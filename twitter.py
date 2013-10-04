@@ -8,7 +8,6 @@ from webob import exc
 import appengine_config
 import tweepy
 
-from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 import webapp2
 
