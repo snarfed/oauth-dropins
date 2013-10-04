@@ -1,4 +1,19 @@
 oauth-dropins
 =============
 
-Drop-in OAuth client handlers for Facebook, Twitter, Google+, Instagram, and more on App Engine.
+About
+---
+
+A collection of drop-in [Google App Engine](https://appengine.google.com/)
+request handlers for the initial OAuth client flows for many popular sites:
+
+* Blogger (v2)
+* Dropbox
+* Facebook
+* Google+
+* Instagram
+* Twitter (v1.1)
+* Tumblr
+* Wordpress.com
+
+This software is released into the public domain. See LICENSE for details.
