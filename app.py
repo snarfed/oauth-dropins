@@ -1,22 +1,33 @@
-"""Serves the front page.
+#!/usr/bin/env python
+"""Serves the HTML front page and discovery files.
 """
-
-import logging
 
 import appengine_config
 
+from google.appengine.ext.webapp import template
+import webapp2
 
-class FrontPage(handlers.TemplateHandler):
-  """Renders and serves /, ie the front page. """
 
-  def template_file(self):
-    return 'templates/index.html'
+class FrontPageHandler(webapp2.RequestHandler):
+  """Renders and serves /, ie the front page.
+  """
+  def get(self):
+    self.response.headers['Content-Type'] = 'text/html'
 
-  def force_to_sequence(self):
-    return set(['tumblr_hostnames', 'blogger_hostnames'])
+    vars = {}
+    # add query params. use a list for params with multiple values.
+    for key in self.request.params:
+      values = self.request.params.getall(key)
+      if len(values) == 1:
+        values = values[0]
+      vars[key] = values
+
+    self.response.out.write(template.render('templates/index.html', vars))
 
 
 application = webapp2.WSGIApplication(
-  [('/', FrontPage),
-   ],
-  debug=appengine_config.DEBUG)
+  [('/', FrontPageHandler)])
+
+
+if __name__ == '__main__':
+  main()

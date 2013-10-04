@@ -11,7 +11,8 @@
 <h2>oauth-dropins demo</h2>
 
 <p>This site is a demo for the
-[oauth-dropins](https://github.com/snarfed/oauth-dropins) library.</p>
+<a href="https://github.com/snarfed/oauth-dropins">oauth-dropins</a>
+library.</p>
 
 <form method="post" action="/facebook/source/add">
   <input type="hidden" name="dest" value="{{ dest }}" />
@@ -19,10 +20,11 @@
 </form>
 <br />
 
-<form method="post" action="/twitter/source/add">
+<form method="post" action="/twitter/start">
   <input type="hidden" name="dest" value="{{ dest }}" />
   <input type="image" alt="Sign in with Twitter" src="/static/twitter_button.png" />
 </form>
+<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}
 <br />
 
 <form method="get" action="/googleplus/source/add">
