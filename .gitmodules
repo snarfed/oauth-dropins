@@ -1,0 +1,33 @@
+[submodule "google-api-python-client"]
+	path = google-api-python-client
+	url = git@github.com:musicmetric/google-api-python-client.git
+[submodule "python-gflags"]
+	path = python-gflags
+	url = git@github.com:wishabi/python-gflags.git
+[submodule "python-tumblpy"]
+	path = python-tumblpy
+	url = git@github.com:michaelhelmick/python-tumblpy.git
+[submodule "requests-oauthlib"]
+	path = requests-oauthlib
+	url = git@github.com:requests/requests-oauthlib.git
+[submodule "gdata-python-client"]
+	path = gdata-python-client
+	url = git@github.com:snarfed/gdata-python-client.git
+[submodule "python-dropbox"]
+	path = python-dropbox
+	url = git@github.com:snarfed/python-dropbox.git
+[submodule "python-instagram"]
+	path = python-instagram
+	url = git@github.com:snarfed/python-instagram.git
+[submodule "httplib2_module"]
+	path = httplib2_module
+	url = git@github.com:adamjmcgrath/httplib2.git
+[submodule "requests_module"]
+	path = requests_module
+	url = git@github.com:kennethreitz/requests.git
+[submodule "oauthlib_module"]
+	path = oauthlib_module
+	url = git@github.com:idan/oauthlib.git
+[submodule "tweepy_module"]
+	path = tweepy_module
+	url = git://github.com/tweepy/tweepy.git

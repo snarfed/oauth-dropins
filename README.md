@@ -14,6 +14,6 @@ request handlers for the initial OAuth client flows for many popular sites:
 * Instagram
 * Twitter (v1.1)
 * Tumblr
-* Wordpress.com
+* Wordpress.com (and Jetpack REST API)
 
 This software is released into the public domain. See LICENSE for details.
