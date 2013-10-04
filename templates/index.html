@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>oauth-dropins demo</title>
+</head>
+
+<body>
+
+<h2>oauth-dropins demo</h2>
+
+<p>This site is a demo for the
+[oauth-dropins](https://github.com/snarfed/oauth-dropins) library.</p>
+
+<form method="post" action="/facebook/source/add">
+  <input type="hidden" name="dest" value="{{ dest }}" />
+  <input type="image" alt="Sign in with Facebook" src="/static/facebook_button.png" />
+</form>
+<br />
+
+<form method="post" action="/twitter/source/add">
+  <input type="hidden" name="dest" value="{{ dest }}" />
+  <input type="image" alt="Sign in with Twitter" src="/static/twitter_button.png" />
+</form>
+<br />
+
+<form method="get" action="/googleplus/source/add">
+  <input type="hidden" name="dest" value="{{ dest }}" />
+  <input type="image" alt="Sign in with Google+" src="/static/google_plus_button.png" />
+</form>
+<br />
+
+<form method="post" action="/instagram/source/add">
+  <input type="hidden" name="dest" value="{{ dest }}" />
+  <input type="image" alt="Sign in with Instagram" src="/static/instagram_button.png" />
+</form>
+<br />
+
+<form method="post" action="/dropbox/dest/add">
+  <input type="image" alt="Sign in with Dropbox" src="/static/dropbox_button.png" />
+</form>
+<br />
+
+<form method="post" action="/wordpress_rest/dest/add">
+  <input type="image" alt="Sign in with WordPress.com" src="/static/wordpress_com_button.png" />
+</form>
+<br />
+
+<form method="post" action="/tumblr/dest/connect">
+  <input type="image" alt="Sign in with Tumblr" src="/static/tumblr_button.png" />
+</form>
+{% if tumblr_username %}
+<form method="post" action="/tumblr/dest/add">
+  <input type="hidden" name="tumblr_username" value="{{ tumblr_username }}" />
+  <input type="hidden" name="oauth_token" value="{{ oauth_token }}" />
+  {% for host in tumblr_hostnames %}
+    <input type="radio" name="host" id="{{ host }}" value="{{ host }}" />
+    <label for="{{ host }}">{{ host }}</label><br />
+  {% endfor %}
+<input type="submit" value="Use this blog" />
+</form>
+{% endif %}
+<br />
+
+<form method="post" action="/blogger/dest/connect">
+  <input type="image" alt="Sign in with Blogger" src="/static/blogger_button.png" />
+</form>
+{% if blogger_owner_name %}
+<form method="post" action="/blogger/dest/add">
+  <input type="hidden" name="blogger_owner_name" value="{{ blogger_owner_name }}" />
+  {% for host in blogger_hostnames %}
+    <input type="radio" name="host" id="{{ host }}" value="{{ host }}" />
+    <label for="{{ host }}">{{ host }}</label><br />
+  {% endfor %}
+<input type="submit" value="Use this blog" />
+</form>
+{% endif %}
+
+</body>
+</html>
