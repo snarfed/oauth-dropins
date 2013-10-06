@@ -17,13 +17,14 @@ library.</p>
 <form method="post" action="/facebook/start">
   <input type="image" alt="Sign in with Facebook" src="/static/facebook_button.png" />
 </form>
-<p>Id: {{ facebook_id }}, auth code: {{ facebook_auth_code }},
-  access token {{ facebook_access_token }}</p>
+<p>User id: {{ facebook_id }},
+  auth code: {{ facebook_auth_code }}, access token {{ facebook_access_token }}</p>
 
 <form method="post" action="/twitter/start">
   <input type="image" alt="Sign in with Twitter" src="/static/twitter_button.png" />
 </form>
-<p>Token key: {{ twitter_token_key }}, secret {{ twitter_token_secret }}</p>
+<p>Username: {{ twitter_username }},
+  access token: {{ twitter_token_key }} / {{ twitter_token_secret }}</p>
 
 <form method="get" action="/googleplus/source/add">
   <input type="image" alt="Sign in with Google+" src="/static/google_plus_button.png" />
