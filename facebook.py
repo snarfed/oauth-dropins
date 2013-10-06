@@ -1,8 +1,6 @@
 """Facebook OAuth drop-in.
 """
 
-__author__ = ['Ryan Barrett <freedom@ryanb.org>']
-
 import json
 import logging
 import urllib
