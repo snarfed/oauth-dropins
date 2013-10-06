@@ -1,6 +1,6 @@
 """App Engine settings.
 
-Reads Facebook and Twitter app keys and secrets into constants from these files:
+Reads app keys and secrets into constants from these files:
 
 dropbox_app_key
 dropbox_app_secret

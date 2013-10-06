@@ -14,40 +14,36 @@
 <a href="https://github.com/snarfed/oauth-dropins">oauth-dropins</a>
 library.</p>
 
-<form method="post" action="/facebook/source/add">
-  <input type="hidden" name="dest" value="{{ dest }}" />
+<form method="post" action="/facebook/start">
   <input type="image" alt="Sign in with Facebook" src="/static/facebook_button.png" />
 </form>
-<br />
+<p>Id: {{ facebook_id }}, auth code: {{ facebook_auth_code }},
+  access token {{ facebook_access_token }}</p>
 
 <form method="post" action="/twitter/start">
-  <input type="hidden" name="dest" value="{{ dest }}" />
   <input type="image" alt="Sign in with Twitter" src="/static/twitter_button.png" />
 </form>
-<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}
-<br />
+<p>Token key: {{ twitter_token_key }}, secret {{ twitter_token_secret }}</p>
 
 <form method="get" action="/googleplus/source/add">
-  <input type="hidden" name="dest" value="{{ dest }}" />
   <input type="image" alt="Sign in with Google+" src="/static/google_plus_button.png" />
 </form>
-<br />
+<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
 <form method="post" action="/instagram/source/add">
-  <input type="hidden" name="dest" value="{{ dest }}" />
   <input type="image" alt="Sign in with Instagram" src="/static/instagram_button.png" />
 </form>
-<br />
+<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
 <form method="post" action="/dropbox/dest/add">
   <input type="image" alt="Sign in with Dropbox" src="/static/dropbox_button.png" />
 </form>
-<br />
+<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
 <form method="post" action="/wordpress_rest/dest/add">
   <input type="image" alt="Sign in with WordPress.com" src="/static/wordpress_com_button.png" />
 </form>
-<br />
+<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
 <form method="post" action="/tumblr/dest/connect">
   <input type="image" alt="Sign in with Tumblr" src="/static/tumblr_button.png" />
@@ -63,7 +59,7 @@ library.</p>
 <input type="submit" value="Use this blog" />
 </form>
 {% endif %}
-<br />
+<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
 <form method="post" action="/blogger/dest/connect">
   <input type="image" alt="Sign in with Blogger" src="/static/blogger_button.png" />
@@ -78,6 +74,7 @@ library.</p>
 <input type="submit" value="Use this blog" />
 </form>
 {% endif %}
+<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
 </body>
 </html>
