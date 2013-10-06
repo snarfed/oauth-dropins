@@ -12,6 +12,7 @@ import appengine_config
 import tweepy
 from webutil import handlers
 from webutil import models
+from webutil import util
 
 from google.appengine.ext import db
 import webapp2
