@@ -15,48 +15,46 @@ handlers:
 # dynamic
 - url: /blogger/.*
   script: blogger.application
-  secure: optional
+  secure: always
   login: required
 
 - url: /dropbox/.*
   script: dropbox.application
-  secure: optional
+  secure: always
 
 - url: /facebook/.*
   script: facebook.application
-  secure: optional
+  secure: always
 
 - url: /instagram/.*
   script: instagram.application
-  secure: optional
+  secure: always
 
 - url: /googleplus/.*
   script: googleplus.application
-  secure: optional
+  secure: always
   login: required
 
 - url: /tumblr/.*
   script: tumblr.application
-  secure: optional
+  secure: always
 
 - url: /twitter/.*
   script: twitter.application
-  secure: optional
+  secure: always
 
 - url: /wordpress_rest/.*
   script: wordpress_rest.application
-  secure: optional
+  secure: always
 
 - url: /
   script: app.application
-  secure: optional
+  secure: always
 
 skip_files:
 - ^(.*/)?.*\.py[co]
 - ^(.*/)?.*/RCS/.*
 - ^(.*/)?\..*
 - ^(.*/)?.*\.bak$
-# don't need anything in the submodule subdirs, especially since
-# webapp-improved/lib has over 1k files!
 - ^(.*/)?(debian|doc|docs|pydocs|python3|ref|samples|tests)/.*
 
