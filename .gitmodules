@@ -31,3 +31,6 @@
 [submodule "tweepy_module"]
 	path = tweepy_module
 	url = git://github.com/tweepy/tweepy.git
+[submodule "webutil"]
+	path = webutil
+	url = git@github.com:snarfed/webutil.git
