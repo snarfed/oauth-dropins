@@ -26,22 +26,23 @@ library.</p>
 <p>Username: {{ twitter_username }},
   access token: {{ twitter_token_key }} / {{ twitter_token_secret }}</p>
 
-<form method="get" action="/googleplus/source/add">
+<form method="get" action="/googleplus/start">
   <input type="image" alt="Sign in with Google+" src="/static/google_plus_button.png" />
 </form>
 <p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
-<form method="post" action="/instagram/source/add">
+<form method="post" action="/instagram/start">
   <input type="image" alt="Sign in with Instagram" src="/static/instagram_button.png" />
 </form>
-<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
+<p>Username: {{ instagram_username }},
+  auth code: {{ instagram_auth_code }}, access token {{ instagram_access_token }}</p>
 
-<form method="post" action="/dropbox/dest/add">
+<form method="post" action="/dropbox/start">
   <input type="image" alt="Sign in with Dropbox" src="/static/dropbox_button.png" />
 </form>
 <p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
 
-<form method="post" action="/wordpress_rest/dest/add">
+<form method="post" action="/wordpress_rest/start">
   <input type="image" alt="Sign in with WordPress.com" src="/static/wordpress_com_button.png" />
 </form>
 <p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
@@ -50,7 +51,7 @@ library.</p>
   <input type="image" alt="Sign in with Tumblr" src="/static/tumblr_button.png" />
 </form>
 {% if tumblr_username %}
-<form method="post" action="/tumblr/dest/add">
+<form method="post" action="/tumblr/start">
   <input type="hidden" name="tumblr_username" value="{{ tumblr_username }}" />
   <input type="hidden" name="oauth_token" value="{{ oauth_token }}" />
   {% for host in tumblr_hostnames %}
@@ -66,7 +67,7 @@ library.</p>
   <input type="image" alt="Sign in with Blogger" src="/static/blogger_button.png" />
 </form>
 {% if blogger_owner_name %}
-<form method="post" action="/blogger/dest/add">
+<form method="post" action="/blogger/start">
   <input type="hidden" name="blogger_owner_name" value="{{ blogger_owner_name }}" />
   {% for host in blogger_hostnames %}
     <input type="radio" name="host" id="{{ host }}" value="{{ host }}" />
