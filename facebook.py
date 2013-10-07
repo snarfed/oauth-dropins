@@ -25,7 +25,6 @@ GET_AUTH_CODE_URL = str('&'.join((
     # redirect_uri here must be the same in the access token request!
     'redirect_uri=%(host_url)s/facebook/auth_callback',
     'response_type=code',
-    'state=foo',
     )))
 
 GET_ACCESS_TOKEN_URL = str('&'.join((
@@ -76,7 +75,6 @@ class CallbackHandler(webapp2.RequestHandler):
     auth_code = self.request.get('code')
     assert auth_code
 
-    # TODO: handle permission declines, errors, etc
     url = GET_ACCESS_TOKEN_URL % {
       'auth_code': auth_code,
       'client_id': appengine_config.FACEBOOK_APP_ID,
