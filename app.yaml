@@ -33,7 +33,6 @@ handlers:
 - url: /googleplus/.*
   script: googleplus.application
   secure: always
-  login: required
 
 - url: /tumblr/.*
   script: tumblr.application
