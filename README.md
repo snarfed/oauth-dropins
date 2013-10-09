@@ -1,6 +1,8 @@
 oauth-dropins
 =============
 
+_Still in progress! Should be ready in a week or two._
+
 About
 ---
 
