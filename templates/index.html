@@ -54,11 +54,11 @@ library.</p>
 <p>Username: {{ tumblr_username }}, blogs: {{ tumblr_hostnames }}<br />
   token: {{ tumblr_token_key }} / {{ tumblr_token_secret }}</p>
 
-<form method="post" action="/blogger/start">
+<form method="post" action="/blogger_v2/start">
   <input type="image" alt="Sign in with Blogger" src="/static/blogger_button.png" />
 </form>
-<p>Username: {{ blogger_username }}, blogs: {{ blogger_hostnames }}<br />
-  token: {{ blogger_token_key }} / {{ blogger_token_secret }}</p>
+<p>Username: {{ blogger_v2_username }}, blogs: {{ blogger_v2_hostnames }}<br />
+ creds: {{ blogger_v2_credentials }}</p>
 
 </body>
 </html>

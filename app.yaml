@@ -17,8 +17,8 @@ handlers:
   static_dir: static
 
 # dynamic
-- url: /blogger/.*
-  script: blogger.application
+- url: /blogger_v2/.*
+  script: blogger_v2.application
   secure: always
   login: required
 
