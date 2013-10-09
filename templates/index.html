@@ -48,36 +48,17 @@ library.</p>
 <p>Username: {{ wordpress_username }},
   token: {{ wordpress_token_key }} / {{ wordpress_token_secret }}</p>
 
-<form method="post" action="/tumblr/dest/connect">
+<form method="post" action="/tumblr/start">
   <input type="image" alt="Sign in with Tumblr" src="/static/tumblr_button.png" />
 </form>
-{% if tumblr_username %}
-<form method="post" action="/tumblr/start">
-  <input type="hidden" name="tumblr_username" value="{{ tumblr_username }}" />
-  <input type="hidden" name="oauth_token" value="{{ oauth_token }}" />
-  {% for host in tumblr_hostnames %}
-    <input type="radio" name="host" id="{{ host }}" value="{{ host }}" />
-    <label for="{{ host }}">{{ host }}</label><br />
-  {% endfor %}
-<input type="submit" value="Use this blog" />
-</form>
-{% endif %}
-<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
+<p>Username: {{ tumblr_username }}, blogs: {{ tumblr_hostnames }}<br />
+  token: {{ tumblr_token_key }} / {{ tumblr_token_secret }}</p>
 
-<form method="post" action="/blogger/dest/connect">
+<form method="post" action="/blogger/start">
   <input type="image" alt="Sign in with Blogger" src="/static/blogger_button.png" />
 </form>
-{% if blogger_owner_name %}
-<form method="post" action="/blogger/start">
-  <input type="hidden" name="blogger_owner_name" value="{{ blogger_owner_name }}" />
-  {% for host in blogger_hostnames %}
-    <input type="radio" name="host" id="{{ host }}" value="{{ host }}" />
-    <label for="{{ host }}">{{ host }}</label><br />
-  {% endfor %}
-<input type="submit" value="Use this blog" />
-</form>
-{% endif %}
-<p>Token: {{ twitter_token_key }},  {{ twitter_token_secret }}</p>
+<p>Username: {{ blogger_username }}, blogs: {{ blogger_hostnames }}<br />
+  token: {{ blogger_token_key }} / {{ blogger_token_secret }}</p>
 
 </body>
 </html>
