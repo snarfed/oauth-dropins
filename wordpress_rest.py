@@ -4,8 +4,6 @@ Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
 """
 
-__author__ = ['Ryan Barrett <freedom@ryanb.org>']
-
 import json
 import logging
 import urllib
