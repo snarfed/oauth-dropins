@@ -7,7 +7,8 @@ About
 ---
 
 A collection of drop-in [Google App Engine](https://appengine.google.com/)
-request handlers for the initial OAuth client flows for many popular sites:
+request handlers for the initial [OAuth](http://oauth.net/) client flows for
+many popular sites:
 
 * Blogger (v2)
 * Dropbox
