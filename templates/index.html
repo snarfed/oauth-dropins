@@ -45,8 +45,8 @@ library.</p>
 <form method="post" action="/wordpress_rest/start">
   <input type="image" alt="Sign in with WordPress.com" src="/static/wordpress_com_button.png" />
 </form>
-<p>Username: {{ wordpress_username }},
-  token: {{ wordpress_token_key }} / {{ wordpress_token_secret }}</p>
+<p>Username: {{ wordpress_blog_id }}, blog: {{ wordpress_blog_domain }},
+  token: {{ wordpress_access_token }}</p>
 
 <form method="post" action="/tumblr/start">
   <input type="image" alt="Sign in with Tumblr" src="/static/tumblr_button.png" />

@@ -1,5 +1,8 @@
 """WordPress.com OAuth drop-in.
 
+https://developer.wordpress.com/docs/api/
+https://developer.wordpress.com/docs/oauth2/
+
 Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
 """
@@ -43,8 +46,7 @@ class WordPressAuth(db.Model):
   The key name is the blog hostname.
   """
   blog_id = db.StringProperty(required=True)
-  oauth_token = db.StringProperty(required=True)
-  oauth_token_secret = db.StringProperty(required=True)
+  access_token = db.StringProperty(required=True)
 
 
 class StartHandler(webapp2.RequestHandler):
@@ -59,25 +61,37 @@ class StartHandler(webapp2.RequestHandler):
     # the HTTP request that gets an access token also gets the blog id and
     # url selected by the user, so grab it from the token response.
     # https://developer.wordpress.com/docs/oauth2/#exchange-code-for-access-token
+
+    # TODO STATE: set up my own google-api-python-client repo or find one with this commit:
+    # https://codereview.appspot.com/12377044/
+
+    # example resp data:
+    # {'access_token': 'et$e8bccr(cv#!gg&*hcFIgYAV&^lASOQW!8!T@$NBf((2kgxQP3RVkZct^iQT7Z',
+    #  'token_type': 'bearer',
+    #  'blog_id': '43559449',
+    #  'blog_url': 'http://ryandc.wordpress.com',
+    #  'scope': '',
+    #  }
+
     resp = self.request.get(TOKEN_RESPONSE_PARAM)
-    logging.info('@ %s', resp)
+    logging.info('@ %r', resp)
     try:
       resp = json.loads(resp)
       blog_id = resp['blog_id']
-      blog_url = resp['blog_url']
+      blog_domain = util.domain_from_link(resp['blog_url'])
+      access_token = resp['access_token']
     except:
       logging.error('Bad JSON response: %r', self.request.params)
       raise
 
-    token_key=self.request.get('oauth_token')
-    token_secret= self.request.get('oauth_token_secret')
-    WordPressAuth(key_name=util.domain_from_link(blog_url), blog_id=blog_id,
-                  token_key=token_key, token_secret=token_secret).save()
+    WordPressAuth(key_name=blog_domain,
+                  blog_id=blog_id,
+                  access_token=access_token).save()
 
     self.redirect('/?%s' % urllib.urlencode(
-        {'wordpress_id': user_id,
-         'wordpress_token_key': util.ellipsize(token_key),
-         'wordpress_token_secret': util.ellipsize(token_secret),
+        {'wordpress_blog_id': blog_id,
+         'wordpress_blog_domain': blog_domain,
+         'wordpress_access_token': util.ellipsize(access_token),
          }))
 
 
