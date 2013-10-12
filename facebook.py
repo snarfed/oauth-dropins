@@ -8,8 +8,8 @@ import urllib2
 import urlparse
 
 import appengine_config
+import models
 from webutil import handlers
-from webutil import models
 from webutil import util
 
 from google.appengine.ext import db
@@ -26,7 +26,6 @@ GET_AUTH_CODE_URL = str('&'.join((
     'redirect_uri=%(host_url)s/facebook/auth_callback',
     'response_type=code',
     )))
-
 GET_ACCESS_TOKEN_URL = str('&'.join((
     'https://graph.facebook.com/oauth/access_token?'
     'client_id=%(client_id)s',
@@ -36,18 +35,33 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
+API_USER_URL = 'https://graph.facebook.com/me'
 
-API_USER_URL = 'https://graph.facebook.com/me?access_token=%s'
 
-
-class FacebookAuth(models.KeyNameModel):
+class FacebookAuth(models.BaseAuth):
   """Datastore model class for a Facebook auth code and access token.
 
   The key name is the user's or page's Facebook ID.
+
+  See models.BaseAuth for usage details. Implements urlopen() but not http() or
+  api().
   """
   auth_code = db.StringProperty(required=True)
   access_token = db.StringProperty(required=True)
   info_json = db.TextProperty(required=True)
+
+  def site_name(self):
+    return 'Facebook'
+
+  def user_display_name(self):
+    """Returns the user's or page's name.
+    """
+    return self.info_json['name']
+
+  def urlopen(self, url, **kwargs):
+    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """
+    return FacebookAuth.urlopen_access_token(url, self.access_token, **kwargs)
 
 
 class StartHandler(webapp2.RequestHandler):
@@ -87,14 +101,14 @@ class CallbackHandler(webapp2.RequestHandler):
     params = urlparse.parse_qs(resp)
     access_token = params['access_token'][0]
 
-    url = API_USER_URL % access_token
-    logging.debug('Fetching: %s', url)
-    resp = urllib2.urlopen(url).read()
+    resp = FacebookAuth.urlopen_access_token(API_USER_URL, access_token).read()
     logging.debug('User info response: %s', resp)
     user_id = json.loads(resp)['id']
 
-    FacebookAuth.get_or_insert(key_name=user_id, info_json=resp,
-                               auth_code=auth_code, access_token=access_token).save()
+    FacebookAuth.get_or_insert(key_name=user_id,
+                               info_json=resp,
+                               auth_code=auth_code,
+                               access_token=access_token).save()
     self.redirect('/?%s' % urllib.urlencode(
         {'facebook_id': user_id,
          'facebook_auth_code': util.ellipsize(auth_code),
