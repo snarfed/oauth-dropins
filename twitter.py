@@ -9,9 +9,10 @@ import urlparse
 from webob import exc
 
 import appengine_config
+import models
 import tweepy
 from webutil import handlers
-from webutil import models
+from webutil.models import KeyNameModel
 from webutil import util
 
 from google.appengine.ext import db
@@ -20,21 +21,60 @@ import webapp2
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
 
 
-class TwitterAccessToken(models.KeyNameModel):
-  """Datastore model class for a Twitter OAuth access token.
+class TwitterAuth(models.BaseAuth):
+  """An authenticated Twitter user.
 
-  The key name is the Twitter username.
+  Provides methods that return information about this user and make OAuth-signed
+  requests to the Twitter v1.1 API. Stores OAuth credentials in the datastore.
+  See models.BaseAuth for usage details.
+
+  Twitter-specific details: implements urlopen() and api() but not http(). api()
+  returns a tweepy.API. The datastore entity key name is the Twitter username.
   """
+  # access token
   token_key = db.StringProperty(required=True)
   token_secret = db.StringProperty(required=True)
-  info_json = db.TextProperty(required=True)
+  user_json = db.TextProperty(required=True)
 
-  def api_urlopen(self, url):
+  def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
     """
-    return api_urlopen(url, self.token_key, self.token_secret)
+    return TwitterAuth._urlopen(url, self.token_key, self.token_secret, **kwargs)
 
-class TwitterRequestToken(models.KeyNameModel):
+  @staticmethod
+  def _urlopen(url, token_key, token_secret, **kwargs):
+    """Wraps urllib2.urlopen() and adds an OAuth signature.
+    """
+    parsed = urlparse.urlparse(url)
+    url_without_query = urlparse.urlunparse(list(parsed[0:4]) + ['', ''])
+    headers = {}
+    auth = TwitterAuth._auth(token_key, token_secret)
+    auth.apply_auth(url_without_query, 'GET', headers,
+                    dict(urlparse.parse_qsl(parsed.query)))
+    logging.debug('Populated Authorization header from access token: %s',
+                  headers.get('Authorization'))
+    logging.debug('Fetching %s', url)
+    return urllib2.urlopen(urllib2.Request(url, headers=headers), **kwargs)
+
+  def _api(self):
+    """Returns a tweepy.API.
+    """
+    return tweepy.API(TwitterAuth._auth(self.token_key, self.token_secret))
+
+  @staticmethod
+  def _auth(token_key, token_secret):
+    """Returns a tweepy.OAuthHandler.
+    """
+    auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
+                               appengine_config.TWITTER_APP_SECRET)
+    # make sure token key and secret aren't unicode because python's hmac
+    # module (used by tweepy/oauth.py) expects strings.
+    # http://stackoverflow.com/questions/11396789
+    auth.set_access_token(str(token_key), str(token_secret))
+    return auth
+
+
+class TwitterRequestToken(KeyNameModel):
   """Datastore model class for a Twitter OAuth request token.
 
   This is only intermediate data. Client should use TwitterOAuthToken instances
@@ -43,31 +83,6 @@ class TwitterRequestToken(models.KeyNameModel):
   The key name is the token key.
   """
   token_secret = db.StringProperty(required=True)
-
-
-def api_urlopen(url, access_token_key, access_token_secret):
-  """Wraps urllib2.urlopen() and adds an OAuth signature.
-
-  Clients should use TwitterAccessToken.api_call() instead.
-  """
-  auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                             appengine_config.TWITTER_APP_SECRET)
-  # make sure token key and secret aren't unicode because python's hmac
-  # module (used by tweepy/oauth.py) expects strings.
-  # http://stackoverflow.com/questions/11396789
-  auth.set_access_token(str(access_token_key),
-                        str(access_token_secret))
-
-  parsed = urlparse.urlparse(url)
-  url_without_query = urlparse.urlunparse(list(parsed[0:4]) + ['', ''])
-  headers = {}
-  auth.apply_auth(url_without_query, 'GET', headers,
-                  dict(urlparse.parse_qsl(parsed.query)))
-  logging.info('Populated Authorization header from access token: %s',
-               headers.get('Authorization'))
-  logging.info('Fetching %s', url)
-
-  return urllib2.urlopen(urllib2.Request(url, headers=headers))
 
 
 class StartHandler(webapp2.RequestHandler):
@@ -126,13 +141,14 @@ class CallbackHandler(webapp2.RequestHandler):
       logging.exception(msg)
       raise exc.HTTPInternalServerError(msg + `e`)
 
-    info_json = api_urlopen(API_ACCOUNT_URL, access_token.key,
-                            access_token.secret).read()
-    username = json.loads(info_json)['screen_name']
-    TwitterAccessToken.get_or_insert(key_name=username,
-                                     token_key=access_token.key,
-                                     token_secret=access_token.secret,
-                                     info_json=info_json).save()
+    user_json = TwitterAuth._urlopen(API_ACCOUNT_URL,
+                                     access_token.key,
+                                     access_token.secret).read()
+    username = json.loads(user_json)['screen_name']
+    TwitterAuth.get_or_insert(key_name=username,
+                              token_key=access_token.key,
+                              token_secret=access_token.secret,
+                              user_json=user_json).save()
 
     self.redirect('/?%s' % urllib.urlencode(
         {'twitter_username': username,
