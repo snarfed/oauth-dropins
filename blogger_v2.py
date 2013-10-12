@@ -17,14 +17,15 @@ import urlparse
 import appengine_config
 import models
 from webutil import handlers
-from webutil import models
 from webutil import util
 
 from oauth2client.appengine import OAuth2Decorator
+from oauth2client.client import Credentials, OAuth2Credentials
 from gdata.blogger import client
 from gdata import gauth
 from google.appengine.api import users
 from google.appengine.ext import db
+import httplib2
 import webapp2
 
 
@@ -37,26 +38,65 @@ oauth = OAuth2Decorator(
   callback_path='/blogger_v2/oauth2callback')
 
 
-class BloggerV2Auth(models.KeyNameModel):
-  """A Blogger blog. The key name is the Blogger username."""
+class BloggerV2Auth(models.BaseAuth):
+  """A Blogger blog. The key name is the Blogger username.
+  """
   hostnames = db.StringListProperty(required=True)
   creds_json = db.TextProperty(required=True)
 
+  # A gdata.blogger.client.BloggerClient. Initialized on demand.
+  _api = None
+
+  def site_name(self):
+    return 'Blogger'
+
+  def user_display_name(self):
+    """Returns the user's Blogger username.
+    """
+    return self.key().name()
+
+  def api(self):
+    """Returns a gdata.blogger.client.BloggerClient.
+    """
+    if self._api is None:
+      self._api = BloggerV2Auth.api_from_creds(self.creds())
+    return self._api
+
+  def creds(self):
+    """Returns an oauth2client.OAuth2Credentials.
+    """
+    return OAuth2Credentials.from_json(self.creds_json)
+
+  @staticmethod
+  def api_from_creds(oauth2_creds):
+    """Returns a gdata.blogger.client.BloggerClient.
+
+    Args:
+      oauth2_creds: OAuth2Credentials
+    """
+    # this must be a client ie subclass of GDClient, since that's what
+    # OAuth2TokenFromCredentials.authorize() expects, *not* a service ie
+    # subclass of GDataService.
+    blogger = client.BloggerClient()
+    gauth.OAuth2TokenFromCredentials(oauth2_creds).authorize(blogger)
+    return blogger
+
+  def http(self):
+    http = httplib2.Http()
+    self.creds().authorize(http)
+    return http
+
 
 class StartHandler(webapp2.RequestHandler):
-  """Connects a Blogger account. Authenticates via OAuth if necessary."""
+  """Connects a Blogger account. Authenticates via OAuth if necessary.
+  """
   @oauth.oauth_required
   def post(self):
     return self.get()
 
   @oauth.oauth_required
   def get(self):
-    # this must be a client ie subclass of GDClient, since that's what
-    # OAuth2TokenFromCredentials.authorize() expects, *not* a service ie
-    # subclass of GDataService.
-    blogger = client.BloggerClient()
-    auth_token = gauth.OAuth2TokenFromCredentials(oauth.credentials)
-    auth_token.authorize(blogger)
+    blogger = BloggerV2Auth.api_from_creds(oauth.credentials)
 
     # get the current user
     blogs = blogger.get_blogs()
@@ -71,9 +111,10 @@ class StartHandler(webapp2.RequestHandler):
             break
 
     creds_json = oauth.credentials.to_json()
-    BloggerV2Auth.get_or_insert(key_name=username,
-                                hostnames=hostnames,
-                                creds_json=creds_json)
+    if username:
+      BloggerV2Auth.get_or_insert(key_name=username,
+                                  hostnames=hostnames,
+                                  creds_json=creds_json)
 
     # redirect so that refreshing the page doesn't try to regenerate the oauth
     # token, which won't work.
