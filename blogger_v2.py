@@ -40,6 +40,8 @@ oauth = OAuth2Decorator(
 
 class BloggerV2Auth(models.BaseAuth):
   """A Blogger blog. The key name is the Blogger username.
+
+  See models.BaseAuth for usage details. Implements http() but not urlopen().
   """
   hostnames = db.StringListProperty(required=True)
   creds_json = db.TextProperty(required=True)
