@@ -1,6 +1,11 @@
 """Instagram OAuth drop-in.
 """
 
+import logging
+import urllib
+import urllib2
+import urlparse
+
 from webutil import models
 
 from google.appengine.ext import db
@@ -30,7 +35,7 @@ class BaseAuth(models.KeyNameModel):
     """
     return None
 
-  def urlopen(self):
+  def urlopen(self, url, data=None, timeout=None):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
 
     Use this for making direct HTTP REST request to a site's API. Not guaranteed
@@ -41,6 +46,20 @@ class BaseAuth(models.KeyNameModel):
     """
     raise NotImplementedError()
 
+  @staticmethod
+  def urlopen_access_token(url, access_token, **kwargs):
+    """Wraps urllib2.urlopen() and adds an access_token query parameter.
+    """
+    # convert to list so we can modify later
+    parsed = list(urlparse.urlparse(url))
+    # query params are in index 4
+    params = urlparse.parse_qsl(parsed[4]) + [('access_token', access_token)]
+    parsed[4] = urllib.urlencode(params)
+    url = urlparse.urlunparse(parsed)
+
+    logging.debug('Fetching %s', url)
+    return urllib2.urlopen(url, **kwargs)
+
   def http(self):
     """Returns an httplib2.Http that adds OAuth credentials to requests.
 
@@ -48,3 +67,4 @@ class BaseAuth(models.KeyNameModel):
     to be implemented by all sites.
     """
     raise NotImplementedError()
+
