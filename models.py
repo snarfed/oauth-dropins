@@ -12,9 +12,14 @@ from google.appengine.ext import db
 
 
 class BaseAuth(models.KeyNameModel):
-  """Datastore base model class for an authenticated site.
+  """Datastore base model class for an authenticated user.
 
-  The key name is usually the user's username or id on the site.
+  Provides methods that return information about this user and make OAuth-signed
+  requests to the site's API(s). Stores OAuth credentials in the datastore.
+  The key name is usually the user's username or id.
+
+  Many sites provide additional methods and store additional user information in
+  a JSON property.
   """
   # A site-specific API object. Initialized on demand.
   _api_obj = None
