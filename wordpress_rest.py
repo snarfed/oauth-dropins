@@ -5,6 +5,9 @@ https://developer.wordpress.com/docs/oauth2/
 
 Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
+
+TODO(ryan): this breaks when the user is already connected and tries to
+reconnect, ie hits the /wordpress_rest/start_handler again.
 """
 
 import json
