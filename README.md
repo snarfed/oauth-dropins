@@ -20,3 +20,10 @@ many popular sites:
 * Wordpress.com (and Jetpack REST API)
 
 This software is released into the public domain. See LICENSE for details.
+
+
+Development
+---
+TODO:
+* drop google-api-python-client because it requires you to log into your google
+  account to store credentials and intermediate data.
