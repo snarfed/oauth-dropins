@@ -39,12 +39,14 @@ API_USER_URL = 'https://graph.facebook.com/me'
 
 
 class FacebookAuth(models.BaseAuth):
-  """Datastore model class for a Facebook auth code and access token.
+  """An authenticated Facebook user or page.
 
-  The key name is the user's or page's Facebook ID.
+  Provides methods that return information about this user (or page) and make
+  OAuth-signed requests to Facebook's HTTP-based APIs. Stores OAuth credentials
+  in the datastore. See models.BaseAuth for usage details.
 
-  See models.BaseAuth for usage details. Implements urlopen() but not http() or
-  api().
+  Facebook-specific details: implements urlopen() but not http() or api(). The
+  key name is the user's or page's Facebook ID.
   """
   auth_code = db.StringProperty(required=True)
   access_token = db.StringProperty(required=True)

@@ -1,5 +1,6 @@
 """Blogger v2 GData API OAuth drop-in.
 
+Blogger API docs:
 https://developers.google.com/blogger/docs/2.0/developers_guider
 
 Uses google-api-python-client to auth via OAuth 2. This describes how to get
@@ -39,15 +40,18 @@ oauth = OAuth2Decorator(
 
 
 class BloggerV2Auth(models.BaseAuth):
-  """A Blogger blog. The key name is the Blogger username.
+  """An authenticated Blogger user.
 
-  See models.BaseAuth for usage details. Implements http() but not urlopen().
+  Provides methods that return information about this user (or page) and make
+  OAuth-signed requests to the Blogger API. Stores OAuth credentials in the
+  datastore. See models.BaseAuth for usage details.
+
+  Blogger-specific details: implements http() and api() but not urlopen(). api()
+  returns a gdata.blogger.client.BloggerClient. The datastore entity key name is
+  the Blogger user's name.
   """
   hostnames = db.StringListProperty(required=True)
   creds_json = db.TextProperty(required=True)
-
-  # A gdata.blogger.client.BloggerClient. Initialized on demand.
-  _api = None
 
   def site_name(self):
     return 'Blogger'
@@ -57,17 +61,15 @@ class BloggerV2Auth(models.BaseAuth):
     """
     return self.key().name()
 
-  def api(self):
-    """Returns a gdata.blogger.client.BloggerClient.
-    """
-    if self._api is None:
-      self._api = BloggerV2Auth.api_from_creds(self.creds())
-    return self._api
-
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
     """
     return OAuth2Credentials.from_json(self.creds_json)
+
+  def http(self):
+    http = httplib2.Http()
+    self.creds().authorize(http)
+    return http
 
   @staticmethod
   def api_from_creds(oauth2_creds):
@@ -83,10 +85,10 @@ class BloggerV2Auth(models.BaseAuth):
     gauth.OAuth2TokenFromCredentials(oauth2_creds).authorize(blogger)
     return blogger
 
-  def http(self):
-    http = httplib2.Http()
-    self.creds().authorize(http)
-    return http
+  def _api(self):
+    """Returns a gdata.blogger.client.BloggerClient.
+    """
+    return BloggerV2Auth.api_from_creds(self.creds())
 
 
 class StartHandler(webapp2.RequestHandler):

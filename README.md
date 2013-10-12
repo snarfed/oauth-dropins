@@ -27,3 +27,5 @@ Development
 TODO:
 * drop google-api-python-client because it requires you to log into your google
   account to store credentials and intermediate data.
+* parameterize OAuth scopes
+* switch BloggerAuth key name to a unique id (blog id?)

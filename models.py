@@ -16,6 +16,8 @@ class BaseAuth(models.KeyNameModel):
 
   The key name is usually the user's username or id on the site.
   """
+  # A site-specific API object. Initialized on demand.
+  _api_obj = None
 
   def site_name(self):
     """Returns the string name of the site, e.g. 'Facebook'.
@@ -33,7 +35,9 @@ class BaseAuth(models.KeyNameModel):
     Returns None if the site doesn 't have a Python API. Only some do, currently
     Blogger, Instagram, Google+, and Tumblr.
     """
-    return None
+    if self._api is None:
+      self._api_obj = self._api()
+    return self._api_obj
 
   def urlopen(self, url, data=None, timeout=None):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
