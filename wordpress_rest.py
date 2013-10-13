@@ -6,18 +6,14 @@ https://developer.wordpress.com/docs/oauth2/
 
 Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
-
-TODO(ryan): this breaks when the user is already connected and tries to
-reconnect, ie hits the /wordpress_rest/start_handler again. Clearing the
-datastore fixes it, but we should handle it without that.
 """
 
 import json
 import logging
 import urllib
+import urllib2
 
 import appengine_config
-from oauth2client.appengine import OAuth2Decorator
 from webutil import handlers
 from webutil import util
 
@@ -25,24 +21,17 @@ from google.appengine.ext import db
 import webapp2
 
 
-TOKEN_RESPONSE_PARAM = 'token_response'
-
-CALLBACK_PATH = '/wordpress_rest/oauth_callback'
-oauth = OAuth2Decorator(
-  client_id=appengine_config.WORDPRESS_CLIENT_ID,
-  client_secret=appengine_config.WORDPRESS_CLIENT_SECRET,
-  # can't find any mention of oauth scope in https://developer.wordpress.com/
-  scope='',
-  auth_uri='https://public-api.wordpress.com/oauth2/authorize',
-  token_uri='https://public-api.wordpress.com/oauth2/token',
-  # wordpress.com doesn't let you use an oauth redirect URL with "local" or
-  # "localhost" anywhere in it. :/ had to use my.dev.com and put this in
-  # /etc/hosts:   127.0.0.1 my.dev.com
-  callback_path=('http://my.dev.com:8080' if appengine_config.DEBUG else '') +
-    CALLBACK_PATH,
-  # the HTTP request that gets an access token also gets the blog id and
-  # url selected by the user, so grab it from the token response.
-  token_response_param=TOKEN_RESPONSE_PARAM)
+# URL templates. Can't (easily) use urllib.urlencode() because I want to keep
+# the %(...)s placeholders as is and fill them in later in code.
+GET_AUTH_CODE_URL = str('&'.join((
+    'https://public-api.wordpress.com/oauth2/authorize?',
+    'scope=',  # wordpress doesn't seem to use scope
+    'client_id=%(client_id)s',
+    # redirect_uri here must be the same in the access token request!
+    'redirect_uri=%(host_url)s/wordpress_rest/oauth_callback',
+    'response_type=code',
+    )))
+GET_ACCESS_TOKEN_URL = 'https://public-api.wordpress.com/oauth2/token'
 
 
 class WordPressAuth(db.Model):
@@ -73,19 +62,49 @@ class WordPressAuth(db.Model):
 
 
 class StartHandler(webapp2.RequestHandler):
+  """Starts WordPress auth. Requests an auth code and expects a redirect back.
+  """
   handle_exception = handlers.handle_exception
 
-  @oauth.oauth_required
   def post(self):
-    self.get()
+    # wordpress.com doesn't let you use an oauth redirect URL with "local" or
+    # "localhost" anywhere in it. :/ had to use my.dev.com and put this in
+    # /etc/hosts:   127.0.0.1 my.dev.com
+    host = 'http://my.dev.com:8080' if appengine_config.DEBUG else self.host_url
 
-  @oauth.oauth_required
+    # TODO: CSRF protection
+    url = GET_AUTH_CODE_URL % {
+      'client_id': appengine_config.WORDPRESS_CLIENT_ID,
+      'host_url': host,
+      }
+    logging.debug('Redirecting to: %s', url)
+    self.redirect(str(url))
+
+
+class CallbackHandler(webapp2.RequestHandler):
+  """The auth callback. Fetches an access token, stores it, and redirects home.
+  """
+  handle_exception = handlers.handle_exception
+
   def get(self):
-    # the HTTP request that gets an access token also gets the blog id and
-    # url selected by the user, so grab it from the token response.
-    # https://developer.wordpress.com/docs/oauth2/#exchange-code-for-access-token
-    resp = self.request.get(TOKEN_RESPONSE_PARAM)
-    logging.debug('Access token response: %r', resp)
+    auth_code = self.request.get('code')
+    assert auth_code
+
+    host = 'http://my.dev.com:8080' if appengine_config.DEBUG else self.host_url
+    data = {
+      'code': auth_code,
+      'client_id': appengine_config.WORDPRESS_CLIENT_ID,
+      'client_secret': appengine_config.WORDPRESS_CLIENT_SECRET,
+      # redirect_uri here must be the same in the oauth code request!
+      # (the value here doesn't actually matter since it's requested server side.)
+      'redirect_uri': host + '/wordpress_rest/oauth_callback',
+      'grant_type': 'authorization_code',
+      }
+    logging.debug('Fetching %s with %r', GET_ACCESS_TOKEN_URL, data)
+    resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL,
+                           data=urllib.urlencode(data)).read()
+    logging.debug('Access token response: %s', resp)
+
     try:
       resp = json.loads(resp)
       blog_id = resp['blog_id']
@@ -103,5 +122,5 @@ class StartHandler(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/wordpress_rest/start', StartHandler),
-    (CALLBACK_PATH, oauth.callback_handler()),
+    ('/wordpress_rest/oauth_callback', CallbackHandler),
     ], debug=appengine_config.DEBUG)
