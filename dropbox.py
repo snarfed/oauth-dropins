@@ -1,5 +1,6 @@
 """Dropbox OAuth drop-in.
 
+Dropbox API docs:
 https://www.dropbox.com/developers/core/start/python
 https://www.dropbox.com/static/developers/dropbox-python-sdk-1.6-docs/
 https://www.dropbox.com/developers/core/docs
@@ -25,14 +26,42 @@ OAUTH_CALLBACK = '%s/dropbox/oauth_callback'
 CSRF_PARAM = 'dropbox-auth-csrf-token'
 
 
+class DropboxAuth(models.BaseAuth):
+  """An authenticated Dropbox user or page.
+
+  Provides methods that return information about this user (or page) and make
+  OAuth-signed requests to Dropbox's HTTP-based APIs. Stores OAuth credentials
+  in the datastore. See models.BaseAuth for usage details.
+
+  Dropbox-specific details: implements urlopen() and api() but not http(). api()
+  returns a python_dropbox.DropboxClient. The key name is the Dropbox user id.
+  """
+  access_token = db.StringProperty(required=True)
+
+  def site_name(self):
+    return 'Dropbox'
+
+  def user_display_name(self):
+    """Returns the Dropbox user id.
+    """
+    return self.key().name()
+
+  def urlopen(self, url, **kwargs):
+    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """
+    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+
+  def api(self):
+    """Returns a python_dropbox.DropboxClient.
+
+    Details: https://www.dropbox.com/static/developers/dropbox-python-sdk-1.6-docs/
+    """
+    return DropboxClient(self.access_token)
+
+
 class DropboxCsrf(db.Model):
   """Stores a CSRF token for the Dropbox OAuth2 flow."""
   token = db.StringProperty(required=False)
-
-
-class Dropbox(db.Model):
-  """A Dropbox account. The key name is the user id."""
-  access_token = db.StringProperty(required=True)
 
 
 def handle_exception(self, e, debug):
@@ -95,8 +124,8 @@ class CallbackHandler(webapp2.RequestHandler):
     access_token, user_id, state = flow.finish(self.request.params)
 
     logging.info('Storing new Dropbox account: %s', user_id)
-    dropbox = Dropbox.get_or_insert(key_name=user_id,
-                                    access_token=access_token)
+    dropbox = DropboxAuth.get_or_insert(key_name=user_id,
+                                        access_token=access_token)
 
     # redirect so that refreshing the page doesn't try to regenerate the oauth
     # token, which won't work.
