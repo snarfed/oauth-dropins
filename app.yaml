@@ -20,7 +20,6 @@ handlers:
 - url: /blogger_v2/.*
   script: blogger_v2.application
   secure: always
-  login: required
 
 - url: /dropbox/.*
   script: dropbox.application
