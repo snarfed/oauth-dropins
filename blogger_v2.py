@@ -67,6 +67,8 @@ class BloggerV2Auth(models.BaseAuth):
     return OAuth2Credentials.from_json(self.creds_json)
 
   def http(self):
+    """Returns an httplib2.Http that adds OAuth credentials to requests.
+    """
     http = httplib2.Http()
     self.creds().authorize(http)
     return http
