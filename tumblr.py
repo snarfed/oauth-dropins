@@ -1,6 +1,6 @@
 """Tumblr OAuth drop-in.
 
-http://www.tumblr.com/docs/en/api/v2
+API docs: http://www.tumblr.com/docs/en/api/v2
 """
 
 import json
@@ -9,10 +9,11 @@ import urllib
 import urlparse
 
 import appengine_config
+import models
 import tumblpy
 from webob import exc
 from webutil import handlers
-from webutil import models
+from webutil.models import KeyNameModel
 from webutil import util
 
 from google.appengine.ext import db
@@ -24,19 +25,45 @@ import webapp2
 OAUTH_CALLBACK_PATH = '/tumblr/oauth_callback'
 
 
-class TumblrAuth(models.KeyNameModel):
-  """Datastore model class for a Tumblr blog.
+class TumblrAuth(models.BaseAuth):
+  """An authenticated Tumblr user.
 
-  The key name is the username.
+  Provides methods that return information about this user and make OAuth-signed
+  requests to the Tumblr API. Stores OAuth credentials in the datastore. See
+  models.BaseAuth for usage details.
+
+  Tumblr-specific details: implements api() but not urlopen() or http(). api()
+  returns a tumblpy.Tumblpy. The datastore entity key name is the Tumblr
+  username.
   """
+  # access token
   token_key = db.StringProperty(required=True)
   token_secret = db.StringProperty(required=True)
   user_json = db.TextProperty(required=True)
 
-# tumblpy.Tumblpy
+  def site_name(self):
+    return 'Tumblr'
+
+  def user_display_name(self):
+    """Returns the username.
+    """
+    return self.key().name()
+
+  def _api(self):
+    """Returns a tumblpy.Tumblpy.
+    """
+    return TumblrAuth._api_from_token(self.token_key, self.token_secret)
+
+  @staticmethod
+  def _api_from_token(key, secret):
+    """Returns a tumblpy.Tumblpy.
+    """
+    return tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
+                           app_secret=appengine_config.TUMBLR_APP_SECRET,
+                           oauth_token=key, oauth_token_secret=secret)
 
 
-class TumblrRequestToken(models.KeyNameModel):
+class TumblrRequestToken(KeyNameModel):
   """Datastore model class for a Twitter OAuth request token.
 
   This is only intermediate data. Client should use TwitterOAuthToken instances
@@ -89,13 +116,10 @@ class CallbackHandler(webapp2.RequestHandler):
 
     # get the user's blogs
     # http://www.tumblr.com/docs/en/api/v2#user-methods
-    tp = tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
-                         app_secret=appengine_config.TUMBLR_APP_SECRET,
-                         oauth_token=auth_token_key,
-                         oauth_token_secret=auth_token_secret)
-    logging.info('Fetching user/info')
+    tp = TumblrAuth._api_from_token(auth_token_key, auth_token_secret)
+    logging.debug('Fetching user/info')
     resp = tp.post('user/info')
-    logging.info('Got: %s', resp)
+    logging.debug('Got: %s', resp)
     user = resp['user']
 
     key = TumblrAuth(key_name=user['name'],
