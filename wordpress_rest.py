@@ -1,5 +1,6 @@
 """WordPress.com OAuth drop-in.
 
+API docs:
 https://developer.wordpress.com/docs/api/
 https://developer.wordpress.com/docs/oauth2/
 
@@ -7,7 +8,8 @@ Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
 
 TODO(ryan): this breaks when the user is already connected and tries to
-reconnect, ie hits the /wordpress_rest/start_handler again.
+reconnect, ie hits the /wordpress_rest/start_handler again. Clearing the
+datastore fixes it, but we should handle it without that.
 """
 
 import json
@@ -44,12 +46,30 @@ oauth = OAuth2Decorator(
 
 
 class WordPressAuth(db.Model):
-  """Datastore model class for a WordPress blog accessed via REST API.
+  """An authenticated WordPress user or page.
 
-  The key name is the blog hostname.
+  Provides methods that return information about this user (or page) and make
+  OAuth-signed requests to the WordPress REST API. Stores OAuth credentials in
+  the datastore. See models.BaseAuth for usage details.
+
+  WordPress-specific details: implements urlopen() but not http() or api(). The
+  key name is the blog hostname.
   """
   blog_id = db.StringProperty(required=True)
   access_token = db.StringProperty(required=True)
+
+  def site_name(self):
+    return 'WordPress'
+
+  def user_display_name(self):
+    """Returns the blog hostname.
+    """
+    return self.key().name()
+
+  def urlopen(self, url, **kwargs):
+    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """
+    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
 
 
 class StartHandler(webapp2.RequestHandler):
@@ -69,7 +89,7 @@ class StartHandler(webapp2.RequestHandler):
     # https://codereview.appspot.com/12377044/
 
     # example resp data:
-    # {'access_token': 'et$e8bccr(cv#!gg&*hcFIgYAV&^lASOQW!8!T@$NBf((2kgxQP3RVkZct^iQT7Z',
+    # {'access_token': '...'
     #  'token_type': 'bearer',
     #  'blog_id': '43559449',
     #  'blog_url': 'http://ryandc.wordpress.com',
@@ -77,14 +97,14 @@ class StartHandler(webapp2.RequestHandler):
     #  }
 
     resp = self.request.get(TOKEN_RESPONSE_PARAM)
-    logging.info('@ %r', resp)
+    logging.debug('Access token response: %r', resp)
     try:
       resp = json.loads(resp)
       blog_id = resp['blog_id']
       blog_domain = util.domain_from_link(resp['blog_url'])
       access_token = resp['access_token']
     except:
-      logging.error('Bad JSON response: %r', self.request.params)
+      logging.exception('Could not decode JSON')
       raise
 
     WordPressAuth(key_name=blog_domain,
