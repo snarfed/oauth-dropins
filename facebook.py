@@ -63,7 +63,7 @@ class FacebookAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return FacebookAuth.urlopen_access_token(url, self.access_token, **kwargs)
+    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
 
 
 class StartHandler(webapp2.RequestHandler):
@@ -103,7 +103,7 @@ class CallbackHandler(webapp2.RequestHandler):
     params = urlparse.parse_qs(resp)
     access_token = params['access_token'][0]
 
-    resp = FacebookAuth.urlopen_access_token(API_USER_URL, access_token).read()
+    resp = BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
     logging.debug('User info response: %s', resp)
     user_id = json.loads(resp)['id']
 

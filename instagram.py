@@ -1,4 +1,6 @@
 """Instagram OAuth drop-in.
+
+Instagram API docs: http://instagram.com/developer/endpoints/
 """
 
 import json
@@ -8,11 +10,11 @@ import urllib2
 import urlparse
 
 import appengine_config
+import models
 from python_instagram.bind import InstagramAPIError
 from python_instagram.client import InstagramAPI
 from webob import exc
 from webutil import handlers
-from webutil import models
 from webutil import util
 
 from google.appengine.ext import db
@@ -32,14 +34,42 @@ GET_AUTH_CODE_URL = str('&'.join((
 GET_ACCESS_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 
 
-class InstagramAuth(models.KeyNameModel):
-  """Datastore model class for a Instagram auth code and access token.
+class InstagramAuth(models.BaseAuth):
+  """An authenticated Instagram user or page.
 
-  The key name is the username.
+  Provides methods that return information about this user (or page) and make
+  OAuth-signed requests to Instagram's HTTP-based APIs. Stores OAuth credentials
+  in the datastore. See models.BaseAuth for usage details.
+
+  Instagram-specific details: implements urlopen() and api() but not http(). The
+  key name is the Instagram username.
   """
   auth_code = db.StringProperty(required=True)
   access_token = db.StringProperty(required=True)
-  info_json = db.TextProperty(required=True)
+  user_json = db.TextProperty(required=True)
+
+  def site_name(self):
+    return 'Instagram'
+
+  def user_display_name(self):
+    """Returns the Instagram username.
+    """
+    return self.key().name()
+
+  def urlopen(self, url, **kwargs):
+    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """
+    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+
+  def api(self):
+    """Returns a python_instagram.InstagramAPI.
+
+    Details: https://github.com/Instagram/python-instagram
+    """
+    return InstagramAPI(
+      client_id=appengine_config.INSTAGRAM_CLIENT_ID,
+      client_secret=appengine_config.INSTAGRAM_CLIENT_SECRET,
+      access_token=self.access_token)
 
 
 def handle_exception(self, e, debug):
@@ -107,8 +137,10 @@ class CallbackHandler(webapp2.RequestHandler):
 
     access_token = data['access_token']
     username = data['user']['username']
-    InstagramAuth.get_or_insert(key_name=username, auth_code=auth_code,
-                                access_token=access_token, info_json=resp)
+    InstagramAuth.get_or_insert(key_name=username,
+                                auth_code=auth_code,
+                                access_token=access_token,
+                                user_json=json.dumps(data['user']))
 
     self.redirect('/?%s' % urllib.urlencode(
         {'instagram_username': username,
