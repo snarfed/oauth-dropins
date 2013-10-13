@@ -82,17 +82,6 @@ class TwitterAuth(models.BaseAuth):
     return auth
 
 
-class TwitterRequestToken(KeyNameModel):
-  """Datastore model class for a Twitter OAuth request token.
-
-  This is only intermediate data. Client should use TwitterOAuthToken instances
-  to make Twitter API calls.
-
-  The key name is the token key.
-  """
-  token_secret = db.StringProperty(required=True)
-
-
 class StartHandler(webapp2.RequestHandler):
   """Starts three-legged OAuth with Twitter.
 
@@ -114,8 +103,8 @@ class StartHandler(webapp2.RequestHandler):
       raise exc.HTTPInternalServerError(msg + `e`)
 
     # store the request token for later use in the callback handler
-    TwitterRequestToken(key_name=auth.request_token.key,
-                        token_secret=auth.request_token.secret).put()
+    models.OAuthRequestToken(key_name=auth.request_token.key,
+                             token_secret=auth.request_token.secret).put()
     logging.info('Generated request token, redirecting to Twitter: %s', auth_url)
     self.redirect(auth_url)
 
@@ -132,7 +121,7 @@ class CallbackHandler(webapp2.RequestHandler):
       raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
 
     # Lookup the request token
-    request_token = TwitterRequestToken.get_by_key_name(oauth_token)
+    request_token = models.OAuthRequestToken.get_by_key_name(oauth_token)
     if request_token is None:
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % oauth_token)
 

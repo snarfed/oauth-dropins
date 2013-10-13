@@ -63,17 +63,6 @@ class TumblrAuth(models.BaseAuth):
                            oauth_token=key, oauth_token_secret=secret)
 
 
-class TumblrRequestToken(KeyNameModel):
-  """Datastore model class for a Twitter OAuth request token.
-
-  This is only intermediate data. Client should use TwitterOAuthToken instances
-  to make Twitter API calls.
-
-  The key name is the token key.
-  """
-  token_secret = db.StringProperty(required=True)
-
-
 class StartHandler(webapp2.RequestHandler):
   """Starts Tumblr auth. Requests an auth code and expects a redirect back.
   """
@@ -86,8 +75,8 @@ class StartHandler(webapp2.RequestHandler):
       callback_url=self.request.host_url + OAUTH_CALLBACK_PATH)
 
     # store the request token for later use in the callback handler
-    TumblrRequestToken(key_name=auth_props['oauth_token'],
-                       token_secret=auth_props['oauth_token_secret']).save()
+    models.OAuthRequestToken(key_name=auth_props['oauth_token'],
+                             token_secret=auth_props['oauth_token_secret']).save()
     auth_url = auth_props['auth_url']
     logging.info('Generated request token, redirecting to Tumblr: %s', auth_url)
     self.redirect(auth_url)
@@ -101,7 +90,7 @@ class CallbackHandler(webapp2.RequestHandler):
   def get(self):
     # lookup the request token
     request_token_key = self.request.get('oauth_token')
-    request_token = TumblrRequestToken.get_by_key_name(request_token_key)
+    request_token = models.OAuthRequestToken.get_by_key_name(request_token_key)
     if request_token is None:
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % request_token_key)
 

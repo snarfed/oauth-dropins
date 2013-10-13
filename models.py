@@ -77,3 +77,13 @@ class BaseAuth(models.KeyNameModel):
     """
     raise NotImplementedError()
 
+
+class OAuthRequestToken(models.KeyNameModel):
+  """Datastore model class for an OAuth 1.1 request token.
+
+  This is only intermediate data. Client should use BaseAuth subclasses to make
+  API calls.
+
+  The key name is the token key.
+  """
+  token_secret = db.StringProperty(required=True)
