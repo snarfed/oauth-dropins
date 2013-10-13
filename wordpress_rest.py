@@ -107,15 +107,10 @@ class StartHandler(webapp2.RequestHandler):
       logging.exception('Could not decode JSON')
       raise
 
-    WordPressAuth(key_name=blog_domain,
-                  blog_id=blog_id,
-                  access_token=access_token).save()
-
-    self.redirect('/?%s' % urllib.urlencode(
-        {'wordpress_blog_id': blog_id,
-         'wordpress_blog_domain': blog_domain,
-         'wordpress_access_token': util.ellipsize(access_token),
-         }))
+    key = WordPressAuth(key_name=blog_domain,
+                        blog_id=blog_id,
+                        access_token=access_token).key()
+    self.redirect('/?entity_key=%s' % key)
 
 
 application = webapp2.WSGIApplication([

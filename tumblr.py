@@ -24,6 +24,18 @@ import webapp2
 OAUTH_CALLBACK_PATH = '/tumblr/oauth_callback'
 
 
+class TumblrAuth(models.KeyNameModel):
+  """Datastore model class for a Tumblr blog.
+
+  The key name is the username.
+  """
+  token_key = db.StringProperty(required=True)
+  token_secret = db.StringProperty(required=True)
+  user_json = db.TextProperty(required=True)
+
+# tumblpy.Tumblpy
+
+
 class TumblrRequestToken(models.KeyNameModel):
   """Datastore model class for a Twitter OAuth request token.
 
@@ -33,16 +45,6 @@ class TumblrRequestToken(models.KeyNameModel):
   The key name is the token key.
   """
   token_secret = db.StringProperty(required=True)
-
-
-class TumblrAuth(models.KeyNameModel):
-  """Datastore model class for a Tumblr blog.
-
-  The key name is the username.
-  """
-  token_key = db.StringProperty(required=True)
-  token_secret = db.StringProperty(required=True)
-  info_json = db.TextProperty(required=True)
 
 
 class StartHandler(webapp2.RequestHandler):
@@ -96,19 +98,13 @@ class CallbackHandler(webapp2.RequestHandler):
     logging.info('Got: %s', resp)
     user = resp['user']
 
-    TumblrAuth(key_name=user['name'],
-               token_key=auth_token_key,
-               token_secret=auth_token_secret,
-               info_json=json.dumps(resp)).save()
-
-    hostnames = util.trim_nulls([util.domain_from_link(b['url'])
-                                 for b in user['blogs']])
-    self.redirect('/?%s' + urllib.urlencode({
-          'tumblr_username': user['name'],
-          'tumblr_hostnames': hostnames,
-          'tumblr_token_key': util.ellipsize(auth_token_key),
-          'tumblr_token_secret': util.ellipsize(auth_token_secret),
-          }, True))
+    key = TumblrAuth(key_name=user['name'],
+                     token_key=auth_token_key,
+                     token_secret=auth_token_secret,
+                     user_json=json.dumps(resp)).save()
+    # hostnames = util.trim_nulls([util.domain_from_link(b['url'])
+    #                              for b in user['blogs']])
+    self.redirect('/?entity_key=%s' % key)
 
 
 application = webapp2.WSGIApplication([

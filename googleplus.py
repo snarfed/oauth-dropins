@@ -55,7 +55,7 @@ class GooglePlusAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the user's name.
     """
-    return json.loads(user_json)['displayName']
+    return json.loads(self.user_json)['displayName']
 
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
@@ -102,15 +102,11 @@ class StartHandler(webapp2.RequestHandler):
     user = json_service.people().get(userId='me').execute(oauth.http())
     logging.debug('Got one person: %r', user)
     creds_json = oauth.credentials.to_json()
-    GooglePlusAuth.get_or_insert(key_name=user['id'],
-                                 creds_json=creds_json,
-                                 user_json=json.dumps(user))
 
-    # redirect so that refreshing doesn't rewrite this GooglePlus entity
-    self.redirect('/?%s' % urllib.urlencode(
-        {'googleplus_name': user['displayName'],
-         'googleplus_credentials': creds_json,
-         }))
+    key = GooglePlusAuth(key_name=user['id'],
+                         creds_json=creds_json,
+                         user_json=json.dumps(user)).save()
+    self.redirect('/?entity_key=%s' % key)
 
 
 application = webapp2.WSGIApplication([

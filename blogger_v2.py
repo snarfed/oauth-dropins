@@ -117,18 +117,14 @@ class StartHandler(webapp2.RequestHandler):
             break
 
     creds_json = oauth.credentials.to_json()
+    redirect = '/'
     if username:
-      BloggerV2Auth.get_or_insert(key_name=username,
-                                  hostnames=hostnames,
-                                  creds_json=creds_json)
+      key = BloggerV2Auth(key_name=username,
+                          hostnames=hostnames,
+                          creds_json=creds_json).save()
+      redirect = '/?entity_key=%s' % key
 
-    # redirect so that refreshing the page doesn't try to regenerate the oauth
-    # token, which won't work.
-    self.redirect('/?' + urllib.urlencode({
-          'blogger_v2_username': username if username else 'No blogs found',
-          'blogger_v2_hostnames': hostnames,
-          'blogger_v2_credentials': creds_json,
-          }, True))
+    self.redirect(redirect)
 
 
 application = webapp2.WSGIApplication([

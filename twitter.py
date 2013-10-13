@@ -36,6 +36,14 @@ class TwitterAuth(models.BaseAuth):
   token_secret = db.StringProperty(required=True)
   user_json = db.TextProperty(required=True)
 
+  def site_name(self):
+    return 'Twitter'
+
+  def user_display_name(self):
+    """Returns the username.
+    """
+    return self.key().name()
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
     """
@@ -145,16 +153,12 @@ class CallbackHandler(webapp2.RequestHandler):
                                      access_token.key,
                                      access_token.secret).read()
     username = json.loads(user_json)['screen_name']
-    TwitterAuth.get_or_insert(key_name=username,
-                              token_key=access_token.key,
-                              token_secret=access_token.secret,
-                              user_json=user_json).save()
 
-    self.redirect('/?%s' % urllib.urlencode(
-        {'twitter_username': username,
-         'twitter_token_key': util.ellipsize(access_token.key),
-         'twitter_token_secret': util.ellipsize(access_token.secret),
-         }))
+    key = TwitterAuth(key_name=username,
+                      token_key=access_token.key,
+                      token_secret=access_token.secret,
+                      user_json=user_json).save()
+    self.redirect('/?entity_key=%s' % key)
 
 
 application = webapp2.WSGIApplication([

@@ -124,15 +124,10 @@ class CallbackHandler(webapp2.RequestHandler):
     access_token, user_id, state = flow.finish(self.request.params)
 
     logging.info('Storing new Dropbox account: %s', user_id)
-    dropbox = DropboxAuth.get_or_insert(key_name=user_id,
-                                        access_token=access_token)
 
-    # redirect so that refreshing the page doesn't try to regenerate the oauth
-    # token, which won't work.
-    self.redirect('/?%s' % urllib.urlencode(
-        {'dropbox_id': user_id,
-         'dropbox_access_token': util.ellipsize(access_token),
-         }))
+    key = DropboxAuth(key_name=user_id,
+                      access_token=access_token).save()
+    self.redirect('/?entity_key=%s' % key)
 
 
 application = webapp2.WSGIApplication([

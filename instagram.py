@@ -138,16 +138,12 @@ class CallbackHandler(webapp2.RequestHandler):
 
     access_token = data['access_token']
     username = data['user']['username']
-    InstagramAuth.get_or_insert(key_name=username,
-                                auth_code=auth_code,
-                                access_token=access_token,
-                                user_json=json.dumps(data['user']))
 
-    self.redirect('/?%s' % urllib.urlencode(
-        {'instagram_username': username,
-         'instagram_auth_code': util.ellipsize(auth_code),
-         'instagram_access_token': util.ellipsize(access_token),
-         }))
+    key = InstagramAuth(key_name=username,
+                        auth_code=auth_code,
+                        access_token=access_token,
+                        user_json=json.dumps(data['user'])).save()
+    self.redirect('/?entity_key=%s' % key)
 
 
 application = webapp2.WSGIApplication([

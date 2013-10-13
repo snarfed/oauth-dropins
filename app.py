@@ -4,6 +4,17 @@
 
 import appengine_config
 
+# import all the sites because we load their model classes.
+import blogger_v2
+import dropbox
+import facebook
+import googleplus
+import instagram
+import tumblr
+import twitter
+import wordpress_rest
+
+from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 import webapp2
 
@@ -15,12 +26,9 @@ class FrontPageHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'text/html'
 
     vars = {}
-    # add query params. use a list for params with multiple values.
-    for key in self.request.params:
-      values = self.request.params.getall(key)
-      if len(values) == 1:
-        values = values[0]
-      vars[key] = values
+    entity_key = self.request.get('entity_key')
+    if entity_key:
+      vars['entity'] = db.get(entity_key)
 
     self.response.out.write(template.render('templates/index.html', vars))
 
