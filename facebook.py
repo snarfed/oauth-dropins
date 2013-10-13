@@ -23,7 +23,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'scope=offline_access',
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
-    'redirect_uri=%(host_url)s/facebook/auth_callback',
+    'redirect_uri=%(host_url)s/facebook/oauth_callback',
     'response_type=code',
     )))
 GET_ACCESS_TOKEN_URL = str('&'.join((
@@ -31,7 +31,7 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the oauth request!
     # (the value here doesn't actually matter since it's requested server side.)
-    'redirect_uri=%(host_url)s/facebook/auth_callback',
+    'redirect_uri=%(host_url)s/facebook/oauth_callback',
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
@@ -116,5 +116,5 @@ class CallbackHandler(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/facebook/start', StartHandler),
-    ('/facebook/auth_callback', CallbackHandler),
+    ('/facebook/oauth_callback', CallbackHandler),
     ], debug=appengine_config.DEBUG)
