@@ -84,18 +84,6 @@ class StartHandler(webapp2.RequestHandler):
     # the HTTP request that gets an access token also gets the blog id and
     # url selected by the user, so grab it from the token response.
     # https://developer.wordpress.com/docs/oauth2/#exchange-code-for-access-token
-
-    # TODO STATE: set up my own google-api-python-client repo or find one with this commit:
-    # https://codereview.appspot.com/12377044/
-
-    # example resp data:
-    # {'access_token': '...'
-    #  'token_type': 'bearer',
-    #  'blog_id': '43559449',
-    #  'blog_url': 'http://ryandc.wordpress.com',
-    #  'scope': '',
-    #  }
-
     resp = self.request.get(TOKEN_RESPONSE_PARAM)
     logging.debug('Access token response: %r', resp)
     try:
@@ -109,7 +97,7 @@ class StartHandler(webapp2.RequestHandler):
 
     key = WordPressAuth(key_name=blog_domain,
                         blog_id=blog_id,
-                        access_token=access_token).key()
+                        access_token=access_token).save()
     self.redirect('/?entity_key=%s' % key)
 
 
