@@ -1,4 +1,4 @@
-"""Instagram OAuth drop-in.
+"""Base datastore model class for an authenticated account.
 """
 
 import logging
@@ -7,6 +7,7 @@ import urllib2
 import urlparse
 
 from webutil import models
+from webutil import util
 
 from google.appengine.ext import db
 
@@ -59,13 +60,7 @@ class BaseAuth(models.KeyNameModel):
   def urlopen_access_token(url, access_token, **kwargs):
     """Wraps urllib2.urlopen() and adds an access_token query parameter.
     """
-    # convert to list so we can modify later
-    parsed = list(urlparse.urlparse(url))
-    # query params are in index 4
-    params = urlparse.parse_qsl(parsed[4]) + [('access_token', access_token)]
-    parsed[4] = urllib.urlencode(params)
-    url = urlparse.urlunparse(parsed)
-
+    url = util.add_query_params(url, [('access_token', access_token)])
     logging.debug('Fetching %s', url)
     return urllib2.urlopen(url, **kwargs)
 
