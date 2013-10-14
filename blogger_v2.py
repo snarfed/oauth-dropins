@@ -1,7 +1,7 @@
 """Blogger v2 GData API OAuth drop-in.
 
 Blogger API docs:
-https://developers.google.com/blogger/docs/2.0/developers_guider
+https://developers.google.com/blogger/docs/2.0/developers_guide_protocol
 
 Uses google-api-python-client to auth via OAuth 2. This describes how to get
 gdata-python-client to use an OAuth 2 token from google-api-python-client:
@@ -12,6 +12,7 @@ https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc
 """
 
 import logging
+import re
 import urllib
 import urlparse
 
@@ -48,10 +49,13 @@ class BloggerV2Auth(models.BaseAuth):
 
   Blogger-specific details: implements http() and api() but not urlopen(). api()
   returns a gdata.blogger.client.BloggerClient. The datastore entity key name is
-  the Blogger user's name.
+  the Blogger user id.
   """
+  name = db.StringProperty(required=True)
   hostnames = db.StringListProperty(required=True)
   creds_json = db.TextProperty(required=True)
+  user_atom = db.TextProperty(required=True)
+  blogs_atom = db.TextProperty(required=True)
 
   def site_name(self):
     return 'Blogger'
@@ -59,7 +63,7 @@ class BloggerV2Auth(models.BaseAuth):
   def user_display_name(self):
     """Returns the user's Blogger username.
     """
-    return self.key().name()
+    return self.name
 
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
@@ -94,8 +98,13 @@ class BloggerV2Auth(models.BaseAuth):
 
 
 class StartHandler(webapp2.RequestHandler):
-  """Connects a Blogger account. Authenticates via OAuth if necessary.
+  """Connects a Blogger account. Authenticates via OAuth.
   """
+  handle_exception = handlers.handle_exception
+
+  # extracts the Blogger id from a profile URL
+  AUTHOR_URI_RE = re.compile('.*blogger\.com/profile/([0-9]+)')
+
   @oauth.oauth_required
   def post(self):
     return self.get()
@@ -104,25 +113,23 @@ class StartHandler(webapp2.RequestHandler):
   def get(self):
     blogger = BloggerV2Auth.api_from_creds(oauth.credentials)
 
-    # get the current user
     blogs = blogger.get_blogs()
-    username = blogs.entry[0].author[0].name.text if blogs.entry else None
-    hostnames = []
-    for entry in blogs.entry:
-      for link in entry.link:
-        if link.type == 'text/html':
-          domain = util.domain_from_link(link.href)
-          if domain:
-            hostnames.append(domain)
-            break
+    author = blogs.author[0]
+    match = self.AUTHOR_URI_RE.match(author.uri.text)
+    if not match:
+      raise exc.HTTPBadRequest('Could not parse author URI: %s', author.uri)
+    id = match.group(1)
+    hostnames = [util.domain_from_link(blog.GetHtmlLink().href)
+                 for blog in blogs.entry if blog.GetHtmlLink()]
 
     creds_json = oauth.credentials.to_json()
-    redirect = '/'
-    if username:
-      key = BloggerV2Auth(key_name=username,
-                          hostnames=hostnames,
-                          creds_json=creds_json).save()
-      redirect = '/?entity_key=%s' % key
+    key = BloggerV2Auth(key_name=id,
+                        name=author.name.text,
+                        hostnames=hostnames,
+                        creds_json=creds_json,
+                        user_atom=str(author),
+                        blogs_atom=str(blogs)).save()
+    redirect = '/?entity_key=%s' % key
 
     self.redirect(redirect)
 
