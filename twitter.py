@@ -145,9 +145,9 @@ class CallbackHandler(handlers.CallbackHandler):
       logging.exception(msg)
       raise exc.HTTPInternalServerError(msg + `e`)
 
-    user_json = TwitterAuth._urlopen(API_ACCOUNT_URL,
-                                     access_token.key,
-                                     access_token.secret).read()
+    user_json = TwitterAuth.signed_urlopen(API_ACCOUNT_URL,
+                                           access_token.key,
+                                           access_token.secret).read()
     username = json.loads(user_json)['screen_name']
 
     auth = TwitterAuth(key_name=username,
