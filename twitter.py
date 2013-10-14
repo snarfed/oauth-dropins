@@ -1,4 +1,8 @@
 """Twitter OAuth drop-in.
+
+TODO: port to
+http://code.google.com/p/oauth/source/browse/#svn%2Fcode%2Fpython . tweepy is
+just a wrapper around that anyway.
 """
 
 import json
@@ -48,10 +52,11 @@ class TwitterAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
     """
-    return TwitterAuth._urlopen(url, self.token_key, self.token_secret, **kwargs)
+    return TwitterAuth.signed_urlopen(url, self.token_key, self.token_secret,
+                                      **kwargs)
 
   @staticmethod
-  def _urlopen(url, token_key, token_secret, **kwargs):
+  def signed_urlopen(url, token_key, token_secret, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
     """
     parsed = urlparse.urlparse(url)
