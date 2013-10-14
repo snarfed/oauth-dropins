@@ -26,15 +26,22 @@ class FrontPageHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'text/html'
 
     vars = {}
-    entity_key = self.request.get('entity_key')
-    if entity_key:
-      vars['entity'] = db.get(entity_key)
+    key = self.request.get('auth_entity')
+    if key:
+      vars['entity'] = db.get(key)
 
     self.response.out.write(template.render('templates/index.html', vars))
 
 
-application = webapp2.WSGIApplication(
-  [('/', FrontPageHandler)])
+class TwitterCallbackHandler(twitter.CallbackHandler):
+  redirect_url = '/'
+
+
+application = webapp2.WSGIApplication([
+    ('/', FrontPageHandler),
+    ('/twitter/start', twitter.StartHandler),
+    ('/twitter/oauth_callback', TwitterCallbackHandler),
+    ], debug=appengine_config.DEBUG)
 
 
 if __name__ == '__main__':

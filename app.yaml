@@ -41,15 +41,11 @@ handlers:
   script: tumblr.application
   secure: always
 
-- url: /twitter/.*
-  script: twitter.application
-  secure: always
-
 - url: /wordpress_rest/.*
   script: wordpress_rest.application
   secure: always
 
-- url: /
+- url: .*
   script: app.application
   secure: always
 

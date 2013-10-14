@@ -9,9 +9,9 @@ import urlparse
 from webob import exc
 
 import appengine_config
+import handlers
 import models
 import tweepy
-from webutil import handlers
 from webutil.models import KeyNameModel
 from webutil import util
 
@@ -82,16 +82,17 @@ class TwitterAuth(models.BaseAuth):
     return auth
 
 
-class StartHandler(webapp2.RequestHandler):
+class StartHandler(handlers.StartHandler):
   """Starts three-legged OAuth with Twitter.
 
   Fetches an OAuth request token, then redirects to Twitter's auth page to
   request an access token.
   """
-  handle_exception = handlers.handle_exception
 
-  def post(self):
-    callback_url = '%s/twitter/oauth_callback' % self.request.host_url
+  def redirect_url(self, state=''):
+    callback_url = '%s/twitter/oauth_callback?state=%s' % (
+      self.request.host_url, state)
+
     try:
       auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                  appengine_config.TWITTER_APP_SECRET,
@@ -106,13 +107,12 @@ class StartHandler(webapp2.RequestHandler):
     models.OAuthRequestToken(key_name=auth.request_token.key,
                              token_secret=auth.request_token.secret).put()
     logging.info('Generated request token, redirecting to Twitter: %s', auth_url)
-    self.redirect(auth_url)
+    return auth_url
 
 
-class CallbackHandler(webapp2.RequestHandler):
+class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and redirects to the front page.
   """
-  handle_exception = handlers.handle_exception
 
   def get(self):
     oauth_token = self.request.get('oauth_token', None)
@@ -143,14 +143,9 @@ class CallbackHandler(webapp2.RequestHandler):
                                      access_token.secret).read()
     username = json.loads(user_json)['screen_name']
 
-    key = TwitterAuth(key_name=username,
-                      token_key=access_token.key,
-                      token_secret=access_token.secret,
-                      user_json=user_json).save()
-    self.redirect('/?entity_key=%s' % key)
-
-
-application = webapp2.WSGIApplication([
-    ('/twitter/start', StartHandler),
-    ('/twitter/oauth_callback', CallbackHandler),
-    ], debug=appengine_config.DEBUG)
+    auth = TwitterAuth(key_name=username,
+                       token_key=access_token.key,
+                       token_secret=access_token.secret,
+                       user_json=user_json)
+    auth.save()
+    self.finish(auth, state=self.request.get('state'))
