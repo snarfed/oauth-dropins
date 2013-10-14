@@ -10,14 +10,20 @@ from webutil import util
 class StartHandler(webapp2.RequestHandler):
   """Base class for starting an OAuth flow.
 
-  Clients may use this as the request handler class directly. It handles POST
-  (not GET) requests, and if the 'state' query parameter is provided in the
-  request data, it will be returned to the client in the OAuth callback handler.
+  Clients may use this as the request handler class directly. It handles GET and
+  POST requests, and if the 'state' query parameter is provided in the request
+  data, it will be returned to the client in the OAuth callback handler.
 
   Alternatively, clients may call redirect_url() and HTTP 302 redirect to it
   manually, which will start the same OAuth flow.
+
+  Clients *must* set the callback_path attribute. It should start with a /.
   """
   handle_exception = handlers.handle_exception
+  callback_path = None
+
+  def get(self):
+    self.post()
 
   def post(self):
     url = self.redirect_url(state=self.request.get('state'))
@@ -25,7 +31,7 @@ class StartHandler(webapp2.RequestHandler):
     self.redirect(url)
 
   def redirect_url(self, state=''):
-    """Subclasses must implement this.
+    """oauth-dropin subclasses must implement this.
     """
     raise NotImplementedError()
 

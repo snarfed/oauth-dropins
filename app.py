@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Serves the HTML front page and discovery files.
 """
 
@@ -33,13 +32,16 @@ class FrontPageHandler(webapp2.RequestHandler):
     self.response.out.write(template.render('templates/index.html', vars))
 
 
+class TwitterStartHandler(twitter.StartHandler):
+  callback_path = '/twitter/oauth_callback'
+
 class TwitterCallbackHandler(twitter.CallbackHandler):
   redirect_url = '/'
 
 
 application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
-    ('/twitter/start', twitter.StartHandler),
+    ('/twitter/start', TwitterStartHandler),
     ('/twitter/oauth_callback', TwitterCallbackHandler),
     ], debug=appengine_config.DEBUG)
 
