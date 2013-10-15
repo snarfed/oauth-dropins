@@ -25,10 +25,6 @@ handlers:
   script: dropbox.application
   secure: always
 
-- url: /facebook/.*
-  script: facebook.application
-  secure: always
-
 - url: /instagram/.*
   script: instagram.application
   secure: always
@@ -41,15 +37,11 @@ handlers:
   script: tumblr.application
   secure: always
 
-- url: /twitter/.*
-  script: twitter.application
-  secure: always
-
 - url: /wordpress_rest/.*
   script: wordpress_rest.application
   secure: always
 
-- url: /
+- url: .*
   script: app.application
   secure: always
 

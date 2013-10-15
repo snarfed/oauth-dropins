@@ -1,4 +1,6 @@
 """Facebook OAuth drop-in.
+
+TODO: implement client state param
 """
 
 import json
@@ -8,8 +10,8 @@ import urllib2
 import urlparse
 
 import appengine_config
+import handlers
 import models
-from webutil import handlers
 from webutil import util
 
 from google.appengine.ext import db
@@ -23,7 +25,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'scope=offline_access',
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
-    'redirect_uri=%(host_url)s/facebook/oauth_callback',
+    'redirect_uri=%(host_url)s%(callback_path)s',
     'response_type=code',
     )))
 GET_ACCESS_TOKEN_URL = str('&'.join((
@@ -31,7 +33,7 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the oauth request!
     # (the value here doesn't actually matter since it's requested server side.)
-    'redirect_uri=%(host_url)s/facebook/oauth_callback',
+    'redirect_uri=%(host_url)s%(callback_path)s',
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
@@ -66,26 +68,26 @@ class FacebookAuth(models.BaseAuth):
     return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
 
 
-class StartHandler(webapp2.RequestHandler):
+class StartHandler(handlers.StartHandler):
   """Starts Facebook auth. Requests an auth code and expects a redirect back.
   """
-  handle_exception = handlers.handle_exception
 
-  def post(self):
-    url = GET_AUTH_CODE_URL % {
+  def redirect_url(self, state=''):
+    return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.FACEBOOK_APP_ID,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
       'host_url': self.request.host_url,
+      'callback_path': self.callback_path,
       }
-    logging.debug('Redirecting to: %s', url)
-    self.redirect(str(url))
 
 
-class CallbackHandler(webapp2.RequestHandler):
+class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
+
+  Clients must set callback_path to the same value as in StartHandler.
   """
-  handle_exception = handlers.handle_exception
+  callback_path = None
 
   def get(self):
     auth_code = self.request.get('code')
@@ -96,6 +98,7 @@ class CallbackHandler(webapp2.RequestHandler):
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
       'host_url': self.request.host_url,
+      'callback_path': self.callback_path,
       }
     logging.debug('Fetching: %s', url)
     resp = urllib2.urlopen(url).read()
@@ -107,14 +110,9 @@ class CallbackHandler(webapp2.RequestHandler):
     logging.debug('User info response: %s', resp)
     user_id = json.loads(resp)['id']
 
-    key = FacebookAuth(key_name=user_id,
-                       user_json=resp,
-                       auth_code=auth_code,
-                       access_token=access_token).save()
-    self.redirect('/?entity_key=%s' % key)
-
-
-application = webapp2.WSGIApplication([
-    ('/facebook/start', StartHandler),
-    ('/facebook/oauth_callback', CallbackHandler),
-    ], debug=appengine_config.DEBUG)
+    auth = FacebookAuth(key_name=user_id,
+                        user_json=resp,
+                        auth_code=auth_code,
+                        access_token=access_token)
+    auth.save()
+    self.finish(auth, state=self.request.get('state'))
