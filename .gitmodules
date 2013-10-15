@@ -1,6 +1,3 @@
-[submodule "python-gflags"]
-	path = python-gflags
-	url = git@github.com:wishabi/python-gflags.git
 [submodule "python-tumblpy"]
 	path = python-tumblpy
 	url = git@github.com:michaelhelmick/python-tumblpy.git
