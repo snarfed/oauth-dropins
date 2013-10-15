@@ -36,6 +36,7 @@ class FacebookStartHandler(facebook.StartHandler):
   callback_path = '/facebook/oauth_callback'
 
 class FacebookCallbackHandler(facebook.CallbackHandler):
+  callback_path = '/facebook/oauth_callback'
   redirect_url = '/'
 
 
