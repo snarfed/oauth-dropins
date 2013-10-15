@@ -32,6 +32,13 @@ class FrontPageHandler(webapp2.RequestHandler):
     self.response.out.write(template.render('templates/index.html', vars))
 
 
+class FacebookStartHandler(facebook.StartHandler):
+  callback_path = '/facebook/oauth_callback'
+
+class FacebookCallbackHandler(facebook.CallbackHandler):
+  redirect_url = '/'
+
+
 class TwitterStartHandler(twitter.StartHandler):
   callback_path = '/twitter/oauth_callback'
 
@@ -41,6 +48,8 @@ class TwitterCallbackHandler(twitter.CallbackHandler):
 
 application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
+    ('/facebook/start', FacebookStartHandler),
+    ('/facebook/oauth_callback', FacebookCallbackHandler),
     ('/twitter/start', TwitterStartHandler),
     ('/twitter/oauth_callback', TwitterCallbackHandler),
     ], debug=appengine_config.DEBUG)
