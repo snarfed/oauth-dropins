@@ -26,3 +26,4 @@ Development
 ---
 TODO:
 * parameterize OAuth scopes
+* implement CSRF protection for all sites
