@@ -27,3 +27,5 @@ Development
 TODO:
 * parameterize OAuth scopes
 * implement CSRF protection for all sites
+* implement Blogger's v3 API:
+  https://developers.google.com/blogger/docs/3.0/getting_started
