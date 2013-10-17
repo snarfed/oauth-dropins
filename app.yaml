@@ -25,10 +25,6 @@ handlers:
   script: dropbox.application
   secure: always
 
-- url: /instagram/.*
-  script: instagram.application
-  secure: always
-
 - url: /googleplus/.*
   script: googleplus.application
   secure: always

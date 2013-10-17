@@ -35,6 +35,8 @@ application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
     ('/facebook/start', facebook.StartHandler.to('/facebook/oauth_callback')),
     ('/facebook/oauth_callback', facebook.CallbackHandler.to('/')),
+    ('/instagram/start', instagram.StartHandler.to('/instagram/oauth_callback')),
+    ('/instagram/oauth_callback', instagram.CallbackHandler.to('/')),
     ('/twitter/start', twitter.StartHandler.to('/twitter/oauth_callback')),
     ('/twitter/oauth_callback', twitter.CallbackHandler.to('/')),
     ], debug=appengine_config.DEBUG)
