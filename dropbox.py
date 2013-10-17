@@ -11,10 +11,11 @@ import logging
 import urllib
 
 import appengine_config
-from python_dropbox.client import DropboxOAuth2Flow, DropboxClient
+import handlers
 import models
+from python_dropbox.client import DropboxOAuth2Flow, DropboxClient
 from webob import exc
-from webutil import handlers
+from webutil import handlers as webutil_handlers
 from webutil import util
 
 from google.appengine.ext import db
@@ -22,7 +23,11 @@ import models
 import webapp2
 
 
-OAUTH_CALLBACK = '%s/dropbox/oauth_callback'
+assert (appengine_config.DROPBOX_APP_KEY and
+        appengine_config.DROPBOX_APP_SECRET), (
+        "Please fill in the dropbox_app_key and dropbox_app_secret files in "
+        "your app's root directory.")
+
 CSRF_PARAM = 'dropbox-auth-csrf-token'
 
 
@@ -77,33 +82,31 @@ def handle_exception(self, e, debug):
     logging.exception()
     raise exc.HTTPBadRequest()
   else:
-    return handlers.handle_exception(self, e, debug)
+    return webutil_handlers.handle_exception(self, e, debug)
 
 
-class StartHandler(webapp2.RequestHandler):
+class StartHandler(handlers.StartHandler):
   """Starts Dropbox auth. Requests an auth code and expects a redirect back.
   """
   handle_exception = handle_exception
 
-  def post(self):
+  def redirect_url(self, state=''):
     csrf = DropboxCsrf()
     csrf.save()
     csrf_holder = {}
     flow = DropboxOAuth2Flow(appengine_config.DROPBOX_APP_KEY,
                              appengine_config.DROPBOX_APP_SECRET,
-                             OAUTH_CALLBACK % self.request.host_url,
+                             self.request.host_url + self.to_path,
                              csrf_holder, CSRF_PARAM)
 
     auth_url = flow.start(url_state=str(csrf.key().id()))
-
     csrf.token = csrf_holder[CSRF_PARAM]
     csrf.save()
-    logging.info('Stored DropboxCsrf id %d, redirecting to Dropbox: %s',
-      csrf.key().id(), auth_url)
-    self.redirect(auth_url)
+    logging.info('Stored DropboxCsrf id %d', csrf.key().id())
+    return auth_url
 
 
-class CallbackHandler(webapp2.RequestHandler):
+class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
   handle_exception = handle_exception
@@ -119,18 +122,12 @@ class CallbackHandler(webapp2.RequestHandler):
     csrf_holder = {CSRF_PARAM: csrf.token}
     flow = DropboxOAuth2Flow(appengine_config.DROPBOX_APP_KEY,
                              appengine_config.DROPBOX_APP_SECRET,
-                             OAUTH_CALLBACK % self.request.host_url,
+                             self.request.path_url,
                              csrf_holder, CSRF_PARAM)
     access_token, user_id, state = flow.finish(self.request.params)
 
     logging.info('Storing new Dropbox account: %s', user_id)
 
-    key = DropboxAuth(key_name=user_id,
-                      access_token=access_token).save()
-    self.redirect('/?entity_key=%s' % key)
-
-
-application = webapp2.WSGIApplication([
-    ('/dropbox/start', StartHandler),
-    ('/dropbox/oauth_callback', CallbackHandler),
-    ], debug=appengine_config.DEBUG)
+    auth = DropboxAuth(key_name=user_id, access_token=access_token)
+    auth.save()
+    self.finish(auth, state=self.request.get('state'))
