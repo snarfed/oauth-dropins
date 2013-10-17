@@ -25,7 +25,9 @@ This software is released into the public domain. See LICENSE for details.
 Development
 ---
 TODO:
-* parameterize OAuth scopes
+* parameterize OAuth scopes (only applicable to some sites)
+* clean up app key/secret file handling. (standardize file names? put them in a
+  subdir?)
 * implement CSRF protection for all sites
 * implement Blogger's v3 API:
   https://developers.google.com/blogger/docs/3.0/getting_started
