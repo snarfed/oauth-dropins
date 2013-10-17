@@ -23,6 +23,12 @@ from webutil import util
 from google.appengine.ext import db
 import webapp2
 
+
+assert (appengine_config.TWITTER_APP_KEY and
+        appengine_config.TWITTER_APP_SECRET), (
+        "Please fill in the twitter_app_key and twitter_app_secret files in "
+        "your app's root directory.")
+
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
 
 

@@ -17,6 +17,12 @@ from webutil import util
 from google.appengine.ext import db
 import webapp2
 
+
+assert (appengine_config.FACEBOOK_APP_ID and
+        appengine_config.FACEBOOK_APP_SECRET), (
+        "Please fill in the facebook_app_id and facebook_app_secret files in "
+        "your app's root directory.")
+
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = str('&'.join((
