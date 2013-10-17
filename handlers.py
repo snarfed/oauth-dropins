@@ -23,10 +23,6 @@ class BaseHandler(webapp2.RequestHandler):
   handle_exception = handlers.handle_exception
   to_path = None
 
-  def __init__(self, *args, **kwargs):
-    assert self.to_path, 'No `to` URL. Did you forget to use the to() class method in your request handler mapping?'
-    super(BaseHandler, self).__init__(*args, **kwargs)
-
   @classmethod
   def to(cls, path):
     class ToHandler(cls):
@@ -46,6 +42,10 @@ class StartHandler(BaseHandler):
   Alternatively, clients may call redirect_url() and HTTP 302 redirect to it
   manually, which will start the same OAuth flow.
   """
+
+  def __init__(self, *args, **kwargs):
+    assert self.to_path, 'No `to` URL. Did you forget to use the to() class method in your request handler mapping?'
+    super(StartHandler, self).__init__(*args, **kwargs)
 
   def get(self):
     self.post()
@@ -83,6 +83,7 @@ class CallbackHandler(BaseHandler):
       auth_entity: a site-specific subclass of models.BaseAuth
       state: the string passed to StartHandler.redirect_url()
     """
+    assert self.to_path, 'No `to` URL. Did you forget to use the to() class method in your request handler mapping?'
     params = [('auth_entity', auth_entity.key()), ('state', state)]
     url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
