@@ -1,4 +1,13 @@
-"""Based flow request handlers. Clients should use the site-specific subclasses.
+"""Based flow request handlers. Clients should use the individual site modules.
+
+Example usage:
+
+application = webapp2.WSGIApplication([
+  ('/oauth_start', facebook.StartHandler.to('/oauth_callback')),
+  ('/oauth_callback', facebook.CallbackHandler.to('/done')),
+  ('/done', AuthenticatedHandler),
+  ...
+  ]
 """
 
 import logging
@@ -7,20 +16,36 @@ import webapp2
 from webutil import handlers
 from webutil import util
 
-class StartHandler(webapp2.RequestHandler):
+
+class BaseHandler(webapp2.RequestHandler):
+  """Base request handler class. Provides the to() factory method.
+  """
+  handle_exception = handlers.handle_exception
+  to_path = None
+
+  def __init__(self, *args, **kwargs):
+    assert self.to_path, 'No `to` URL. Did you forget to use the to() class method in your request handler mapping?'
+    super(BaseHandler, self).__init__(*args, **kwargs)
+
+  @classmethod
+  def to(cls, path):
+    class ToHandler(cls):
+      to_path = path
+    return ToHandler
+
+
+class StartHandler(BaseHandler):
   """Base class for starting an OAuth flow.
 
-  Clients may use this as the request handler class directly. It handles GET and
-  POST requests, and if the 'state' query parameter is provided in the request
-  data, it will be returned to the client in the OAuth callback handler.
+  Users should use the to() class method when using this request handler in a
+  WSGI application. See the file docstring for details.
+
+  If the 'state' query parameter is provided in the request data, it will be
+  returned to the client in the OAuth callback handler.
 
   Alternatively, clients may call redirect_url() and HTTP 302 redirect to it
   manually, which will start the same OAuth flow.
-
-  Clients *must* set the callback_path attribute. It should start with a /.
   """
-  handle_exception = handlers.handle_exception
-  callback_path = None
 
   def get(self):
     self.post()
@@ -36,18 +61,20 @@ class StartHandler(webapp2.RequestHandler):
     raise NotImplementedError()
 
 
-class CallbackHandler(webapp2.RequestHandler):
+class CallbackHandler(BaseHandler):
   """Base OAuth callback request handler.
 
-  Clients may subclass this and implement finish(), which is called after the
-  OAuth flow is done. Alternatively, they may set the redirect_url attr, and
-  users will be redirected there.
+  Users can use the to() class method when using this request handler in a WSGI
+  application to make it redirect to a given URL path on completion. See the
+  file docstring for details.
+
+  Alternatively, you can subclass it and implement finish(), which will be
+  called in the OAuth callback request directly, after the user has been
+  authenticated.
 
   The auth entity and optional state parameter provided to StartHandler will be
   passed to finish() or as query parameters to the redirect URL.
   """
-  handle_exception = handlers.handle_exception
-  redirect_url = None
 
   def finish(self, auth_entity, state=None):
     """Called when the OAuth flow is complete. Clients may override.
@@ -56,8 +83,7 @@ class CallbackHandler(webapp2.RequestHandler):
       auth_entity: a site-specific subclass of models.BaseAuth
       state: the string passed to StartHandler.redirect_url()
     """
-    assert self.redirect_url, 'You must implement finish() or set redirect_url'
     params = [('auth_entity', auth_entity.key()), ('state', state)]
-    url = util.add_query_params(self.redirect_url, params)
+    url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
     self.redirect(url)

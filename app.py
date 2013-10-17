@@ -3,7 +3,6 @@
 
 import appengine_config
 
-# import all the sites because we load their model classes.
 import blogger_v2
 import dropbox
 import facebook
@@ -32,27 +31,12 @@ class FrontPageHandler(webapp2.RequestHandler):
     self.response.out.write(template.render('templates/index.html', vars))
 
 
-class FacebookStartHandler(facebook.StartHandler):
-  callback_path = '/facebook/oauth_callback'
-
-class FacebookCallbackHandler(facebook.CallbackHandler):
-  callback_path = '/facebook/oauth_callback'
-  redirect_url = '/'
-
-
-class TwitterStartHandler(twitter.StartHandler):
-  callback_path = '/twitter/oauth_callback'
-
-class TwitterCallbackHandler(twitter.CallbackHandler):
-  redirect_url = '/'
-
-
 application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
-    ('/facebook/start', FacebookStartHandler),
-    ('/facebook/oauth_callback', FacebookCallbackHandler),
-    ('/twitter/start', TwitterStartHandler),
-    ('/twitter/oauth_callback', TwitterCallbackHandler),
+    ('/facebook/start', facebook.StartHandler.to('/facebook/oauth_callback')),
+    ('/facebook/oauth_callback', facebook.CallbackHandler.to('/')),
+    ('/twitter/start', twitter.StartHandler.to('/twitter/oauth_callback')),
+    ('/twitter/oauth_callback', twitter.CallbackHandler.to('/')),
     ], debug=appengine_config.DEBUG)
 
 

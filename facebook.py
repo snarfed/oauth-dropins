@@ -78,16 +78,13 @@ class StartHandler(handlers.StartHandler):
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
       'host_url': self.request.host_url,
-      'callback_path': self.callback_path,
+      'callback_path': self.to_path,
       }
 
 
 class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
-
-  Clients must set callback_path to the same value as in StartHandler.
   """
-  callback_path = None
 
   def get(self):
     auth_code = self.request.get('code')
@@ -98,7 +95,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
       'host_url': self.request.host_url,
-      'callback_path': self.callback_path,
+      'callback_path': self.request.path,
       }
     logging.debug('Fetching: %s', url)
     resp = urllib2.urlopen(url).read()

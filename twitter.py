@@ -96,9 +96,7 @@ class StartHandler(handlers.StartHandler):
   """
 
   def redirect_url(self, state=''):
-    assert self.callback_path
-    callback_url = '%s%s?state=%s' % (self.request.host_url, self.callback_path,
-                                      state)
+    callback_url = '%s%s?state=%s' % (self.request.host_url, self.to_path, state)
 
     try:
       auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
