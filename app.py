@@ -43,6 +43,9 @@ application = webapp2.WSGIApplication([
     ('/tumblr/oauth_callback', tumblr.CallbackHandler.to('/')),
     ('/twitter/start', twitter.StartHandler.to('/twitter/oauth_callback')),
     ('/twitter/oauth_callback', twitter.CallbackHandler.to('/')),
+    ('/wordpress_rest/start', wordpress_rest.StartHandler.to(
+        '/wordpress_rest/oauth_callback')),
+    ('/wordpress_rest/oauth_callback', wordpress_rest.CallbackHandler.to('/')),
     ], debug=appengine_config.DEBUG)
 
 

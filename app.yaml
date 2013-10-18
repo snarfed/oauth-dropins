@@ -25,10 +25,6 @@ handlers:
   script: googleplus.application
   secure: always
 
-- url: /wordpress_rest/.*
-  script: wordpress_rest.application
-  secure: always
-
 - url: .*
   script: app.application
   secure: always

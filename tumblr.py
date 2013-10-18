@@ -83,7 +83,7 @@ class StartHandler(handlers.StartHandler):
 
 
 class CallbackHandler(handlers.CallbackHandler):
-  """OAuth callback. Fetches the user's blogs and re-renders the front page.
+  """OAuth callback. Fetches the user's blogs and stores the credentials.
   """
 
   def get(self):
