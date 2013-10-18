@@ -6,6 +6,15 @@ https://developer.wordpress.com/docs/oauth2/
 
 Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
+
+Also, wordpress.com doesn't let you use an oauth redirect URL with "local" or
+"localhost" anywhere in it. : / A common workaround is to map an arbitrary host
+to localhost in your /etc/hosts, e.g.:
+
+127.0.0.1 my.dev.com
+
+You can then test on your local machine by running dev_appserver and opening
+http://my.dev.com:8080/ instead of http://localhost:8080/ .
 """
 
 import json
@@ -72,15 +81,10 @@ class StartHandler(handlers.StartHandler):
   """
 
   def redirect_url(self, state=''):
-    # wordpress.com doesn't let you use an oauth redirect URL with "local" or
-    # "localhost" anywhere in it. :/ had to use my.dev.com and put this in
-    # /etc/hosts:   127.0.0.1 my.dev.com
-    host = 'http://my.dev.com:8080' if appengine_config.DEBUG else self.host_url
-
     # TODO: CSRF protection
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-      'host_url': host,
+      'host_url': self.request.host_url,
       'callback_path': self.to_path,
       }
 
@@ -93,7 +97,6 @@ class CallbackHandler(handlers.CallbackHandler):
     auth_code = self.request.get('code')
     assert auth_code
 
-    host = 'http://my.dev.com:8080' if appengine_config.DEBUG else self.host_url
     data = {
       'code': auth_code,
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
