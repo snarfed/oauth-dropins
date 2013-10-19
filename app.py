@@ -37,6 +37,8 @@ application = webapp2.WSGIApplication([
     ('/dropbox/oauth_callback', dropbox.CallbackHandler.to('/')),
     ('/facebook/start', facebook.StartHandler.to('/facebook/oauth_callback')),
     ('/facebook/oauth_callback', facebook.CallbackHandler.to('/')),
+    ('/googleplus/start', googleplus.StartHandler.to('/googleplus/oauth_callback')),
+    ('/googleplus/oauth_callback', googleplus.CallbackHandler.to('/')),
     ('/instagram/start', instagram.StartHandler.to('/instagram/oauth_callback')),
     ('/instagram/oauth_callback', instagram.CallbackHandler.to('/')),
     ('/tumblr/start', tumblr.StartHandler.to('/tumblr/oauth_callback')),

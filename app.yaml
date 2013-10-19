@@ -21,10 +21,6 @@ handlers:
   script: blogger_v2.application
   secure: always
 
-- url: /googleplus/.*
-  script: googleplus.application
-  secure: always
-
 - url: .*
   script: app.application
   secure: always
