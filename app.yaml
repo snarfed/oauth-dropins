@@ -12,14 +12,8 @@ libraries:
 
 handlers:
 
-# static
 - url: /static
   static_dir: static
-
-# dynamic
-- url: /blogger_v2/.*
-  script: blogger_v2.application
-  secure: always
 
 - url: .*
   script: app.application

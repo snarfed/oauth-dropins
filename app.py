@@ -33,6 +33,8 @@ class FrontPageHandler(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
+    ('/blogger_v2/start', blogger_v2.StartHandler.to('/blogger_v2/oauth_callback')),
+    ('/blogger_v2/oauth_callback', blogger_v2.CallbackHandler.to('/')),
     ('/dropbox/start', dropbox.StartHandler.to('/dropbox/oauth_callback')),
     ('/dropbox/oauth_callback', dropbox.CallbackHandler.to('/')),
     ('/facebook/start', facebook.StartHandler.to('/facebook/oauth_callback')),
