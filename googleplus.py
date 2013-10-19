@@ -36,7 +36,7 @@ assert (appengine_config.GOOGLE_CLIENT_ID and
 # https://developers.google.com/api-client-library/python/apis/
 json_service = discovery.build('plus', 'v1')
 
-# instantiated in StartHandler.to_path()
+# global. initialized in StartHandler.to_path().
 oauth_decorator = None
 
 
@@ -117,7 +117,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         scope='https://www.googleapis.com/auth/plus.me',
         callback_path=to_path)
 
-    class Handler(cls, oauth_decorator.callback_handler()):
+    class Handler(cls):
       @oauth_decorator.oauth_required
       def get(self):
         # get the current user
@@ -131,13 +131,16 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         auth.save()
         self.finish(auth, state=self.request.get('state'))
 
+      @oauth_decorator.oauth_required
+      def post(self):
+        return self.get()
+
     return Handler
 
 
-class CallbackHandler(StartHandler):
+class CallbackHandler(object):
   """OAuth callback handler factory.
   """
-
   @staticmethod
   def to(to_path):
     StartHandler.to_path = to_path
