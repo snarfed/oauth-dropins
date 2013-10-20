@@ -60,7 +60,7 @@ class WordPressAuth(db.Model):
   key name is the blog hostname.
   """
   blog_id = db.StringProperty(required=True)
-  access_token = db.StringProperty(required=True)
+  access_token_str = db.StringProperty(required=True)
 
   def site_name(self):
     return 'WordPress'
@@ -70,10 +70,15 @@ class WordPressAuth(db.Model):
     """
     return self.key().name()
 
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return self.access_token_str
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
 
 
 class StartHandler(handlers.StartHandler):
@@ -122,6 +127,6 @@ class CallbackHandler(handlers.CallbackHandler):
 
     auth = WordPressAuth(key_name=blog_domain,
                          blog_id=blog_id,
-                         access_token=access_token)
+                         access_token_str=access_token)
     auth.save()
     self.finish(auth, state=self.request.get('state'))

@@ -1,4 +1,4 @@
-"""Serves the HTML front page and discovery files.
+"""Example oauth-dropins app. Serves the front page and discovery files.
 """
 
 import appengine_config
@@ -23,8 +23,8 @@ class FrontPageHandler(webapp2.RequestHandler):
   def get(self):
     self.response.headers['Content-Type'] = 'text/html'
 
-    vars = {}
-    key = self.request.get('auth_entity')
+    vars = dict(self.request.params)
+    key = vars['auth_entity']
     if key:
       vars['entity'] = db.get(key)
 

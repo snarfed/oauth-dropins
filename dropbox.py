@@ -41,7 +41,7 @@ class DropboxAuth(models.BaseAuth):
   Dropbox-specific details: implements urlopen() and api() but not http(). api()
   returns a python_dropbox.DropboxClient. The key name is the Dropbox user id.
   """
-  access_token = db.StringProperty(required=True)
+  access_token_str = db.StringProperty(required=True)
 
   def site_name(self):
     return 'Dropbox'
@@ -51,17 +51,22 @@ class DropboxAuth(models.BaseAuth):
     """
     return self.key().name()
 
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return self.access_token_str
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
 
   def api(self):
     """Returns a python_dropbox.DropboxClient.
 
     Details: https://www.dropbox.com/static/developers/dropbox-python-sdk-1.6-docs/
     """
-    return DropboxClient(self.access_token)
+    return DropboxClient(self.access_token_str)
 
 
 class DropboxCsrf(db.Model):
@@ -128,6 +133,6 @@ class CallbackHandler(handlers.CallbackHandler):
 
     logging.info('Storing new Dropbox account: %s', user_id)
 
-    auth = DropboxAuth(key_name=user_id, access_token=access_token)
+    auth = DropboxAuth(key_name=user_id, access_token_str=access_token)
     auth.save()
     self.finish(auth, state=self.request.get('state'))

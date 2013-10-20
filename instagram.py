@@ -52,7 +52,7 @@ class InstagramAuth(models.BaseAuth):
   username.
   """
   auth_code = db.StringProperty(required=True)
-  access_token = db.StringProperty(required=True)
+  access_token_str = db.StringProperty(required=True)
   user_json = db.TextProperty(required=True)
 
   def site_name(self):
@@ -63,10 +63,15 @@ class InstagramAuth(models.BaseAuth):
     """
     return self.key().name()
 
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return self.access_token_str
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
 
   def api(self):
     """Returns a python_instagram.InstagramAPI.
@@ -76,7 +81,7 @@ class InstagramAuth(models.BaseAuth):
     return InstagramAPI(
       client_id=appengine_config.INSTAGRAM_CLIENT_ID,
       client_secret=appengine_config.INSTAGRAM_CLIENT_SECRET,
-      access_token=self.access_token)
+      access_token=self.access_token_str)
 
 
 def handle_exception(self, e, debug):
@@ -146,7 +151,7 @@ class CallbackHandler(handlers.CallbackHandler):
 
     auth = InstagramAuth(key_name=username,
                          auth_code=auth_code,
-                         access_token=access_token,
+                         access_token_str=access_token,
                          user_json=json.dumps(data['user']))
     auth.save()
     self.finish(auth, state=self.request.get('state'))

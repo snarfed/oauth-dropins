@@ -15,7 +15,14 @@
 library.</p>
 
 {% if entity %}
-<p>Authenticated with {{ entity.site_name }} for {{ entity.user_display_name }}.</p>
+<p>Authenticated with {{ entity.site_name }} for {{ entity.user_display_name }}.<br />
+{% if access_token %}
+  Access token {{ access_token }}.<br />
+{% endif %}
+{% if access_token_key or access_token_secret %}
+  Access token key {{ access_token_key }}, secret {{ access_token_secret }}.
+{% endif %}
+</p>
 {% endif %}
 
 <form method="post" action="/facebook/start">

@@ -11,6 +11,7 @@ Support was added to gdata-python-client here:
 https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc6c8525e18812ccc02badc0
 """
 
+import json
 import logging
 import re
 import urllib
@@ -65,6 +66,11 @@ class BloggerV2Auth(models.BaseAuth):
     """Returns an oauth2client.OAuth2Credentials.
     """
     return OAuth2Credentials.from_json(self.creds_json)
+
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return json.loads(self.creds_json)['access_token']
 
   def http(self):
     """Returns an httplib2.Http that adds OAuth credentials to requests.

@@ -85,6 +85,15 @@ class CallbackHandler(BaseHandler):
     """
     assert self.to_path, 'No `to` URL. Did you forget to use the to() class method in your request handler mapping?'
     params = [('auth_entity', auth_entity.key()), ('state', state)]
+
+    token = auth_entity.access_token()
+    logging.info('@ %r', token)
+    if isinstance(token, basestring):
+      params.append(('access_token', token))
+    else:
+      params += [('access_token_key', token[0]),
+                 ('access_token_secret', token[1])]
+
     url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
     self.redirect(url)

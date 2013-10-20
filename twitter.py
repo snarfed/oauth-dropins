@@ -55,6 +55,11 @@ class TwitterAuth(models.BaseAuth):
     """
     return self.key().name()
 
+  def access_token(self):
+    """Returns the OAuth access token as a (string key, string secret) tuple.
+    """
+    return (self.token_key, self.token_secret)
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
     """
