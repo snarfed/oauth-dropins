@@ -136,7 +136,36 @@ class MyCallbackHandler(facebook.CallbackHandler):
 
 ### Auth entities
 
-TODO
+Each site defines an App Engine datastore
+[model class](https://developers.google.com/appengine/docs/python/datastore/entities#Python_Kinds_and_identifiers)
+that stores each user's OAuth credentials and other useful information, like
+their name and profile URL. The class name is generally of the form
+`<em>Site</em>Auth`, e.g. `FacebookAuth`. Here are the useful methods:
+
+- `site_name()` returns the human-readable string name of the site, e.g.
+  "Facebook".
+
+- `user_display_name()` returns a human-readable string name for the user, e.g.
+  "Ryan Barrett". This is usually their first name, full name, or username.
+
+- `access_token()` returns the OAuth access token. For OAuth 2 sites, this is a
+  single string. For OAuth 1.1 sites (currently just Twitter and Tumblr), this
+  is a (string key, string secret) tuple.
+
+The following methods are optional. Auth entity classes usually implement at
+least one of them, but not all.
+
+- `api()` returns a site-specific API object. This is usually a third party
+  library dedicated to the site, e.g. [Tweepy](https://github.com/tweepy/tweepy)
+  or [python-instagram](https://github.com/Instagram/python-instagram). See the
+  site class's docstring for details.
+
+- `urlopen(data=None, timeout=None)` wraps `urllib2.urlopen()` and adds the
+  OAuth credentials to the request. Use this for making direct HTTP request to a
+  site's REST API.
+
+- `http()` returns an `httplib2.Http` instance that adds the OAuth credentials
+  to requests.
 
 
 Development
