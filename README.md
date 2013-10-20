@@ -29,6 +29,7 @@ and secret in two plain text files in your app's root directory,
 `facebook_app_id` and `facebook_app_secret`.
 
 1. Create a `facebook_oauth.py` file with these contents:
+
 ```python
 from oauth_dropins import facebook, twitter
 import webapp2
@@ -39,6 +40,7 @@ application = webapp2.WSGIApplication([
 ```
 
 1. Add these lines to `app.yaml`:
+
 ```yaml
 - url: /facebook/(start_oauth|oauth_callback)
   script: facebook_oauth.application
@@ -77,44 +79,52 @@ used in any Python web framework that supports WSGI
 implemented with [webapp2](http://webapp-improved.appspot.com/).
 
 
-`StartHandler`
-===
+### `StartHandler`
+
 This HTTP request handler class redirects you to an OAuth-enabled site so it can ask
 the user to grant your app permission. It has two useful methods:
 
-- _`to(callback_path)`_ is a factory method that returns a request handler class
+- `to(callback_path)` is a factory method that returns a request handler class
   you can use in a WSGI application. The argument should be the path
-  mapped to [`CallbackHandler`](#callbackhandler) in your application. This also
+  mapped to `[CallbackHandler](#callbackhandler)` in your application. This also
   usually needs to match the callback URL in your app's configuration on the
   destination site.
 
-- _`redirect_url(state='')`_ returns the URL to redirect to at the destination
+- `redirect_url(state='')` returns the URL to redirect to at the destination
   site to initiate the OAuth flow. `StartHandler` will redirect here
   automatically if it's used in a WSGI application, but you can also instantiate
-  it and call this manually if you want to control that redirect yourself.
+  it and call this manually if you want to control that redirect yourself:
+
+```python
+class MyHandler(webapp2.RequestHandler):
+  def get(self):
+    ...
+    start_handler = facebook.StartHandler.to('/facebook/oauth_callback')
+    self.redirect(start_handler.redirect_url())
+```
 
 
-`CallbackHandler`
-===
+### `CallbackHandler`
+
 This class handles the HTTP redirect back to your app after the user has granted
 or declined permission. It also has two useful methods:
 
-- _`to(callback_path)`_ is a factory method that returns a request handler class
-  you can use in a WSGI application, similar to [`StartHandler`](#starthandler).
+- `to(callback_path)` is a factory method that returns a request handler class
+  you can use in a WSGI application, similar to `[StartHandler](#starthandler)`.
   The callback path is the path in your app that users should be redirected to
   after the OAuth flow is complete. It will include the OAuth token in its query
   parameters, either `access_token` for OAuth 2.0 or `access_token_key` and
   `access_token_secret` for OAuth 1.1. It will also include an `auth_entity`
-  query paremeter with the string key of an [auth entity](#auth_entities) that
+  query paremeter with the string key of an [auth entity](#auth-entities) that
   has more data (and functionality) for the authenticated user.
 
-- _`finish(auth_entity, state=None)`_ is run in the initial callback request
+- `finish(auth_entity, state=None)` is run in the initial callback request
   after the OAuth response has been processed. `auth_entity` is the newly
   created auth entity for this connection.
 
   By default, `finish` redirects to the path you specified in `to()`, but you
   can subclass `CallbackHandler` and override it to run your own code inside the
-  OAuth callback instead of redirecting. For example:
+  OAuth callback instead of redirecting:
 
 ```python
 class MyCallbackHandler(facebook.CallbackHandler):
@@ -124,18 +134,19 @@ class MyCallbackHandler(facebook.CallbackHandler):
 ```
 
 
-Auth entities
-===
+### Auth entities
+
 TODO
 
 
 Development
 ---
 TODO:
-* [ ] handle declines
-* [ ] document exceptions
-* [ ] parameterize OAuth scopes (only applicable to some sites)
-* [ ] clean up app key/secret file handling. (standardize file names? put them in a subdir?)
-* [ ] implement CSRF protection for all sites
-* [ ] implement Blogger's v3 API:
+- [ ] finish documentation
+- [ ] handle declines
+- [ ] document exceptions
+- [ ] parameterize OAuth scopes (only applicable to some sites)
+- [ ] clean up app key/secret file handling. (standardize file names? put them in a subdir?)
+- [ ] implement CSRF protection for all sites
+- [ ] implement Blogger's v3 API:
       https://developers.google.com/blogger/docs/3.0/getting_started
