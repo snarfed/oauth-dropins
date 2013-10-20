@@ -49,7 +49,7 @@ application = webapp2.WSGIApplication([
 
 Voila! Send your users to `/facebook/start_oauth` when you want them to connect
 their Facebook account to your app, and when they're done, they'll be redirected
-to `/next` in your app.
+to `/next?access_token=...` in your app.
 
 All of the sites provide the same API. To use a different one, just import the
 site module you want and follow the same steps. The current list of modules is:
@@ -86,7 +86,7 @@ the user to grant your app permission. It has two useful methods:
 
 - `to(callback_path)` is a factory method that returns a request handler class
   you can use in a WSGI application. The argument should be the path
-  mapped to `[CallbackHandler](#callbackhandler)` in your application. This also
+  mapped to [`CallbackHandler`](#callbackhandler) in your application. This also
   usually needs to match the callback URL in your app's configuration on the
   destination site.
 
@@ -110,7 +110,7 @@ This class handles the HTTP redirect back to your app after the user has granted
 or declined permission. It also has two useful methods:
 
 - `to(callback_path)` is a factory method that returns a request handler class
-  you can use in a WSGI application, similar to `[StartHandler](#starthandler)`.
+  you can use in a WSGI application, similar to [`StartHandler`](#starthandler).
   The callback path is the path in your app that users should be redirected to
   after the OAuth flow is complete. It will include the OAuth token in its query
   parameters, either `access_token` for OAuth 2.0 or `access_token_key` and
@@ -142,11 +142,11 @@ TODO
 Development
 ---
 TODO:
-- [ ] finish documentation
-- [ ] handle declines
-- [ ] document exceptions
-- [ ] parameterize OAuth scopes (only applicable to some sites)
-- [ ] clean up app key/secret file handling. (standardize file names? put them in a subdir?)
-- [ ] implement CSRF protection for all sites
-- [ ] implement Blogger's v3 API:
-      https://developers.google.com/blogger/docs/3.0/getting_started
+
+* finish documentation
+* handle declines
+* document exceptions
+* parameterize OAuth scopes (only applicable to some sites)
+* clean up app key/secret file handling. (standardize file names? put them in a subdir?)
+* implement CSRF protection for all sites
+* implement [Blogger's v3 API](https://developers.google.com/blogger/docs/3.0/getting_started)
