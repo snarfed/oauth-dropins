@@ -45,6 +45,14 @@ class BaseAuth(models.KeyNameModel):
       self._api_obj = self._api()
     return self._api_obj
 
+  def access_token(self):
+    """Returns the OAuth access token.
+
+    This is a string for OAuth 2 sites or a (string key, string secret) tuple
+    for OAuth 1.1 sites (currently just Twitter and Tumblr).
+    """
+    raise NotImplementedError()
+
   def urlopen(self, url, data=None, timeout=None):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
 

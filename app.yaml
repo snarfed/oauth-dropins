@@ -12,34 +12,8 @@ libraries:
 
 handlers:
 
-# static
 - url: /static
   static_dir: static
-
-# dynamic
-- url: /blogger_v2/.*
-  script: blogger_v2.application
-  secure: always
-
-- url: /dropbox/.*
-  script: dropbox.application
-  secure: always
-
-- url: /instagram/.*
-  script: instagram.application
-  secure: always
-
-- url: /googleplus/.*
-  script: googleplus.application
-  secure: always
-
-- url: /tumblr/.*
-  script: tumblr.application
-  secure: always
-
-- url: /wordpress_rest/.*
-  script: wordpress_rest.application
-  secure: always
 
 - url: .*
   script: app.application

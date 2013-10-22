@@ -17,6 +17,12 @@ from webutil import util
 from google.appengine.ext import db
 import webapp2
 
+
+assert (appengine_config.FACEBOOK_APP_ID and
+        appengine_config.FACEBOOK_APP_SECRET), (
+        "Please fill in the facebook_app_id and facebook_app_secret files in "
+        "your app's root directory.")
+
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = str('&'.join((
@@ -51,7 +57,7 @@ class FacebookAuth(models.BaseAuth):
   key name is the user's or page's Facebook ID.
   """
   auth_code = db.StringProperty(required=True)
-  access_token = db.StringProperty(required=True)
+  access_token_str = db.StringProperty(required=True)
   user_json = db.TextProperty(required=True)
 
   def site_name(self):
@@ -62,10 +68,15 @@ class FacebookAuth(models.BaseAuth):
     """
     return json.loads(self.user_json)['name']
 
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return self.access_token_str
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
 
 
 class StartHandler(handlers.StartHandler):
@@ -110,6 +121,6 @@ class CallbackHandler(handlers.CallbackHandler):
     auth = FacebookAuth(key_name=user_id,
                         user_json=resp,
                         auth_code=auth_code,
-                        access_token=access_token)
+                        access_token_str=access_token)
     auth.save()
     self.finish(auth, state=self.request.get('state'))

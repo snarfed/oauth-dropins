@@ -10,16 +10,22 @@ import urllib2
 import urlparse
 
 import appengine_config
+import handlers
 import models
 from python_instagram.bind import InstagramAPIError
 from python_instagram.client import InstagramAPI
 from webob import exc
-from webutil import handlers
+from webutil import handlers as webutil_handlers
 from webutil import util
 
 from google.appengine.ext import db
 import webapp2
 
+
+assert (appengine_config.INSTAGRAM_CLIENT_ID and
+        appengine_config.INSTAGRAM_CLIENT_SECRET), (
+  "Please fill in the instagram_client_id and instagram_client_secret files "
+  "in your app's root directory.")
 
 # instagram api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
@@ -27,7 +33,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'https://api.instagram.com/oauth/authorize?',
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
-    'redirect_uri=%(host_url)s/instagram/oauth_callback',
+    'redirect_uri=%(host_url)s%(callback_path)s',
     'response_type=code',
     )))
 
@@ -46,7 +52,7 @@ class InstagramAuth(models.BaseAuth):
   username.
   """
   auth_code = db.StringProperty(required=True)
-  access_token = db.StringProperty(required=True)
+  access_token_str = db.StringProperty(required=True)
   user_json = db.TextProperty(required=True)
 
   def site_name(self):
@@ -57,10 +63,15 @@ class InstagramAuth(models.BaseAuth):
     """
     return self.key().name()
 
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return self.access_token_str
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
 
   def api(self):
     """Returns a python_instagram.InstagramAPI.
@@ -70,7 +81,7 @@ class InstagramAuth(models.BaseAuth):
     return InstagramAPI(
       client_id=appengine_config.INSTAGRAM_CLIENT_ID,
       client_secret=appengine_config.INSTAGRAM_CLIENT_SECRET,
-      access_token=self.access_token)
+      access_token=self.access_token_str)
 
 
 def handle_exception(self, e, debug):
@@ -81,29 +92,28 @@ def handle_exception(self, e, debug):
     self.response.set_status(e.status_code)
     self.response.write(str(e))
   else:
-    return handlers.handle_exception(self, e, debug)
+    return webutil_handlers.handle_exception(self, e, debug)
 
 
-class StartHandler(webapp2.RequestHandler):
+class StartHandler(handlers.StartHandler):
   """Starts Instagram auth. Requests an auth code and expects a redirect back.
   """
-  handle_exception = handlers.handle_exception
+  handle_exception = handle_exception
 
-  def post(self):
+  def redirect_url(self, state=''):
     # http://instagram.com/developer/authentication/
-    url = GET_AUTH_CODE_URL % {
+    return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
       # TODO: CSRF protection identifier.
       'host_url': self.request.host_url,
+      'callback_path': self.to_path,
       }
-    logging.debug('Redirecting to %s', url)
-    self.redirect(str(url))
 
 
-class CallbackHandler(webapp2.RequestHandler):
+class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
-  handle_exception = handlers.handle_exception
+  handle_exception = handle_exception
 
   def get(self):
     if self.request.get('error'):
@@ -119,7 +129,7 @@ class CallbackHandler(webapp2.RequestHandler):
       'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
       'client_secret': appengine_config.INSTAGRAM_CLIENT_SECRET,
       'code': auth_code,
-      'redirect_uri': self.request.host_url + '/instagram/oauth_callback',
+      'redirect_uri': self.request.path_url,
       'grant_type': 'authorization_code',
       }
 
@@ -139,14 +149,9 @@ class CallbackHandler(webapp2.RequestHandler):
     access_token = data['access_token']
     username = data['user']['username']
 
-    key = InstagramAuth(key_name=username,
-                        auth_code=auth_code,
-                        access_token=access_token,
-                        user_json=json.dumps(data['user'])).save()
-    self.redirect('/?entity_key=%s' % key)
-
-
-application = webapp2.WSGIApplication([
-    ('/instagram/start', StartHandler),
-    ('/instagram/oauth_callback', CallbackHandler),
-    ], debug=appengine_config.DEBUG)
+    auth = InstagramAuth(key_name=username,
+                         auth_code=auth_code,
+                         access_token_str=access_token,
+                         user_json=json.dumps(data['user']))
+    auth.save()
+    self.finish(auth, state=self.request.get('state'))

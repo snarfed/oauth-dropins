@@ -1,6 +1,8 @@
 """Tumblr OAuth drop-in.
 
-API docs: http://www.tumblr.com/docs/en/api/v2
+API docs:
+http://www.tumblr.com/docs/en/api/v2
+http://www.tumblr.com/oauth/apps
 """
 
 import json
@@ -9,11 +11,10 @@ import urllib
 import urlparse
 
 import appengine_config
+import handlers
 import models
 import tumblpy
 from webob import exc
-from webutil import handlers
-from webutil.models import KeyNameModel
 from webutil import util
 
 from google.appengine.ext import db
@@ -21,8 +22,10 @@ from google.appengine.ext.webapp import template
 import webapp2
 
 
-# http://www.tumblr.com/oauth/apps
-OAUTH_CALLBACK_PATH = '/tumblr/oauth_callback'
+assert (appengine_config.TUMBLR_APP_KEY and
+        appengine_config.TUMBLR_APP_SECRET), (
+        "Please fill in the tumblr_app_key and tumblr_app_secret files in "
+        "your app's root directory.")
 
 
 class TumblrAuth(models.BaseAuth):
@@ -49,6 +52,11 @@ class TumblrAuth(models.BaseAuth):
     """
     return self.key().name()
 
+  def access_token(self):
+    """Returns the OAuth access token as a (string key, string secret) tuple.
+    """
+    return (self.token_key, self.token_secret)
+
   def _api(self):
     """Returns a tumblpy.Tumblpy.
     """
@@ -63,29 +71,25 @@ class TumblrAuth(models.BaseAuth):
                            oauth_token=key, oauth_token_secret=secret)
 
 
-class StartHandler(webapp2.RequestHandler):
+class StartHandler(handlers.StartHandler):
   """Starts Tumblr auth. Requests an auth code and expects a redirect back.
   """
-  handle_exception = handlers.handle_exception
 
-  def post(self):
+  def redirect_url(self, state=''):
     tp = tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
                          app_secret=appengine_config.TUMBLR_APP_SECRET)
     auth_props = tp.get_authentication_tokens(
-      callback_url=self.request.host_url + OAUTH_CALLBACK_PATH)
+      callback_url=self.request.host_url + self.to_path)
 
     # store the request token for later use in the callback handler
     models.OAuthRequestToken(key_name=auth_props['oauth_token'],
                              token_secret=auth_props['oauth_token_secret']).save()
-    auth_url = auth_props['auth_url']
-    logging.info('Generated request token, redirecting to Tumblr: %s', auth_url)
-    self.redirect(auth_url)
+    return auth_props['auth_url']
 
 
-class CallbackHandler(webapp2.RequestHandler):
-  """OAuth callback. Fetches the user's blogs and re-renders the front page.
+class CallbackHandler(handlers.CallbackHandler):
+  """OAuth callback. Fetches the user's blogs and stores the credentials.
   """
-  handle_exception = handlers.handle_exception
 
   def get(self):
     # lookup the request token
@@ -111,16 +115,9 @@ class CallbackHandler(webapp2.RequestHandler):
     logging.debug('Got: %s', resp)
     user = resp['user']
 
-    key = TumblrAuth(key_name=user['name'],
-                     token_key=auth_token_key,
-                     token_secret=auth_token_secret,
-                     user_json=json.dumps(resp)).save()
-    # hostnames = util.trim_nulls([util.domain_from_link(b['url'])
-    #                              for b in user['blogs']])
-    self.redirect('/?entity_key=%s' % key)
-
-
-application = webapp2.WSGIApplication([
-    ('/tumblr/start', StartHandler),
-    (OAUTH_CALLBACK_PATH, CallbackHandler),
-    ], debug=appengine_config.DEBUG)
+    auth = TumblrAuth(key_name=user['name'],
+                      token_key=auth_token_key,
+                      token_secret=auth_token_secret,
+                      user_json=json.dumps(resp))
+    auth.save()
+    self.finish(auth, state=self.request.get('state'))

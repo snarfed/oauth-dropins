@@ -6,6 +6,15 @@ https://developer.wordpress.com/docs/oauth2/
 
 Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
+
+Also, wordpress.com doesn't let you use an oauth redirect URL with "local" or
+"localhost" anywhere in it. : / A common workaround is to map an arbitrary host
+to localhost in your /etc/hosts, e.g.:
+
+127.0.0.1 my.dev.com
+
+You can then test on your local machine by running dev_appserver and opening
+http://my.dev.com:8080/ instead of http://localhost:8080/ .
 """
 
 import json
@@ -14,11 +23,17 @@ import urllib
 import urllib2
 
 import appengine_config
-from webutil import handlers
+import handlers
 from webutil import util
 
 from google.appengine.ext import db
 import webapp2
+
+
+assert (appengine_config.WORDPRESS_CLIENT_ID and
+        appengine_config.WORDPRESS_CLIENT_SECRET), (
+        "Please fill in the wordpress_client_id and wordpress_client_secret "
+        "files in your app's root directory.")
 
 
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
@@ -28,7 +43,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'scope=',  # wordpress doesn't seem to use scope
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
-    'redirect_uri=%(host_url)s/wordpress_rest/oauth_callback',
+    'redirect_uri=%(host_url)s%(callback_path)s',
     'response_type=code',
     )))
 GET_ACCESS_TOKEN_URL = 'https://public-api.wordpress.com/oauth2/token'
@@ -45,7 +60,7 @@ class WordPressAuth(db.Model):
   key name is the blog hostname.
   """
   blog_id = db.StringProperty(required=True)
-  access_token = db.StringProperty(required=True)
+  access_token_str = db.StringProperty(required=True)
 
   def site_name(self):
     return 'WordPress'
@@ -55,49 +70,45 @@ class WordPressAuth(db.Model):
     """
     return self.key().name()
 
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return self.access_token_str
+
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token, **kwargs)
+    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
 
 
-class StartHandler(webapp2.RequestHandler):
+class StartHandler(handlers.StartHandler):
   """Starts WordPress auth. Requests an auth code and expects a redirect back.
   """
-  handle_exception = handlers.handle_exception
 
-  def post(self):
-    # wordpress.com doesn't let you use an oauth redirect URL with "local" or
-    # "localhost" anywhere in it. :/ had to use my.dev.com and put this in
-    # /etc/hosts:   127.0.0.1 my.dev.com
-    host = 'http://my.dev.com:8080' if appengine_config.DEBUG else self.host_url
-
+  def redirect_url(self, state=''):
     # TODO: CSRF protection
-    url = GET_AUTH_CODE_URL % {
+    return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-      'host_url': host,
+      'host_url': self.request.host_url,
+      'callback_path': self.to_path,
       }
-    logging.debug('Redirecting to: %s', url)
-    self.redirect(str(url))
 
 
-class CallbackHandler(webapp2.RequestHandler):
-  """The auth callback. Fetches an access token, stores it, and redirects home.
+class CallbackHandler(handlers.CallbackHandler):
+  """The OAuth callback. Fetches an access token and stores it.
   """
-  handle_exception = handlers.handle_exception
 
   def get(self):
     auth_code = self.request.get('code')
     assert auth_code
 
-    host = 'http://my.dev.com:8080' if appengine_config.DEBUG else self.host_url
     data = {
       'code': auth_code,
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
       'client_secret': appengine_config.WORDPRESS_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': host + '/wordpress_rest/oauth_callback',
+      'redirect_uri': self.request.path_url,
       'grant_type': 'authorization_code',
       }
     logging.debug('Fetching %s with %r', GET_ACCESS_TOKEN_URL, data)
@@ -114,13 +125,8 @@ class CallbackHandler(webapp2.RequestHandler):
       logging.exception('Could not decode JSON')
       raise
 
-    key = WordPressAuth(key_name=blog_domain,
-                        blog_id=blog_id,
-                        access_token=access_token).save()
-    self.redirect('/?entity_key=%s' % key)
-
-
-application = webapp2.WSGIApplication([
-    ('/wordpress_rest/start', StartHandler),
-    ('/wordpress_rest/oauth_callback', CallbackHandler),
-    ], debug=appengine_config.DEBUG)
+    auth = WordPressAuth(key_name=blog_domain,
+                         blog_id=blog_id,
+                         access_token_str=access_token)
+    auth.save()
+    self.finish(auth, state=self.request.get('state'))

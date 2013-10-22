@@ -11,14 +11,16 @@ Support was added to gdata-python-client here:
 https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc6c8525e18812ccc02badc0
 """
 
+import json
 import logging
 import re
 import urllib
 import urlparse
 
 import appengine_config
+import googleplus
+import handlers
 import models
-from webutil import handlers
 from webutil import util
 
 from oauth2client.appengine import OAuth2Decorator
@@ -31,13 +33,8 @@ import httplib2
 import webapp2
 
 
-oauth = OAuth2Decorator(
-  client_id=appengine_config.GOOGLE_CLIENT_ID,
-  client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-  # https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
-  # (the scope for the v3 API is https://www.googleapis.com/auth/blogger)
-  scope='http://www.blogger.com/feeds/',
-  callback_path='/blogger_v2/oauth2callback')
+# global. initialized in StartHandler.to_path().
+oauth_decorator = None
 
 
 class BloggerV2Auth(models.BaseAuth):
@@ -71,9 +68,9 @@ class BloggerV2Auth(models.BaseAuth):
     return OAuth2Credentials.from_json(self.creds_json)
 
   def access_token(self):
-    """Returns an oauth2client.OAuth2Credentials.
+    """Returns the OAuth access token string.
     """
-    return OAuth2Credentials.from_json(self.creds_json)
+    return json.loads(self.creds_json)['access_token']
 
   def http(self):
     """Returns an httplib2.Http that adds OAuth credentials to requests.
@@ -102,44 +99,65 @@ class BloggerV2Auth(models.BaseAuth):
     return BloggerV2Auth.api_from_creds(self.creds())
 
 
-class StartHandler(webapp2.RequestHandler):
+class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   """Connects a Blogger account. Authenticates via OAuth.
   """
-  handle_exception = handlers.handle_exception
+  handle_exception = googleplus.handle_exception
 
   # extracts the Blogger id from a profile URL
   AUTHOR_URI_RE = re.compile('.*blogger\.com/profile/([0-9]+)')
 
-  @oauth.oauth_required
-  def post(self):
-    return self.get()
+  @classmethod
+  def to(cls, to_path):
+    """Override this since we need to_path to instantiate the oauth decorator.
+    """
+    global oauth_decorator
+    if oauth_decorator is None:
+      oauth_decorator = OAuth2Decorator(
+        client_id=appengine_config.GOOGLE_CLIENT_ID,
+        client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
+        # https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
+        # (the scope for the v3 API is https://www.googleapis.com/auth/blogger)
+        scope='http://www.blogger.com/feeds/',
+        callback_path=to_path)
 
-  @oauth.oauth_required
-  def get(self):
-    blogger = BloggerV2Auth.api_from_creds(oauth.credentials)
+    class Handler(cls):
+      @oauth_decorator.oauth_required
+      def post(self):
+        return self.get()
 
-    blogs = blogger.get_blogs()
-    author = blogs.author[0]
-    match = self.AUTHOR_URI_RE.match(author.uri.text)
-    if not match:
-      raise exc.HTTPBadRequest('Could not parse author URI: %s', author.uri)
-    id = match.group(1)
-    hostnames = [util.domain_from_link(blog.GetHtmlLink().href)
-                 for blog in blogs.entry if blog.GetHtmlLink()]
+      @oauth_decorator.oauth_required
+      def get(self):
+        blogger = BloggerV2Auth.api_from_creds(oauth_decorator.credentials)
+        blogs = blogger.get_blogs()
+        author = blogs.author[0]
+        match = self.AUTHOR_URI_RE.match(author.uri.text)
+        if not match:
+          raise exc.HTTPBadRequest('Could not parse author URI: %s', author.uri)
+        id = match.group(1)
+        hostnames = [util.domain_from_link(blog.GetHtmlLink().href)
+                     for blog in blogs.entry if blog.GetHtmlLink()]
 
-    creds_json = oauth.credentials.to_json()
-    key = BloggerV2Auth(key_name=id,
-                        name=author.name.text,
-                        hostnames=hostnames,
-                        creds_json=creds_json,
-                        user_atom=str(author),
-                        blogs_atom=str(blogs)).save()
-    redirect = '/?entity_key=%s' % key
+        creds_json = oauth_decorator.credentials.to_json()
+        auth = BloggerV2Auth(key_name=id,
+                             name=author.name.text,
+                             hostnames=hostnames,
+                             creds_json=creds_json,
+                             user_atom=str(author),
+                             blogs_atom=str(blogs))
+        auth.save()
+        self.finish(auth, state=self.request.get('state'))
 
-    self.redirect(redirect)
+
+    return Handler
 
 
-application = webapp2.WSGIApplication([
-    ('/blogger_v2/start', StartHandler),
-    (oauth.callback_path, oauth.callback_handler()),
-    ], debug=appengine_config.DEBUG)
+class CallbackHandler(object):
+  """OAuth callback handler factory.
+  """
+  @staticmethod
+  def to(to_path):
+    StartHandler.to_path = to_path
+    global oauth_decorator
+    assert oauth_decorator
+    return oauth_decorator.callback_handler()

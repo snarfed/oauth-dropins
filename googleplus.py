@@ -2,6 +2,8 @@
 
 Google+ API docs: https://developers.google.com/+/api/latest/
 Python API client docs: https://developers.google.com/api-client-library/python/
+
+TODO: check that overriding CallbackHandler.finish() actually works.
 """
 
 import json
@@ -10,9 +12,9 @@ import logging
 import urllib
 
 import appengine_config
+import handlers
 import models
 
-from webutil import handlers
 from webutil import util
 
 from apiclient import discovery
@@ -22,17 +24,20 @@ from oauth2client.client import Credentials, OAuth2Credentials
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 import webapp2
+from webutil import handlers as webutil_handlers
 
+
+assert (appengine_config.GOOGLE_CLIENT_ID and
+        appengine_config.GOOGLE_CLIENT_SECRET), (
+        "Please fill in the google_client_id and google_client_secret files in "
+        "your app's root directory.")
 
 # service names and versions:
 # https://developers.google.com/api-client-library/python/apis/
 json_service = discovery.build('plus', 'v1')
-oauth = OAuth2Decorator(
-  client_id=appengine_config.GOOGLE_CLIENT_ID,
-  client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-  # G+ scopes: https://developers.google.com/+/api/oauth#oauth-scopes
-  scope='https://www.googleapis.com/auth/plus.me',
-  callback_path='/googleplus/oauth2callback')
+
+# global. initialized in StartHandler.to_path().
+oauth_decorator = None
 
 
 class GooglePlusAuth(models.BaseAuth):
@@ -88,33 +93,62 @@ class GooglePlusAuth(models.BaseAuth):
     return json_service
 
 
-class StartHandler(webapp2.RequestHandler):
-  """Finishes Facebook auth. (The oauth decorator handles OAuth redirects.)
+def handle_exception(self, e, debug):
+  """Exception handler that passes back HttpErrors as real HTTP errors.
   """
-  def handle_exception(self, e, debug):
-    """Exception handler that passes back HttpErrors as real HTTP errors.
+  if isinstance(e, HttpError):
+    logging.exception(e)
+    self.response.set_status(e.resp.status)
+    self.response.write(str(e))
+  else:
+    return webutil_handlers.handle_exception(self, e, debug)
+
+
+class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
+  """Starts and finishes the OAuth flow. The decorator handles the redirects.
+  """
+  handle_exception = handle_exception
+
+  @classmethod
+  def to(cls, to_path):
+    """Override this since we need to_path to instantiate the oauth decorator.
     """
-    if isinstance(e, HttpError):
-      logging.exception(e)
-      self.response.set_status(e.resp.status)
-      self.response.write(str(e))
-    else:
-      return handlers.handle_exception(self, e, debug)
+    global oauth_decorator
+    if oauth_decorator is None:
+      oauth_decorator = OAuth2Decorator(
+        client_id=appengine_config.GOOGLE_CLIENT_ID,
+        client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
+        # G+ scopes: https://developers.google.com/+/api/oauth#oauth-scopes
+        scope='https://www.googleapis.com/auth/plus.me',
+        callback_path=to_path)
 
-  @oauth.oauth_required
-  def get(self):
-    # get the current user
-    user = json_service.people().get(userId='me').execute(oauth.http())
-    logging.debug('Got one person: %r', user)
-    creds_json = oauth.credentials.to_json()
+    class Handler(cls):
+      @oauth_decorator.oauth_required
+      def get(self):
+        # get the current user
+        user = json_service.people().get(userId='me').execute(oauth_decorator.http())
+        logging.debug('Got one person: %r', user)
+        creds_json = oauth_decorator.credentials.to_json()
 
-    key = GooglePlusAuth(key_name=user['id'],
-                         creds_json=creds_json,
-                         user_json=json.dumps(user)).save()
-    self.redirect('/?entity_key=%s' % key)
+        auth = GooglePlusAuth(key_name=user['id'],
+                              creds_json=creds_json,
+                              user_json=json.dumps(user))
+        auth.save()
+        self.finish(auth, state=self.request.get('state'))
+
+      @oauth_decorator.oauth_required
+      def post(self):
+        return self.get()
+
+    return Handler
 
 
-application = webapp2.WSGIApplication([
-    ('/googleplus/start', StartHandler),
-    (oauth.callback_path, oauth.callback_handler()),
-    ], debug=appengine_config.DEBUG)
+class CallbackHandler(object):
+  """OAuth callback handler factory.
+  """
+  @staticmethod
+  def to(to_path):
+    StartHandler.to_path = to_path
+    global oauth_decorator
+    assert oauth_decorator
+    return oauth_decorator.callback_handler()
