@@ -70,6 +70,11 @@ class BloggerV2Auth(models.BaseAuth):
     """
     return OAuth2Credentials.from_json(self.creds_json)
 
+  def access_token(self):
+    """Returns an oauth2client.OAuth2Credentials.
+    """
+    return OAuth2Credentials.from_json(self.creds_json)
+
   def http(self):
     """Returns an httplib2.Http that adds OAuth credentials to requests.
     """

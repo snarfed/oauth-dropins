@@ -62,6 +62,11 @@ class GooglePlusAuth(models.BaseAuth):
     """
     return OAuth2Credentials.from_json(self.creds_json)
 
+  def access_token(self):
+    """Returns the OAuth access token string.
+    """
+    return json.loads(self.creds_json)['access_token']
+
   def http(self):
     """Returns an httplib2.Http that adds OAuth credentials to requests.
     """
