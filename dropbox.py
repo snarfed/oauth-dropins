@@ -72,13 +72,14 @@ class DropboxAuth(models.BaseAuth):
 class DropboxCsrf(db.Model):
   """Stores a CSRF token for the Dropbox OAuth2 flow."""
   token = db.StringProperty(required=False)
+  state = db.TextProperty(required=False)
 
 
 def handle_exception(self, e, debug):
   """Exception handler that handles Dropbox client errors.
   """
   if isinstance(e, (DropboxOAuth2Flow.CsrfException,
-                      DropboxOAuth2Flow.ProviderException)):
+                    DropboxOAuth2Flow.ProviderException)):
     logging.exception()
     raise exc.HTTPForbidden()
   elif isinstance(e, (DropboxOAuth2Flow.BadRequestException,
@@ -95,8 +96,8 @@ class StartHandler(handlers.StartHandler):
   """
   handle_exception = handle_exception
 
-  def redirect_url(self, state=''):
-    csrf = DropboxCsrf()
+  def redirect_url(self, state=None):
+    csrf = DropboxCsrf(state=state)
     csrf.save()
     csrf_holder = {}
     flow = DropboxOAuth2Flow(appengine_config.DROPBOX_APP_KEY,
@@ -135,4 +136,4 @@ class CallbackHandler(handlers.CallbackHandler):
 
     auth = DropboxAuth(key_name=user_id, access_token_str=access_token)
     auth.save()
-    self.finish(auth, state=self.request.get('state'))
+    self.finish(auth, state=csrf.state)
