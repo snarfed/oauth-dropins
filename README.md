@@ -31,7 +31,7 @@ also want to add them to your `.gitignore`.)
 1. Create a `facebook_oauth.py` file with these contents:
 
 ```python
-from oauth_dropins import facebook, twitter
+from oauth_dropins import facebook
 import webapp2
 
 application = webapp2.WSGIApplication([
