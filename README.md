@@ -57,8 +57,6 @@ secrets also differ by site;
 [`appengine_config.py`](https://github.com/snarfed/oauth-dropins/blob/master/appengine_config.py)
 has the full list.
 
-For a
-
 
 Usage details
 ---
@@ -169,7 +167,6 @@ Development
 ---
 TODO:
 
-* finish documentation
 * handle declines
 * document exceptions
 * parameterize OAuth scopes (only applicable to some sites)
