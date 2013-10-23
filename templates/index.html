@@ -4,6 +4,11 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <title>oauth-dropins demo</title>
+  <meta name="viewport" content="width=device-width">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="http:////netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css" />
 </head>
 
 <body>
@@ -22,33 +27,32 @@ library.</p>
 {% if access_token_key or access_token_secret %}
   Access token key {{ access_token_key }}, secret {{ access_token_secret }}.
 {% endif %}
-State {{ state }}.
 </p>
 {% endif %}
 
-<form method="post" action="/facebook/start?state=asdf_facebook">
-  <input type="image" alt="Sign in with Facebook" src="/static/facebook_button.png" />
+<form method="post" action="/facebook/start">
+  <input type="image" alt="Sign in with Facebook" src="/static/facebook.png" />
 </form>
-<form method="post" action="/twitter/start?state=asdf_twitter">
-  <input type="image" alt="Sign in with Twitter" src="/static/twitter_button.png" />
+<form method="post" action="/twitter/start">
+  <input type="image" alt="Sign in with Twitter" src="/static/twitter.png" />
 </form>
-<form method="post" action="/googleplus/start?state=asdf_googleplus">
-  <input type="image" alt="Sign in with Google+" src="/static/google_plus_button.png" />
+<form method="post" action="/googleplus/start">
+  <input type="image" alt="Sign in with Google+" src="/static/google_plus.png" />
 </form>
-<form method="post" action="/instagram/start?state=asdf_instagram">
-  <input type="image" alt="Sign in with Instagram" src="/static/instagram_button.png" />
+<form method="post" action="/instagram/start">
+  <input type="image" alt="Sign in with Instagram" src="/static/instagram.png" />
 </form>
-<form method="post" action="/dropbox/start?state=asdf_dropbox">
-  <input type="image" alt="Sign in with Dropbox" src="/static/dropbox_button.png" />
+<form method="post" action="/dropbox/start">
+  <input type="image" alt="Sign in with Dropbox" src="/static/dropbox.png" />
 </form>
-<form method="post" action="/wordpress_rest/start?state=asdf_wordpress_rest">
-  <input type="image" alt="Sign in with WordPress.com" src="/static/wordpress_com_button.png" />
+<form method="post" action="/wordpress_rest/start">
+  <input type="image" alt="Sign in with WordPress.com" src="/static/wordpress_com.png" />
 </form>
-<form method="post" action="/tumblr/start?state=asdf_tumblr">
-  <input type="image" alt="Sign in with Tumblr" src="/static/tumblr_button.png" />
+<form method="post" action="/tumblr/start">
+  <input type="image" alt="Sign in with Tumblr" src="/static/tumblr.png" />
 </form>
-<form method="post" action="/blogger_v2/start?state=asdf_blogger_v2">
-  <input type="image" alt="Sign in with Blogger" src="/static/blogger_button.png" />
+<form method="post" action="/blogger_v2/start">
+  <input type="image" alt="Sign in with Blogger" src="/static/blogger.png" />
 </form>
 
 </body>
