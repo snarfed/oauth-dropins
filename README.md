@@ -1,4 +1,4 @@
-![OAuth logo](https://raw.github.com/snarfed/oauth-dropins/master/static/oauth_logo_shiny_128.png)
+![OAuth logo](https://raw.github.com/snarfed/oauth-dropins/master/static/oauth_shiny_128.png)
 oauth-dropins
 =============
 
