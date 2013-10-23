@@ -1,5 +1,4 @@
 ![OAuth logo](https://raw.github.com/snarfed/oauth-dropins/master/static/oauth_logo_shiny_128.png)
-
 oauth-dropins
 =============
 
@@ -9,7 +8,7 @@ initial [OAuth](http://oauth.net/) client flows for many popular sites,
 including Blogger, Dropbox, Facebook, Google+, Instagram, Twitter, Tumblr, and
 WordPress.com.
 
-This repo also provides an example demo app:
+This repo also provides an example demo app, deployed at
 http://oauth-dropins.appspot.com/.
 
 All dependencies are included as git submodules. After you've cloned or download
@@ -52,16 +51,7 @@ their Facebook account to your app, and when they're done, they'll be redirected
 to `/next?access_token=...` in your app.
 
 All of the sites provide the same API. To use a different one, just import the
-site module you want and follow the same steps. The current list of modules is:
-
-* `blogger_v2`
-* `dropbox`
-* `facebook`
-* `googleplus`
-* `instagram`
-* `tumblr`
-* `twitter`
-* `wordpress_rest`
+site module you want and follow the same steps.
 
 
 Usage details
@@ -70,8 +60,9 @@ Usage details
 There are three main parts to an OAuth drop-in: the initial redirect to the site
 itself, the redirect back to your app after the user approves or declines the
 request, and the datastore entity that stores the user's OAuth credentials and
-helps you use them. These are implemented by the `StartHandler`,
-`CallbackHandler`, and auth entity classes, respectively.
+helps you use them. These are implemented by [`StartHandler`](#starthandler),
+[`CallbackHandler`](#callbackhandler), and [auth entities](#auth-entities),
+respectively.
 
 The request handlers are full [WSGI](http://wsgi.org/) applications and may be
 used in any Python web framework that supports WSGI
@@ -90,7 +81,7 @@ the user to grant your app permission. It has two useful methods:
   usually needs to match the callback URL in your app's configuration on the
   destination site.
 
-- `redirect_url(state='')` returns the URL to redirect to at the destination
+- `redirect_url(state=None)` returns the URL to redirect to at the destination
   site to initiate the OAuth flow. `StartHandler` will redirect here
   automatically if it's used in a WSGI application, but you can also instantiate
   it and call this manually if you want to control that redirect yourself:
