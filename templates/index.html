@@ -11,6 +11,24 @@
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css" />
 </head>
 
+<style type="text/css">
+body {
+  padding-top: 2em;
+}
+.tp-main {
+  padding-top: 6em;
+}
+.tp-main h1 {
+  font-size: 4em;
+}
+.tp-main .lead {
+  font-size: 2em;
+}
+form {
+  display: inline;
+}
+</style>
+
 <body>
 
 <!-- github ribbon: https://github.com/blog/273-github-ribbons -->
@@ -20,22 +38,30 @@
        alt="Fork me on GitHub">
 </a>
 
-<h2>oauth-dropins demo</h2>
+<main class="tp-main">
+  <div class="container">
+    <h1>oauth-dropins</h1>
+    <p class="lead">A collection of drop-in
+<a href="http://oauth.net/">OAuth</a> client flows for
+Python on <a href="https://appengine.google.com/">App Engine</a>. Details in
+the <a href="https://github.com/snarfed/oauth-dropins">GitHub repo.</a></p>
 
-<p>This site is a demo for the
-<a href="https://github.com/snarfed/oauth-dropins">oauth-dropins</a>
-library.</p>
+    <p class="lead">Click on a site to try its drop-in!</p>
 
 {% if entity %}
-<p>Authenticated with {{ entity.site_name }} for {{ entity.user_display_name }}.<br />
+<p class="lead"><em>
+Authenticated {{ entity.user_display_name }} on {{ entity.site_name }}.
+<!--
 {% if access_token %}
   Access token {{ access_token }}.<br />
 {% endif %}
 {% if access_token_key or access_token_secret %}
   Access token key {{ access_token_key }}, secret {{ access_token_secret }}.
 {% endif %}
-</p>
+-->
+</em></p>
 {% endif %}
+
 
 <form method="post" action="/facebook/start">
   <input type="image" alt="Sign in with Facebook" src="/static/facebook.png" />
@@ -61,6 +87,9 @@ library.</p>
 <form method="post" action="/blogger_v2/start">
   <input type="image" alt="Sign in with Blogger" src="/static/blogger.png" />
 </form>
+
+  </div>
+</main>
 
 </body>
 </html>

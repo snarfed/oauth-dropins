@@ -36,7 +36,7 @@ class BaseHandler(webapp2.RequestHandler):
     Includes scheme, host, and optional state.
     """
     url = self.request.host_url + self.to_path
-    if state is not None:
+    if state:
       url = util.add_query_params(url, [('state', state)])
     return url
 
