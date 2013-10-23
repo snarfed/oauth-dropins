@@ -90,3 +90,4 @@ class OAuthRequestToken(models.KeyNameModel):
   The key name is the token key.
   """
   token_secret = db.StringProperty(required=True)
+  state = db.StringProperty(required=False)

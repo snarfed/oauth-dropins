@@ -75,7 +75,7 @@ class StartHandler(handlers.StartHandler):
   """Starts Tumblr auth. Requests an auth code and expects a redirect back.
   """
 
-  def redirect_url(self, state=''):
+  def redirect_url(self, state=None):
     tp = tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
                          app_secret=appengine_config.TUMBLR_APP_SECRET)
     auth_props = tp.get_authentication_tokens(
@@ -83,7 +83,8 @@ class StartHandler(handlers.StartHandler):
 
     # store the request token for later use in the callback handler
     models.OAuthRequestToken(key_name=auth_props['oauth_token'],
-                             token_secret=auth_props['oauth_token_secret']).save()
+                             token_secret=auth_props['oauth_token_secret'],
+                             state=state).save()
     return auth_props['auth_url']
 
 
@@ -120,4 +121,4 @@ class CallbackHandler(handlers.CallbackHandler):
                       token_secret=auth_token_secret,
                       user_json=json.dumps(resp))
     auth.save()
-    self.finish(auth, state=self.request.get('state'))
+    self.finish(auth, state=request_token.state)
