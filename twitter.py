@@ -106,13 +106,11 @@ class StartHandler(handlers.StartHandler):
   request an access token.
   """
 
-  def redirect_url(self, state=''):
-    callback_url = '%s%s?state=%s' % (self.request.host_url, self.to_path, state)
-
+  def redirect_url(self, state=None):
     try:
       auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                  appengine_config.TWITTER_APP_SECRET,
-                                 callback_url)
+                                 self.to_url(state=state))
       auth_url = auth.get_authorization_url()
     except tweepy.TweepError, e:
       msg = 'Could not create Twitter OAuth request token: '

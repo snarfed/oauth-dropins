@@ -31,7 +31,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'scope=offline_access',
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
-    'redirect_uri=%(host_url)s%(callback_path)s',
+    'redirect_uri=%(redirect_uri)s',
     'response_type=code',
     )))
 GET_ACCESS_TOKEN_URL = str('&'.join((
@@ -39,7 +39,7 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the oauth request!
     # (the value here doesn't actually matter since it's requested server side.)
-    'redirect_uri=%(host_url)s%(callback_path)s',
+    'redirect_uri=%(redirect_uri)s',
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
@@ -83,13 +83,12 @@ class StartHandler(handlers.StartHandler):
   """Starts Facebook auth. Requests an auth code and expects a redirect back.
   """
 
-  def redirect_url(self, state=''):
+  def redirect_url(self, state=None):
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.FACEBOOK_APP_ID,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
-      'host_url': self.request.host_url,
-      'callback_path': self.to_path,
+      'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
       }
 
 
@@ -100,13 +99,17 @@ class CallbackHandler(handlers.CallbackHandler):
   def get(self):
     auth_code = self.request.get('code')
     assert auth_code
+    state = self.request.get('state')
+
+    redirect_uri = self.request.path_url
+    if state:
+      redirect_uri = util.add_query_params(redirect_uri, [('state', state)])
 
     url = GET_ACCESS_TOKEN_URL % {
       'auth_code': auth_code,
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
-      'host_url': self.request.host_url,
-      'callback_path': self.request.path,
+      'redirect_uri': redirect_uri,
       }
     logging.debug('Fetching: %s', url)
     resp = urllib2.urlopen(url).read()
@@ -123,4 +126,4 @@ class CallbackHandler(handlers.CallbackHandler):
                         auth_code=auth_code,
                         access_token_str=access_token)
     auth.save()
-    self.finish(auth, state=self.request.get('state'))
+    self.finish(auth, state=state)

@@ -24,7 +24,7 @@ class FrontPageHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = 'text/html'
 
     vars = dict(self.request.params)
-    key = vars['auth_entity']
+    key = vars.get('auth_entity')
     if key:
       vars['entity'] = db.get(key)
 
