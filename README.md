@@ -25,7 +25,8 @@ Here's a full example of using the Facebook drop-in.
 
 1. Put your [Facebook application](https://developers.facebook.com/apps)'s ID
 and secret in two plain text files in your app's root directory,
-`facebook_app_id` and `facebook_app_secret`.
+`facebook_app_id` and `facebook_app_secret`. (If you use git, you'll probably
+also want to add them to your `.gitignore`.)
 
 1. Create a `facebook_oauth.py` file with these contents:
 
@@ -51,7 +52,12 @@ their Facebook account to your app, and when they're done, they'll be redirected
 to `/next?access_token=...` in your app.
 
 All of the sites provide the same API. To use a different one, just import the
-site module you want and follow the same steps.
+site module you want and follow the same steps. The filenames for app keys and
+secrets also differ by site;
+[`appengine_config.py`](https://github.com/snarfed/oauth-dropins/blob/master/appengine_config.py)
+has the full list.
+
+For a
 
 
 Usage details
