@@ -43,7 +43,8 @@ GET_AUTH_CODE_URL = str('&'.join((
     'scope=',  # wordpress doesn't seem to use scope
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
-    'redirect_uri=%(host_url)s%(callback_path)s',
+    'redirect_uri=%(redirect_uri)s',
+    'state=%(state)s',
     'response_type=code',
     )))
 GET_ACCESS_TOKEN_URL = 'https://public-api.wordpress.com/oauth2/token'
@@ -85,13 +86,13 @@ class StartHandler(handlers.StartHandler):
   """Starts WordPress auth. Requests an auth code and expects a redirect back.
   """
 
-  def redirect_url(self, state=''):
+  def redirect_url(self, state=None):
     # TODO: CSRF protection
-    return GET_AUTH_CODE_URL % {
+    return str(GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-      'host_url': self.request.host_url,
-      'callback_path': self.to_path,
-      }
+      'redirect_uri': self.to_url(),
+      'state': urllib.quote_plus(state) if state else '',
+      })
 
 
 class CallbackHandler(handlers.CallbackHandler):
