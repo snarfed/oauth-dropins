@@ -11,6 +11,7 @@ application = webapp2.WSGIApplication([
 """
 
 import logging
+import urllib
 
 import webapp2
 from webutil import handlers
@@ -29,6 +30,24 @@ class BaseHandler(webapp2.RequestHandler):
       to_path = path
     return ToHandler
 
+  def to_url(self, state=None):
+    """Returns a fully qualified callback URL based on to_path.
+
+    Includes scheme, host, and optional state.
+    """
+    url = self.request.host_url + self.to_path
+    if state is not None:
+      url = util.add_query_params(url, [('state', state)])
+    return url
+
+  def request_url_with_state(self):
+    """Returns the current request URL, with the state query param if provided.
+    """
+    state = self.request.get('state')
+    if state:
+      return util.add_query_params(self.request.path_url, [('state', state)])
+    else:
+      return self.request.path_url
 
 class StartHandler(BaseHandler):
   """Base class for starting an OAuth flow.
@@ -55,7 +74,7 @@ class StartHandler(BaseHandler):
     logging.info('Starting OAuth flow: redirecting to %s', url)
     self.redirect(url)
 
-  def redirect_url(self, state=''):
+  def redirect_url(self, state=None):
     """oauth-dropin subclasses must implement this.
     """
     raise NotImplementedError()

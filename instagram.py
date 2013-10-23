@@ -123,17 +123,12 @@ class CallbackHandler(handlers.CallbackHandler):
     auth_code = self.request.get('code')
     assert auth_code
 
-    state = self.request.get('state')
-    redirect_uri = self.request.path_url
-    if state:
-      redirect_uri = util.add_query_params(redirect_uri, [('state', state)])
-
     # http://instagram.com/developer/authentication/
     data = {
       'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
       'client_secret': appengine_config.INSTAGRAM_CLIENT_SECRET,
       'code': auth_code,
-      'redirect_uri': redirect_uri,
+      'redirect_uri': self.request_url_with_state(),
       'grant_type': 'authorization_code',
       }
 
@@ -158,4 +153,4 @@ class CallbackHandler(handlers.CallbackHandler):
                          access_token_str=access_token,
                          user_json=json.dumps(data['user']))
     auth.save()
-    self.finish(auth, state=state)
+    self.finish(auth, state=self.request.get('state'))

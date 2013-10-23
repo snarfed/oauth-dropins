@@ -99,17 +99,12 @@ class CallbackHandler(handlers.CallbackHandler):
   def get(self):
     auth_code = self.request.get('code')
     assert auth_code
-    state = self.request.get('state')
-
-    redirect_uri = self.request.path_url
-    if state:
-      redirect_uri = util.add_query_params(redirect_uri, [('state', state)])
 
     url = GET_ACCESS_TOKEN_URL % {
       'auth_code': auth_code,
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
-      'redirect_uri': redirect_uri,
+      'redirect_uri': self.request_url_with_state(),
       }
     logging.debug('Fetching: %s', url)
     resp = urllib2.urlopen(url).read()
@@ -126,4 +121,4 @@ class CallbackHandler(handlers.CallbackHandler):
                         auth_code=auth_code,
                         access_token_str=access_token)
     auth.save()
-    self.finish(auth, state=state)
+    self.finish(auth, state=self.request.get('state'))
