@@ -20,6 +20,7 @@ from webutil import util
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 import webapp2
+from webutil import handlers as webutil_handlers
 
 
 assert (appengine_config.TUMBLR_APP_KEY and
@@ -71,9 +72,20 @@ class TumblrAuth(models.BaseAuth):
                            oauth_token=key, oauth_token_secret=secret)
 
 
+def handle_exception(self, e, debug):
+  """Exception handler that handles Tweepy errors.
+  """
+  if isinstance(e, tumblpy.TumblpyError):
+      logging.exception('OAuth error')
+      raise exc.HTTPBadRequest(e)
+  else:
+    return webutil_handlers.handle_exception(self, e, debug)
+
+
 class StartHandler(handlers.StartHandler):
   """Starts Tumblr auth. Requests an auth code and expects a redirect back.
   """
+  handle_exception = handle_exception
 
   def redirect_url(self, state=None):
     tp = tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
@@ -91,10 +103,17 @@ class StartHandler(handlers.StartHandler):
 class CallbackHandler(handlers.CallbackHandler):
   """OAuth callback. Fetches the user's blogs and stores the credentials.
   """
+  handle_exception = handle_exception
 
   def get(self):
-    # lookup the request token
+    verifier = self.request.get('oauth_verifier')
     request_token_key = self.request.get('oauth_token')
+    if not verifier or not request_token_key:
+      # user declined
+      self.finish(None)
+      return
+
+    # look up the request token
     request_token = models.OAuthRequestToken.get_by_key_name(request_token_key)
     if request_token is None:
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % request_token_key)
@@ -104,7 +123,7 @@ class CallbackHandler(handlers.CallbackHandler):
                          app_secret=appengine_config.TUMBLR_APP_SECRET,
                          oauth_token=request_token_key,
                          oauth_token_secret=request_token.token_secret)
-    auth_token = tp.get_authorized_tokens(self.request.params['oauth_verifier'])
+    auth_token = tp.get_authorized_tokens(verifier)
     auth_token_key = auth_token['oauth_token']
     auth_token_secret = auth_token['oauth_token_secret']
 
