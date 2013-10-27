@@ -19,6 +19,7 @@ import tweepy
 
 from webutil.models import KeyNameModel
 from webutil import util
+from webutil import handlers as webutil_handlers
 
 from google.appengine.ext import db
 import webapp2
@@ -103,7 +104,7 @@ def handle_exception(self, e, debug):
   """Exception handler that handles Tweepy errors.
   """
   if isinstance(e, tweepy.TweepError):
-      logging.exception(msg)
+      logging.exception('OAuth error')
       raise exc.HTTPBadRequest(e)
   else:
     return webutil_handlers.handle_exception(self, e, debug)
