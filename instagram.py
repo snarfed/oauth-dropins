@@ -1,6 +1,11 @@
 """Instagram OAuth drop-in.
 
 Instagram API docs: http://instagram.com/developer/endpoints/
+
+Almost identical to Facebook, except the access token request has `code`
+and `grant_type` query parameters instead of just `auth_code`, and the response
+has a `user` object instead of `id`.
+TODO: unify them.
 """
 
 import json
@@ -10,6 +15,7 @@ import urllib2
 import urlparse
 
 import appengine_config
+import facebook  # we reuse facebook.CallbackHandler.handle_error()
 import handlers
 import models
 from python_instagram.bind import InstagramAPIError
@@ -115,10 +121,8 @@ class CallbackHandler(handlers.CallbackHandler):
   handle_exception = handle_exception
 
   def get(self):
-    if self.request.get('error'):
-      params = [urllib.decode(self.request.get(k))
-                for k in ('error', 'error_reason', 'error_description')]
-      raise exc.HttpBadRequest('\n'.join(params))
+    if facebook.CallbackHandler.handle_error(self):
+      return
 
     auth_code = self.request.get('code')
     assert auth_code

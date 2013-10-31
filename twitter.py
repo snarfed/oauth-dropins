@@ -19,6 +19,7 @@ import tweepy
 
 from webutil.models import KeyNameModel
 from webutil import util
+from webutil import handlers as webutil_handlers
 
 from google.appengine.ext import db
 import webapp2
@@ -99,23 +100,29 @@ class TwitterAuth(models.BaseAuth):
     return auth
 
 
+def handle_exception(self, e, debug):
+  """Exception handler that handles Tweepy errors.
+  """
+  if isinstance(e, tweepy.TweepError):
+      logging.exception('OAuth error')
+      raise exc.HTTPBadRequest(e)
+  else:
+    return webutil_handlers.handle_exception(self, e, debug)
+
+
 class StartHandler(handlers.StartHandler):
   """Starts three-legged OAuth with Twitter.
 
   Fetches an OAuth request token, then redirects to Twitter's auth page to
   request an access token.
   """
+  handle_exception = handle_exception
 
   def redirect_url(self, state=None):
-    try:
-      auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                                 appengine_config.TWITTER_APP_SECRET,
-                                 self.to_url(state=state))
-      auth_url = auth.get_authorization_url()
-    except tweepy.TweepError, e:
-      msg = 'Could not create Twitter OAuth request token: '
-      logging.exception(msg)
-      raise exc.HTTPInternalServerError(msg + `e`)
+    auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
+                               appengine_config.TWITTER_APP_SECRET,
+                               self.to_url(state=state))
+    auth_url = auth.get_authorization_url()
 
     # store the request token for later use in the callback handler
     models.OAuthRequestToken(key_name=auth.request_token.key,
@@ -127,8 +134,14 @@ class StartHandler(handlers.StartHandler):
 class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and redirects to the front page.
   """
+  handle_exception = handle_exception
 
   def get(self):
+    # https://dev.twitter.com/docs/application-permission-model
+    if self.request.get('denied'):
+      self.finish(None, state=self.request.get('state'))
+      return
+
     oauth_token = self.request.get('oauth_token', None)
     oauth_verifier = self.request.get('oauth_verifier', None)
     if oauth_token is None:
@@ -145,13 +158,7 @@ class CallbackHandler(handlers.CallbackHandler):
     auth.set_request_token(request_token.key().name(), request_token.token_secret)
 
     # Fetch the access token
-    try:
-      access_token = auth.get_access_token(oauth_verifier)
-    except tweepy.TweepError, e:
-      msg = 'Twitter OAuth error, could not get access token: '
-      logging.exception(msg)
-      raise exc.HTTPInternalServerError(msg + `e`)
-
+    access_token = auth.get_access_token(oauth_verifier)
     user_json = TwitterAuth.signed_urlopen(API_ACCOUNT_URL,
                                            access_token.key,
                                            access_token.secret).read()

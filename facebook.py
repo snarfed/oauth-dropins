@@ -1,6 +1,7 @@
 """Facebook OAuth drop-in.
 
 TODO: implement client state param
+TODO: unify this with instagram. see file docstring comment there.
 """
 
 import json
@@ -8,6 +9,7 @@ import logging
 import urllib
 import urllib2
 import urlparse
+from webob import exc
 
 import appengine_config
 import handlers
@@ -97,6 +99,9 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
+    if CallbackHandler.handle_error(self):
+      return
+
     auth_code = self.request.get('code')
     assert auth_code
 
@@ -122,3 +127,27 @@ class CallbackHandler(handlers.CallbackHandler):
                         access_token_str=access_token)
     auth.save()
     self.finish(auth, state=self.request.get('state'))
+
+  @staticmethod
+  def handle_error(handler):
+    """Handles any error reported in the callback query parameters.
+
+    Args:
+      handler: CallbackHandler
+
+    Returns: True if there was an error, False otherwise.
+    """
+    error = handler.request.get('error')
+    error_reason = handler.request.get('error_reason')
+
+    if error or error_reason:
+      error_description = urllib.unquote_plus(
+        handler.request.get('error_description', ''))
+      if error == 'access_denied' and error_reason == 'user_denied':
+        logging.info('User declined: %s', error_description)
+        handler.finish(None, state=handler.request.get('state'))
+        return True
+      else:
+        raise exc.HTTPBadRequest(' '.join(error, error_reason, error_description))
+
+    return False

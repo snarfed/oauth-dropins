@@ -111,11 +111,14 @@ or declined permission. It also has two useful methods:
   parameters, either `access_token` for OAuth 2.0 or `access_token_key` and
   `access_token_secret` for OAuth 1.1. It will also include an `auth_entity`
   query paremeter with the string key of an [auth entity](#auth-entities) that
-  has more data (and functionality) for the authenticated user.
+  has more data (and functionality) for the authenticated user. If the user
+  declined the OAuth authorization request, the only query parameter will be
+  `declined=true`.
 
-- `finish(auth_entity, state=None)` is run in the initial callback request
-  after the OAuth response has been processed. `auth_entity` is the newly
-  created auth entity for this connection.
+- `finish(auth_entity, state=None)` is run in the initial callback request after
+  the OAuth response has been processed. `auth_entity` is the newly created auth
+  entity for this connection, or `None` if the user declined the OAuth
+  authorization request.
 
   By default, `finish` redirects to the path you specified in `to()`, but you
   can subclass `CallbackHandler` and override it to run your own code inside the
@@ -167,8 +170,6 @@ Development
 ---
 TODO:
 
-* handle declines
-* document exceptions
 * parameterize OAuth scopes (only applicable to some sites)
 * clean up app key/secret file handling. (standardize file names? put them in a subdir?)
 * implement CSRF protection for all sites

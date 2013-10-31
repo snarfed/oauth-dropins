@@ -78,14 +78,13 @@ class DropboxCsrf(db.Model):
 def handle_exception(self, e, debug):
   """Exception handler that handles Dropbox client errors.
   """
-  if isinstance(e, (DropboxOAuth2Flow.CsrfException,
-                    DropboxOAuth2Flow.ProviderException)):
-    logging.exception()
+  if isinstance(e, DropboxOAuth2Flow.CsrfException):
+    logging.exception('Bad CSRF token', e)
     raise exc.HTTPForbidden()
   elif isinstance(e, (DropboxOAuth2Flow.BadRequestException,
                       DropboxOAuth2Flow.BadStateException,
-                      DropboxOAuth2Flow.NotApprovedException)):
-    logging.exception()
+                      DropboxOAuth2Flow.ProviderException)):
+    logging.exception('OAuth error', e)
     raise exc.HTTPBadRequest()
   else:
     return webutil_handlers.handle_exception(self, e, debug)
@@ -130,10 +129,14 @@ class CallbackHandler(handlers.CallbackHandler):
                              appengine_config.DROPBOX_APP_SECRET,
                              self.request.path_url,
                              csrf_holder, CSRF_PARAM)
-    access_token, user_id, state = flow.finish(self.request.params)
+    try:
+      access_token, user_id, state = flow.finish(self.request.params)
+    except DropboxOAuth2Flow.NotApprovedException, e:
+      logging.info('User declined OAuth request: %s', e)
+      self.finish(None, state=csrf.state)
+      return
 
     logging.info('Storing new Dropbox account: %s', user_id)
-
     auth = DropboxAuth(key_name=user_id, access_token_str=access_token)
     auth.save()
     self.finish(auth, state=csrf.state)

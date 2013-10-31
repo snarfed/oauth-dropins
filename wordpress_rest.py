@@ -100,9 +100,21 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
+    # handle errors
+    error = self.request.get('error')
+    if error:
+      error_description = urllib.unquote_plus(
+        self.request.get('error_description', ''))
+      if error == 'access_denied':
+        logging.info('User declined: %s', error_description)
+        self.finish(None, state=self.request.get('state'))
+        return
+      else:
+        raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
+
+    # extract auth code and request access token
     auth_code = self.request.get('code')
     assert auth_code
-
     data = {
       'code': auth_code,
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
