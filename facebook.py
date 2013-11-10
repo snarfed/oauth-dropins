@@ -78,7 +78,8 @@ class FacebookAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
+    return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
+                                                **kwargs)
 
 
 class StartHandler(handlers.StartHandler):
