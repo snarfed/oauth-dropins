@@ -131,6 +131,8 @@ class MyCallbackHandler(facebook.CallbackHandler):
         (auth_entity.user_display_name(), auth_entity.site_name()))
 ```
 
+  However, this is *not* currently supported for Google+ and Blogger. Hopefully
+  that will be fixed in the future.
 
 ### Auth entities
 
@@ -170,6 +172,8 @@ Development
 ---
 TODO:
 
+* handle declines for Google+ and Blogger
+* allow overriding `CallbackHandler.finish() in Google+ and Blogger
 * parameterize OAuth scopes (only applicable to some sites)
 * clean up app key/secret file handling. (standardize file names? put them in a subdir?)
 * implement CSRF protection for all sites
