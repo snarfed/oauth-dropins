@@ -140,7 +140,6 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
       def post(self):
         return self.get()
 
-    Handler.to_path = to_path
     return Handler
 
 
