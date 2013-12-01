@@ -32,9 +32,15 @@ assert (appengine_config.GOOGLE_CLIENT_ID and
         "Please fill in the google_client_id and google_client_secret files in "
         "your app's root directory.")
 
-# service names and versions:
-# https://developers.google.com/api-client-library/python/apis/
-json_service = discovery.build('plus', 'v1')
+# global
+json_service = None
+
+def init_json_service():
+  global json_service
+  if json_service is None:
+    # service names and versions:
+    # https://developers.google.com/api-client-library/python/apis/
+    json_service = discovery.build('plus', 'v1')
 
 # global. initialized in StartHandler.to_path().
 oauth_decorator = None
@@ -90,6 +96,7 @@ class GooglePlusAuth(models.BaseAuth):
 
     More details: https://developers.google.com/api-client-library/python/
     """
+    init_json_service()
     return json_service
 
 
@@ -126,6 +133,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
       @oauth_decorator.oauth_required
       def get(self):
         # get the current user
+        init_json_service()
         user = json_service.people().get(userId='me').execute(oauth_decorator.http())
         logging.debug('Got one person: %r', user)
         creds_json = oauth_decorator.credentials.to_json()
