@@ -77,8 +77,10 @@ class TwitterAuth(models.BaseAuth):
     auth = TwitterAuth._auth(token_key, token_secret)
     auth.apply_auth(url_without_query, 'GET', headers,
                     dict(urlparse.parse_qsl(parsed.query)))
-    logging.debug('Populated Authorization header from access token: %s',
-                  headers.get('Authorization'))
+    logging.debug(
+      'Populated Authorization header from access token key %s... and secret %s...',
+      token_key[:4], token_secret[:4])
+      # headers.get('Authorization'))
     logging.debug('Fetching %s', url)
     return urllib2.urlopen(urllib2.Request(url, headers=headers), **kwargs)
 
