@@ -111,7 +111,7 @@ or declined permission. It also has two useful methods:
   after the OAuth flow is complete. It will include the OAuth token in its query
   parameters, either `access_token` for OAuth 2.0 or `access_token_key` and
   `access_token_secret` for OAuth 1.1. It will also include an `auth_entity`
-  query paremeter with the string key of an [auth entity](#auth-entities) that
+  query parameter with the string key of an [auth entity](#auth-entities) that
   has more data (and functionality) for the authenticated user. If the user
   declined the OAuth authorization request, the only query parameter will be
   `declined=true`.
