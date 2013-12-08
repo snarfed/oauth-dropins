@@ -68,8 +68,9 @@ class BaseAuth(models.KeyNameModel):
   def urlopen_access_token(url, access_token, **kwargs):
     """Wraps urllib2.urlopen() and adds an access_token query parameter.
     """
+    log_url = util.add_query_params(url, [('access_token', access_token[:4] + '...')])
+    logging.info('Fetching %s', log_url)
     url = util.add_query_params(url, [('access_token', access_token)])
-    logging.debug('Fetching %s', url)
     return urllib2.urlopen(url, **kwargs)
 
   def http(self):
