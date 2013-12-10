@@ -94,8 +94,9 @@ the user to grant your app permission. It has two useful methods:
 class MyHandler(webapp2.RequestHandler):
   def get(self):
     ...
-    start_handler = facebook.StartHandler.to('/facebook/oauth_callback')
-    self.redirect(start_handler.redirect_url())
+    handler_cls = facebook.StartHandler.to('/facebook/oauth_callback')
+    handler = handler_cls(self.request, self.response)
+    self.redirect(handler.redirect_url())
 ```
 
 
