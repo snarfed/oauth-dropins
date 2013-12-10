@@ -127,7 +127,13 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
         # G+ scopes: https://developers.google.com/+/api/oauth#oauth-scopes
         scope='https://www.googleapis.com/auth/plus.me',
-        callback_path=to_path)
+        callback_path=to_path,
+        # make sure we ask for a refresh token so we can use it to get an access
+        # token offline. requires approval_prompt=force! more:
+        # ~/etc/google+_oauth_credentials_debugging_for_plusstreamfeed_bridgy
+        # http://googleappsdeveloper.blogspot.com.au/2011/10/upcoming-changes-to-oauth-20-endpoint.html
+        access_type='offline',
+        approval_prompt='force')
 
     class Handler(cls):
       @oauth_decorator.oauth_required
