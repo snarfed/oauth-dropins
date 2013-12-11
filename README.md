@@ -17,6 +17,10 @@ submodule update`.
 
 This software is released into the public domain. See LICENSE for details.
 
+Related work:
+
+* [Python Social Auth](http://psa.matiasaguirre.net/)
+
 
 Quick start
 ---
@@ -99,6 +103,9 @@ class MyHandler(webapp2.RequestHandler):
     self.redirect(handler.redirect_url())
 ```
 
+  However, this is *not* currently supported for Google+ and Blogger. Hopefully
+  that will be fixed in the future.
+
 
 ### `CallbackHandler`
 
@@ -174,8 +181,11 @@ Development
 ---
 TODO:
 
-* handle declines for Google+ and Blogger
-* allow overriding `CallbackHandler.finish() in Google+ and Blogger
+* Google+ and Blogger need some love:
+  * handle declines for Google+ and Blogger
+  * allow overriding `CallbackHandler.finish()`
+  * support `StartHandler.redirect_url()`
+  * allow more than one `CallbackHandler` per app
 * parameterize OAuth scopes (only applicable to some sites)
 * clean up app key/secret file handling. (standardize file names? put them in a subdir?)
 * implement CSRF protection for all sites
