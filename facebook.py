@@ -30,7 +30,7 @@ assert (appengine_config.FACEBOOK_APP_ID and
 GET_AUTH_CODE_URL = str('&'.join((
     'https://www.facebook.com/dialog/oauth?',
     # https://developers.facebook.com/docs/reference/login/
-    'scope=offline_access',
+    'scope=offline_access,user_status,user_photos',
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
     'redirect_uri=%(redirect_uri)s',
