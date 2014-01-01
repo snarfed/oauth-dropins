@@ -17,6 +17,10 @@ submodule update`.
 
 This software is released into the public domain. See LICENSE for details.
 
+Related work:
+
+* [Python Social Auth](http://psa.matiasaguirre.net/)
+
 
 Quick start
 ---
@@ -99,6 +103,9 @@ class MyHandler(webapp2.RequestHandler):
     self.redirect(handler.redirect_url())
 ```
 
+  However, this is *not* currently supported for Google+ and Blogger. Hopefully
+  that will be fixed in the future.
+
 
 ### `CallbackHandler`
 
@@ -108,13 +115,14 @@ or declined permission. It also has two useful methods:
 - `to(callback_path)` is a factory method that returns a request handler class
   you can use in a WSGI application, similar to [`StartHandler`](#starthandler).
   The callback path is the path in your app that users should be redirected to
-  after the OAuth flow is complete. It will include the OAuth token in its query
-  parameters, either `access_token` for OAuth 2.0 or `access_token_key` and
-  `access_token_secret` for OAuth 1.1. It will also include an `auth_entity`
-  query paremeter with the string key of an [auth entity](#auth-entities) that
-  has more data (and functionality) for the authenticated user. If the user
-  declined the OAuth authorization request, the only query parameter will be
-  `declined=true`.
+  after the OAuth flow is complete. It will include a `state` query parameter
+  with the value provided by the `StartHandler`. It will also include an OAuth
+  token in its query parameters, either `access_token` for OAuth 2.0 or
+  `access_token_key` and `access_token_secret` for OAuth 1.1. It will also
+  include an `auth_entity` query parameter with the string key of an
+  [auth entity](#auth-entities) that has more data (and functionality) for the
+  authenticated user. If the user declined the OAuth authorization request, the
+  only query parameter besides `state` will be `declined=true`.
 
 - `finish(auth_entity, state=None)` is run in the initial callback request after
   the OAuth response has been processed. `auth_entity` is the newly created auth
@@ -173,8 +181,11 @@ Development
 ---
 TODO:
 
-* handle declines for Google+ and Blogger
-* allow overriding `CallbackHandler.finish() in Google+ and Blogger
+* Google+ and Blogger need some love:
+  * handle declines for Google+ and Blogger
+  * allow overriding `CallbackHandler.finish()`
+  * support `StartHandler.redirect_url()`
+  * allow more than one `CallbackHandler` per app
 * parameterize OAuth scopes (only applicable to some sites)
 * clean up app key/secret file handling. (standardize file names? put them in a subdir?)
 * implement CSRF protection for all sites
