@@ -91,12 +91,14 @@ class TwitterAuth(models.BaseAuth):
     return header
 
   @staticmethod
-  def signed_urlopen(url, token_key, token_secret, **kwargs):
+  def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
     """
-    header = TwitterAuth.auth_header(url, token_key, token_secret)
+    if headers is None:
+      headers = {}
+    headers.update(TwitterAuth.auth_header(url, token_key, token_secret))
     logging.debug('Fetching %s', url)
-    return urllib2.urlopen(urllib2.Request(url, headers=header), **kwargs)
+    return urllib2.urlopen(urllib2.Request(url, headers=headers), **kwargs)
 
   def tweepy_api(self):
     """Returns a tweepy.API.
