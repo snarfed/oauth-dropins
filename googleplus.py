@@ -116,8 +116,11 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   """
   handle_exception = handle_exception
 
+  # G+ scopes: https://developers.google.com/+/api/oauth#oauth-scopes
+  DEFAULT_SCOPE = 'https://www.googleapis.com/auth/plus.me'
+
   @classmethod
-  def to(cls, to_path):
+  def to(cls, to_path, scopes=None):
     """Override this since we need to_path to instantiate the oauth decorator.
     """
     global oauth_decorator
@@ -125,8 +128,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
       oauth_decorator = OAuth2Decorator(
         client_id=appengine_config.GOOGLE_CLIENT_ID,
         client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-        # G+ scopes: https://developers.google.com/+/api/oauth#oauth-scopes
-        scope='https://www.googleapis.com/auth/plus.me',
+        scope=cls.make_scope_str(scopes),
         callback_path=to_path,
         # make sure we ask for a refresh token so we can use it to get an access
         # token offline. requires approval_prompt=force! more:

@@ -38,6 +38,7 @@ assert (appengine_config.INSTAGRAM_CLIENT_ID and
 GET_AUTH_CODE_URL = str('&'.join((
     'https://api.instagram.com/oauth/authorize?',
     'client_id=%(client_id)s',
+    'scope=%(scope)s',
     # redirect_uri here must be the same in the access token request!
     'redirect_uri=%(redirect_uri)s',
     'response_type=code',
@@ -106,10 +107,15 @@ class StartHandler(handlers.StartHandler):
   """
   handle_exception = handle_exception
 
+  DEFAULT_SCOPE = 'basic'
+
   def redirect_url(self, state=None):
     # http://instagram.com/developer/authentication/
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
+      # instagram uses + instead of , to separate scopes
+      # http://instagram.com/developer/authentication/#scope
+      'scope': self.scope.replace(',', '+'),
       # TODO: CSRF protection identifier.
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
       }

@@ -30,8 +30,7 @@ assert (appengine_config.FACEBOOK_APP_ID and
 GET_AUTH_CODE_URL = str('&'.join((
     'https://www.facebook.com/dialog/oauth?',
     # https://developers.facebook.com/docs/reference/login/
-    # TODO: parameterize scopes, then remove user_*
-    'scope=offline_access,user_status,user_photos,user_events',
+    'scope=%(scope)s',
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
     'redirect_uri=%(redirect_uri)s',
@@ -90,6 +89,7 @@ class StartHandler(handlers.StartHandler):
   def redirect_url(self, state=None):
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.FACEBOOK_APP_ID,
+      'scope': self.scope,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),

@@ -83,11 +83,15 @@ implemented with [webapp2](http://webapp-improved.appspot.com/).
 This HTTP request handler class redirects you to an OAuth-enabled site so it can ask
 the user to grant your app permission. It has two useful methods:
 
-- `to(callback_path)` is a factory method that returns a request handler class
-  you can use in a WSGI application. The argument should be the path
-  mapped to [`CallbackHandler`](#callbackhandler) in your application. This also
-  usually needs to match the callback URL in your app's configuration on the
-  destination site.
+- `to(callback_path, scopes=None)` is a factory method that returns a request
+  handler class you can use in a WSGI application. The argument should be the
+  path mapped to [`CallbackHandler`](#callbackhandler) in your application. This
+  also usually needs to match the callback URL in your app's configuration on
+  the destination site.
+
+  If you want to add OAuth scopes beyond the default one(s) needed for login,
+  you can pass them to the `scopes` kwarg as a string or sequence of strings.
+  This is currently supported with Facebook, Google+, Blogger, and Instagram.
 
 - `redirect_url(state=None)` returns the URL to redirect to at the destination
   site to initiate the OAuth flow. `StartHandler` will redirect here
@@ -182,11 +186,10 @@ Development
 TODO:
 
 * Google+ and Blogger need some love:
-  * handle declines for Google+ and Blogger
+  * handle declines
   * allow overriding `CallbackHandler.finish()`
   * support `StartHandler.redirect_url()`
   * allow more than one `CallbackHandler` per app
-* parameterize OAuth scopes (only applicable to some sites)
 * clean up app key/secret file handling. (standardize file names? put them in a subdir?)
 * implement CSRF protection for all sites
 * implement [Blogger's v3 API](https://developers.google.com/blogger/docs/3.0/getting_started)

@@ -10,6 +10,7 @@ application = webapp2.WSGIApplication([
   ]
 """
 
+import copy
 import logging
 import urllib
 
@@ -21,14 +22,33 @@ from webutil import util
 class BaseHandler(webapp2.RequestHandler):
   """Base request handler class. Provides the to() factory method.
   """
+  DEFAULT_SCOPE = ''  # may be overridden by subclasses
+
   handle_exception = handlers.handle_exception
   to_path = None
 
   @classmethod
-  def to(cls, path):
+  def to(cls, path, scopes=None):
     class ToHandler(cls):
       to_path = path
+      scope = cls.make_scope_str(scopes)
     return ToHandler
+
+  @classmethod
+  def make_scope_str(cls, extra):
+    """Returns an OAuth scopes query parameter value.
+
+    Combines DEFAULT_SCOPE and extra.
+
+    Args:
+      extra: string, sequence of strings, or None
+    """
+    if extra is None:
+      return cls.DEFAULT_SCOPE
+    elif isinstance(extra, basestring):
+      return cls.DEFAULT_SCOPE + ',' + extra
+    else:
+      return cls.DEFAULT_SCOPE + ','.join(extra)
 
   def to_url(self, state=None):
     """Returns a fully qualified callback URL based on to_path.
@@ -48,6 +68,7 @@ class BaseHandler(webapp2.RequestHandler):
       return util.add_query_params(self.request.path_url, [('state', state)])
     else:
       return self.request.path_url
+
 
 class StartHandler(BaseHandler):
   """Base class for starting an OAuth flow.

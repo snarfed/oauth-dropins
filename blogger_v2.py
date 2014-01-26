@@ -107,8 +107,12 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   # extracts the Blogger id from a profile URL
   AUTHOR_URI_RE = re.compile('.*blogger\.com/profile/([0-9]+)')
 
+  # https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
+  # (the scope for the v3 API is https://www.googleapis.com/auth/blogger)
+  DEFAULT_SCOPE = 'http://www.blogger.com/feeds/'
+
   @classmethod
-  def to(cls, to_path):
+  def to(cls, to_path, scopes=None):
     """Override this since we need to_path to instantiate the oauth decorator.
     """
     global oauth_decorator
@@ -116,9 +120,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
       oauth_decorator = OAuth2Decorator(
         client_id=appengine_config.GOOGLE_CLIENT_ID,
         client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-        # https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
-        # (the scope for the v3 API is https://www.googleapis.com/auth/blogger)
-        scope='http://www.blogger.com/feeds/',
+        scope=cls.make_scope_str(scopes),
         callback_path=to_path)
 
     class Handler(cls):
