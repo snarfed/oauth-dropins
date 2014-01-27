@@ -75,8 +75,8 @@ class GooglePlusAuth(models.BaseAuth):
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
     """
-    if creds_model:
-      return creds_model
+    if self.creds_model:
+      return self.creds_model.credentials
     else:
       # TODO: remove creds_json
       return OAuth2Credentials.from_json(self.creds_json)
