@@ -55,10 +55,14 @@ class GooglePlusAuth(models.BaseAuth):
 
   Google+-specific details: implements http() and api() but not urlopen(). api()
   returns a apiclient.discovery.Resource. The datastore entity key name is the
-  Google+ user id.
+  Google+ user id. Uses credentials from the stored CredentialsModel since
+  google-api-python-client stores refresh tokens there.
   """
-  user_json = db.TextProperty(required=True)
-  creds_json = db.TextProperty(required=True)
+  user_json = db.TextProperty()
+  creds_model = db.ReferenceProperty(CredentialsModel)
+
+  # deprecated. TODO: remove
+  creds_json = db.TextProperty()
 
   def site_name(self):
     return 'Google+'
@@ -71,12 +75,18 @@ class GooglePlusAuth(models.BaseAuth):
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
     """
-    return OAuth2Credentials.from_json(self.creds_json)
+    if creds_model:
+      return creds_model
+    else:
+      # TODO: remove creds_json
+      return OAuth2Credentials.from_json(self.creds_json)
 
   def access_token(self):
     """Returns the OAuth access token string.
     """
-    return json.loads(self.creds_json)['access_token']
+    data = (self.creds_model.credentials.to_json() if self.creds_model
+            else self.creds_json)
+    return json.loads(data)['access_token']
 
   def http(self, **kwargs):
     """Returns an httplib2.Http that adds OAuth credentials to requests.
@@ -144,10 +154,11 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         init_json_service()
         user = json_service.people().get(userId='me').execute(oauth_decorator.http())
         logging.debug('Got one person: %r', user)
-        creds_json = oauth_decorator.credentials.to_json()
 
+        store = oauth_decorator.credentials.store
+        creds_model_key = db.Key.from_path(store._model.kind(), store._key_name)
         auth = GooglePlusAuth(key_name=user['id'],
-                              creds_json=creds_json,
+                              creds_model=creds_model_key,
                               user_json=json.dumps(user))
         auth.save()
         self.finish(auth, state=self.request.get('state'))
