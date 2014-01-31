@@ -24,7 +24,7 @@ from webob import exc
 from webutil import handlers as webutil_handlers
 from webutil import util
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 import webapp2
 
 
@@ -58,9 +58,9 @@ class InstagramAuth(models.BaseAuth):
   api() returns a python_instagram.InstagramAPI. The key name is the Instagram
   username.
   """
-  auth_code = db.StringProperty(required=True)
-  access_token_str = db.StringProperty(required=True)
-  user_json = db.TextProperty(required=True)
+  auth_code = ndb.StringProperty(required=True)
+  access_token_str = ndb.StringProperty(required=True)
+  user_json = ndb.TextProperty(required=True)
 
   def site_name(self):
     return 'Instagram'
@@ -68,7 +68,7 @@ class InstagramAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the Instagram username.
     """
-    return self.key().name()
+    return self.key.string_id()
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -162,5 +162,5 @@ class CallbackHandler(handlers.CallbackHandler):
                          auth_code=auth_code,
                          access_token_str=access_token,
                          user_json=json.dumps(data['user']))
-    auth.save()
+    auth.put()
     self.finish(auth, state=self.request.get('state'))

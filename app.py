@@ -12,7 +12,7 @@ import tumblr
 import twitter
 import wordpress_rest
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 import webapp2
 
@@ -26,7 +26,7 @@ class FrontPageHandler(webapp2.RequestHandler):
     vars = dict(self.request.params)
     key = vars.get('auth_entity')
     if key:
-      vars['entity'] = db.get(key)
+      vars['entity'] = ndb.Key(urlsafe=key).get()
 
     self.response.out.write(template.render('templates/index.html', vars))
 

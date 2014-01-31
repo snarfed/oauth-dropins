@@ -129,7 +129,7 @@ class CallbackHandler(BaseHandler):
     if auth_entity is None:
       params = [('declined', True)]
     else:
-      params = [('auth_entity', auth_entity.key()), ('state', state)]
+      params = [('auth_entity', auth_entity.key), ('state', state)]
       token = auth_entity.access_token()
       if isinstance(token, basestring):
         params.append(('access_token', token))

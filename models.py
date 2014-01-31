@@ -9,7 +9,7 @@ import urlparse
 from webutil import models
 from webutil import util
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 
 class BaseAuth(models.KeyNameModel):
@@ -90,5 +90,5 @@ class OAuthRequestToken(models.KeyNameModel):
 
   The key name is the token key.
   """
-  token_secret = db.StringProperty(required=True)
-  state = db.StringProperty(required=False)
+  token_secret = ndb.StringProperty(required=True)
+  state = ndb.StringProperty(required=False)

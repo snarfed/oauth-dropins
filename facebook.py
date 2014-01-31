@@ -16,7 +16,7 @@ import handlers
 import models
 from webutil import util
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 import webapp2
 
 
@@ -58,9 +58,9 @@ class FacebookAuth(models.BaseAuth):
   Facebook-specific details: implements urlopen() but not http() or api(). The
   key name is the user's or page's Facebook ID.
   """
-  auth_code = db.StringProperty(required=True)
-  access_token_str = db.StringProperty(required=True)
-  user_json = db.TextProperty(required=True)
+  auth_code = ndb.StringProperty(required=True)
+  access_token_str = ndb.StringProperty(required=True)
+  user_json = ndb.TextProperty(required=True)
 
   def site_name(self):
     return 'Facebook'
@@ -127,7 +127,7 @@ class CallbackHandler(handlers.CallbackHandler):
                         user_json=resp,
                         auth_code=auth_code,
                         access_token_str=access_token)
-    auth.save()
+    auth.put()
     self.finish(auth, state=self.request.get('state'))
 
   @staticmethod

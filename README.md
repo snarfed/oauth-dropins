@@ -150,7 +150,7 @@ class MyCallbackHandler(facebook.CallbackHandler):
 ### Auth entities
 
 Each site defines an App Engine datastore
-[model class](https://developers.google.com/appengine/docs/python/datastore/entities#Python_Kinds_and_identifiers)
+[ndb.Model class](https://developers.google.com/appengine/docs/python/datastore/entities#Python_Kinds_and_identifiers)
 that stores each user's OAuth credentials and other useful information, like
 their name and profile URL. The class name is of the form <em>Site</em>Auth, e.g.
 FacebookAuth. Here are the useful methods:

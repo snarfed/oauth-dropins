@@ -21,7 +21,7 @@ from apiclient import discovery
 from apiclient.errors import HttpError
 from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
 from oauth2client.client import Credentials, OAuth2Credentials
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 import webapp2
 from webutil import handlers as webutil_handlers
@@ -58,11 +58,11 @@ class GooglePlusAuth(models.BaseAuth):
   Google+ user id. Uses credentials from the stored CredentialsModel since
   google-api-python-client stores refresh tokens there.
   """
-  user_json = db.TextProperty()
-  creds_model = db.ReferenceProperty(CredentialsModel)
+  user_json = ndb.TextProperty()
+  creds_model = ndb.ReferenceProperty(CredentialsModel)
 
   # deprecated. TODO: remove
-  creds_json = db.TextProperty()
+  creds_json = ndb.TextProperty()
 
   def site_name(self):
     return 'Google+'
@@ -156,11 +156,11 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         logging.debug('Got one person: %r', user)
 
         store = oauth_decorator.credentials.store
-        creds_model_key = db.Key.from_path(store._model.kind(), store._key_name)
+        creds_model_key = ndb.Key(store._model.kind(), store._key_name)
         auth = GooglePlusAuth(key_name=user['id'],
                               creds_model=creds_model_key,
                               user_json=json.dumps(user))
-        auth.save()
+        auth.put()
         self.finish(auth, state=self.request.get('state'))
 
       @oauth_decorator.oauth_required

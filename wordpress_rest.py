@@ -26,7 +26,7 @@ import appengine_config
 import handlers
 from webutil import util
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 import webapp2
 
 
@@ -50,7 +50,7 @@ GET_AUTH_CODE_URL = str('&'.join((
 GET_ACCESS_TOKEN_URL = 'https://public-api.wordpress.com/oauth2/token'
 
 
-class WordPressAuth(db.Model):
+class WordPressAuth(ndb.Model):
   """An authenticated WordPress user or page.
 
   Provides methods that return information about this user (or page) and make
@@ -60,8 +60,8 @@ class WordPressAuth(db.Model):
   WordPress-specific details: implements urlopen() but not http() or api(). The
   key name is the blog hostname.
   """
-  blog_id = db.StringProperty(required=True)
-  access_token_str = db.StringProperty(required=True)
+  blog_id = ndb.StringProperty(required=True)
+  access_token_str = ndb.StringProperty(required=True)
 
   def site_name(self):
     return 'WordPress'
@@ -69,7 +69,7 @@ class WordPressAuth(db.Model):
   def user_display_name(self):
     """Returns the blog hostname.
     """
-    return self.key().name()
+    return self.key.string_id()
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -141,5 +141,5 @@ class CallbackHandler(handlers.CallbackHandler):
     auth = WordPressAuth(key_name=blog_domain,
                          blog_id=blog_id,
                          access_token_str=access_token)
-    auth.save()
+    auth.put()
     self.finish(auth, state=self.request.get('state'))

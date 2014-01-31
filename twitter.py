@@ -21,7 +21,7 @@ from webutil.models import KeyNameModel
 from webutil import util
 from webutil import handlers as webutil_handlers
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 import webapp2
 
 
@@ -44,9 +44,9 @@ class TwitterAuth(models.BaseAuth):
   returns a tweepy.API. The datastore entity key name is the Twitter username.
   """
   # access token
-  token_key = db.StringProperty(required=True)
-  token_secret = db.StringProperty(required=True)
-  user_json = db.TextProperty(required=True)
+  token_key = ndb.StringProperty(required=True)
+  token_secret = ndb.StringProperty(required=True)
+  user_json = ndb.TextProperty(required=True)
 
   def site_name(self):
     return 'Twitter'
@@ -54,7 +54,7 @@ class TwitterAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the username.
     """
-    return self.key().name()
+    return self.key.string_id()
 
   def access_token(self):
     """Returns the OAuth access token as a (string key, string secret) tuple.
@@ -174,7 +174,7 @@ class CallbackHandler(handlers.CallbackHandler):
     # Rebuild the auth handler
     auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                appengine_config.TWITTER_APP_SECRET)
-    auth.set_request_token(request_token.key().name(), request_token.token_secret)
+    auth.set_request_token(request_token.key.string_id(), request_token.token_secret)
 
     # Fetch the access token
     access_token = auth.get_access_token(oauth_verifier)
@@ -187,5 +187,5 @@ class CallbackHandler(handlers.CallbackHandler):
                        token_key=access_token.key,
                        token_secret=access_token.secret,
                        user_json=user_json)
-    auth.save()
+    auth.put()
     self.finish(auth, state=self.request.get('state'))

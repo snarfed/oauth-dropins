@@ -18,7 +18,7 @@ from webob import exc
 from webutil import handlers as webutil_handlers
 from webutil import util
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 import models
 import webapp2
 
@@ -41,7 +41,7 @@ class DropboxAuth(models.BaseAuth):
   Dropbox-specific details: implements urlopen() and api() but not http(). api()
   returns a python_dropbox.DropboxClient. The key name is the Dropbox user id.
   """
-  access_token_str = db.StringProperty(required=True)
+  access_token_str = ndb.StringProperty(required=True)
 
   def site_name(self):
     return 'Dropbox'
@@ -49,7 +49,7 @@ class DropboxAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the Dropbox user id.
     """
-    return self.key().name()
+    return self.key.string_id()
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -69,10 +69,10 @@ class DropboxAuth(models.BaseAuth):
     return DropboxClient(self.access_token_str)
 
 
-class DropboxCsrf(db.Model):
+class DropboxCsrf(ndb.Model):
   """Stores a CSRF token for the Dropbox OAuth2 flow."""
-  token = db.StringProperty(required=False)
-  state = db.TextProperty(required=False)
+  token = ndb.StringProperty(required=False)
+  state = ndb.TextProperty(required=False)
 
 
 def handle_exception(self, e, debug):
@@ -97,17 +97,17 @@ class StartHandler(handlers.StartHandler):
 
   def redirect_url(self, state=None):
     csrf = DropboxCsrf(state=state)
-    csrf.save()
+    csrf.put()
     csrf_holder = {}
     flow = DropboxOAuth2Flow(appengine_config.DROPBOX_APP_KEY,
                              appengine_config.DROPBOX_APP_SECRET,
                              self.request.host_url + self.to_path,
                              csrf_holder, CSRF_PARAM)
 
-    auth_url = flow.start(url_state=str(csrf.key().id()))
+    auth_url = flow.start(url_state=str(csrf.key.id()))
     csrf.token = csrf_holder[CSRF_PARAM]
-    csrf.save()
-    logging.info('Stored DropboxCsrf id %d', csrf.key().id())
+    csrf.put()
+    logging.info('Stored DropboxCsrf id %d', csrf.key.id())
     return auth_url
 
 
@@ -138,5 +138,5 @@ class CallbackHandler(handlers.CallbackHandler):
 
     logging.info('Storing new Dropbox account: %s', user_id)
     auth = DropboxAuth(key_name=user_id, access_token_str=access_token)
-    auth.save()
+    auth.put()
     self.finish(auth, state=csrf.state)

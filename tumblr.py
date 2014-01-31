@@ -17,7 +17,7 @@ import tumblpy
 from webob import exc
 from webutil import util
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 import webapp2
 from webutil import handlers as webutil_handlers
@@ -41,9 +41,9 @@ class TumblrAuth(models.BaseAuth):
   username.
   """
   # access token
-  token_key = db.StringProperty(required=True)
-  token_secret = db.StringProperty(required=True)
-  user_json = db.TextProperty(required=True)
+  token_key = ndb.StringProperty(required=True)
+  token_secret = ndb.StringProperty(required=True)
+  user_json = ndb.TextProperty(required=True)
 
   def site_name(self):
     return 'Tumblr'
@@ -51,7 +51,7 @@ class TumblrAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the username.
     """
-    return self.key().name()
+    return self.key.string_id()
 
   def access_token(self):
     """Returns the OAuth access token as a (string key, string secret) tuple.
@@ -96,7 +96,7 @@ class StartHandler(handlers.StartHandler):
     # store the request token for later use in the callback handler
     models.OAuthRequestToken(key_name=auth_props['oauth_token'],
                              token_secret=auth_props['oauth_token_secret'],
-                             state=state).save()
+                             state=state).put()
     return auth_props['auth_url']
 
 
@@ -139,5 +139,5 @@ class CallbackHandler(handlers.CallbackHandler):
                       token_key=auth_token_key,
                       token_secret=auth_token_secret,
                       user_json=json.dumps(resp))
-    auth.save()
+    auth.put()
     self.finish(auth, state=request_token.state)

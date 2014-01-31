@@ -28,7 +28,7 @@ from oauth2client.client import Credentials, OAuth2Credentials
 from gdata.blogger import client
 from gdata import gauth
 from google.appengine.api import users
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 import httplib2
 import webapp2
 
@@ -48,11 +48,11 @@ class BloggerV2Auth(models.BaseAuth):
   returns a gdata.blogger.client.BloggerClient. The datastore entity key name is
   the Blogger user id.
   """
-  name = db.StringProperty(required=True)
-  hostnames = db.StringListProperty(required=True)
-  creds_json = db.TextProperty(required=True)
-  user_atom = db.TextProperty(required=True)
-  blogs_atom = db.TextProperty(required=True)
+  name = ndb.StringProperty(required=True)
+  hostnames = ndb.StringListProperty(required=True)
+  creds_json = ndb.TextProperty(required=True)
+  user_atom = ndb.TextProperty(required=True)
+  blogs_atom = ndb.TextProperty(required=True)
 
   def site_name(self):
     return 'Blogger'
@@ -147,7 +147,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
                              creds_json=creds_json,
                              user_atom=str(author),
                              blogs_atom=str(blogs))
-        auth.save()
+        auth.put()
         self.finish(auth, state=self.request.get('state'))
 
 
