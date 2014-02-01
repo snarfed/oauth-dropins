@@ -17,7 +17,6 @@ import handlers
 import models
 import tweepy
 
-from webutil.models import KeyNameModel
 from webutil import util
 from webutil import handlers as webutil_handlers
 

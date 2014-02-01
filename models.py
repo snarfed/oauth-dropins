@@ -12,7 +12,7 @@ from webutil import util
 from google.appengine.ext import ndb
 
 
-class BaseAuth(models.KeyNameModel):
+class BaseAuth(models.StringIdModel):
   """Datastore base model class for an authenticated user.
 
   Provides methods that return information about this user and make OAuth-signed
@@ -82,7 +82,7 @@ class BaseAuth(models.KeyNameModel):
     raise NotImplementedError()
 
 
-class OAuthRequestToken(models.KeyNameModel):
+class OAuthRequestToken(models.StringIdModel):
   """Datastore model class for an OAuth 1.1 request token.
 
   This is only intermediate data. Client should use BaseAuth subclasses to make
