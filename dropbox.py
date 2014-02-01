@@ -137,6 +137,6 @@ class CallbackHandler(handlers.CallbackHandler):
       return
 
     logging.info('Storing new Dropbox account: %s', user_id)
-    auth = DropboxAuth(key_name=user_id, access_token_str=access_token)
+    auth = DropboxAuth(id=user_id, access_token_str=access_token)
     auth.put()
     self.finish(auth, state=csrf.state)

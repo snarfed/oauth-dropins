@@ -158,7 +158,7 @@ class CallbackHandler(handlers.CallbackHandler):
     access_token = data['access_token']
     username = data['user']['username']
 
-    auth = InstagramAuth(key_name=username,
+    auth = InstagramAuth(id=username,
                          auth_code=auth_code,
                          access_token_str=access_token,
                          user_json=json.dumps(data['user']))

@@ -138,7 +138,7 @@ class CallbackHandler(handlers.CallbackHandler):
       logging.exception('Could not decode JSON')
       raise
 
-    auth = WordPressAuth(key_name=blog_domain,
+    auth = WordPressAuth(id=blog_domain,
                          blog_id=blog_id,
                          access_token_str=access_token)
     auth.put()

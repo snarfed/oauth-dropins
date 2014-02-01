@@ -49,7 +49,7 @@ class BloggerV2Auth(models.BaseAuth):
   the Blogger user id.
   """
   name = ndb.StringProperty(required=True)
-  hostnames = ndb.StringListProperty(required=True)
+  hostnames = ndb.StringProperty(repeated=True)
   creds_json = ndb.TextProperty(required=True)
   user_atom = ndb.TextProperty(required=True)
   blogs_atom = ndb.TextProperty(required=True)
@@ -141,7 +141,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
                      for blog in blogs.entry if blog.GetHtmlLink()]
 
         creds_json = oauth_decorator.credentials.to_json()
-        auth = BloggerV2Auth(key_name=id,
+        auth = BloggerV2Auth(id=id,
                              name=author.name.text,
                              hostnames=hostnames,
                              creds_json=creds_json,

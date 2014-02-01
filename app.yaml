@@ -3,8 +3,10 @@ version: 1
 threadsafe: true
 api_version: 1
 default_expiration: 1d
-
 runtime: python27
+
+builtins:
+- remote_api: on
 
 libraries:
 - name: ssl

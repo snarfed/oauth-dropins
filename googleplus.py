@@ -21,6 +21,7 @@ from apiclient import discovery
 from apiclient.errors import HttpError
 from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
 from oauth2client.client import Credentials, OAuth2Credentials
+from google.appengine.ext import db
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 import webapp2
@@ -59,7 +60,7 @@ class GooglePlusAuth(models.BaseAuth):
   google-api-python-client stores refresh tokens there.
   """
   user_json = ndb.TextProperty()
-  creds_model = ndb.ReferenceProperty(CredentialsModel)
+  creds_model = ndb.KeyProperty(kind='CredentialsModel')
 
   # deprecated. TODO: remove
   creds_json = ndb.TextProperty()
@@ -76,7 +77,7 @@ class GooglePlusAuth(models.BaseAuth):
     """Returns an oauth2client.OAuth2Credentials.
     """
     if self.creds_model:
-      return self.creds_model.credentials
+      return db.get(self.creds_model.to_old_key()).credentials
     else:
       # TODO: remove creds_json
       return OAuth2Credentials.from_json(self.creds_json)
@@ -84,9 +85,7 @@ class GooglePlusAuth(models.BaseAuth):
   def access_token(self):
     """Returns the OAuth access token string.
     """
-    data = (self.creds_model.credentials.to_json() if self.creds_model
-            else self.creds_json)
-    return json.loads(data)['access_token']
+    return self.creds().access_token
 
   def http(self, **kwargs):
     """Returns an httplib2.Http that adds OAuth credentials to requests.
@@ -101,7 +100,7 @@ class GooglePlusAuth(models.BaseAuth):
     To use it, first choose a resource type (e.g. People), then make a call,
     then execute that call with an authorized Http instance. For example:
 
-    gpa = GooglePlusAuth.get_by_key_name(123)
+    gpa = GooglePlusAuth.get_by_id('123')
     results_json = gpa.people().search(query='ryan').execute(gpa.http())
 
     More details: https://developers.google.com/api-client-library/python/
@@ -157,7 +156,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
 
         store = oauth_decorator.credentials.store
         creds_model_key = ndb.Key(store._model.kind(), store._key_name)
-        auth = GooglePlusAuth(key_name=user['id'],
+        auth = GooglePlusAuth(id=user['id'],
                               creds_model=creds_model_key,
                               user_json=json.dumps(user))
         auth.put()

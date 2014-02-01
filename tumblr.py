@@ -94,7 +94,7 @@ class StartHandler(handlers.StartHandler):
       callback_url=self.request.host_url + self.to_path)
 
     # store the request token for later use in the callback handler
-    models.OAuthRequestToken(key_name=auth_props['oauth_token'],
+    models.OAuthRequestToken(id=auth_props['oauth_token'],
                              token_secret=auth_props['oauth_token_secret'],
                              state=state).put()
     return auth_props['auth_url']
@@ -114,7 +114,7 @@ class CallbackHandler(handlers.CallbackHandler):
       return
 
     # look up the request token
-    request_token = models.OAuthRequestToken.get_by_key_name(request_token_key)
+    request_token = models.OAuthRequestToken.get_by_id(request_token_key)
     if request_token is None:
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % request_token_key)
 
@@ -135,7 +135,7 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.debug('Got: %s', resp)
     user = resp['user']
 
-    auth = TumblrAuth(key_name=user['name'],
+    auth = TumblrAuth(id=user['name'],
                       token_key=auth_token_key,
                       token_secret=auth_token_secret,
                       user_json=json.dumps(resp))

@@ -144,7 +144,7 @@ class StartHandler(handlers.StartHandler):
     auth_url = auth.get_authorization_url()
 
     # store the request token for later use in the callback handler
-    models.OAuthRequestToken(key_name=auth.request_token.key,
+    models.OAuthRequestToken(id=auth.request_token.key,
                              token_secret=auth.request_token.secret).put()
     logging.info('Generated request token, redirecting to Twitter: %s', auth_url)
     return auth_url
@@ -167,7 +167,7 @@ class CallbackHandler(handlers.CallbackHandler):
       raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
 
     # Lookup the request token
-    request_token = models.OAuthRequestToken.get_by_key_name(oauth_token)
+    request_token = models.OAuthRequestToken.get_by_id(oauth_token)
     if request_token is None:
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % oauth_token)
 
@@ -183,7 +183,7 @@ class CallbackHandler(handlers.CallbackHandler):
                                            access_token.secret).read()
     username = json.loads(user_json)['screen_name']
 
-    auth = TwitterAuth(key_name=username,
+    auth = TwitterAuth(id=username,
                        token_key=access_token.key,
                        token_secret=access_token.secret,
                        user_json=user_json)

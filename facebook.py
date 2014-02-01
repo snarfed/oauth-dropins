@@ -123,7 +123,7 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.debug('User info response: %s', resp)
     user_id = json.loads(resp)['id']
 
-    auth = FacebookAuth(key_name=user_id,
+    auth = FacebookAuth(id=user_id,
                         user_json=resp,
                         auth_code=auth_code,
                         access_token_str=access_token)
