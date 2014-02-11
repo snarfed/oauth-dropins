@@ -53,7 +53,7 @@ class BaseAuth(models.StringIdModel):
     """
     raise NotImplementedError()
 
-  def urlopen(self, url, data=None, timeout=None):
+  def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
 
     Use this for making direct HTTP REST request to a site's API. Not guaranteed
@@ -67,6 +67,8 @@ class BaseAuth(models.StringIdModel):
   @staticmethod
   def urlopen_access_token(url, access_token, **kwargs):
     """Wraps urllib2.urlopen() and adds an access_token query parameter.
+
+    Kwargs are passed through to urlopen().
     """
     log_url = util.add_query_params(url, [('access_token', access_token[:4] + '...')])
     logging.info('Fetching %s', log_url)
