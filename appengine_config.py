@@ -24,15 +24,34 @@ wordpress_client_id_local
 wordpress_client_secret_local
 """
 
-from __future__ import with_statement
 import os
 import sys
 
 from webutil.appengine_config import *
 
-# make sure we can import from the oauth-dropins directory
-if os.path.dirname(__file__) not in sys.path:
-  sys.path.append(os.path.dirname(__file__))
+# Import library modules.
+#
+# To prevent duplicating modules under different names, we import here and set
+# up sys.modules entries instead of munging sys.path or using other tricks.
+# Background in https://github.com/snarfed/bridgy/issues/31
+import apiclient; sys.modules['apiclient'] = apiclient
+import atom; sys.modules['atom'] = atom
+import gdata; sys.modules['gdata'] = gdata
+import httplib2; sys.modules['httplib2'] = httplib2
+import oauth2client; sys.modules['oauth2client'] = oauth2client
+import oauthlib; sys.modules['oauthlib'] = oauthlib
+import python_instagram; sys.modules['python_instagram'] = python_instagram
+import requests; sys.modules['requests'] = requests
+import requests_oauthlib; sys.modules['requests_oauthlib'] = requests_oauthlib
+import tumblpy; sys.modules['tumblpy'] = tumblpy
+import uritemplate; sys.modules['uritemplate'] = uritemplate
+# tweepy imports from itself with e.g. 'from tweepy.models import ...',
+# so temporarily munge sys.path to make that work.
+sys.path.append(os.path.dirname(__file__))
+try:
+  import tweepy; sys.modules['tweepy'] = tweepy
+finally:
+  sys.path.pop()
 
 def read(filename):
   """Returns the contents of filename, or None if it doesn't exist."""
