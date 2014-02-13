@@ -12,6 +12,7 @@ import urlparse
 from webob import exc
 
 import appengine_config
+from appengine_config import HTTP_TIMEOUT
 import handlers
 import models
 from webutil import util
@@ -114,7 +115,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'redirect_uri': self.request_url_with_state(),
       }
     logging.debug('Fetching: %s', url)
-    resp = urllib2.urlopen(url).read()
+    resp = urllib2.urlopen(url, timeout=HTTP_TIMEOUT).read()
     logging.debug('Access token response: %s', resp)
     params = urlparse.parse_qs(resp)
     access_token = params['access_token'][0]

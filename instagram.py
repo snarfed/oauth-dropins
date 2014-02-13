@@ -15,6 +15,7 @@ import urllib2
 import urlparse
 
 import appengine_config
+from appengine_config import HTTP_TIMEOUT
 import facebook  # we reuse facebook.CallbackHandler.handle_error()
 import handlers
 import models
@@ -143,8 +144,8 @@ class CallbackHandler(handlers.CallbackHandler):
       }
 
     logging.debug('Fetching: %s with data %s', GET_ACCESS_TOKEN_URL, data)
-    resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL,
-                           data=urllib.urlencode(data)).read()
+    resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
+                           timeout=HTTP_TIMEOUT).read()
     try:
       data = json.loads(resp)
     except ValueError, TypeError:

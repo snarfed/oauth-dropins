@@ -126,7 +126,8 @@ class CallbackHandler(handlers.CallbackHandler):
       }
     logging.debug('Fetching %s with %r', GET_ACCESS_TOKEN_URL, data)
     resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL,
-                           data=urllib.urlencode(data)).read()
+                           data=urllib.urlencode(data),
+                           timeout=appengine_config.HTTP_TIMEOUT).read()
     logging.debug('Access token response: %s', resp)
 
     try:

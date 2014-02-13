@@ -29,6 +29,15 @@ import sys
 
 from webutil.appengine_config import *
 
+# default network timeout to 60s. the G+ and Instagram APIs use httplib2, which
+# honors this.
+import socket
+socket.setdefaulttimeout(60)
+# monkey-patch socket.getdefaulttimeout() because it often gets reset, e.g. by
+# socket.setblocking() and maybe other operations.
+# http://stackoverflow.com/a/8465202/186123
+socket.getdefaulttimeout = lambda: 60
+
 # Import library modules.
 #
 # To prevent duplicating modules under different names, we import here and set

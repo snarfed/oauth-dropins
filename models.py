@@ -6,6 +6,7 @@ import urllib
 import urllib2
 import urlparse
 
+import appengine_config
 from webutil import models
 from webutil import util
 
@@ -73,6 +74,8 @@ class BaseAuth(models.StringIdModel):
     log_url = util.add_query_params(url, [('access_token', access_token[:4] + '...')])
     logging.info('Fetching %s', log_url)
     url = util.add_query_params(url, [('access_token', access_token)])
+    if 'timeout' not in kwargs:
+      kwargs['timeout'] = appengine_config.HTTP_TIMEOUT
     return urllib2.urlopen(url, **kwargs)
 
   def http(self):
