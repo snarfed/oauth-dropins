@@ -15,8 +15,6 @@ import appengine_config
 import handlers
 import models
 
-from webutil import util
-
 from apiclient import discovery
 from apiclient.errors import HttpError
 from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
@@ -26,6 +24,7 @@ from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
 import webapp2
 from webutil import handlers as webutil_handlers
+from webutil import util
 
 
 assert (appengine_config.GOOGLE_CLIENT_ID and

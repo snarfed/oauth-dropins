@@ -38,29 +38,59 @@ socket.setdefaulttimeout(60)
 # http://stackoverflow.com/a/8465202/186123
 socket.getdefaulttimeout = lambda: 60
 
-# Import library modules.
+# Add library modules directories to sys.path so they can be imported.
 #
-# To prevent duplicating modules under different names, we import here and set
-# up sys.modules entries instead of munging sys.path or using other tricks.
-# Background in https://github.com/snarfed/bridgy/issues/31
-import apiclient; sys.modules['apiclient'] = apiclient
-import atom; sys.modules['atom'] = atom
-import gdata; sys.modules['gdata'] = gdata
-import httplib2; sys.modules['httplib2'] = httplib2
-import oauth2client; sys.modules['oauth2client'] = oauth2client
-import oauthlib; sys.modules['oauthlib'] = oauthlib
-import python_instagram; sys.modules['python_instagram'] = python_instagram
-import requests; sys.modules['requests'] = requests
-import requests_oauthlib; sys.modules['requests_oauthlib'] = requests_oauthlib
-import tumblpy; sys.modules['tumblpy'] = tumblpy
-import uritemplate; sys.modules['uritemplate'] = uritemplate
+# I used to use symlinks and munge sys.modules, but both of those ended up in
+# duplicate instances of modules, which caused problems. Background in
+# https://github.com/snarfed/bridgy/issues/31
+for path in (
+  'google-api-python-client',
+  'gdata-python-client/src',
+  'httplib2_module/python2',
+  'oauthlib_module',
+  'python-dropbox',
+  'requests_module',
+  'requests-oauthlib',
+  'python-tumblpy',
+  'tweepy_module',
+  ):
+  path = os.path.join(os.path.dirname(__file__), path)
+  if path not in sys.path:
+    sys.path.append(path)
+
+import python_instagram
+sys.modules['python_instagram'] = python_instagram
+
+# sys.path.append(0, os.path.join(os.path.dirname(__file__), 'python-instagram'))
+# import python_instagram.bind
+# import python_instagram.client
+# sys.path.pop(0)
+
+# alias instagram to python_instagram since we have instagram.py files.
+# sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'python-instagram'))
+# import instagram as python_instagram
+# sys.modules['python_instagram'] = instagram
+# sys.path.pop(0)
+
 # tweepy imports from itself with e.g. 'from tweepy.models import ...',
 # so temporarily munge sys.path to make that work.
-sys.path.append(os.path.dirname(__file__))
-try:
-  import tweepy; sys.modules['tweepy'] = tweepy
-finally:
-  sys.path.pop()
+
+# import apiclient; sys.modules['apiclient'] = apiclient
+# import atom; sys.modules['atom'] = atom
+# import gdata; sys.modules['gdata'] = gdata
+# import httplib2; sys.modules['httplib2'] = httplib2
+# import oauth2client; sys.modules['oauth2client'] = oauth2client
+# import oauthlib; sys.modules['oauthlib'] = oauthlib
+# # import instagram; sys.modules['python_instagram'] = instagram
+# import python_instagram; sys.modules['python_instagram'] = python_instagram
+# import requests; sys.modules['requests'] = requests
+# import requests_oauthlib; sys.modules['requests_oauthlib'] = requests_oauthlib
+# import tumblpy; sys.modules['tumblpy'] = tumblpy
+# import uritemplate; sys.modules['uritemplate'] = uritemplate
+
+# make sure we can import from the oauth-dropins directory
+# if os.path.dirname(__file__) not in sys.path:
+#   sys.path.append(os.path.dirname(__file__))
 
 def read(filename):
   """Returns the contents of filename, or None if it doesn't exist."""
