@@ -90,8 +90,9 @@ the user to grant your app permission. It has two useful methods:
   the destination site.
 
   If you want to add OAuth scopes beyond the default one(s) needed for login,
-  you can pass them to the `scopes` kwarg as a string or sequence of strings.
-  This is currently supported with Facebook, Google+, Blogger, and Instagram.
+  you can pass them to the `scopes` kwarg as a string or sequence of strings, or
+  include them in the `scopes` query parameter in the POST request body. This is
+  currently supported with Facebook, Google+, Blogger, and Instagram.
 
 - `redirect_url(state=None)` returns the URL to redirect to at the destination
   site to initiate the OAuth flow. `StartHandler` will redirect here

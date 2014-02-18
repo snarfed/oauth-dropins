@@ -77,7 +77,8 @@ class StartHandler(BaseHandler):
   WSGI application. See the file docstring for details.
 
   If the 'state' query parameter is provided in the request data, it will be
-  returned to the client in the OAuth callback handler.
+  returned to the client in the OAuth callback handler. If the 'scope' query
+  parameter is provided, it will be added to the existing OAuth scopes.
 
   Alternatively, clients may call redirect_url() and HTTP 302 redirect to it
   manually, which will start the same OAuth flow.
@@ -91,6 +92,10 @@ class StartHandler(BaseHandler):
     self.post()
 
   def post(self):
+    scopes = self.request.params.getall('scope')
+    if scopes:
+      self.scope += ',' + ','.join(scopes)
+
     url = self.redirect_url(state=self.request.get('state'))
     logging.info('Starting OAuth flow: redirecting to %s', url)
     self.redirect(url)

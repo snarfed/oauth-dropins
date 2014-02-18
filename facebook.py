@@ -88,13 +88,13 @@ class StartHandler(handlers.StartHandler):
   """
 
   def redirect_url(self, state=None):
-    return GET_AUTH_CODE_URL % {
+    return str(GET_AUTH_CODE_URL % {
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'scope': self.scope,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
-      }
+      })
 
 
 class CallbackHandler(handlers.CallbackHandler):
