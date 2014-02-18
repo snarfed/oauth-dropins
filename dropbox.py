@@ -11,17 +11,16 @@ import logging
 import urllib
 
 import appengine_config
+
+from python_dropbox.client import DropboxOAuth2Flow, DropboxClient
+from google.appengine.ext import ndb
+import webapp2
+from webob import exc
+
 import handlers
 import models
-from python_dropbox.client import DropboxOAuth2Flow, DropboxClient
-from webob import exc
 from webutil import handlers as webutil_handlers
 from webutil import util
-
-from google.appengine.ext import ndb
-import models
-import webapp2
-
 
 assert (appengine_config.DROPBOX_APP_KEY and
         appengine_config.DROPBOX_APP_SECRET), (

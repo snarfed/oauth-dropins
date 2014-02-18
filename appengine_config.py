@@ -58,39 +58,10 @@ for path in (
   if path not in sys.path:
     sys.path.append(path)
 
+import python_dropbox
+sys.modules['python_dropbox'] = python_dropbox
 import python_instagram
 sys.modules['python_instagram'] = python_instagram
-
-# sys.path.append(0, os.path.join(os.path.dirname(__file__), 'python-instagram'))
-# import python_instagram.bind
-# import python_instagram.client
-# sys.path.pop(0)
-
-# alias instagram to python_instagram since we have instagram.py files.
-# sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'python-instagram'))
-# import instagram as python_instagram
-# sys.modules['python_instagram'] = instagram
-# sys.path.pop(0)
-
-# tweepy imports from itself with e.g. 'from tweepy.models import ...',
-# so temporarily munge sys.path to make that work.
-
-# import apiclient; sys.modules['apiclient'] = apiclient
-# import atom; sys.modules['atom'] = atom
-# import gdata; sys.modules['gdata'] = gdata
-# import httplib2; sys.modules['httplib2'] = httplib2
-# import oauth2client; sys.modules['oauth2client'] = oauth2client
-# import oauthlib; sys.modules['oauthlib'] = oauthlib
-# # import instagram; sys.modules['python_instagram'] = instagram
-# import python_instagram; sys.modules['python_instagram'] = python_instagram
-# import requests; sys.modules['requests'] = requests
-# import requests_oauthlib; sys.modules['requests_oauthlib'] = requests_oauthlib
-# import tumblpy; sys.modules['tumblpy'] = tumblpy
-# import uritemplate; sys.modules['uritemplate'] = uritemplate
-
-# make sure we can import from the oauth-dropins directory
-# if os.path.dirname(__file__) not in sys.path:
-#   sys.path.append(os.path.dirname(__file__))
 
 def read(filename):
   """Returns the contents of filename, or None if it doesn't exist."""
