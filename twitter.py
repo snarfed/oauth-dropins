@@ -96,10 +96,10 @@ class TwitterAuth(models.BaseAuth):
     if headers is None:
       headers = {}
     headers.update(TwitterAuth.auth_header(url, token_key, token_secret))
-    if 'timeout' not in kwargs:
-      kwargs['timeout'] = appengine_config.HTTP_TIMEOUT
+    timeout = kwargs.pop('timeout', appengine_config.HTTP_TIMEOUT)
     logging.debug('Fetching %s', url)
-    return urllib2.urlopen(urllib2.Request(url, headers=headers), **kwargs)
+    return urllib2.urlopen(urllib2.Request(url, headers=headers, **kwargs),
+                           timeout=timeout)
 
   def tweepy_api(self):
     """Returns a tweepy.API.
