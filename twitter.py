@@ -67,13 +67,14 @@ class TwitterAuth(models.BaseAuth):
                                       **kwargs)
 
   @staticmethod
-  def auth_header(url, token_key, token_secret):
+  def auth_header(url, token_key, token_secret, method='GET'):
     """Generates an Authorization header and returns it in a header dict.
 
     Args:
       url: string
       token_key: string
       token_secret: string
+      method: string
 
     Returns: single element dict with key 'Authorization'
     """
@@ -81,12 +82,11 @@ class TwitterAuth(models.BaseAuth):
     url_without_query = urlparse.urlunparse(list(parsed[0:4]) + ['', ''])
     header = {}
     auth = TwitterAuth.tweepy_auth(token_key, token_secret)
-    auth.apply_auth(url_without_query, 'GET', header,
+    auth.apply_auth(url_without_query, method, header,
                     dict(urlparse.parse_qsl(parsed.query)))
     logging.debug(
       'Generated Authorization header from access token key %s... and secret %s...',
       token_key[:4], token_secret[:4])
-      # header.get('Authorization'))
     return header
 
   @staticmethod
@@ -95,7 +95,19 @@ class TwitterAuth(models.BaseAuth):
     """
     if headers is None:
       headers = {}
-    headers.update(TwitterAuth.auth_header(url, token_key, token_secret))
+
+    # if this is a post, move the body params into the URL. Tweepy's OAuth
+    # signing doesn't work if they're in the body; Twitter returns a 401.
+    data = kwargs.get('data')
+    if data:
+      method = 'POST'
+      url = util.add_query_params(url, urlparse.parse_qsl(data))
+      kwargs['data'] = ''
+    else:
+      method = 'GET'
+
+    headers.update(TwitterAuth.auth_header(url, token_key, token_secret,
+                                           method=method))
     timeout = kwargs.pop('timeout', appengine_config.HTTP_TIMEOUT)
     logging.debug('Fetching %s', url)
     return urllib2.urlopen(urllib2.Request(url, headers=headers, **kwargs),
