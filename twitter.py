@@ -101,7 +101,7 @@ class TwitterAuth(models.BaseAuth):
     data = kwargs.get('data')
     if data:
       method = 'POST'
-      url = util.add_query_params(url, urlparse.parse_qsl(data))
+      url += ('&' if '?' in url else '?') + data
       kwargs['data'] = ''
     else:
       method = 'GET'
