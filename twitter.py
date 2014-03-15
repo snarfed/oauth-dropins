@@ -24,11 +24,6 @@ from google.appengine.ext import ndb
 import webapp2
 
 
-assert (appengine_config.TWITTER_APP_KEY and
-        appengine_config.TWITTER_APP_SECRET), (
-        "Please fill in the twitter_app_key and twitter_app_secret files in "
-        "your app's root directory.")
-
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
 
 
@@ -122,6 +117,10 @@ class TwitterAuth(models.BaseAuth):
   def tweepy_auth(token_key, token_secret):
     """Returns a tweepy.OAuthHandler.
     """
+    assert (appengine_config.TWITTER_APP_KEY and
+            appengine_config.TWITTER_APP_SECRET), (
+      "Please fill in the twitter_app_key and twitter_app_secret files in "
+      "your app's root directory.")
     auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                appengine_config.TWITTER_APP_SECRET)
     # make sure token key and secret aren't unicode because python's hmac
@@ -151,6 +150,10 @@ class StartHandler(handlers.StartHandler):
   handle_exception = handle_exception
 
   def redirect_url(self, state=None):
+    assert (appengine_config.TWITTER_APP_KEY and
+            appengine_config.TWITTER_APP_SECRET), (
+      "Please fill in the twitter_app_key and twitter_app_secret files in "
+      "your app's root directory.")
     auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                appengine_config.TWITTER_APP_SECRET,
                                self.to_url(state=state))

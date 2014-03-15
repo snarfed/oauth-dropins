@@ -30,12 +30,6 @@ from google.appengine.ext import ndb
 import webapp2
 
 
-assert (appengine_config.WORDPRESS_CLIENT_ID and
-        appengine_config.WORDPRESS_CLIENT_SECRET), (
-        "Please fill in the wordpress_client_id and wordpress_client_secret "
-        "files in your app's root directory.")
-
-
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = str('&'.join((
@@ -87,6 +81,10 @@ class StartHandler(handlers.StartHandler):
   """
 
   def redirect_url(self, state=None):
+    assert (appengine_config.WORDPRESS_CLIENT_ID and
+            appengine_config.WORDPRESS_CLIENT_SECRET), (
+      "Please fill in the wordpress_client_id and wordpress_client_secret "
+      "files in your app's root directory.")
     # TODO: CSRF protection
     return str(GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,

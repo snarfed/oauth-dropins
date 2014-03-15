@@ -22,11 +22,6 @@ import models
 from webutil import handlers as webutil_handlers
 from webutil import util
 
-assert (appengine_config.DROPBOX_APP_KEY and
-        appengine_config.DROPBOX_APP_SECRET), (
-        "Please fill in the dropbox_app_key and dropbox_app_secret files in "
-        "your app's root directory.")
-
 CSRF_PARAM = 'dropbox-auth-csrf-token'
 
 
@@ -95,6 +90,11 @@ class StartHandler(handlers.StartHandler):
   handle_exception = handle_exception
 
   def redirect_url(self, state=None):
+    assert (appengine_config.DROPBOX_APP_KEY and
+            appengine_config.DROPBOX_APP_SECRET), (
+      "Please fill in the dropbox_app_key and dropbox_app_secret files in "
+      "your app's root directory.")
+
     csrf = DropboxCsrf(state=state)
     csrf.put()
     csrf_holder = {}

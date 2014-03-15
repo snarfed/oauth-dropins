@@ -29,11 +29,6 @@ from google.appengine.ext import ndb
 import webapp2
 
 
-assert (appengine_config.INSTAGRAM_CLIENT_ID and
-        appengine_config.INSTAGRAM_CLIENT_SECRET), (
-  "Please fill in the instagram_client_id and instagram_client_secret files "
-  "in your app's root directory.")
-
 # instagram api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 # the str() is since WSGI middleware chokes on unicode redirect URLs :/
@@ -87,6 +82,10 @@ class InstagramAuth(models.BaseAuth):
 
     Details: https://github.com/Instagram/python-instagram
     """
+    assert (appengine_config.INSTAGRAM_CLIENT_ID and
+            appengine_config.INSTAGRAM_CLIENT_SECRET), (
+      "Please fill in the instagram_client_id and instagram_client_secret "
+      "files in your app's root directory.")
     return InstagramAPI(
       client_id=appengine_config.INSTAGRAM_CLIENT_ID,
       client_secret=appengine_config.INSTAGRAM_CLIENT_SECRET,
@@ -112,6 +111,10 @@ class StartHandler(handlers.StartHandler):
   DEFAULT_SCOPE = 'basic'
 
   def redirect_url(self, state=None):
+    assert (appengine_config.INSTAGRAM_CLIENT_ID and
+            appengine_config.INSTAGRAM_CLIENT_SECRET), (
+      "Please fill in the instagram_client_id and instagram_client_secret "
+      "files in your app's root directory.")
     # http://instagram.com/developer/authentication/
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.INSTAGRAM_CLIENT_ID,

@@ -27,11 +27,6 @@ from webutil import handlers as webutil_handlers
 from webutil import util
 
 
-assert (appengine_config.GOOGLE_CLIENT_ID and
-        appengine_config.GOOGLE_CLIENT_SECRET), (
-        "Please fill in the google_client_id and google_client_secret files in "
-        "your app's root directory.")
-
 # global
 json_service = None
 
@@ -148,6 +143,10 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
     class Handler(cls):
       @oauth_decorator.oauth_required
       def get(self):
+        assert (appengine_config.GOOGLE_CLIENT_ID and
+                appengine_config.GOOGLE_CLIENT_SECRET), (
+          "Please fill in the google_client_id and google_client_secret files in "
+          "your app's root directory.")
         # get the current user
         init_json_service()
         user = json_service.people().get(userId='me').execute(oauth_decorator.http())

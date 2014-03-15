@@ -23,12 +23,6 @@ import webapp2
 from webutil import handlers as webutil_handlers
 
 
-assert (appengine_config.TUMBLR_APP_KEY and
-        appengine_config.TUMBLR_APP_SECRET), (
-        "Please fill in the tumblr_app_key and tumblr_app_secret files in "
-        "your app's root directory.")
-
-
 class TumblrAuth(models.BaseAuth):
   """An authenticated Tumblr user.
 
@@ -67,6 +61,10 @@ class TumblrAuth(models.BaseAuth):
   def _api_from_token(key, secret):
     """Returns a tumblpy.Tumblpy.
     """
+    assert (appengine_config.TUMBLR_APP_KEY and
+            appengine_config.TUMBLR_APP_SECRET), (
+      "Please fill in the tumblr_app_key and tumblr_app_secret files in "
+      "your app's root directory.")
     return tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
                            app_secret=appengine_config.TUMBLR_APP_SECRET,
                            oauth_token=key, oauth_token_secret=secret)
@@ -88,6 +86,10 @@ class StartHandler(handlers.StartHandler):
   handle_exception = handle_exception
 
   def redirect_url(self, state=None):
+    assert (appengine_config.TUMBLR_APP_KEY and
+            appengine_config.TUMBLR_APP_SECRET), (
+      "Please fill in the tumblr_app_key and tumblr_app_secret files in "
+      "your app's root directory.")
     tp = tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
                          app_secret=appengine_config.TUMBLR_APP_SECRET)
     auth_props = tp.get_authentication_tokens(
