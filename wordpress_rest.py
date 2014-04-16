@@ -24,6 +24,7 @@ import urllib2
 
 import appengine_config
 import handlers
+from models import BaseAuth
 from webutil import util
 
 from google.appengine.ext import ndb
@@ -42,9 +43,10 @@ GET_AUTH_CODE_URL = str('&'.join((
     'response_type=code',
     )))
 GET_ACCESS_TOKEN_URL = 'https://public-api.wordpress.com/oauth2/token'
+API_USER_URL = 'https://public-api.wordpress.com/rest/v1/me?pretty=true'
 
 
-class WordPressAuth(ndb.Model):
+class WordPressAuth(BaseAuth):
   """An authenticated WordPress user or page.
 
   Provides methods that return information about this user (or page) and make
@@ -55,7 +57,9 @@ class WordPressAuth(ndb.Model):
   key name is the blog hostname.
   """
   blog_id = ndb.StringProperty(required=True)
+  blog_url = ndb.StringProperty(required=True)
   access_token_str = ndb.StringProperty(required=True)
+  user_json = ndb.TextProperty()
 
   def site_name(self):
     return 'WordPress'
@@ -63,7 +67,11 @@ class WordPressAuth(ndb.Model):
   def user_display_name(self):
     """Returns the blog hostname.
     """
-    return self.key.string_id()
+    name = self.key.string_id()
+    if self.user_json:
+      user = json.loads(self.user_json)
+      name += ' (%s)' % user.get('display_name') or user.get('username')
+    return name
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -73,7 +81,9 @@ class WordPressAuth(ndb.Model):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
+    kwargs.setdefault('headers', {})['authorization'] = \
+        'Bearer ' + self.access_token_str
+    return urllib2.urlopen(urllib2.Request(url, **kwargs))
 
 
 class StartHandler(handlers.StartHandler):
@@ -83,8 +93,8 @@ class StartHandler(handlers.StartHandler):
   def redirect_url(self, state=None):
     assert (appengine_config.WORDPRESS_CLIENT_ID and
             appengine_config.WORDPRESS_CLIENT_SECRET), (
-      "Please fill in the wordpress_client_id and wordpress_client_secret "
-      "files in your app's root directory.")
+      "Please fill in the wordpress.com_client_id and "
+      "wordpress.com_client_secret files in your app's root directory.")
     # TODO: CSRF protection
     return str(GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
@@ -131,6 +141,7 @@ class CallbackHandler(handlers.CallbackHandler):
     try:
       resp = json.loads(resp)
       blog_id = resp['blog_id']
+      blog_url = resp['blog_url']
       blog_domain = util.domain_from_link(resp['blog_url'])
       access_token = resp['access_token']
     except:
@@ -139,6 +150,9 @@ class CallbackHandler(handlers.CallbackHandler):
 
     auth = WordPressAuth(id=blog_domain,
                          blog_id=blog_id,
+                         blog_url=blog_url,
                          access_token_str=access_token)
+    auth.user_json = auth.urlopen(API_USER_URL).read()
     auth.put()
+
     self.finish(auth, state=self.request.get('state'))
