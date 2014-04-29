@@ -83,6 +83,10 @@ class WordPressAuth(BaseAuth):
     """
     kwargs.setdefault('headers', {})['authorization'] = \
         'Bearer ' + self.access_token_str
+    logging.info('Fetching %s', url)
+    data = kwargs.get('data')
+    if data:
+      logging.info('...with data: %r', data)
     return urllib2.urlopen(urllib2.Request(url, **kwargs))
 
 
