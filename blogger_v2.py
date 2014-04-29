@@ -49,10 +49,13 @@ class BloggerV2Auth(models.BaseAuth):
   the Blogger user id.
   """
   name = ndb.StringProperty(required=True)
-  hostnames = ndb.StringProperty(repeated=True)
   creds_json = ndb.TextProperty(required=True)
   user_atom = ndb.TextProperty(required=True)
   blogs_atom = ndb.TextProperty(required=True)
+
+  # the elements in both of these lists match
+  blog_ids = ndb.StringProperty(repeated=True)
+  blog_hostnames = ndb.StringProperty(repeated=True)
 
   def site_name(self):
     return 'Blogger'
@@ -137,16 +140,22 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         if not match:
           raise exc.HTTPBadRequest('Could not parse author URI: %s', author.uri)
         id = match.group(1)
-        hostnames = [util.domain_from_link(blog.GetHtmlLink().href)
-                     for blog in blogs.entry if blog.GetHtmlLink()]
+
+        blog_ids = []
+        blog_hostnames = []
+        for blog in blogs.entry:
+          blog_ids.append(blog.get_blog_id())
+          blog_hostnames.append(util.domain_from_link(blog.GetHtmlLink().href)
+                                if blog.GetHtmlLink() else None)
 
         creds_json = oauth_decorator.credentials.to_json()
         auth = BloggerV2Auth(id=id,
                              name=author.name.text,
-                             hostnames=hostnames,
                              creds_json=creds_json,
                              user_atom=str(author),
-                             blogs_atom=str(blogs))
+                             blogs_atom=str(blogs),
+                             blog_ids=blog_ids,
+                             blog_hostnames=blog_hostnames)
         auth.put()
         self.finish(auth, state=self.request.get('state'))
 
