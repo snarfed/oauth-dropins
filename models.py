@@ -42,7 +42,7 @@ class BaseAuth(models.StringIdModel):
     Returns None if the site doesn 't have a Python API. Only some do, currently
     Blogger, Instagram, Google+, and Tumblr.
     """
-    if self._api is None:
+    if self._api_obj is None:
       self._api_obj = self._api()
     return self._api_obj
 
