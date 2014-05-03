@@ -52,6 +52,7 @@ class BloggerV2Auth(models.BaseAuth):
   creds_json = ndb.TextProperty(required=True)
   user_atom = ndb.TextProperty(required=True)
   blogs_atom = ndb.TextProperty(required=True)
+  picture_url = ndb.TextProperty(required=True)
 
   # the elements in both of these lists match
   blog_ids = ndb.StringProperty(repeated=True)
@@ -149,8 +150,17 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
                                 if blog.GetHtmlLink() else None)
 
         creds_json = oauth_decorator.credentials.to_json()
+
+        # extract profile picture URL
+        picture_url = None
+        for child in author.children:
+          if child.tag.split(':')[-1] == 'image':
+            picture_url = child.get_attributes('src')[0].value
+            break
+
         auth = BloggerV2Auth(id=id,
                              name=author.name.text,
+                             picture_url=picture_url,
                              creds_json=creds_json,
                              user_atom=str(author),
                              blogs_atom=str(blogs),
