@@ -113,7 +113,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
 
   # https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
   # (the scope for the v3 API is https://www.googleapis.com/auth/blogger)
-  DEFAULT_SCOPE = 'http://www.blogger.com/feeds/'
+  DEFAULT_SCOPE = 'https://www.blogger.com/feeds/'
 
   @classmethod
   def to(cls, to_path, scopes=None):
@@ -125,7 +125,10 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         client_id=appengine_config.GOOGLE_CLIENT_ID,
         client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
         scope=cls.make_scope_str(scopes),
-        callback_path=to_path)
+        callback_path=to_path,
+        approval_prompt='force',
+        # https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth
+        include_granted_scopes='true')
 
     class Handler(cls):
       @oauth_decorator.oauth_required

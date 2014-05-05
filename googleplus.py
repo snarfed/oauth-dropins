@@ -138,7 +138,9 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         # ~/etc/google+_oauth_credentials_debugging_for_plusstreamfeed_bridgy
         # http://googleappsdeveloper.blogspot.com.au/2011/10/upcoming-changes-to-oauth-20-endpoint.html
         access_type='offline',
-        approval_prompt='force')
+        approval_prompt='force',
+        # https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth
+        include_granted_scopes='true')
 
     class Handler(cls):
       @oauth_decorator.oauth_required
