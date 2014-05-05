@@ -23,7 +23,7 @@ import handlers
 import models
 from webutil import util
 
-from oauth2client.appengine import OAuth2Decorator
+from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
 from oauth2client.client import Credentials, OAuth2Credentials
 from gdata.blogger import client
 from gdata import gauth
@@ -103,6 +103,19 @@ class BloggerV2Auth(models.BaseAuth):
     return BloggerV2Auth.api_from_creds(self.creds())
 
 
+# Wrapper classes around the StorageByKeyName and CredentialsModel model classes
+# to change their kinds so we can store separate creds for Google+ and Blogger.
+# Without this, after you've signed into one, signing into the other tries to
+# reuse the existing creds without re-requesting access for the new product and
+# scope, which obviously fails. I hoped approval_prompt=force or
+# include_granted_scopes=true or both would fix this, but no luck. :/
+class StorageByKeyName_Blogger(StorageByKeyName):
+  pass
+
+class CredentialsModel_Blogger(CredentialsModel):
+  pass
+
+
 class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   """Connects a Blogger account. Authenticates via OAuth.
   """
@@ -128,7 +141,9 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         callback_path=to_path,
         approval_prompt='force',
         # https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth
-        include_granted_scopes='true')
+        include_granted_scopes='true',
+        _storage_class=StorageByKeyName_Blogger,
+        _credentials_class=CredentialsModel_Blogger)
 
     class Handler(cls):
       @oauth_decorator.oauth_required
