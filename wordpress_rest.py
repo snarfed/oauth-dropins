@@ -67,11 +67,11 @@ class WordPressAuth(BaseAuth):
   def user_display_name(self):
     """Returns the blog hostname.
     """
-    name = self.key.string_id()
     if self.user_json:
       user = json.loads(self.user_json)
-      name += ' (%s)' % user.get('display_name') or user.get('username')
-    return name
+      return user.get('display_name') or user.get('username')
+    else:
+      return self.key.string_id()
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -87,7 +87,8 @@ class WordPressAuth(BaseAuth):
     data = kwargs.get('data')
     if data:
       logging.info('...with data: %r', data)
-    return urllib2.urlopen(urllib2.Request(url, **kwargs))
+    return urllib2.urlopen(urllib2.Request(url, **kwargs),
+                           timeout=appengine_config.HTTP_TIMEOUT)
 
 
 class StartHandler(handlers.StartHandler):
