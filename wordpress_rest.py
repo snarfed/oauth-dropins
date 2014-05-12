@@ -29,6 +29,7 @@ from webutil import util
 
 from google.appengine.ext import ndb
 import webapp2
+from webob import exc
 
 
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
