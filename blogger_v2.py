@@ -157,9 +157,12 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         blogs = blogger.get_blogs()
         author = blogs.author[0]
         match = self.AUTHOR_URI_RE.match(author.uri.text)
-        if not match:
-          raise exc.HTTPBadRequest('Could not parse author URI: %s', author.uri)
-        id = match.group(1)
+        if match:
+          id = match.group(1)
+        else:
+          logging.warning("Couldn't parse author URI %s , using entire URI as id",
+                          author.uri.text)
+          id = author.uri.text
 
         blog_ids = []
         blog_hostnames = []
