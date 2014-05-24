@@ -153,8 +153,19 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
 
       @oauth_decorator.oauth_required
       def get(self):
+        state = self.request.get('state')
         blogger = BloggerV2Auth.api_from_creds(oauth_decorator.credentials)
-        blogs = blogger.get_blogs()
+        try:
+          blogs = blogger.get_blogs()
+        except BaseException:
+          # this api call often returns 401 Unauthorized for users who aren't
+          # signed up for blogger and/or don't have any blogs.
+          logging.exception('Blogger get_blogs() API call failed')
+          # we can't currently intercept declines for Google+ or Blogger, so the
+          # only time we return a None auth entity right now is on error.
+          self.finish(None, state=state)
+          return
+
         author = blogs.author[0]
         match = self.AUTHOR_URI_RE.match(author.uri.text)
         if match:
@@ -167,7 +178,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         blog_ids = []
         blog_hostnames = []
         for blog in blogs.entry:
-          blog_ids.append(blog.get_blog_id())
+          blog_ids.append(blog.get_blog_id() or blog.get_blog_name())
           blog_hostnames.append(util.domain_from_link(blog.GetHtmlLink().href)
                                 if blog.GetHtmlLink() else None)
 
@@ -189,7 +200,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
                              blog_ids=blog_ids,
                              blog_hostnames=blog_hostnames)
         auth.put()
-        self.finish(auth, state=self.request.get('state'))
+        self.finish(auth, state=state)
 
 
     return Handler

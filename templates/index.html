@@ -34,6 +34,9 @@ the <a href="https://github.com/snarfed/oauth-dropins">GitHub repo.</a></p>
 <p class="lead"><em>
 {% if declined %}
 <span style="color: red">User declined the access request.</span>
+{% else %}{% if error %}
+<span style="color: red">Error fetching user details.</span>
+{% endif %}
 {% endif %}
 {% if entity %}
 <span style="color: green">
