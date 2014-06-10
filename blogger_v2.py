@@ -57,6 +57,7 @@ class BloggerV2Auth(models.BaseAuth):
 
   # the elements in both of these lists match
   blog_ids = ndb.StringProperty(repeated=True)
+  blog_titles = ndb.StringProperty(repeated=True)
   blog_hostnames = ndb.StringProperty(repeated=True)
 
   def site_name(self):
@@ -177,9 +178,11 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
           id = author.uri.text
 
         blog_ids = []
+        blog_titles = []
         blog_hostnames = []
         for blog in blogs.entry:
           blog_ids.append(blog.get_blog_id() or blog.get_blog_name())
+          blog_titles.append(blog.title.text)
           blog_hostnames.append(util.domain_from_link(blog.GetHtmlLink().href)
                                 if blog.GetHtmlLink() else None)
 
@@ -199,6 +202,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
                              user_atom=str(author),
                              blogs_atom=str(blogs),
                              blog_ids=blog_ids,
+                             blog_titles=blog_titles,
                              blog_hostnames=blog_hostnames)
         auth.put()
         self.finish(auth, state=state)
