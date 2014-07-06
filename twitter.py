@@ -16,6 +16,7 @@ import appengine_config
 import handlers
 import models
 import tweepy
+import twitter_auth
 
 from webutil import util
 from webutil import handlers as webutil_handlers
@@ -58,81 +59,13 @@ class TwitterAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
     """
-    return TwitterAuth.signed_urlopen(url, self.token_key, self.token_secret,
-                                      **kwargs)
-
-  @staticmethod
-  def auth_header(url, token_key, token_secret, method='GET'):
-    """Generates an Authorization header and returns it in a header dict.
-
-    Args:
-      url: string
-      token_key: string
-      token_secret: string
-      method: string
-
-    Returns: single element dict with key 'Authorization'
-    """
-    parsed = urlparse.urlparse(url)
-    url_without_query = urlparse.urlunparse(list(parsed[0:4]) + ['', ''])
-    header = {}
-    auth = TwitterAuth.tweepy_auth(token_key, token_secret)
-    auth.apply_auth(url_without_query, method, header,
-                    dict(urlparse.parse_qsl(parsed.query)))
-    logging.debug(
-      'Generated Authorization header from access token key %s... and secret %s...',
-      token_key[:4], token_secret[:4])
-    return header
-
-  @staticmethod
-  def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
-    """Wraps urllib2.urlopen() and adds an OAuth signature.
-
-    !!! WARNING !!! activitystreams-unofficial.twitter.Twitter duplicates this
-    so that it can avoid depending on App Engine via this module. If you change
-    anything here, make the same change there!
-    """
-    if headers is None:
-      headers = {}
-
-    # if this is a post, move the body params into the URL. Tweepy's OAuth
-    # signing doesn't work if they're in the body; Twitter returns a 401.
-    data = kwargs.get('data')
-    if data:
-      method = 'POST'
-      url += ('&' if '?' in url else '?') + data
-      kwargs['data'] = ''
-    else:
-      method = 'GET'
-
-    headers.update(TwitterAuth.auth_header(url, token_key, token_secret,
-                                           method=method))
-    timeout = kwargs.pop('timeout', appengine_config.HTTP_TIMEOUT)
-    logging.debug('Fetching %s', url)
-    return urllib2.urlopen(urllib2.Request(url, headers=headers, **kwargs),
-                           timeout=timeout)
+    return twitter_auth.signed_urlopen(url, self.token_key, self.token_secret,
+                                       **kwargs)
 
   def tweepy_api(self):
     """Returns a tweepy.API.
     """
-    return tweepy.API(TwitterAuth.tweepy_auth(self.token_key, self.token_secret))
-
-  @staticmethod
-  def tweepy_auth(token_key, token_secret):
-    """Returns a tweepy.OAuthHandler.
-    """
-    assert (appengine_config.TWITTER_APP_KEY and
-            appengine_config.TWITTER_APP_SECRET), (
-      "Please fill in the twitter_app_key and twitter_app_secret files in "
-      "your app's root directory.")
-    auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                               appengine_config.TWITTER_APP_SECRET)
-    # make sure token key and secret aren't unicode because python's hmac
-    # module (used by tweepy/oauth.py) expects strings.
-    # http://stackoverflow.com/questions/11396789
-    # fixed in https://github.com/tweepy/tweepy/commit/5a22bf73ccf7fae3d2b10314ce7f8eef067fee7a
-    auth.set_access_token(str(token_key), str(token_secret))
-    return auth
+    return tweepy.API(twitter_auth.tweepy_auth(self.token_key, self.token_secret))
 
 
 def handle_exception(self, e, debug):
@@ -198,9 +131,9 @@ class CallbackHandler(handlers.CallbackHandler):
 
     # Fetch the access token
     access_token = auth.get_access_token(oauth_verifier)
-    user_json = TwitterAuth.signed_urlopen(API_ACCOUNT_URL,
-                                           access_token.key,
-                                           access_token.secret).read()
+    user_json = twitter_auth.signed_urlopen(API_ACCOUNT_URL,
+                                            access_token.key,
+                                            access_token.secret).read()
     username = json.loads(user_json)['screen_name']
 
     auth = TwitterAuth(id=username,
