@@ -87,6 +87,10 @@ class TwitterAuth(models.BaseAuth):
   @staticmethod
   def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
     """Wraps urllib2.urlopen() and adds an OAuth signature.
+
+    !!! WARNING !!! activitystreams-unofficial.twitter.Twitter duplicates this
+    so that it can avoid depending on App Engine via this module. If you change
+    anything here, make the same change there!
     """
     if headers is None:
       headers = {}
