@@ -7,6 +7,8 @@ facebook_app_id
 facebook_app_secret
 facebook_app_id_local
 facebook_app_secret_local
+flickr_app_key
+flickr_app_secret
 google_client_id
 google_client_secret
 instagram_client_id
