@@ -1,7 +1,7 @@
 """Flickr OAuth drop-in.
 
 Uses oauthlib directly to authenticate and sign requests with OAuth
-1.0 credentials.
+1.0 credentials. https://www.flickr.com/services/api/auth.oauth.html
 """
 
 import json
@@ -29,8 +29,9 @@ class FlickrAuth(models.BaseAuth):
   """An authenticated Flickr user.
 
   Provides methods that return information about this user and make
-  OAuth-signed requests to the FLickr API. Stores OAuth credentials in
-  the datastore.  See models.BaseAuth for usage details.
+  OAuth-signed requests to the Flickr API. Stores OAuth credentials in
+  the datastore. Key is the Flickr user ID. See models.BaseAuth for
+  usage details.
   """
   # access token
   token_key = ndb.StringProperty(required=True)
@@ -41,7 +42,7 @@ class FlickrAuth(models.BaseAuth):
     return 'Flickr'
 
   def user_display_name(self):
-    """Returns the username.
+    """Returns the user id.
     """
     return self.key.string_id()
 
@@ -141,7 +142,6 @@ class CallbackHandler(handlers.CallbackHandler):
     access_token = parsed.get('oauth_token')[0]
     access_secret = parsed.get('oauth_token_secret')[0]
     user_nsid = parsed.get('user_nsid')[0]
-    #username = parsed.get('username')[0]
 
     if access_token is None:
       raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
