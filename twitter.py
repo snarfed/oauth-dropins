@@ -94,7 +94,14 @@ class StartHandler(handlers.StartHandler):
     auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                appengine_config.TWITTER_APP_SECRET,
                                self.to_url(state=state))
-    auth_url = auth.get_authorization_url()
+
+    # signin_with_twitter=True returns /authenticate instead of /authorize so
+    # that Twitter doesn't prompt the user for approval if they've already
+    # approved. Background: https://dev.twitter.com/discussions/1253
+    #
+    # Requires "Allow this application to be used to Sign in with Twitter"
+    # to be checked in the app's settings on https://apps.twitter.com/
+    auth_url = auth.get_authorization_url(signin_with_twitter=True)
 
     # store the request token for later use in the callback handler
     models.OAuthRequestToken(id=auth.request_token.key,
