@@ -2,6 +2,9 @@
 
 Uses oauthlib directly to authenticate and sign requests with OAuth
 1.0 credentials. https://www.flickr.com/services/api/auth.oauth.html
+
+Note that when users decline Flickr's OAuth prompt by clicking the Cancel
+button, Flickr redirects them to its home page, *not* to us.
 """
 
 import json
