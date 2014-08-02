@@ -6,6 +6,7 @@ import appengine_config
 import blogger_v2
 import dropbox
 import facebook
+import flickr
 import googleplus
 import instagram
 import tumblr
@@ -39,6 +40,8 @@ application = webapp2.WSGIApplication([
     ('/dropbox/oauth_callback', dropbox.CallbackHandler.to('/')),
     ('/facebook/start', facebook.StartHandler.to('/facebook/oauth_callback')),
     ('/facebook/oauth_callback', facebook.CallbackHandler.to('/')),
+    ('/flickr/start', flickr.StartHandler.to('/flickr/oauth_callback')),
+    ('/flickr/oauth_callback', flickr.CallbackHandler.to('/')),
     ('/googleplus/start', googleplus.StartHandler.to('/googleplus/oauth_callback')),
     ('/googleplus/oauth_callback', googleplus.CallbackHandler.to('/')),
     ('/instagram/start', instagram.StartHandler.to('/instagram/oauth_callback')),

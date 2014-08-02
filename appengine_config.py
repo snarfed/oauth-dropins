@@ -88,6 +88,8 @@ else:
 
 DROPBOX_APP_KEY = read('dropbox_app_key')
 DROPBOX_APP_SECRET = read('dropbox_app_secret')
+FLICKR_APP_KEY = read('flickr_app_key')
+FLICKR_APP_SECRET = read('flickr_app_secret')
 GOOGLE_CLIENT_ID = read('google_client_id')
 GOOGLE_CLIENT_SECRET = read('google_client_secret')
 TUMBLR_APP_KEY = read('tumblr_app_key')
