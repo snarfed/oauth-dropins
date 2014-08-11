@@ -7,13 +7,16 @@ just a wrapper around that anyway.
 
 import json
 import logging
+import urllib
+import urllib2
+import urlparse
 from webob import exc
 
 import appengine_config
 import handlers
 import models
-import tweepy
 import requests
+import tweepy
 import twitter_auth
 
 from webutil import util
@@ -54,6 +57,12 @@ class TwitterAuth(models.BaseAuth):
     """Returns the OAuth access token as a (string key, string secret) tuple.
     """
     return (self.token_key, self.token_secret)
+
+  def urlopen(self, url, **kwargs):
+    """Wraps urllib2.urlopen() and adds an OAuth signature.
+    """
+    return twitter_auth.signed_urlopen(url, self.token_key, self.token_secret,
+                                       **kwargs)
 
   def get(self, *args, **kwargs):
     """Wraps requests.get() and adds an OAuth signature.
@@ -112,7 +121,6 @@ class StartHandler(handlers.StartHandler):
     auth_url = auth.get_authorization_url(signin_with_twitter=True)
 
     # store the request token for later use in the callback handler
-    print `auth.request_token`
     models.OAuthRequestToken(id=auth.request_token['oauth_token'],
                              token_secret=auth.request_token['oauth_token_secret']
                              ).put()
@@ -144,21 +152,22 @@ class CallbackHandler(handlers.CallbackHandler):
     if request_token is None:
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % oauth_token)
 
-    # Rebuild the auth handler and fetch the access token
-    handler = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                                  appengine_config.TWITTER_APP_SECRET)
-    handler.request_token = {'oauth_token': request_token.key.string_id(),
-                             'oauth_token_secret': request_token.token_secret}
-    access_token_key, access_token_secret = handler.get_access_token(oauth_verifier)
+    # Rebuild the auth handler
+    auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
+                               appengine_config.TWITTER_APP_SECRET)
+    auth.request_token = {'oauth_token': request_token.key.string_id(),
+                          'oauth_token_secret': request_token.token_secret}
 
-    # Fetch user info and username
-    resp = requests.get(API_ACCOUNT_URL, auth=twitter_auth.oauth1(access_token_key,
-                                                                  access_token_secret))
-    resp.raise_for_status()
-    username = json.loads(resp.text)['screen_name']
+    # Fetch the access token
+    access_token_key, access_token_secret = auth.get_access_token(oauth_verifier)
+    user_json = twitter_auth.signed_urlopen(API_ACCOUNT_URL,
+                                            access_token_key,
+                                            access_token_secret).read()
+    username = json.loads(user_json)['screen_name']
+
     auth = TwitterAuth(id=username,
                        token_key=access_token_key,
                        token_secret=access_token_secret,
-                       user_json=resp.text)
+                       user_json=user_json)
     auth.put()
     self.finish(auth, state=self.request.get('state'))
