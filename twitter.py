@@ -100,8 +100,22 @@ class StartHandler(handlers.StartHandler):
 
   Fetches an OAuth request token, then redirects to Twitter's auth page to
   request an access token.
+
+  Attributes:
+    access_type: optional, 'read' or 'write'. Passed through to Twitter as
+      x_auth_access_type. If the twitter app has read/write or read/write/dm
+      permissions, this lets you request a read-only token. Details:
+      https://dev.twitter.com/docs/api/1/post/oauth/request_token
   """
   handle_exception = handle_exception
+
+  @classmethod
+  def to(cls, path, scopes=None, access_type=None):
+    assert access_type in (None, 'read', 'write'), \
+        'access_type must be "read" or "write"; got %r' % access_type
+    handler = super(StartHandler, cls).to(path, scopes=scopes)
+    handler.access_type = access_type
+    return handler
 
   def redirect_url(self, state=None):
     assert (appengine_config.TWITTER_APP_KEY and
@@ -118,7 +132,8 @@ class StartHandler(handlers.StartHandler):
     #
     # Requires "Allow this application to be used to Sign in with Twitter"
     # to be checked in the app's settings on https://apps.twitter.com/
-    auth_url = auth.get_authorization_url(signin_with_twitter=True)
+    auth_url = auth.get_authorization_url(signin_with_twitter=True,
+                                          access_type=self.access_type)
 
     # store the request token for later use in the callback handler
     models.OAuthRequestToken(id=auth.request_token['oauth_token'],
