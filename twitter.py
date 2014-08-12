@@ -132,8 +132,13 @@ class StartHandler(handlers.StartHandler):
     #
     # Requires "Allow this application to be used to Sign in with Twitter"
     # to be checked in the app's settings on https://apps.twitter.com/
-    auth_url = auth.get_authorization_url(signin_with_twitter=True,
-                                          access_type=self.access_type)
+    #
+    # Also, there's a Twitter API bug that makes /authenticate and
+    # x_auth_access_type not play nice with each other. Work around that by only
+    # using /authenticate if access_type isn't set.
+    # https://dev.twitter.com/discussions/21281
+    auth_url = auth.get_authorization_url(
+      signin_with_twitter=not self.access_type, access_type=self.access_type)
 
     # store the request token for later use in the callback handler
     models.OAuthRequestToken(id=auth.request_token['oauth_token'],
