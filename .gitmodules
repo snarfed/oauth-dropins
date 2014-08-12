@@ -21,7 +21,7 @@
 	url = git@github.com:idan/oauthlib.git
 [submodule "tweepy_module"]
 	path = tweepy_module
-	url = git://github.com/tweepy/tweepy.git
+	url = git://github.com/snarfed/tweepy.git
 [submodule "webutil"]
 	path = webutil
 	url = git@github.com:snarfed/webutil.git
