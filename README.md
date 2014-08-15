@@ -94,6 +94,16 @@ the user to grant your app permission. It has two useful methods:
   include them in the `scopes` query parameter in the POST request body. This is
   currently supported with Facebook, Google+, Blogger, and Instagram.
 
+  Some of the sites that use OAuth 1 support alternatives. For Twitter,
+  `StartHandler.to` takes an additional `access_type` kwarg that may be `read`
+  or `write`. It's passed through to Twitter
+  [as `x_auth_access_type`](https://dev.twitter.com/docs/api/1/post/oauth/request_token).
+  For Flickr, the start handler accepts a `perms` POST query parameter that may
+  be `read`, `write` or `delete`; it's
+  [passed through to Flickr](https://www.flickr.com/services/api/auth.oauth.html#authorization)
+  unchanged. (Flickr claims it's optional, but
+  [sometimes breaks if it's not provided.](http://stackoverflow.com/questions/6517317/flickr-api-error-when-oauth))
+
 - `redirect_url(state=None)` returns the URL to redirect to at the destination
   site to initiate the OAuth flow. `StartHandler` will redirect here
   automatically if it's used in a WSGI application, but you can also instantiate

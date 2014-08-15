@@ -111,6 +111,7 @@ class StartHandler(handlers.StartHandler):
       state=state).put()
 
     auth_url = AUTHORIZE_URL + '?' + urllib.urlencode({
+      'perms': self.request.get('perms', 'read'),
       'oauth_token': resource_owner_key
     })
     logging.info(
