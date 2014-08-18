@@ -5,8 +5,8 @@ oauth-dropins
 This is a collection of drop-in
 [Google App Engine](https://appengine.google.com/) request handlers for the
 initial [OAuth](http://oauth.net/) client flows for many popular sites,
-including Blogger, Dropbox, Facebook, Google+, Instagram, Twitter, Tumblr, and
-WordPress.com.
+including Blogger, Dropbox, Facebook, Flickr, Google+, Instagram, Twitter, 
+Tumblr, and WordPress.com.
 
 This repo also provides an example demo app, deployed at
 http://oauth-dropins.appspot.com/.
@@ -173,8 +173,8 @@ FacebookAuth. Here are the useful methods:
   "Ryan Barrett". This is usually their first name, full name, or username.
 
 - `access_token()` returns the OAuth access token. For OAuth 2 sites, this is a
-  single string. For OAuth 1.1 sites (currently just Twitter and Tumblr), this
-  is a (string key, string secret) tuple.
+  single string. For OAuth 1.1 sites (currently just Twitter, Tumblr, and Flickr),
+  this is a (string key, string secret) tuple.
 
 The following methods are optional. Auth entity classes usually implement at
 least one of them, but not all.
