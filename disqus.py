@@ -90,6 +90,10 @@ class StartHandler(handlers.StartHandler):
   """Starts Disqus auth. Requests an auth code and expects a redirect back.
   """
 
+  # Disqus scopes are comma separated: read, write, admin, email
+  # https://disqus.com/api/docs/requests/#data-availability
+  DEFAULT_SCOPE = 'read'
+
   def redirect_url(self, state=None):
       assert (appengine_config.DISQUS_CLIENT_ID and
               appengine_config.DISQUS_CLIENT_SECRET), (
@@ -109,7 +113,7 @@ class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
   def get(self):
-    if facebook.CallbackHandler.handle_error(self):
+    if self.handle_error():
       return
 
     auth_code = self.request.get('code')
@@ -127,13 +131,12 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.debug('Fetching %s with data %s', GET_ACCESS_TOKEN_URL, data)
     resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
                            timeout=HTTP_TIMEOUT).read()
+
     try:
       data = json.loads(resp)
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
       raise exc.HttpBadRequest('Bad Disqus response to access token request')
-
-    # TODO how does Disqus indicate access denied?
 
     access_token = data['access_token']
     user_id = data['user_id']
@@ -155,3 +158,22 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.info('created disqus auth %s', auth)
     auth.put()
     self.finish(auth, state=self.request.get('state'))
+
+  def handle_error(handler):
+    """Handles any error reported in the callback query parameters.
+
+    Args:
+      handler: CallbackHandler
+
+    Returns: True if there was an error, False otherwise.
+    """
+    error = handler.request.get('error')
+    if error:
+      if error == 'access_denied':
+        logging.info('User declined')
+        handler.finish(None, state=handler.request.get('state'))
+        return True
+      else:
+        raise exc.HTTPBadRequest(error)
+
+    return False

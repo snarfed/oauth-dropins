@@ -150,6 +150,6 @@ class CallbackHandler(handlers.CallbackHandler):
         handler.finish(None, state=handler.request.get('state'))
         return True
       else:
-        raise exc.HTTPBadRequest(' '.join(error, error_reason, error_description))
+        raise exc.HTTPBadRequest(' '.join((error, error_reason, error_description)))
 
     return False
