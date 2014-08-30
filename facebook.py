@@ -24,7 +24,7 @@ import webapp2
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = str('&'.join((
-    'https://www.facebook.com/dialog/oauth?',
+    'https://www.facebook.com/dialog/oauth?'
     # https://developers.facebook.com/docs/reference/login/
     'scope=%(scope)s',
     'client_id=%(client_id)s',

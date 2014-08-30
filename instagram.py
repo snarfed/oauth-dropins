@@ -3,8 +3,9 @@
 Instagram API docs: http://instagram.com/developer/endpoints/
 
 Almost identical to Facebook, except the access token request has `code`
-and `grant_type` query parameters instead of just `auth_code`, and the response
-has a `user` object instead of `id`.
+and `grant_type` query parameters instead of just `auth_code`, the response
+has a `user` object instead of `id`, and the call to GET_ACCESS_TOKEN_URL
+is a POST instead of a GET.
 TODO: unify them.
 """
 
@@ -75,7 +76,8 @@ class InstagramAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return BaseAuth.urlopen_access_token(url, self.access_token_str, **kwargs)
+    return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
+                                                **kwargs)
 
   def api(self):
     """Returns a python_instagram.InstagramAPI.
@@ -153,7 +155,7 @@ class CallbackHandler(handlers.CallbackHandler):
                            timeout=HTTP_TIMEOUT).read()
     try:
       data = json.loads(resp)
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
       raise exc.HttpBadRequest('Bad Instagram response to access token request')
 
