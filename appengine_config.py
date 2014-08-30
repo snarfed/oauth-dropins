@@ -78,6 +78,8 @@ if DEBUG:
   INSTAGRAM_CLIENT_SECRET = read('instagram_client_secret_local')
   WORDPRESS_CLIENT_ID = read('wordpress.com_client_id_local')
   WORDPRESS_CLIENT_SECRET = read('wordpress.com_client_secret_local')
+  DISQUS_CLIENT_ID = read('disqus_client_id_local')
+  DISQUS_CLIENT_SECRET = read('disqus_client_secret_local')
 else:
   FACEBOOK_APP_ID = read('facebook_app_id')
   FACEBOOK_APP_SECRET = read('facebook_app_secret')
@@ -85,6 +87,8 @@ else:
   INSTAGRAM_CLIENT_SECRET = read('instagram_client_secret')
   WORDPRESS_CLIENT_ID = read('wordpress.com_client_id')
   WORDPRESS_CLIENT_SECRET = read('wordpress.com_client_secret')
+  DISQUS_CLIENT_ID = read('disqus_client_id')
+  DISQUS_CLIENT_SECRET = read('disqus_client_secret')
 
 DROPBOX_APP_KEY = read('dropbox_app_key')
 DROPBOX_APP_SECRET = read('dropbox_app_secret')

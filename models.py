@@ -66,14 +66,19 @@ class BaseAuth(models.StringIdModel):
     raise NotImplementedError()
 
   @staticmethod
-  def urlopen_access_token(url, access_token, **kwargs):
+  def urlopen_access_token(url, access_token, api_key=None, **kwargs):
     """Wraps urllib2.urlopen() and adds an access_token query parameter.
 
     Kwargs are passed through to urlopen().
     """
-    log_url = util.add_query_params(url, [('access_token', access_token[:4] + '...')])
+    log_params = [('access_token', access_token[:4] + '...')]
+    real_params = [('access_token', access_token)]
+    if api_key:
+      log_params.append(('api_key', api_key[:4] + '...'))
+      real_params.append(('api_key', api_key))
+    log_url = util.add_query_params(url, log_params)
     logging.info('Fetching %s', log_url)
-    url = util.add_query_params(url, [('access_token', access_token)])
+    url = util.add_query_params(url, real_params)
     if 'timeout' not in kwargs:
       kwargs['timeout'] = appengine_config.HTTP_TIMEOUT
     return urllib2.urlopen(url, **kwargs)

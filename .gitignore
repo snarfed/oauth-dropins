@@ -23,3 +23,7 @@ wordpress.com_client_id
 wordpress.com_client_secret
 wordpress.com_client_id_local
 wordpress.com_client_secret_local
+disqus_client_id
+disqus_client_secret
+disqus_client_id_local
+disqus_client_secret_local

@@ -4,6 +4,7 @@
 import appengine_config
 
 import blogger_v2
+import disqus
 import dropbox
 import facebook
 import flickr
@@ -36,6 +37,8 @@ application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
     ('/blogger_v2/start', blogger_v2.StartHandler.to('/blogger_v2/oauth_callback')),
     ('/blogger_v2/oauth_callback', blogger_v2.CallbackHandler.to('/')),
+    ('/disqus/start', disqus.StartHandler.to('/disqus/oauth_callback')),
+    ('/disqus/oauth_callback', disqus.CallbackHandler.to('/')),
     ('/dropbox/start', dropbox.StartHandler.to('/dropbox/oauth_callback')),
     ('/dropbox/oauth_callback', dropbox.CallbackHandler.to('/')),
     ('/facebook/start', facebook.StartHandler.to('/facebook/oauth_callback')),
