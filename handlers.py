@@ -178,6 +178,7 @@ def interpret_http_exception(exception):
     code = e.code
     try:
       body = e.read()
+      e.fp.seek(0)  # preserve the body so it can be read again
     except AttributeError:
       # no response body
       pass
