@@ -7,6 +7,7 @@ import urllib2
 import urlparse
 
 import appengine_config
+import handlers
 from webutil import models
 from webutil import util
 

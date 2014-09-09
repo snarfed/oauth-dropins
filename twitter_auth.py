@@ -6,6 +6,7 @@ import urllib2
 import urlparse
 
 import appengine_config
+import handlers
 import requests
 import requests_oauthlib
 import tweepy
