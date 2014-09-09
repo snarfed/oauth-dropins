@@ -48,6 +48,7 @@ for path in (
   'httplib2_module/python2',
   'oauthlib_module',
   'python-dropbox',
+  'python-instagram',
   'requests_module',
   'requests-oauthlib',
   'python-tumblpy',

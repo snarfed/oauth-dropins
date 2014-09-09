@@ -14,7 +14,13 @@ import copy
 import logging
 import urllib
 
+import apiclient
+from oauth2client.client import AccessTokenRefreshError
+from python_instagram.bind import InstagramAPIError
+import requests
+import urllib2
 import webapp2
+from webob import exc
 from webutil import handlers
 from webutil import util
 
@@ -145,3 +151,58 @@ class CallbackHandler(BaseHandler):
     url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
     self.redirect(url)
+
+
+def interpret_http_exception(exception):
+  """Extracts the status code and response from different HTTP exception types.
+
+  Args:
+    exc: one of:
+      apiclient.errors.HttpError
+      exc.WSGIHTTPException
+      InstagramAPIError
+      oauth2client.client.AccessTokenRefreshError
+      requests.HTTPError
+      urllib2.HTTPError
+
+  Returns: (string status code or None, string response body or None)
+  """
+  e = exception
+  code = body = None
+
+  if isinstance(e, exc.WSGIHTTPException):
+    code = e.code
+    body = e.plain_body({})
+
+  elif isinstance(e, urllib2.HTTPError):
+    code = e.code
+    try:
+      body = e.read()
+    except AttributeError:
+      # no response body
+      pass
+
+  elif isinstance(e, requests.HTTPError):
+    code = e.response.status_code
+    body = e.response.text
+
+  elif isinstance(e, apiclient.errors.HttpError):
+    code = e.resp.status
+    body = e.content
+
+  elif isinstance(e, InstagramAPIError):
+    if e.error_type == 'OAuthAccessTokenException':
+      code = '401'
+    else:
+      code = e.status_code
+    body = '%s: %s' % (e.error_type, e.error_message)
+
+  elif isinstance(e, AccessTokenRefreshError) and str(e) == 'invalid_grant':
+    code = '401'
+
+  if code:
+    code = str(code)
+  if code or body:
+    logging.warning('Error %s, response body: %s', code, body)
+
+  return code, body
