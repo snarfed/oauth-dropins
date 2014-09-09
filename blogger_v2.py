@@ -159,10 +159,10 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         blogger = BloggerV2Auth.api_from_creds(oauth_decorator.credentials)
         try:
           blogs = blogger.get_blogs()
-        except BaseException:
+        except BaseException, e:
           # this api call often returns 401 Unauthorized for users who aren't
           # signed up for blogger and/or don't have any blogs.
-          logging.exception('Blogger get_blogs() API call failed')
+          handlers.interpret_http_exception(e)
           # we can't currently intercept declines for Google+ or Blogger, so the
           # only time we return a None auth entity right now is on error.
           self.finish(None, state=state)

@@ -149,9 +149,15 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
                 appengine_config.GOOGLE_CLIENT_SECRET), (
           "Please fill in the google_client_id and google_client_secret files in "
           "your app's root directory.")
+
         # get the current user
         init_json_service()
-        user = json_service.people().get(userId='me').execute(oauth_decorator.http())
+        try:
+          user = json_service.people().get(userId='me')\
+              .execute(oauth_decorator.http())
+        except BaseException, e:
+          handlers.interpret_http_exception(e)
+          raise
         logging.debug('Got one person: %r', user)
 
         store = oauth_decorator.credentials.store

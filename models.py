@@ -81,7 +81,12 @@ class BaseAuth(models.StringIdModel):
     url = util.add_query_params(url, real_params)
     if 'timeout' not in kwargs:
       kwargs['timeout'] = appengine_config.HTTP_TIMEOUT
-    return urllib2.urlopen(url, **kwargs)
+
+    try:
+      return urllib2.urlopen(url, **kwargs)
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
 
   def http(self):
     """Returns an httplib2.Http that adds OAuth credentials to requests.

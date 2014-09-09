@@ -133,7 +133,11 @@ class CallbackHandler(handlers.CallbackHandler):
     # http://www.tumblr.com/docs/en/api/v2#user-methods
     tp = TumblrAuth._api_from_token(auth_token_key, auth_token_secret)
     logging.debug('Fetching user/info')
-    resp = tp.post('user/info')
+    try:
+      resp = tp.post('user/info')
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
     logging.debug('Got: %s', resp)
     user = resp['user']
 

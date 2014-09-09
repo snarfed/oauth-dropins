@@ -88,8 +88,12 @@ class WordPressAuth(BaseAuth):
     data = kwargs.get('data')
     if data:
       logging.info('...with data: %r', data)
-    return urllib2.urlopen(urllib2.Request(url, **kwargs),
-                           timeout=appengine_config.HTTP_TIMEOUT)
+    try:
+      return urllib2.urlopen(urllib2.Request(url, **kwargs),
+                             timeout=appengine_config.HTTP_TIMEOUT)
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
 
 
 class StartHandler(handlers.StartHandler):

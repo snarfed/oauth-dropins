@@ -151,8 +151,13 @@ class CallbackHandler(handlers.CallbackHandler):
       }
 
     logging.debug('Fetching: %s with data %s', GET_ACCESS_TOKEN_URL, data)
-    resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
-                           timeout=HTTP_TIMEOUT).read()
+    try:
+      resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
+                             timeout=HTTP_TIMEOUT).read()
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
+
     try:
       data = json.loads(resp)
     except (ValueError, TypeError):

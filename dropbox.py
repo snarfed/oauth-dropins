@@ -135,6 +135,9 @@ class CallbackHandler(handlers.CallbackHandler):
       logging.info('User declined OAuth request: %s', e)
       self.finish(None, state=csrf.state)
       return
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
 
     logging.info('Storing new Dropbox account: %s', user_id)
     auth = DropboxAuth(id=user_id, access_token_str=access_token)

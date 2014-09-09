@@ -55,8 +55,12 @@ def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
   headers.update(auth_header(url, token_key, token_secret, method=method))
   timeout = kwargs.pop('timeout', appengine_config.HTTP_TIMEOUT)
   logging.debug('Fetching %s', url)
-  return urllib2.urlopen(urllib2.Request(url, headers=headers, **kwargs),
-                         timeout=timeout)
+  try:
+    return urllib2.urlopen(urllib2.Request(url, headers=headers, **kwargs),
+                           timeout=timeout)
+  except BaseException, e:
+    handlers.interpret_http_exception(e)
+    raise
 
 
 def tweepy_auth(token_key, token_secret):

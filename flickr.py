@@ -64,8 +64,11 @@ class FlickrAuth(models.BaseAuth):
 
   def urlopen(self, url, **kwargs):
     uri, headers, body = self.api().sign(url, **kwargs)
-    return urllib2.urlopen(
-      urllib2.Request(uri, body, headers))
+    try:
+      return urllib2.urlopen(urllib2.Request(uri, body, headers))
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
 
   def call_api_method(self, method, params):
     full_params = {
@@ -138,7 +141,11 @@ class CallbackHandler(handlers.CallbackHandler):
       signature_type=oauthlib.oauth1.SIGNATURE_TYPE_QUERY)
 
     uri, headers, body = client.sign(ACCESS_TOKEN_URL)
-    resp = urllib2.urlopen(uri)
+    try:
+      resp = urllib2.urlopen(uri)
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
     parsed = dict(urlparse.parse_qs(resp.read()))
 
     logging.debug('access_token response %s', parsed)

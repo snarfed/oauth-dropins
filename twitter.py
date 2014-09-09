@@ -69,7 +69,11 @@ class TwitterAuth(models.BaseAuth):
     """
     oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
     resp = requests.get(*args, auth=oauth1, **kwargs)
-    resp.raise_for_status()
+    try:
+      resp.raise_for_status()
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
     return resp
 
   def post(self, *args, **kwargs):
@@ -77,7 +81,11 @@ class TwitterAuth(models.BaseAuth):
     """
     oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
     resp = requests.post(*args, auth=oauth1, **kwargs)
-    resp.raise_for_status()
+    try:
+      resp.raise_for_status()
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
     return resp
 
   def api(self):
