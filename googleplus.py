@@ -27,6 +27,12 @@ from webutil import handlers as webutil_handlers
 from webutil import util
 
 
+# suppress "execute() takes at most 1 positional argument (2 given)"
+# log warnings from google-api-python-client/oauth2client/util.py:124
+import oauth2client
+oauth2client.util.positional_parameters_enforcement = \
+    oauth2client.util.POSITIONAL_IGNORE
+
 # global
 json_service = None
 
