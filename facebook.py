@@ -111,7 +111,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'auth_code': auth_code,
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
-      'redirect_uri': self.request_url_with_state(),
+      'redirect_uri': urllib.quote_plus(self.request_url_with_state()),
       }
     logging.debug('Fetching: %s', url)
     resp = urllib2.urlopen(url, timeout=HTTP_TIMEOUT).read()

@@ -63,6 +63,8 @@ class BaseHandler(webapp2.RequestHandler):
     """
     url = self.request.host_url + self.to_path
     if state:
+      # unquote first or state will be double-quoted
+      state = urllib.unquote_plus(state)
       url = util.add_query_params(url, [('state', state)])
     return url
 

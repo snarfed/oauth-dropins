@@ -108,8 +108,8 @@ class StartHandler(handlers.StartHandler):
     # TODO: CSRF protection
     return str(GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-      'redirect_uri': self.to_url(),
-      'state': urllib.quote_plus(state) if state else '',
+      'redirect_uri': urllib.quote_plus(self.to_url()),
+      'state': urllib.quote_plus(state if state else ''),
       })
 
 
