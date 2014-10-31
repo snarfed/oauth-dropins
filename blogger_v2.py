@@ -128,8 +128,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
 
   # extracts the Blogger id from a profile URL
   AUTHOR_URI_RE = re.compile(
-    r'.*(?:blogger\.com/profile|(?:plus|profiles)\.google\.com)/([0-9]+)')
-
+    r'.*(?:blogger\.com/(?:feeds|profile)|(?:plus|profiles)\.google\.com)/([0-9]+)(?:/blogs)')
   # https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
   # (the scope for the v3 API is https://www.googleapis.com/auth/blogger)
   DEFAULT_SCOPE = 'https://www.blogger.com/feeds/'
