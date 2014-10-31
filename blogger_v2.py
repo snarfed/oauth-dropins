@@ -3,6 +3,9 @@
 Blogger API docs:
 https://developers.google.com/blogger/docs/2.0/developers_guide_protocol
 
+Python GData API docs:
+http://gdata-python-client.googlecode.com/hg/pydocs/gdata.blogger.data.html
+
 Uses google-api-python-client to auth via OAuth 2. This describes how to get
 gdata-python-client to use an OAuth 2 token from google-api-python-client:
 http://blog.bossylobster.com/2012/12/bridging-oauth-20-objects-between-gdata.html#comment-form
@@ -168,14 +171,16 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
           self.finish(None, state=state)
           return
 
-        author = blogs.author[0]
-        match = self.AUTHOR_URI_RE.match(author.uri.text)
-        if match:
-          id = match.group(1)
-        else:
-          logging.warning("Couldn't parse author URI %s , using entire URI as id",
-                          author.uri.text)
-          id = author.uri.text
+        for id in ([a.uri.text for a in blogs.author if a.uri] +
+                   [l.href for l in blogs.link if l]):
+          if not id:
+            continue
+          match = self.AUTHOR_URI_RE.match(id)
+          if match:
+            id = match.group(1)
+          else:
+            logging.warning("Couldn't parse %s , using entire value as id", id)
+          break
 
         blog_ids = []
         blog_titles = []
@@ -190,10 +195,11 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
 
         # extract profile picture URL
         picture_url = None
-        for child in author.children:
-          if child.tag.split(':')[-1] == 'image':
-            picture_url = child.get_attributes('src')[0].value
-            break
+        for author in blogs.author:
+          for child in author.children:
+            if child.tag.split(':')[-1] == 'image':
+              picture_url = child.get_attributes('src')[0].value
+              break
 
         auth = BloggerV2Auth(id=id,
                              name=author.name.text,
