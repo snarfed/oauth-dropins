@@ -32,6 +32,7 @@ class HandlersTest(testutil.HandlerTest):
         apiclient.errors.HttpError(httplib2.Response({'status': 429}), 'my body')))
     self.assertEquals(('429', 'my body'), ihc(
         urllib2.HTTPError('url', 429, 'msg', {},  StringIO.StringIO('my body'))))
+    self.assertEquals((None, 'foo bar'), ihc(urllib2.URLError('foo bar')))
 
     self.assertEquals(('429', 'my body'), ihc(
         requests.HTTPError(response=util.Struct(status_code='429', text='my body'))))

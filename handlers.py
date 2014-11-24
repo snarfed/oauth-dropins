@@ -166,6 +166,7 @@ def interpret_http_exception(exception):
       oauth2client.client.AccessTokenRefreshError
       requests.HTTPError
       urllib2.HTTPError
+      urllib2.URLError
 
   Returns: (string status code or None, string response body or None)
   """
@@ -182,8 +183,10 @@ def interpret_http_exception(exception):
       body = e.read()
       e.fp.seek(0)  # preserve the body so it can be read again
     except AttributeError:
-      # no response body
-      pass
+      body = e.reason
+
+  elif isinstance(e, urllib2.URLError):
+    body = e.reason
 
   elif isinstance(e, requests.HTTPError):
     code = e.response.status_code
