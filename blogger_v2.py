@@ -25,6 +25,7 @@ import models
 from webutil import util
 
 from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
+from oauth2client.client import OAuth2Credentials
 from gdata.blogger import client
 from gdata import gauth
 from google.appengine.ext import ndb
