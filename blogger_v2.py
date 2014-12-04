@@ -17,8 +17,6 @@ https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc
 import json
 import logging
 import re
-import urllib
-import urlparse
 
 import appengine_config
 import googleplus
@@ -27,14 +25,10 @@ import models
 from webutil import util
 
 from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
-from oauth2client.client import Credentials, OAuth2Credentials
 from gdata.blogger import client
 from gdata import gauth
-from google.appengine.api import users
 from google.appengine.ext import ndb
 import httplib2
-import webapp2
-from webob import exc
 
 
 # global. initialized in StartHandler.to_path().

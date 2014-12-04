@@ -13,7 +13,6 @@ import json
 import logging
 import urllib
 import urllib2
-import urlparse
 
 import appengine_config
 from appengine_config import HTTP_TIMEOUT
@@ -24,10 +23,8 @@ from python_instagram.bind import InstagramAPIError
 from python_instagram.client import InstagramAPI
 from webob import exc
 from webutil import handlers as webutil_handlers
-from webutil import util
 
 from google.appengine.ext import ndb
-import webapp2
 
 
 # instagram api url templates. can't (easily) use urllib.urlencode() because i

@@ -15,10 +15,8 @@ import appengine_config
 from appengine_config import HTTP_TIMEOUT
 import handlers
 import models
-from webutil import util
 
 from google.appengine.ext import ndb
-import webapp2
 
 
 # facebook api url templates. can't (easily) use urllib.urlencode() because i

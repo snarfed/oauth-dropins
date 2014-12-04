@@ -10,7 +10,6 @@ application = webapp2.WSGIApplication([
   ]
 """
 
-import copy
 import logging
 import urllib
 

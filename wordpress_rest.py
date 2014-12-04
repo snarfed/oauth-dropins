@@ -28,7 +28,6 @@ from models import BaseAuth
 from webutil import util
 
 from google.appengine.ext import ndb
-import webapp2
 from webob import exc
 
 

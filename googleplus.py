@@ -9,7 +9,6 @@ TODO: check that overriding CallbackHandler.finish() actually works.
 import json
 import httplib2
 import logging
-import urllib
 
 import appengine_config
 import handlers
@@ -17,14 +16,11 @@ import models
 
 from apiclient import discovery
 from apiclient.errors import HttpError
-from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
-from oauth2client.client import Credentials, OAuth2Credentials
+from oauth2client.appengine import CredentialsModel, OAuth2Decorator
+from oauth2client.client import OAuth2Credentials
 from google.appengine.ext import db
 from google.appengine.ext import ndb
-from google.appengine.ext.webapp import template
-import webapp2
 from webutil import handlers as webutil_handlers
-from webutil import util
 
 
 # suppress "execute() takes at most 1 positional argument (2 given)"

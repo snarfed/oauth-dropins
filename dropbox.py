@@ -6,21 +6,17 @@ https://www.dropbox.com/static/developers/dropbox-python-sdk-1.6-docs/
 https://www.dropbox.com/developers/core/docs
 """
 
-import json
 import logging
-import urllib
 
 import appengine_config
 
 from python_dropbox.client import DropboxOAuth2Flow, DropboxClient
 from google.appengine.ext import ndb
-import webapp2
 from webob import exc
 
 import handlers
 import models
 from webutil import handlers as webutil_handlers
-from webutil import util
 
 CSRF_PARAM = 'dropbox-auth-csrf-token'
 

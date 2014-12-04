@@ -7,9 +7,6 @@ just a wrapper around that anyway.
 
 import json
 import logging
-import urllib
-import urllib2
-import urlparse
 from webob import exc
 
 import appengine_config
@@ -19,11 +16,9 @@ import requests
 import tweepy
 import twitter_auth
 
-from webutil import util
 from webutil import handlers as webutil_handlers
 
 from google.appengine.ext import ndb
-import webapp2
 
 
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'

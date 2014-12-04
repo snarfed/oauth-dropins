@@ -7,19 +7,14 @@ http://www.tumblr.com/oauth/apps
 
 import json
 import logging
-import urllib
-import urlparse
 
 import appengine_config
 import handlers
 import models
 import tumblpy
 from webob import exc
-from webutil import util
 
 from google.appengine.ext import ndb
-from google.appengine.ext.webapp import template
-import webapp2
 from webutil import handlers as webutil_handlers
 
 

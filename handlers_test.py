@@ -8,8 +8,7 @@ import urllib2
 
 import appengine_config
 
-import apiclient
-from apiclient import errors
+import apiclient.errors
 import httplib2
 from oauth2client.client import AccessTokenRefreshError
 from python_instagram.bind import InstagramAPIError

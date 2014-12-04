@@ -57,7 +57,3 @@ application = webapp2.WSGIApplication([
         '/wordpress_rest/oauth_callback')),
     ('/wordpress_rest/oauth_callback', wordpress_rest.CallbackHandler.to('/')),
     ], debug=appengine_config.DEBUG)
-
-
-if __name__ == '__main__':
-  main()

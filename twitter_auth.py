@@ -3,7 +3,6 @@
 
 import logging
 import urllib2
-import urlparse
 
 import appengine_config
 import handlers

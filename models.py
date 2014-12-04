@@ -2,9 +2,7 @@
 """
 
 import logging
-import urllib
 import urllib2
-import urlparse
 
 import appengine_config
 import handlers
