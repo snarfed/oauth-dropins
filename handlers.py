@@ -196,7 +196,8 @@ def interpret_http_exception(exception):
     body = e.content
 
   elif isinstance(e, InstagramAPIError):
-    if e.error_type == 'OAuthAccessTokenException':
+    if e.error_type in ('OAuthAccessTokenException',        # revoked access
+                        'APIRequiresAuthenticationError'):  # account deleted
       code = '401'
     else:
       code = e.status_code

@@ -43,3 +43,5 @@ class HandlersTest(testutil.HandlerTest):
         InstagramAPIError('429', 'my desc', 'my body')))
     self.assertEquals(('401', 'OAuthAccessTokenException: my body'), ihc(
         InstagramAPIError('422', 'OAuthAccessTokenException', 'my body')))
+    self.assertEquals(('401', 'APIRequiresAuthenticationError: my body'), ihc(
+        InstagramAPIError('400', 'APIRequiresAuthenticationError', 'my body')))
