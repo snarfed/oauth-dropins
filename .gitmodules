@@ -10,9 +10,6 @@
 [submodule "python-dropbox"]
 	path = python-dropbox
 	url = git@github.com:snarfed/python-dropbox.git
-[submodule "python-instagram"]
-	path = python-instagram
-	url = git@github.com:snarfed/python-instagram.git
 [submodule "requests_module"]
 	path = requests_module
 	url = git@github.com:kennethreitz/requests.git

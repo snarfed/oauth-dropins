@@ -19,10 +19,7 @@ from appengine_config import HTTP_TIMEOUT
 import facebook  # we reuse facebook.CallbackHandler.handle_error()
 import handlers
 import models
-from python_instagram.bind import InstagramAPIError
-from python_instagram.client import InstagramAPI
 from webob import exc
-from webutil import handlers as webutil_handlers
 
 from google.appengine.ext import ndb
 
@@ -37,7 +34,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     # redirect_uri here must be the same in the access token request!
     'redirect_uri=%(redirect_uri)s',
     'response_type=code',
-    )))
+)))
 
 GET_ACCESS_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 
@@ -49,9 +46,8 @@ class InstagramAuth(models.BaseAuth):
   OAuth-signed requests to Instagram's HTTP-based APIs. Stores OAuth credentials
   in the datastore. See models.BaseAuth for usage details.
 
-  Instagram-specific details: implements urlopen() and api() but not http().
-  api() returns a python_instagram.InstagramAPI. The key name is the Instagram
-  username.
+  Instagram-specific details: implements urlopen() but not api() nor
+  http().  The key name is the Instagram username.
   """
   auth_code = ndb.StringProperty(required=True)
   access_token_str = ndb.StringProperty(required=True)
@@ -76,37 +72,10 @@ class InstagramAuth(models.BaseAuth):
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
 
-  def api(self):
-    """Returns a python_instagram.InstagramAPI.
-
-    Details: https://github.com/Instagram/python-instagram
-    """
-    assert (appengine_config.INSTAGRAM_CLIENT_ID and
-            appengine_config.INSTAGRAM_CLIENT_SECRET), (
-      "Please fill in the instagram_client_id and instagram_client_secret "
-      "files in your app's root directory.")
-    return InstagramAPI(
-      client_id=appengine_config.INSTAGRAM_CLIENT_ID,
-      client_secret=appengine_config.INSTAGRAM_CLIENT_SECRET,
-      access_token=self.access_token_str)
-
-
-def handle_exception(self, e, debug):
-  """Exception handler that converts InstagramAPIError to HTTP errors.
-  """
-  if isinstance(e, InstagramAPIError):
-    logging.exception(e)
-    self.response.set_status(e.status_code)
-    self.response.write(str(e))
-  else:
-    return webutil_handlers.handle_exception(self, e, debug)
-
 
 class StartHandler(handlers.StartHandler):
   """Starts Instagram auth. Requests an auth code and expects a redirect back.
   """
-  handle_exception = handle_exception
-
   DEFAULT_SCOPE = 'basic'
 
   def redirect_url(self, state=None):
@@ -123,13 +92,12 @@ class StartHandler(handlers.StartHandler):
       'scope': str(self.scope.replace(',', '+')),
       # TODO: CSRF protection identifier.
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
-      }
+    }
 
 
 class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
-  handle_exception = handle_exception
 
   def get(self):
     if facebook.CallbackHandler.handle_error(self):
@@ -145,7 +113,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'code': auth_code,
       'redirect_uri': self.request_url_with_state(),
       'grant_type': 'authorization_code',
-      }
+    }
 
     logging.debug('Fetching: %s with data %s', GET_ACCESS_TOKEN_URL, data)
     try:
