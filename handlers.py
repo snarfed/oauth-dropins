@@ -15,7 +15,6 @@ import urllib
 
 import apiclient
 from oauth2client.client import AccessTokenRefreshError
-from python_instagram.bind import InstagramAPIError
 import requests
 import urllib2
 import webapp2
@@ -161,7 +160,6 @@ def interpret_http_exception(exception):
     exc: one of:
       apiclient.errors.HttpError
       exc.WSGIHTTPException
-      InstagramAPIError
       oauth2client.client.AccessTokenRefreshError
       requests.HTTPError
       urllib2.HTTPError
@@ -195,15 +193,12 @@ def interpret_http_exception(exception):
     code = e.resp.status
     body = e.content
 
-  elif isinstance(e, InstagramAPIError):
-    if e.error_type in ('OAuthAccessTokenException',        # revoked access
-                        'APIRequiresAuthenticationError'):  # account deleted
-      code = '401'
-    else:
-      code = e.status_code
-    body = '%s: %s' % (e.error_type, e.error_message)
-
   elif isinstance(e, AccessTokenRefreshError) and str(e) == 'invalid_grant':
+    code = '401'
+
+  # instagram-specific error_types that should disable the source.
+  if body and ('OAuthAccessTokenException' in body            # revoked access
+               or 'APIRequiresAuthenticationError' in body):  # account deleted
     code = '401'
 
   if code:

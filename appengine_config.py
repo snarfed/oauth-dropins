@@ -48,7 +48,6 @@ for path in (
   'httplib2_module/python2',
   'oauthlib_module',
   'python-dropbox',
-  'python-instagram',
   'requests_module',
   'requests-oauthlib',
   'python-tumblpy',
@@ -60,8 +59,7 @@ for path in (
 
 import python_dropbox
 sys.modules['python_dropbox'] = python_dropbox
-import python_instagram
-sys.modules['python_instagram'] = python_instagram
+
 
 def read(filename):
   """Returns the contents of filename, or None if it doesn't exist."""

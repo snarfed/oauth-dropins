@@ -11,7 +11,6 @@ Facebook. Differences:
   so we additionally fetch /user/details before saving
 - Deny appears to be broken on Disqus's side (clicking "No Thanks" has
   no effect), so we ignore that possibility for now.
-- InstagramAuth provides a python_instagram API.
 
 TODO unify Disqus, Facebook, and Instagram
 """
