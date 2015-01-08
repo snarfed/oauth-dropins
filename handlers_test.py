@@ -37,7 +37,8 @@ class HandlersTest(testutil.HandlerTest):
     self.assertEquals((None, None), ihc(AccessTokenRefreshError('invalid_foo')))
     self.assertEquals(('401', None), ihc(AccessTokenRefreshError('invalid_grant')))
 
-    # this is the type of response we get back from instagram
+    # this is the type of response we get back from instagram.
+    # because it means the source should be disabled, we convert the status code 400 to 401
     ig_token_error = json.dumps({
       "meta": {
         "error_type": "OAuthAccessTokenException",
@@ -46,5 +47,5 @@ class HandlersTest(testutil.HandlerTest):
       }
     })
 
-    self.assertEquals(('400', ig_token_error), ihc(urllib2.HTTPError(
+    self.assertEquals(('401', ig_token_error), ihc(urllib2.HTTPError(
       'url', 400, 'BAD REQUEST', {}, StringIO.StringIO(ig_token_error))))
