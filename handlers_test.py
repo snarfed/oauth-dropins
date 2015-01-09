@@ -7,6 +7,8 @@ import StringIO
 import urllib2
 import json
 
+import appengine_config
+
 import apiclient.errors
 import httplib2
 from oauth2client.client import AccessTokenRefreshError
