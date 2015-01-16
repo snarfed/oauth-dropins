@@ -1,5 +1,7 @@
 """Facebook OAuth drop-in.
 
+https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.2
+
 TODO: implement client state param
 TODO: unify this with instagram. see file docstring comment there.
 """
@@ -22,7 +24,7 @@ from google.appengine.ext import ndb
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = str('&'.join((
-    'https://www.facebook.com/dialog/oauth?'
+    'https://www.facebook.com/v2.2/dialog/oauth?'
     # https://developers.facebook.com/docs/reference/login/
     'scope=%(scope)s',
     'client_id=%(client_id)s',
@@ -31,7 +33,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'response_type=code',
     )))
 GET_ACCESS_TOKEN_URL = str('&'.join((
-    'https://graph.facebook.com/oauth/access_token?'
+    'https://graph.facebook.com/v2.2/oauth/access_token?'
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the oauth request!
     # (the value here doesn't actually matter since it's requested server side.)
@@ -39,7 +41,7 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
-API_USER_URL = 'https://graph.facebook.com/me'
+API_USER_URL = 'https://graph.facebook.com/v2.2/me'
 
 
 class FacebookAuth(models.BaseAuth):
