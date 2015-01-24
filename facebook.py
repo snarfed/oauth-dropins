@@ -42,6 +42,7 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'code=%(auth_code)s',
     )))
 API_USER_URL = 'https://graph.facebook.com/v2.2/me'
+API_PAGES_URL = 'https://graph.facebook.com/v2.2/me/accounts'
 
 
 class FacebookAuth(models.BaseAuth):
@@ -54,9 +55,13 @@ class FacebookAuth(models.BaseAuth):
   Facebook-specific details: implements urlopen() but not http() or api(). The
   key name is the user's or page's Facebook ID.
   """
-  auth_code = ndb.StringProperty(required=True)
+  type = ndb.StringProperty(choices=('user', 'page'), required=True)
+  auth_code = ndb.StringProperty()
   access_token_str = ndb.StringProperty(required=True)
+  # https://developers.facebook.com/docs/graph-api/reference/v2.2/user#fields
   user_json = ndb.TextProperty(required=True)
+  # https://developers.facebook.com/docs/graph-api/reference/v2.2/user/accounts#fields
+  pages_json = ndb.TextProperty()
 
   def site_name(self):
     return 'Facebook'
@@ -76,6 +81,26 @@ class FacebookAuth(models.BaseAuth):
     """
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
+
+  def for_page(self, page_id):
+    """Returns a new, unsaved FacebookAuth entity for a page in pages_json.
+
+    The returned entity's properties will be populated with the page's data.
+    access_token will be the page access token, user_json will be the page
+    object, and pages_json will be empty.
+
+    If page_id is not in pages_json, returns None.
+
+    Args:
+      page_id: string, Facebook page id
+    """
+    for page in json.loads(self.pages_json):
+      id = page.get('id')
+      if id == page_id:
+        return FacebookAuth(id=id, type='page', user_json=json.dumps(page),
+                            access_token_str=page.get('access_token'))
+
+    return None
 
 
 class StartHandler(handlers.StartHandler):
@@ -119,12 +144,18 @@ class CallbackHandler(handlers.CallbackHandler):
     params = urlparse.parse_qs(resp)
     access_token = params['access_token'][0]
 
-    resp = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
-    logging.debug('User info response: %s', resp)
-    user_id = json.loads(resp)['id']
+    user = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
+    logging.debug('User info response: %s', user)
+    user_id = json.loads(user)['id']
+
+    pages = json.dumps(json.loads(models.BaseAuth.urlopen_access_token(
+      API_PAGES_URL, access_token).read()).get('data'))
+    logging.debug('Pages response: %s', pages)
 
     auth = FacebookAuth(id=user_id,
-                        user_json=resp,
+                        type='user',
+                        user_json=user,
+                        pages_json=pages,
                         auth_code=auth_code,
                         access_token_str=access_token)
     auth.put()
