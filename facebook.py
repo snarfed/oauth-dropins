@@ -55,7 +55,7 @@ class FacebookAuth(models.BaseAuth):
   Facebook-specific details: implements urlopen() but not http() or api(). The
   key name is the user's or page's Facebook ID.
   """
-  type = ndb.StringProperty(choices=('user', 'page'), required=True)
+  type = ndb.StringProperty(choices=('user', 'page'))
   auth_code = ndb.StringProperty()
   access_token_str = ndb.StringProperty(required=True)
   # https://developers.facebook.com/docs/graph-api/reference/v2.2/user#fields
