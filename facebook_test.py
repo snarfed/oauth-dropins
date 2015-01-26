@@ -25,7 +25,7 @@ class FacebookTest(testutil.HandlerTest):
 
   def test_urlopen_batch(self):
     self.expect_urlopen(
-      facebook.API_BATCH_URL,
+      facebook.API_BASE,
       data='batch=[{"method":"GET","relative_url":"abc"},'
                   '{"method":"GET","relative_url":"def"}]',
       response=json.dumps([{'code': 200, 'body': '{"abc": 1}'},
@@ -37,7 +37,7 @@ class FacebookTest(testutil.HandlerTest):
 
   def test_urlopen_batch_error(self):
     self.expect_urlopen(
-      facebook.API_BATCH_URL,
+      facebook.API_BASE,
       data='batch=[{"method":"GET","relative_url":"abc"},'
                   '{"method":"GET","relative_url":"def"}]',
       response=json.dumps([{'code': 200},

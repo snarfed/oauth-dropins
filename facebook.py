@@ -41,13 +41,11 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
-API_BATCH_URL = 'https://graph.facebook.com/v2.2'
-API_USER = 'me'
-API_PAGES = 'me/accounts'
-
-# TODO: remove once bridgy and a-u have switched to the above constants
 API_USER_URL = 'https://graph.facebook.com/v2.2/me'
 API_PAGES_URL = 'https://graph.facebook.com/v2.2/me/accounts'
+
+# https://developers.facebook.com/docs/graph-api/making-multiple-requests
+API_BASE = 'https://graph.facebook.com/v2.2/'
 
 
 class FacebookAuth(models.BaseAuth):
@@ -102,7 +100,7 @@ class FacebookAuth(models.BaseAuth):
                                   for url in urls],
                                  separators=(',', ':'))  # no whitespace
 
-    req = urllib2.Request(API_BATCH_URL, data=data)
+    req = urllib2.Request(API_BASE, data=data)
     resps = json.loads(self.urlopen(req).read())
 
     bodies = []
