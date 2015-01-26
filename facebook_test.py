@@ -50,3 +50,17 @@ class FacebookTest(testutil.HandlerTest):
     except urllib2.HTTPError, e:
       self.assertEqual(499, e.code)
       self.assertEqual('error body', e.reason)
+
+  def test_urlopen_batch_headers(self):
+    self.expect_urlopen(
+      facebook.API_BASE,
+      data='batch=[{"headers":[{"name":"X","value":"Y"},'
+                              '{"name":"U","value":"V"}],'
+                   '"method":"GET","relative_url":"abc"},'
+                  '{"method":"GET","relative_url":"def"}]',
+      response=json.dumps([{'code': 200}, {'code': 200}]))
+    self.mox.ReplayAll()
+
+    self.auth.urlopen_batch((
+      {'url': 'abc', 'headers': {'X': 'Y', 'U': 'V'}},
+      'def'))
