@@ -41,6 +41,11 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
+API_BATCH_URL = 'https://graph.facebook.com/v2.2'
+API_USER = 'me'
+API_PAGES = 'me/accounts'
+
+# TODO: remove once bridgy and a-u have switched to the above constants
 API_USER_URL = 'https://graph.facebook.com/v2.2/me'
 API_PAGES_URL = 'https://graph.facebook.com/v2.2/me/accounts'
 
@@ -81,6 +86,37 @@ class FacebookAuth(models.BaseAuth):
     """
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
+
+  def urlopen_batch(self, urls, **kwargs):
+    """Sends a batch of multiple API calls, including OAuth credentials.
+
+    https://developers.facebook.com/docs/graph-api/making-multiple-requests
+
+    Args:
+      urls: sequence of string relative API URLs, e.g. ('me', 'me/accounts')
+
+    Returns: sequence of responses, either decoded JSON objects (when possible)
+      or string response bodies
+    """
+    data = 'batch=' + json.dumps([{'method': 'GET', 'relative_url': url}
+                                  for url in urls],
+                                 separators=(',', ':'))  # no whitespace
+
+    req = urllib2.Request(API_BATCH_URL, data=data)
+    resps = json.loads(self.urlopen(req).read())
+
+    bodies = []
+    for url, resp in zip(url, resps):
+      code = int(resp.get('code', 0))
+      body = resp.get('body')
+      if code / 100 != 2:
+        raise urllib2.HTTPError(url, code, body, resp.get('headers'), None)
+      try:
+        bodies.append(json.loads(body))
+      except (ValueError, TypeError):
+        bodies.append(body)
+
+    return bodies
 
   def for_page(self, page_id):
     """Returns a new, unsaved FacebookAuth entity for a page in pages_json.
