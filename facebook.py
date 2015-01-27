@@ -45,9 +45,6 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
 API_USER_URL = 'https://graph.facebook.com/v2.2/me'
 API_PAGES_URL = 'https://graph.facebook.com/v2.2/me/accounts'
 
-# https://developers.facebook.com/docs/graph-api/making-multiple-requests
-API_BASE = 'https://graph.facebook.com/v2.2/'
-
 
 class FacebookAuth(models.BaseAuth):
   """An authenticated Facebook user or page.
@@ -85,51 +82,6 @@ class FacebookAuth(models.BaseAuth):
     """
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
-
-  def urlopen_batch(self, requests, **kwargs):
-    """Sends a batch of multiple API calls, including OAuth credentials.
-
-    https://developers.facebook.com/docs/graph-api/making-multiple-requests
-
-    Args:
-      requests: sequence of string relative API URLs, e.g. ('me',
-        'me/accounts'), or dicts containing 'url' and 'headers' keys. The latter
-        is a dict of HTTP request headers. May mix strings and dicts.
-
-    Returns: sequence of responses, either decoded JSON objects (when possible)
-      or string response bodies
-    """
-    batch = []
-    for req in requests:
-      item = {'method': 'GET'}
-      if isinstance(req, basestring):
-        item['relative_url'] = req
-      else:
-        assert isinstance(req, dict)
-        item['relative_url'] = req.get('url')
-        item['headers'] = [{'name': n, 'value': v}
-                           for n, v in req.get('headers', {}).items()]
-      batch.append(item)
-
-    data = 'batch=' + json.dumps(util.trim_nulls(batch),
-                                 separators=(',', ':'))  # no whitespace
-
-    req = urllib2.Request(API_BASE, data=data)
-    resps = json.loads(self.urlopen(req).read())
-
-    bodies = []
-    for item, resp in zip(batch, resps):
-      code = int(resp.get('code', 0))
-      body = resp.get('body')
-      if code / 100 != 2:
-        raise urllib2.HTTPError(item['relative_url'], code, body,
-                                resp.get('headers'), None)
-      try:
-        bodies.append(json.loads(body))
-      except (ValueError, TypeError):
-        bodies.append(body)
-
-    return bodies
 
   def for_page(self, page_id):
     """Returns a new, unsaved FacebookAuth entity for a page in pages_json.
