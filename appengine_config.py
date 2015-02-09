@@ -2,12 +2,16 @@
 
 Reads app keys and secrets into constants from these files:
 
+disqus_client_id
+disqus_client_secret
 dropbox_app_key
 dropbox_app_secret
 facebook_app_id
 facebook_app_secret
 facebook_app_id_local
 facebook_app_secret_local
+flickr_app_key
+flickr_app_secret
 google_client_id
 google_client_secret
 instagram_client_id
