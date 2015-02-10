@@ -14,6 +14,7 @@ import logging
 import urllib
 
 import apiclient
+import apiclient.errors
 from oauth2client.client import AccessTokenRefreshError
 import requests
 import urllib2
