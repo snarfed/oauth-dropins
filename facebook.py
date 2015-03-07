@@ -88,7 +88,7 @@ class FacebookAuth(models.BaseAuth):
 
     The returned entity's properties will be populated with the page's data.
     access_token will be the page access token, user_json will be the page
-    object, and pages_json will be empty.
+    object, and pages_json will be a single-element list with the page.
 
     If page_id is not in pages_json, returns None.
 
@@ -98,8 +98,11 @@ class FacebookAuth(models.BaseAuth):
     for page in json.loads(self.pages_json):
       id = page.get('id')
       if id == page_id:
-        return FacebookAuth(id=id, type='page', user_json=json.dumps(page),
-                            access_token_str=page.get('access_token'))
+        entity = FacebookAuth(id=id, type='page', pages_json=json.dumps([page]),
+                              access_token_str=page.get('access_token'))
+        entity.user_json = entity.urlopen(API_USER_URL).read()
+        logging.debug('Page object: %s', entity.user_json)
+        return entity
 
     return None
 
