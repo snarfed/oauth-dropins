@@ -111,13 +111,16 @@ class StartHandler(handlers.StartHandler):
   """Starts Facebook auth. Requests an auth code and expects a redirect back.
   """
 
-  def redirect_url(self, state=None):
-    assert (appengine_config.FACEBOOK_APP_ID and
-            appengine_config.FACEBOOK_APP_SECRET), (
-      "Please fill in the facebook_app_id and facebook_app_secret files in "
-      "your app's root directory.")
+  def redirect_url(self, state=None, app_id=None):
+    if app_id is None:
+      assert (appengine_config.FACEBOOK_APP_ID and
+              appengine_config.FACEBOOK_APP_SECRET), (
+              "Please fill in the facebook_app_id and facebook_app_secret files"
+              " in your app's root directory.")
+      app_id = appengine_config.FACEBOOK_APP_ID
+
     return str(GET_AUTH_CODE_URL % {
-      'client_id': appengine_config.FACEBOOK_APP_ID,
+      'client_id': app_id,
       'scope': self.scope,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
@@ -143,7 +146,12 @@ class CallbackHandler(handlers.CallbackHandler):
       'redirect_uri': urllib.quote_plus(self.request_url_with_state()),
       }
     logging.debug('Fetching: %s', url)
-    resp = urllib2.urlopen(url, timeout=HTTP_TIMEOUT).read()
+    try:
+      resp = urllib2.urlopen(url, timeout=HTTP_TIMEOUT).read()
+    except urllib2.HTTPError, e:
+      logging.error(e.read())
+      raise
+
     logging.debug('Access token response: %s', resp)
     params = urlparse.parse_qs(resp)
     access_token = params['access_token'][0]
