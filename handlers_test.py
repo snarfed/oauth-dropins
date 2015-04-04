@@ -29,8 +29,12 @@ class HandlersTest(testutil.HandlerTest):
         exc.HTTPPaymentRequired(body_template='my body')))
     self.assertEquals(('429', 'my body'), ihc(
         apiclient.errors.HttpError(httplib2.Response({'status': 429}), 'my body')))
-    self.assertEquals(('429', 'my body'), ihc(
-        urllib2.HTTPError('url', 429, 'msg', {}, StringIO.StringIO('my body'))))
+
+    ex = urllib2.HTTPError('url', 429, 'msg', {}, StringIO.StringIO('my body'))
+    self.assertEquals(('429', 'my body'), ihc(ex))
+    # check that it works multiple times even though read() doesn't.
+    self.assertEquals(('429', 'my body'), ihc(ex))
+
     self.assertEquals((None, 'foo bar'), ihc(urllib2.URLError('foo bar')))
 
     self.assertEquals(('429', 'my body'), ihc(

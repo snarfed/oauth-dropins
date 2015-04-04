@@ -178,10 +178,14 @@ def interpret_http_exception(exception):
   elif isinstance(e, urllib2.HTTPError):
     code = e.code
     try:
-      body = e.read()
-      e.fp.seek(0)  # preserve the body so it can be read again
-    except AttributeError:
-      body = e.reason
+      body = e.read() or getattr(e, 'body')
+      if body:
+        # store a copy inside the exception because e.fp.seek(0) to reset isn't
+        # always available.
+        e.body = body
+    except AttributeError, ae:
+      if not body:
+        body = e.reason
 
   elif isinstance(e, urllib2.URLError):
     body = e.reason
@@ -198,8 +202,8 @@ def interpret_http_exception(exception):
     code = '401'
 
   # instagram-specific error_types that should disable the source.
-  if body and ('OAuthAccessTokenException' in body            # revoked access
-               or 'APIRequiresAuthenticationError' in body):  # account deleted
+  if body and ('OAuthAccessTokenException' in body or      # revoked access
+               'APIRequiresAuthenticationError' in body):  # account deleted
     code = '401'
 
   if code:
