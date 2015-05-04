@@ -28,6 +28,3 @@
 [submodule "httplib2_module"]
 	path = httplib2_module
 	url = git@github.com:snarfed/httplib2.git
-[submodule "six"]
-	path = six
-	url = https://github.com/kelp404/six.git

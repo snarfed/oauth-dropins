@@ -55,7 +55,6 @@ for path in (
   'requests_module',
   'requests-oauthlib',
   'python-tumblpy',
-  'six',
   'tweepy_module',
   ):
   path = os.path.join(os.path.dirname(__file__), path)
