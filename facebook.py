@@ -106,6 +106,20 @@ class FacebookAuth(models.BaseAuth):
 
     return None
 
+  def is_authority_for(self, key):
+    """Additionally check if the key represents a Page that this user has
+    authority over.
+
+    Args:
+      auth_entity_key: ndb.Key
+
+    Returns: boolean, true if key represents this user or one of the
+    user's pages.
+    """
+    return super(FacebookAuth, self).is_authority_for(key) or any(
+      key == self.for_page(page.get('id')).key
+      for page in json.loads(self.pages_json))
+
 
 class StartHandler(handlers.StartHandler):
   """Starts Facebook auth. Requests an auth code and expects a redirect back.

@@ -64,6 +64,21 @@ class BaseAuth(models.StringIdModel):
     """
     raise NotImplementedError()
 
+  def is_authority_for(self, key):
+    """When disabling or modifying an account, it's useful to re-auth the
+    user to make sure they have have permission to modify that
+    account. Typically this means the auth entity represents the exact
+    same user, but in some cases (e.g., Facebook Pages), a user may
+    control several unique identities. So authenticating as a user
+    should give you authority over their pages.
+
+    Args:
+      key: ndb.Key
+
+    Returns: boolean, true if key represents the same account as this entity
+    """
+    return self.key == key
+
   @staticmethod
   def urlopen_access_token(url, access_token, api_key=None, **kwargs):
     """Wraps urllib2.urlopen() and adds an access_token query parameter.
