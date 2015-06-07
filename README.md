@@ -194,6 +194,10 @@ least one of them, but not all.
 
 Development
 ---
+To convert README.md to README.rst:
+
+`pandoc --from=markdown --to=rst --output=README.rst README.md`
+
 TODO:
 
 * Google+ and Blogger need some love:
