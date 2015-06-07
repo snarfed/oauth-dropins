@@ -66,8 +66,18 @@ class DropboxAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
-                                                **kwargs)
+    logging.info('Fetching %s with header "Authorization: Bearer %s..',
+                 url, self.access_token_str[:4])
+
+    if 'timeout' not in kwargs:
+      kwargs['timeout'] = appengine_config.HTTP_TIMEOUT
+    headers = {'Authorization': 'Bearer %s' % self.access_token_str}
+
+    try:
+      return urllib2.urlopen(urllib2.Request(url, headers=headers), **kwargs)
+    except BaseException, e:
+      handlers.interpret_http_exception(e)
+      raise
 
 
 class DropboxCsrf(ndb.Model):
@@ -138,6 +148,7 @@ class CallbackHandler(handlers.CallbackHandler):
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
       raise exc.HttpBadRequest('Bad Dropbox response to access token request')
+
 
     logging.info('Storing new Dropbox account: %s', data['uid'])
     auth = DropboxAuth(id=data['uid'], access_token_str=data['access_token'])
