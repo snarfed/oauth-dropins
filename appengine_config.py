@@ -33,7 +33,7 @@ import sys
 
 # Load packages in lib/
 from google.appengine.ext import vendor
-vendor.add('lib')
+vendor.add('local')
 
 from webutil.appengine_config import *
 
@@ -44,6 +44,18 @@ socket.setdefaulttimeout(HTTP_TIMEOUT)
 # socket.setblocking() and maybe other operations.
 # http://stackoverflow.com/a/8465202/186123
 socket.getdefaulttimeout = lambda: HTTP_TIMEOUT
+
+# Add submodule directories to sys.path so they can be imported.
+#
+# I used to use symlinks and munge sys.modules, but both of those ended up in
+# duplicate instances of modules, which caused problems. Background in
+# https://github.com/snarfed/bridgy/issues/31
+for path in (
+  'gdata-python-client/src',
+  ):
+  path = os.path.join(os.path.dirname(__file__), path)
+  if path not in sys.path:
+    sys.path.append(path)
 
 
 def read(filename):

@@ -4,6 +4,3 @@
 [submodule "webutil"]
 	path = webutil
 	url = git@github.com:snarfed/webutil.git
-[submodule "google-api-python-client"]
-	path = google-api-python-client
-	url = git@github.com:fmoga/google-api-python-client.git

@@ -25,6 +25,13 @@ source local/bin/activate
 pip install -r requirements.txt
 ```
 
+Then add this line to the `appengine_config.py` file in your project's root
+directory:
+
+```py
+from oauth_dropins.appengine_config import *
+```
+
 This software is released into the public domain. See LICENSE for details.
 
 Related work:
@@ -204,14 +211,12 @@ least one of them, but not all.
 
 Development
 ---
-Use [`virtualenv`]() to set up dependencies:
-
 Most dependencies are clean, but we've made patches to some that we haven't
 (yet) tried to push upstream. If we ever switch submodule repos for those
 dependencies, make sure the patches are included!
 
-* snarfed/gdata-python-client@fabb6227361612ac4fcb8bef4438719cb00eaa2b
-* snarfed/gdata-python-client@8453e3388d152ac650e22d219fae36da56d9a85d
+* [snarfed/gdata-python-client@fabb622](https://github.com/snarfed/gdata-python-client/commit/fabb6227361612ac4fcb8bef4438719cb00eaa2b)
+* [snarfed/gdata-python-client@8453e33](https://github.com/snarfed/gdata-python-client/commit/8453e3388d152ac650e22d219fae36da56d9a85d)
 
 To convert README.md to README.rst:
 

@@ -4,14 +4,7 @@ Docs: https://packaging.python.org/en/latest/distributing.html
 
 Based on https://github.com/pypa/sampleproject/blob/master/setup.py
 """
-
-# Always prefer setuptools over distutils
-from setuptools import setup, find_packages
-# To use a consistent encoding
-from codecs import open
-from os import path
-
-here = path.abspath(path.dirname(__file__))
+from setuptools import setup
 
 setup(name='oauth-dropins',
       version='1.0',
@@ -37,8 +30,6 @@ setup(name='oauth-dropins',
       # requirements files see:
       # https://packaging.python.org/en/latest/requirements.html
       install_requires=[
-          'dropbox',
-          'gdata',
           'google-api-python-client',
           'httplib2',
           'oauthlib',

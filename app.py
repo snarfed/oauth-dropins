@@ -3,16 +3,16 @@
 
 import appengine_config
 
-import blogger_v2
-import disqus
-import dropbox
-import facebook
-import flickr
-import googleplus
-import instagram
-import tumblr
-import twitter
-import wordpress_rest
+from oauth_dropins import blogger_v2
+from oauth_dropins import disqus
+from oauth_dropins import dropbox
+from oauth_dropins import facebook
+from oauth_dropins import flickr
+from oauth_dropins import googleplus
+from oauth_dropins import instagram
+from oauth_dropins import tumblr
+from oauth_dropins import twitter
+from oauth_dropins import wordpress_rest
 
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import template
