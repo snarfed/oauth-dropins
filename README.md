@@ -5,15 +5,25 @@ oauth-dropins
 This is a collection of drop-in
 [Google App Engine](https://appengine.google.com/) request handlers for the
 initial [OAuth](http://oauth.net/) client flows for many popular sites,
-including Blogger, Dropbox, Facebook, Flickr, Google+, Instagram, Twitter, 
-Tumblr, and WordPress.com.
+including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, Instagram,
+Tumblr, Twitter, and WordPress.com.
 
 This repo also provides an example demo app, deployed at
 http://oauth-dropins.appspot.com/.
 
-All dependencies are included as git submodules. After you've cloned or download
-this repo, be sure to initialize the submodules with `git submodule init && git
-submodule update`.
+Some dependencies are included as git submodules; others are installed with
+`pip` in a
+[`virtualenv`](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
+([App Engine details.](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring))
+To get set up:
+
+```shell
+git submodule init
+git submodule update
+virtualenv local
+source local/bin/activate
+pip install -r requirements.txt
+```
 
 This software is released into the public domain. See LICENSE for details.
 
@@ -194,6 +204,15 @@ least one of them, but not all.
 
 Development
 ---
+Use [`virtualenv`]() to set up dependencies:
+
+Most dependencies are clean, but we've made patches to some that we haven't
+(yet) tried to push upstream. If we ever switch submodule repos for those
+dependencies, make sure the patches are included!
+
+* snarfed/gdata-python-client@fabb6227361612ac4fcb8bef4438719cb00eaa2b
+* snarfed/gdata-python-client@8453e3388d152ac650e22d219fae36da56d9a85d
+
 To convert README.md to README.rst:
 
 `pandoc --from=markdown --to=rst --output=README.rst README.md`
