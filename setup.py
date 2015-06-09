@@ -1,10 +1,20 @@
 """setuptools setup module for oauth-dropins.
 
-Docs: https://packaging.python.org/en/latest/distributing.html
+Docs:
+https://packaging.python.org/en/latest/distributing.html
+http://pythonhosted.org/setuptools/setuptools.html
 
 Based on https://github.com/pypa/sampleproject/blob/master/setup.py
 """
+import unittest
+
 from setuptools import setup
+
+
+class TestLoader(unittest.TestLoader):
+    def loadTestsFromNames(self, names, _=None):
+        return self.discover(names[0])
+
 
 setup(name='oauth-dropins',
       version='1.0',
@@ -25,10 +35,6 @@ setup(name='oauth-dropins',
           'Programming Language :: Python :: 2',
       ],
       keywords='oauth appengine',
-      # List run-time dependencies here.  These will be installed by pip when
-      # your project is installed. For an analysis of "install_requires" vs pip's
-      # requirements files see:
-      # https://packaging.python.org/en/latest/requirements.html
       install_requires=[
           'google-api-python-client',
           'httplib2',
@@ -38,4 +44,6 @@ setup(name='oauth-dropins',
           'requests-oauthlib',
           'tweepy',
       ],
+      test_loader='setup:TestLoader',
+      test_suite='.',
 )

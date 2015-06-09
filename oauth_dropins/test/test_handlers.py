@@ -15,7 +15,7 @@ from oauth2client.client import AccessTokenRefreshError
 import requests
 from webob import exc
 
-import handlers
+from oauth_dropins import handlers
 from webutil import util
 from webutil import testutil
 

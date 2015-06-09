@@ -211,6 +211,8 @@ least one of them, but not all.
 
 Development
 ---
+Run the unit tests with `python setup.py test`.
+
 Most dependencies are clean, but we've made patches to some that we haven't
 (yet) tried to push upstream. If we ever switch submodule repos for those
 dependencies, make sure the patches are included!

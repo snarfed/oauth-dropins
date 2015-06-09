@@ -1,4 +1,5 @@
 /dist/
+/.eggs/
 /*.egg-info
 /local/
 datastore.dat
