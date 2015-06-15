@@ -16,8 +16,8 @@ import requests
 from webob import exc
 
 from oauth_dropins import handlers
-from webutil import util
-from webutil import testutil
+from oauth_dropins.webutil import util
+from oauth_dropins.webutil import testutil
 
 
 class HandlersTest(testutil.HandlerTest):

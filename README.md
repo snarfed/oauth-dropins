@@ -11,38 +11,41 @@ Tumblr, Twitter, and WordPress.com.
 This repo also provides an example demo app, deployed at
 http://oauth-dropins.appspot.com/.
 
-Some dependencies are included as git submodules; others are installed with
-`pip` in a
+Depends on the
+[App Engine Python SDK](https://developers.google.com/appengine/downloads). All
+other dependencies are handled by pip and enumerated in
+[requirements.txt](https://github.com/snarfed/oauth-dropins/blob/master/requirements.txt).
+We recommend that you install with pip in a
 [`virtualenv`](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
 ([App Engine details.](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring))
-To get set up:
 
-```shell
-git submodule init
-git submodule update
-virtualenv local
-source local/bin/activate
-pip install -r requirements.txt
-```
-
-Then add this line to the `appengine_config.py` file in your project's root
-directory:
-
-```py
-from oauth_dropins.appengine_config import *
-```
+If you clone the repo directly or want to contribute, see
+[Development](#development) for setup instructions.
 
 This software is released into the public domain. See LICENSE for details.
-
-Related work:
-
-* [Python Social Auth](http://psa.matiasaguirre.net/)
 
 
 Quick start
 ---
 
 Here's a full example of using the Facebook drop-in.
+
+1. Install oauth-dropins into a virtualenv somewhere your App Engine project's
+directory, e.g. `local/`:
+
+```shell
+source local/bin/activate
+pip install oauth-dropins
+```
+
+1. Add this to the `appengine_config.py` file in your project's root directory
+([background](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)):
+
+```py
+from google.appengine.ext import vendor
+vendor.add('local')
+from oauth_dropins.appengine_config import *
+```
 
 1. Put your [Facebook application](https://developers.facebook.com/apps)'s ID
 and secret in two plain text files in your app's root directory,
@@ -211,7 +214,16 @@ least one of them, but not all.
 
 Development
 ---
-Run the unit tests with `python setup.py test`.
+To get started:
+
+```shell
+git submodule init
+git submodule update
+virtualenv local
+source local/bin/activate
+pip install -r requirements.txt
+python setup.py test
+```
 
 Most dependencies are clean, but we've made patches to some that we haven't
 (yet) tried to push upstream. If we ever switch submodule repos for those
@@ -223,6 +235,10 @@ dependencies, make sure the patches are included!
 To convert README.md to README.rst:
 
 `pandoc --from=markdown --to=rst --output=README.rst README.md`
+
+Related work:
+
+* [Python Social Auth](http://psa.matiasaguirre.net/)
 
 TODO:
 

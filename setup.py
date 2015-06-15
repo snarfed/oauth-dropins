@@ -6,14 +6,7 @@ http://pythonhosted.org/setuptools/setuptools.html
 
 Based on https://github.com/pypa/sampleproject/blob/master/setup.py
 """
-import unittest
-
-from setuptools import setup
-
-
-class TestLoader(unittest.TestLoader):
-    def loadTestsFromNames(self, names, _=None):
-        return self.discover(names[0])
+from setuptools import setup, find_packages
 
 
 setup(name='oauth-dropins',
@@ -21,7 +14,7 @@ setup(name='oauth-dropins',
       description='Drop-in App Engine OAuth client handlers for many popular sites.',
       long_description=open('README.rst').read(),
       url='https://github.com/snarfed/oauth-dropins',
-      packages=['oauth_dropins', 'webutil'],
+      packages=find_packages(),
       author='Ryan Barrett',
       author_email='oauth-dropins@ryanb.org',
       license='Public domain',
@@ -36,6 +29,7 @@ setup(name='oauth-dropins',
       ],
       keywords='oauth appengine',
       install_requires=[
+          'gdata',
           'google-api-python-client',
           'httplib2',
           'oauthlib',
@@ -44,6 +38,5 @@ setup(name='oauth-dropins',
           'requests-oauthlib',
           'tweepy',
       ],
-      test_loader='setup:TestLoader',
-      test_suite='.',
+      test_suite='oauth_dropins',
 )

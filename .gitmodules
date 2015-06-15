@@ -1,6 +1,3 @@
-[submodule "gdata-python-client"]
-	path = gdata-python-client
-	url = git@github.com:snarfed/gdata-python-client.git
 [submodule "webutil"]
-	path = webutil
+	path = oauth_dropins/webutil
 	url = git@github.com:snarfed/webutil.git
