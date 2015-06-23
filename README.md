@@ -219,7 +219,7 @@ To get started:
 ```shell
 git submodule init
 git submodule update
-virtualenv --system-site-packages local
+virtualenv local
 source local/bin/activate
 pip install -r requirements.txt
 python setup.py test
