@@ -15,11 +15,11 @@ libraries:
 handlers:
 
 - url: /static
-  static_dir: static
+  static_dir: oauth_dropins/static
 
 - url: /favicon.ico
-  static_files: static/favicon.ico
-  upload: static/favicon.ico
+  static_files: oauth_dropins/static/favicon.ico
+  upload: oauth_dropins/static/favicon.ico
 
 - url: .*
   script: app.application
