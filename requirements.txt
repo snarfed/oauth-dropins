@@ -8,4 +8,4 @@ oauthlib
 python-tumblpy
 requests==2.1.0
 requests-oauthlib
-tweepy==2.3
+tweepy>=3.0
