@@ -1,0 +1,4 @@
+# Used by include_package_data=True in setup.py to include static files.
+# Docs: https://docs.python.org/2/distutils/sourcedist.html#manifest-template
+recursive-include oauth_dropins *
+recursive-exclude oauth_dropins *.pyc
