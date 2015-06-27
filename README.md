@@ -1,4 +1,4 @@
-![OAuth logo](https://raw.github.com/snarfed/oauth-dropins/master/static/oauth_shiny_128.png)
+![OAuth logo](https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny_128.png)
 oauth-dropins
 =============
 
@@ -236,6 +236,9 @@ dependencies, make sure the patches are included!
 
 * [snarfed/gdata-python-client@fabb622](https://github.com/snarfed/gdata-python-client/commit/fabb6227361612ac4fcb8bef4438719cb00eaa2b)
 * [snarfed/gdata-python-client@8453e33](https://github.com/snarfed/gdata-python-client/commit/8453e3388d152ac650e22d219fae36da56d9a85d)
+
+To deploy:
+`python -m unittest discover && git push && ~/google_appengine/appcfg.py update .`
 
 To convert README.md to README.rst:
 
