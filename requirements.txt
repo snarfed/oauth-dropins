@@ -2,7 +2,6 @@
 gdata>=2.0.18
 google-api-python-client>=1.4.0
 httplib2
-mox
 oauth2client
 oauthlib
 python-tumblpy
