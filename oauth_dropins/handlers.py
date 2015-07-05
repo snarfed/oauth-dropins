@@ -13,13 +13,7 @@ application = webapp2.WSGIApplication([
 import logging
 import urllib
 
-import apiclient
-import apiclient.errors
-from oauth2client.client import AccessTokenRefreshError
-import requests
-import urllib2
 import webapp2
-from webob import exc
 from webutil import handlers
 from webutil import util
 
@@ -152,63 +146,3 @@ class CallbackHandler(BaseHandler):
     url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
     self.redirect(url)
-
-
-def interpret_http_exception(exception):
-  """Extracts the status code and response from different HTTP exception types.
-
-  Args:
-    exc: one of:
-      apiclient.errors.HttpError
-      exc.WSGIHTTPException
-      oauth2client.client.AccessTokenRefreshError
-      requests.HTTPError
-      urllib2.HTTPError
-      urllib2.URLError
-
-  Returns: (string status code or None, string response body or None)
-  """
-  e = exception
-  code = body = None
-
-  if isinstance(e, exc.WSGIHTTPException):
-    code = e.code
-    body = e.plain_body({})
-
-  elif isinstance(e, urllib2.HTTPError):
-    code = e.code
-    try:
-      body = e.read() or getattr(e, 'body')
-      if body:
-        # store a copy inside the exception because e.fp.seek(0) to reset isn't
-        # always available.
-        e.body = body
-    except AttributeError, ae:
-      if not body:
-        body = e.reason
-
-  elif isinstance(e, urllib2.URLError):
-    body = e.reason
-
-  elif isinstance(e, requests.HTTPError):
-    code = e.response.status_code
-    body = e.response.text
-
-  elif isinstance(e, apiclient.errors.HttpError):
-    code = e.resp.status
-    body = e.content
-
-  elif isinstance(e, AccessTokenRefreshError) and str(e) == 'invalid_grant':
-    code = '401'
-
-  # instagram-specific error_types that should disable the source.
-  if body and ('OAuthAccessTokenException' in body or      # revoked access
-               'APIRequiresAuthenticationError' in body):  # account deleted
-    code = '401'
-
-  if code:
-    code = str(code)
-  if code or body:
-    logging.warning('Error %s, response body: %s', code, body)
-
-  return code, body
