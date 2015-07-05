@@ -11,7 +11,19 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
+.. automodule:: oauth_dropins.blogger_v2
+.. automodule:: oauth_dropins.disqus
+.. automodule:: oauth_dropins.dropbox
+.. automodule:: oauth_dropins.facebook
+.. automodule:: oauth_dropins.flickr
+.. automodule:: oauth_dropins.googleplus
+.. automodule:: oauth_dropins.handlers
+.. automodule:: oauth_dropins.instagram
+.. automodule:: oauth_dropins.models
+.. automodule:: oauth_dropins.tumblr
+.. automodule:: oauth_dropins.twitter
+.. automodule:: oauth_dropins.twitter_auth
+.. automodule:: oauth_dropins.wordpress_rest
 
 Indices and tables
 ==================
