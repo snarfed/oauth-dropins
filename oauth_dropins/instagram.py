@@ -19,9 +19,10 @@ from appengine_config import HTTP_TIMEOUT
 import facebook  # we reuse facebook.CallbackHandler.handle_error()
 import handlers
 import models
-from webob import exc
+from webutil import util
 
 from google.appengine.ext import ndb
+from webob import exc
 
 
 # instagram api url templates. can't (easily) use urllib.urlencode() because i
@@ -120,7 +121,7 @@ class CallbackHandler(handlers.CallbackHandler):
       resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
                              timeout=HTTP_TIMEOUT).read()
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
 
     try:

@@ -21,6 +21,7 @@ from oauth2client.client import OAuth2Credentials
 from google.appengine.ext import db
 from google.appengine.ext import ndb
 from webutil import handlers as webutil_handlers
+from webutil import util
 
 
 # suppress "execute() takes at most 1 positional argument (2 given)"
@@ -158,7 +159,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
           user = json_service.people().get(userId='me')\
               .execute(oauth_decorator.http())
         except BaseException, e:
-          handlers.interpret_http_exception(e)
+          util.interpret_http_exception(e)
           raise
         logging.debug('Got one person: %r', user)
 

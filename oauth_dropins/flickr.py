@@ -18,6 +18,7 @@ from webob import exc
 import appengine_config
 import handlers
 import models
+from webutil import util
 
 from google.appengine.ext import ndb
 
@@ -67,7 +68,7 @@ class FlickrAuth(models.BaseAuth):
     try:
       return urllib2.urlopen(urllib2.Request(uri, body, headers))
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
 
   def call_api_method(self, method, params):
@@ -144,7 +145,7 @@ class CallbackHandler(handlers.CallbackHandler):
     try:
       resp = urllib2.urlopen(uri)
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
     parsed = dict(urlparse.parse_qs(resp.read()))
 

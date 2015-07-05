@@ -15,6 +15,7 @@ from appengine_config import HTTP_TIMEOUT
 
 from google.appengine.ext import ndb
 from webob import exc
+from webutil import util
 
 import handlers
 import models
@@ -76,7 +77,7 @@ class DropboxAuth(models.BaseAuth):
     try:
       return urllib2.urlopen(urllib2.Request(url, headers=headers), **kwargs)
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
 
 
@@ -140,7 +141,7 @@ class CallbackHandler(handlers.CallbackHandler):
       resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
                              timeout=HTTP_TIMEOUT).read()
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
 
     try:

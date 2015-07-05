@@ -159,7 +159,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         except BaseException, e:
           # this api call often returns 401 Unauthorized for users who aren't
           # signed up for blogger and/or don't have any blogs.
-          handlers.interpret_http_exception(e)
+          util.interpret_http_exception(e)
           # we can't currently intercept declines for Google+ or Blogger, so the
           # only time we return a None auth entity right now is on error.
           self.finish(None, state=state)

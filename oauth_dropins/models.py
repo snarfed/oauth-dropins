@@ -99,7 +99,7 @@ class BaseAuth(models.StringIdModel):
     try:
       return urllib2.urlopen(url, **kwargs)
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
 
   def http(self):

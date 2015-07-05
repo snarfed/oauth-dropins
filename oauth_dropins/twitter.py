@@ -17,6 +17,7 @@ import tweepy
 import twitter_auth
 
 from webutil import handlers as webutil_handlers
+from webutil import util
 
 from google.appengine.ext import ndb
 
@@ -67,7 +68,7 @@ class TwitterAuth(models.BaseAuth):
     try:
       resp.raise_for_status()
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
     return resp
 
@@ -79,7 +80,7 @@ class TwitterAuth(models.BaseAuth):
     try:
       resp.raise_for_status()
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
     return resp
 

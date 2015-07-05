@@ -91,7 +91,7 @@ class WordPressAuth(BaseAuth):
       return urllib2.urlopen(urllib2.Request(url, **kwargs),
                              timeout=appengine_config.HTTP_TIMEOUT)
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
 
 

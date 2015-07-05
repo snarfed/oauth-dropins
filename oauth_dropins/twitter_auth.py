@@ -5,10 +5,11 @@ import logging
 import urllib2
 
 import appengine_config
-import handlers
 import requests
 import requests_oauthlib
 import tweepy
+
+from webutil import util
 
 
 def auth_header(url, token_key, token_secret, method='GET'):
@@ -59,7 +60,7 @@ def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
     return urllib2.urlopen(urllib2.Request(url, headers=headers, **kwargs),
                            timeout=timeout)
   except BaseException, e:
-    handlers.interpret_http_exception(e)
+    util.interpret_http_exception(e)
     raise
 
 

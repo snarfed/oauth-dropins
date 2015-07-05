@@ -16,6 +16,7 @@ from webob import exc
 
 from google.appengine.ext import ndb
 from webutil import handlers as webutil_handlers
+from webutil import util
 
 
 class TumblrAuth(models.BaseAuth):
@@ -131,7 +132,7 @@ class CallbackHandler(handlers.CallbackHandler):
     try:
       resp = tp.post('user/info')
     except BaseException, e:
-      handlers.interpret_http_exception(e)
+      util.interpret_http_exception(e)
       raise
     logging.debug('Got: %s', resp)
     user = resp['user']
