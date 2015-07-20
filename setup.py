@@ -8,8 +8,8 @@ Based on https://github.com/pypa/sampleproject/blob/master/setup.py
 """
 from setuptools import setup, find_packages
 
-# test/__init__.py makes App Engine SDK's bundled libraries importable.
-import oauth_dropins.test
+# webutil/test/__init__.py makes App Engine SDK's bundled libraries importable.
+import oauth_dropins.webutil.test
 
 setup(name='oauth-dropins',
       version='1.0',
