@@ -227,6 +227,12 @@ git submodule update
 virtualenv local
 source local/bin/activate
 pip install -r requirements.txt
+
+# We install gdata in source mode, and App Engine doesn't follow .egg-link
+# files, so add a symlink to it.
+ln -s ../../../src/gdata/src/gdata local/lib/python2.7/site-packages/gdata
+ln -s ../../../src/gdata/src/atom local/lib/python2.7/site-packages/atom
+
 python setup.py test
 ```
 
