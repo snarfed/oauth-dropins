@@ -9,17 +9,18 @@ button, Flickr redirects them to its home page, *not* to us.
 
 import json
 import logging
-import oauthlib
+import oauthlib.oauth1
 import urllib
 import urllib2
 import urlparse
 from webob import exc
 
 import appengine_config
+import flickr_auth
 import handlers
 import models
-from webutil import util
 
+from webutil import util
 from google.appengine.ext import ndb
 
 
@@ -64,23 +65,12 @@ class FlickrAuth(models.BaseAuth):
       signature_type=oauthlib.oauth1.SIGNATURE_TYPE_QUERY)
 
   def urlopen(self, url, **kwargs):
-    uri, headers, body = self.api().sign(url, **kwargs)
-    try:
-      return urllib2.urlopen(urllib2.Request(uri, body, headers))
-    except BaseException, e:
-      util.interpret_http_exception(e)
-      raise
+    return flickr_auth.signed_urlopen(
+      url, self.token_key, self.token_secret, kwargs)
 
   def call_api_method(self, method, params):
-    full_params = {
-      'nojsoncallback': 1,
-      'format': 'json',
-      'api_key': appengine_config.FLICKR_APP_KEY,
-      'method': method,
-    }
-    full_params.update(params)
-    resp = self.urlopen(API_URL + '?' + urllib.urlencode(full_params))
-    return json.load(resp)
+    return flickr_auth.call_api_method(
+      method, params, self.token_key, self.token_secret)
 
 
 class StartHandler(handlers.StartHandler):
@@ -89,7 +79,6 @@ class StartHandler(handlers.StartHandler):
   Fetches an OAuth request token, then redirects to Flickr's auth page to
   request an access token.
   """
-
   def redirect_url(self, state=None):
     assert (appengine_config.FLICKR_APP_KEY and
             appengine_config.FLICKR_APP_SECRET), (
@@ -99,11 +88,11 @@ class StartHandler(handlers.StartHandler):
     client = oauthlib.oauth1.Client(
       appengine_config.FLICKR_APP_KEY,
       client_secret=appengine_config.FLICKR_APP_SECRET,
-      signature_type=oauthlib.oauth1.SIGNATURE_TYPE_QUERY,
       callback_uri=self.to_url(state=state))
 
     uri, headers, body = client.sign(REQUEST_TOKEN_URL)
-    resp = urllib2.urlopen(uri, timeout=appengine_config.HTTP_TIMEOUT)
+    resp = urllib2.urlopen(urllib2.Request(uri, body, headers),
+                           timeout=appengine_config.HTTP_TIMEOUT)
     parsed = dict(urlparse.parse_qs(resp.read()))
 
     resource_owner_key = parsed.get('oauth_token')[0]
@@ -138,19 +127,15 @@ class CallbackHandler(handlers.CallbackHandler):
       client_secret=appengine_config.FLICKR_APP_SECRET,
       resource_owner_key=oauth_token,
       resource_owner_secret=request_token.token_secret,
-      verifier=oauth_verifier,
-      signature_type=oauthlib.oauth1.SIGNATURE_TYPE_QUERY)
+      verifier=oauth_verifier)
 
     uri, headers, body = client.sign(ACCESS_TOKEN_URL)
     try:
-      resp = urllib2.urlopen(uri)
+      resp = urllib2.urlopen(urllib2.Request(uri, body, headers))
     except BaseException, e:
       util.interpret_http_exception(e)
       raise
     parsed = dict(urlparse.parse_qs(resp.read()))
-
-    logging.debug('access_token response %s', parsed)
-
     access_token = parsed.get('oauth_token')[0]
     access_secret = parsed.get('oauth_token_secret')[0]
     user_nsid = parsed.get('user_nsid')[0]
