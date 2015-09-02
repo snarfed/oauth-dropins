@@ -6,6 +6,7 @@ import oauthlib.oauth1
 import urllib
 import urllib2
 import json
+import logging
 from webutil import util
 
 
@@ -28,7 +29,7 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
     resource_owner_secret=token_secret)
   uri, headers, body = auth.sign(url, **kwargs)
   timeout = kwargs.pop('timeout', appengine_config.HTTP_TIMEOUT)
-
+  logging.debug('Fetching %s', uri)
   try:
     return urllib2.urlopen(urllib2.Request(uri, body, headers),
                            timeout=timeout)
@@ -53,7 +54,6 @@ def call_api_method(method, params, token_key, token_secret):
   full_params = {
     'nojsoncallback': 1,
     'format': 'json',
-    'api_key': appengine_config.FLICKR_APP_KEY,
     'method': method,
   }
   full_params.update(params)

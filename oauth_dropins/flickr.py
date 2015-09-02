@@ -13,15 +13,15 @@ import oauthlib.oauth1
 import urllib
 import urllib2
 import urlparse
-from webob import exc
 
 import appengine_config
 import flickr_auth
 import handlers
 import models
-
 from webutil import util
+
 from google.appengine.ext import ndb
+from webob import exc
 
 
 REQUEST_TOKEN_URL = 'https://www.flickr.com/services/oauth/request_token'
