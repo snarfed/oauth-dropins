@@ -57,7 +57,20 @@ def call_api_method(method, params, token_key, token_secret):
     'method': method,
   }
   full_params.update(params)
-  resp = signed_urlopen('https://api.flickr.com/services/rest?'
-                        + urllib.urlencode(full_params),
-                        token_key, token_secret)
-  return json.load(resp)
+  url = 'https://api.flickr.com/services/rest?' + urllib.urlencode(full_params)
+  resp = signed_urlopen(url, token_key, token_secret)
+
+  body = json.load(resp)
+
+  # Flickr returns HTTP success even for errors, so we have to fake it
+  if body.get('stat') == 'fail':
+    error_code = body.get('code')
+    # https://www.flickr.com/services/api/flickr.auth.checkToken.html#Error%20Codes
+    if error_code == 98 or error_code == 100:
+      code = 401  # invalid auth token or API key -> unauthorized
+    else:
+      code = 400
+    raise urllib2.HTTPError(url, code, 'message=%s, flickr code=%d' % (
+      body.get('message'), error_code), {}, None)
+
+  return body
