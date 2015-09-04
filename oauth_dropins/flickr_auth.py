@@ -42,6 +42,9 @@ def call_api_method(method, params, token_key, token_secret):
   """Call a Flickr API method. Flickr has one API endpoint, where
   different methods are called by name.
 
+  If the "stat" field contains "fail", then this method creates
+  an artificial HTTPError 400 or 401 depending on the type of failure.
+
   Args:
     method (string): the API method name (e.g. flickr.photos.getInfo)
     params (dict): the parameters to send to the API method
@@ -60,7 +63,11 @@ def call_api_method(method, params, token_key, token_secret):
   url = 'https://api.flickr.com/services/rest?' + urllib.urlencode(full_params)
   resp = signed_urlopen(url, token_key, token_secret)
 
-  body = json.load(resp)
+  try:
+    body = json.load(resp)
+  except:
+    logging.exception('malformed flickr response')
+    body = {}
 
   # Flickr returns HTTP success even for errors, so we have to fake it
   if body.get('stat') == 'fail':
