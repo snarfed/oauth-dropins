@@ -1,4 +1,7 @@
 """Utility functions for generating Twitter OAuth headers and making API calls.
+
+This is a separate module from twitter.py so that projects like granary can use
+it without pulling in App Engine dependencies.
 """
 
 import logging
