@@ -49,7 +49,7 @@ they'll be redirected to ``/next?access_token=...`` in your app.
 All of the sites provide the same API. To use a different one, just
 import the site module you want and follow the same steps. The filenames
 for app keys and secrets also differ by site;
-`appengine_config.py <https://github.com/snarfed/oauth-dropins/blob/master/appengine_config.py>`__
+`appengine_config.py <https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/appengine_config.py>`__
 has the full list.
 
 
