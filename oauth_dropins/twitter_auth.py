@@ -33,10 +33,6 @@ def auth_header(url, token_key, token_secret, method='GET'):
     resource_owner_secret=token_secret,
     )
   req = requests.Request(method=method, url=url, auth=oauth1).prepare()
-
-  logging.debug(
-    'Generated Authorization header from access token key %s... and secret %s...',
-    token_key[:4], token_secret[:4])
   return req.headers
 
 
