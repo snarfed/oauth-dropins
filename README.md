@@ -30,46 +30,52 @@ Quick start
 
 Here's a full example of using the Facebook drop-in.
 
+1. Make sure you have the
+  [App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
+  version 1.9.15 or later (for
+  [`vendor`](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
+  support) installed and on your `$PYTHONPATH`, e.g.
+  `export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine`. oauth-dropins's
+  `setup.py` file needs it during installation.
 1. Install oauth-dropins into a virtualenv somewhere your App Engine project's
 directory, e.g. `local/`:
 
-```shell
-source local/bin/activate
-pip install oauth-dropins
-```
+    ```shell
+    source local/bin/activate
+    pip install oauth-dropins
+    ```
 
 1. Add this to the `appengine_config.py` file in your project's root directory
 ([background](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)):
 
-```py
-from google.appengine.ext import vendor
-vendor.add('local')
-from oauth_dropins.appengine_config import *
-```
+    ```py
+    from google.appengine.ext import vendor
+    vendor.add('local')
+    from oauth_dropins.appengine_config import *
+    ```
 
 1. Put your [Facebook application](https://developers.facebook.com/apps)'s ID
-and secret in two plain text files in your app's root directory,
-`facebook_app_id` and `facebook_app_secret`. (If you use git, you'll probably
-also want to add them to your `.gitignore`.)
-
+  and secret in two plain text files in your app's root directory,
+  `facebook_app_id` and `facebook_app_secret`. (If you use git, you'll probably
+  also want to add them to your `.gitignore`.)
 1. Create a `facebook_oauth.py` file with these contents:
 
-```python
-from oauth_dropins import facebook
-import webapp2
-
-application = webapp2.WSGIApplication([
-  ('/facebook/start_oauth', facebook.StartHandler.to('/facebook/oauth_callback')),
-  ('/facebook/oauth_callback', facebook.CallbackHandler.to('/next'))]
-```
+    ```python
+    from oauth_dropins import facebook
+    import webapp2
+    
+    application = webapp2.WSGIApplication([
+      ('/facebook/start_oauth', facebook.StartHandler.to('/facebook/oauth_callback')),
+      ('/facebook/oauth_callback', facebook.CallbackHandler.to('/next'))]
+    ```
 
 1. Add these lines to `app.yaml`:
 
-```yaml
-- url: /facebook/(start_oauth|oauth_callback)
-  script: facebook_oauth.application
-  secure: always
-```
+    ```yaml
+    - url: /facebook/(start_oauth|oauth_callback)
+      script: facebook_oauth.application
+      secure: always
+    ```
 
 Voila! Send your users to `/facebook/start_oauth` when you want them to connect
 their Facebook account to your app, and when they're done, they'll be redirected
