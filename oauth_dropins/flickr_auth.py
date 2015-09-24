@@ -65,8 +65,8 @@ def call_api_method(method, params, token_key, token_secret):
 
   try:
     body = json.load(resp)
-  except:
-    logging.exception('malformed flickr response')
+  except BaseException:
+    logging.exception('malformed flickr response: %s', resp[:1000])
     body = {}
 
   # Flickr returns HTTP success even for errors, so we have to fake it
