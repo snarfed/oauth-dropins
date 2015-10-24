@@ -47,7 +47,7 @@ class BaseHandler(webapp2.RequestHandler):
     elif isinstance(extra, basestring):
       return cls.DEFAULT_SCOPE + ',' + extra
     else:
-      return cls.DEFAULT_SCOPE + ','.join(extra)
+      return cls.DEFAULT_SCOPE + ',' + ','.join(extra)
 
   def to_url(self, state=None):
     """Returns a fully qualified callback URL based on to_path.
