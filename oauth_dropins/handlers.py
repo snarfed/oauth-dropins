@@ -45,9 +45,9 @@ class BaseHandler(webapp2.RequestHandler):
     if extra is None:
       return cls.DEFAULT_SCOPE
     elif isinstance(extra, basestring):
-      return cls.DEFAULT_SCOPE + ',' + extra
+      return (cls.DEFAULT_SCOPE + ',' if cls.DEFAULT_SCOPE else '') + extra
     else:
-      return cls.DEFAULT_SCOPE + ',' + ','.join(extra)
+      return (cls.DEFAULT_SCOPE + ',' if cls.DEFAULT_SCOPE else '') + ','.join(extra)
 
   def to_url(self, state=None):
     """Returns a fully qualified callback URL based on to_path.
@@ -95,7 +95,7 @@ class StartHandler(BaseHandler):
   def post(self):
     scopes = self.request.params.getall('scope')
     if scopes:
-      self.scope += ',' + ','.join(scopes)
+      self.scope += (',' if self.scope else '') + ','.join(scopes)
 
     url = self.redirect_url(state=self.request.get('state'))
     logging.info('Starting OAuth flow: redirecting to %s', url)
