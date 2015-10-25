@@ -134,7 +134,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
       oauth_decorator = OAuth2Decorator(
         client_id=appengine_config.GOOGLE_CLIENT_ID,
         client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-        scope=cls.make_scope_str(scopes),
+        scope=cls.make_scope_str(scopes, separator=' '),
         callback_path=to_path,
         # make sure we ask for a refresh token so we can use it to get an access
         # token offline. requires approval_prompt=force! more:

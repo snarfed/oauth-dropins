@@ -34,20 +34,21 @@ class BaseHandler(webapp2.RequestHandler):
     return ToHandler
 
   @classmethod
-  def make_scope_str(cls, extra):
+  def make_scope_str(cls, extra, separator=','):
     """Returns an OAuth scopes query parameter value.
 
     Combines DEFAULT_SCOPE and extra.
 
     Args:
       extra: string, sequence of strings, or None
+      separator: string (optional), the separator between multiple scopes.
+        defaults to ','
     """
-    if extra is None:
+    if not extra:
       return cls.DEFAULT_SCOPE
-    elif isinstance(extra, basestring):
-      return (cls.DEFAULT_SCOPE + ',' if cls.DEFAULT_SCOPE else '') + extra
-    else:
-      return (cls.DEFAULT_SCOPE + ',' if cls.DEFAULT_SCOPE else '') + ','.join(extra)
+
+    return (cls.DEFAULT_SCOPE + separator if cls.DEFAULT_SCOPE else '') + (
+      extra if isinstance(extra, basestring) else separator.join(extra))
 
   def to_url(self, state=None):
     """Returns a fully qualified callback URL based on to_path.
