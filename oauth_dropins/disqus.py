@@ -20,6 +20,8 @@ import urllib
 import urllib2
 from webob import exc
 
+from webutil import util
+
 import appengine_config
 from appengine_config import HTTP_TIMEOUT
 import handlers
@@ -111,10 +113,8 @@ class CallbackHandler(handlers.CallbackHandler):
     if self.handle_error():
       return
 
-    auth_code = self.request.get('code')
-    assert auth_code
-
     # https://disqus.com/api/docs/auth/
+    auth_code = util.get_required_param(self, 'code')
     data = {
         'grant_type': 'authorization_code',
         'client_id': appengine_config.DISQUS_CLIENT_ID,

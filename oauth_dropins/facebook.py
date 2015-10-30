@@ -150,9 +150,7 @@ class CallbackHandler(handlers.CallbackHandler):
     if CallbackHandler.handle_error(self):
       return
 
-    auth_code = self.request.get('code')
-    assert auth_code
-
+    auth_code = util.get_required_param(self, 'code')
     url = GET_ACCESS_TOKEN_URL % {
       'auth_code': auth_code,
       'client_id': appengine_config.FACEBOOK_APP_ID,

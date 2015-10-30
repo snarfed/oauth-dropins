@@ -130,8 +130,7 @@ class CallbackHandler(handlers.CallbackHandler):
         raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
 
     # extract auth code and request access token
-    auth_code = self.request.get('code')
-    assert auth_code
+    auth_code = util.get_required_param(self, 'code')
     data = {
       'code': auth_code,
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,

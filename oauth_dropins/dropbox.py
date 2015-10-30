@@ -108,6 +108,8 @@ class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
   def get(self):
+    state = util.get_required_param(self, 'state')
+
     # handle errors
     error = self.request.get('error')
     error_reason = urllib.unquote_plus(self.request.get('error_reason', ''))
@@ -115,24 +117,26 @@ class CallbackHandler(handlers.CallbackHandler):
     if error or error_reason:
       if error == 'access_denied':
         logging.info('User declined: %s', error_reason)
-        self.finish(None, state=self.request.get('state'))
+        self.finish(None, state=state)
         return
       else:
         raise exc.HTTPBadRequest(' '.join((error, error_reason)))
 
     # lookup the CSRF token
-    csrf_id = urllib.unquote_plus(self.request.get('state')).split('|')[-1]
-    csrf = DropboxCsrf.get_by_id(int(csrf_id))
+    try:
+      csrf_id = int(urllib.unquote_plus(state).split('|')[-1])
+    except (ValueError, TypeError):
+      raise exc.HTTPBadRequest('Invalid state value %r' % state)
+
+    csrf = DropboxCsrf.get_by_id(csrf_id)
     if not csrf:
-      raise exc.HTTPBadRequest('No CSRF token for id %s', csrf_id)
+      raise exc.HTTPBadRequest('No CSRF token for id %s' % csrf_id)
 
     # request an access token
-    auth_code = self.request.get('code')
-    assert auth_code
     data = {
       'client_id': appengine_config.DROPBOX_APP_KEY,
       'client_secret': appengine_config.DROPBOX_APP_SECRET,
-      'code': auth_code,
+      'code': util.get_required_param(self, 'code'),
       'redirect_uri': self.request.path_url,
     }
 

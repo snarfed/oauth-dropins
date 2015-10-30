@@ -104,10 +104,8 @@ class CallbackHandler(handlers.CallbackHandler):
     if facebook.CallbackHandler.handle_error(self):
       return
 
-    auth_code = self.request.get('code')
-    assert auth_code
-
     # http://instagram.com/developer/authentication/
+    auth_code = util.get_required_param(self, 'code')
     data = {
       'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
       'client_secret': appengine_config.INSTAGRAM_CLIENT_SECRET,
