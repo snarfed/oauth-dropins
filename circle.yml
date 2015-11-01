@@ -1,0 +1,11 @@
+# CircleCI automatically reads this file from our repo and uses it for
+# configuration. Docs: https://circleci.com/docs/configuration
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
+
+dependencies:
+  pre:
+    - curl -o $HOME/google_appengine_1.9.28.zip https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.28.zip
+    - unzip -q -d $HOME $HOME/google_appengine_1.9.28.zip
