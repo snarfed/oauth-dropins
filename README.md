@@ -1,5 +1,5 @@
 ![OAuth logo](https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny_128.png)
-oauth-dropins
+oauth-dropins [![Circle CI](https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg)](https://circleci.com/gh/snarfed/oauth-dropins)
 =============
 
 This is a collection of drop-in
