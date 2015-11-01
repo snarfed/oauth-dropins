@@ -43,5 +43,5 @@ setup(name='oauth-dropins',
           'requests-oauthlib',
           'tweepy>=3.0',
       ],
-      test_suite='oauth_dropins',
+      test_suite='oauth_dropins.webutil',
 )

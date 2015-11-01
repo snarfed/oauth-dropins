@@ -9,3 +9,9 @@ dependencies:
   pre:
     - curl -o $HOME/google_appengine_1.9.28.zip https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.28.zip
     - unzip -q -d $HOME $HOME/google_appengine_1.9.28.zip
+  post:
+    - ln -s $VIRTUAL_ENV local  # we use app engine's vendor module to point here
+
+machine:
+  environment:
+    PYTHONPATH: $PYTHONPATH:$HOME/google_appengine
