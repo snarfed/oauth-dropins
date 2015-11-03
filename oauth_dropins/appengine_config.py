@@ -32,6 +32,11 @@ import os
 
 from webutil.appengine_config import *
 
+# quiet down oauth1 log messages
+import logging
+logging.getLogger('oauthlib').setLevel(logging.INFO)
+logging.getLogger('requests_oauthlib').setLevel(logging.INFO)
+
 # default timeout. the G+ and Instagram APIs use httplib2, which honors this.
 import socket
 socket.setdefaulttimeout(HTTP_TIMEOUT)
@@ -39,6 +44,10 @@ socket.setdefaulttimeout(HTTP_TIMEOUT)
 # socket.setblocking() and maybe other operations.
 # http://stackoverflow.com/a/8465202/186123
 socket.getdefaulttimeout = lambda: HTTP_TIMEOUT
+
+# Twitter returns HTTP 429 for rate limiting, which webob doesn't know. Tell it.
+import webob
+webob.util.status_reasons[429] = 'Twitter rate limited'
 
 
 def read(filename):
