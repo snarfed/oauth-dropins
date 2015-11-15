@@ -2,12 +2,18 @@
 """
 
 import appengine_config
+from webutil import util
+
 import oauthlib.oauth1
-import urllib
-import urllib2
+import requests_oauthlib
+import requests
+
 import json
 import logging
-from webutil import util
+import re
+import urllib
+import urllib2
+import urlparse
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):
@@ -36,6 +42,14 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
   except BaseException, e:
     util.interpret_http_exception(e)
     raise
+
+
+def raise_for_failure(url, code, msg):
+  # https://www.flickr.com/services/api/flickr.auth.checkToken.html#Error%20Codes
+  # invalid auth token or API key -> unauthorized
+  http_code = 401 if code == 98 or code == 100 else 400
+  raise urllib2.HTTPError(
+    url, http_code, 'message=%s, flickr code=%d' % (msg, code), {}, None)
 
 
 def call_api_method(method, params, token_key, token_secret):
@@ -72,13 +86,76 @@ def call_api_method(method, params, token_key, token_secret):
 
   # Flickr returns HTTP success even for errors, so we have to fake it
   if body.get('stat') == 'fail':
-    error_code = body.get('code')
-    # https://www.flickr.com/services/api/flickr.auth.checkToken.html#Error%20Codes
-    if error_code == 98 or error_code == 100:
-      code = 401  # invalid auth token or API key -> unauthorized
-    else:
-      code = 400
-    raise urllib2.HTTPError(url, code, 'message=%s, flickr code=%d' % (
-      body.get('message'), error_code), {}, None)
+    raise_for_failure(url, body.get('code'), body.get('message'))
 
   return body
+
+
+def upload(params, photo_file, token_key, token_secret, timeout=None):
+  """Upload a photo to this user's Flickr account.
+
+  Flickr uploads use their own API endpoint, that returns only XML.
+  https://www.flickr.com/services/api/upload.api.html
+
+  Unlike call_api_method, this uses the requests library because
+  urllib2 does support multi-part POSTs on its own.
+
+  Args:
+    params (dict): the parameters to send to the API method
+    photo_file (File-like object): the image to upload
+    token_key (string): the user's API access token
+    token_secret (string): the user's API access token secret
+
+  Return:
+    dict containing the photo id (as 'id')
+
+  Raises:
+    requests.HTTPError on http error or urllib2.HTTPError if we get a
+    stat='fail' response from Flickr.
+  """
+  if not timeout:
+    timeout = appengine_config.HTTP_TIMEOUT
+
+  upload_url = 'https://up.flickr.com/services/upload'
+  auth = requests_oauthlib.OAuth1(
+      client_key=appengine_config.FLICKR_APP_KEY,
+      client_secret=appengine_config.FLICKR_APP_SECRET,
+      resource_owner_key=token_key,
+      resource_owner_secret=token_secret,
+      signature_type=oauthlib.oauth1.SIGNATURE_TYPE_BODY)
+
+  # create a request with files for signing
+  faux_req = requests.Request(
+    'POST', upload_url, data=params, auth=auth).prepare()
+  # parse the signed parameters back out of the body
+  data = urlparse.parse_qsl(faux_req.body)
+
+  # and use them in the real request
+  logging.debug('uploading with data: %s', data)
+  resp = requests.post(upload_url, data=data, files={
+    'photo': photo_file,
+  }, timeout=timeout)
+  logging.debug('upload response: %s, %s', resp, resp.content)
+  resp.raise_for_status()
+
+  m = re.search('<rsp stat="(\w+)">', resp.content, re.DOTALL)
+  if not m:
+    raise BaseException(
+      'Expected response with <rsp stat="...">. Got: %s' % resp.content)
+
+  stat = m.group(1)
+  if stat == 'fail':
+    m = re.search('<err code="(\d+)" msg="([\w ]+)" />', resp.content, re.DOTALL)
+    if not m:
+      raise BaseException(
+        'Expected response with <err code="..." msg=".." />. Got: %s'
+        % resp.content)
+    raise_for_failure(upload_url, int(m.group(1)), m.group(2))
+
+  m = re.search('<photoid>(\d+)</photoid>', resp.content, re.DOTALL)
+  if not m:
+    raise BaseException(
+      'Expected response with <photoid>...</photoid>. Got: %s'
+      % resp.content)
+
+  return {'id': m.group(1)}
