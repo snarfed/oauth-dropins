@@ -26,6 +26,7 @@ from webob import exc
 
 REQUEST_TOKEN_URL = 'https://www.flickr.com/services/oauth/request_token'
 AUTHORIZE_URL = 'https://www.flickr.com/services/oauth/authorize'
+AUTHENTICATE_URL = 'https://www.flickr.com/services/oauth/authenticate'
 ACCESS_TOKEN_URL = 'https://www.flickr.com/services/oauth/access_token'
 API_URL = 'https://api.flickr.com/services/rest'
 
@@ -103,10 +104,16 @@ class StartHandler(handlers.StartHandler):
       token_secret=resource_owner_secret,
       state=state).put()
 
-    auth_url = AUTHORIZE_URL + '?' + urllib.urlencode({
-      'perms': self.request.get('perms', 'read'),
-      'oauth_token': resource_owner_key
-    })
+    if self.scope:
+      auth_url = AUTHORIZE_URL + '?' + urllib.urlencode({
+        'perms': self.scope or 'read',
+        'oauth_token': resource_owner_key
+      })
+    else:
+      auth_url = AUTHENTICATE_URL + '?' + urllib.urlencode({
+        'oauth_token': resource_owner_key
+      })
+
     logging.info(
       'Generated request token, redirect to Flickr authorization url: %s',
       auth_url)
