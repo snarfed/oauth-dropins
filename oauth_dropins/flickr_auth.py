@@ -91,7 +91,7 @@ def call_api_method(method, params, token_key, token_secret):
   return body
 
 
-def upload(params, photo_file, token_key, token_secret, timeout=None):
+def upload(params, photo_file, token_key, token_secret):
   """Upload a photo to this user's Flickr account.
 
   Flickr uploads use their own API endpoint, that returns only XML.
@@ -113,9 +113,6 @@ def upload(params, photo_file, token_key, token_secret, timeout=None):
     requests.HTTPError on http error or urllib2.HTTPError if we get a
     stat='fail' response from Flickr.
   """
-  if not timeout:
-    timeout = appengine_config.HTTP_TIMEOUT
-
   upload_url = 'https://up.flickr.com/services/upload'
   auth = requests_oauthlib.OAuth1(
       client_key=appengine_config.FLICKR_APP_KEY,
@@ -134,7 +131,7 @@ def upload(params, photo_file, token_key, token_secret, timeout=None):
   logging.debug('uploading with data: %s', data)
   resp = requests.post(upload_url, data=data, files={
     'photo': photo_file,
-  }, timeout=timeout)
+  }, timeout=appengine_config.HTTP_TIMEOUT)
   logging.debug('upload response: %s, %s', resp, resp.content)
   resp.raise_for_status()
 
