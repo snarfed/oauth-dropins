@@ -57,8 +57,12 @@ def read(filename):
       return f.read().strip()
 
 if DEBUG:
-  FACEBOOK_APP_ID = read('facebook_app_id_local')
-  FACEBOOK_APP_SECRET = read('facebook_app_secret_local')
+  # read these from env vars if available. used in CircleCI:
+  # https://circleci.com/gh/snarfed/bridgy/edit#env-vars
+  FACEBOOK_APP_ID = (os.getenv('FACEBOOK_APP_ID') or
+                     read('facebook_app_id_local'))
+  FACEBOOK_APP_SECRET = (os.getenv('FACEBOOK_APP_SECRET') or
+                         read('facebook_app_secret_local'))
   INSTAGRAM_CLIENT_ID = read('instagram_client_id_local')
   INSTAGRAM_CLIENT_SECRET = read('instagram_client_secret_local')
   WORDPRESS_CLIENT_ID = read('wordpress.com_client_id_local')
@@ -66,8 +70,10 @@ if DEBUG:
   DISQUS_CLIENT_ID = read('disqus_client_id_local')
   DISQUS_CLIENT_SECRET = read('disqus_client_secret_local')
 else:
-  FACEBOOK_APP_ID = read('facebook_app_id')
-  FACEBOOK_APP_SECRET = read('facebook_app_secret')
+  FACEBOOK_APP_ID = (os.getenv('FACEBOOK_APP_ID') or
+                     read('facebook_app_id'))
+  FACEBOOK_APP_SECRET = (os.getenv('FACEBOOK_APP_SECRET') or
+                         read('facebook_app_secret'))
   INSTAGRAM_CLIENT_ID = read('instagram_client_id')
   INSTAGRAM_CLIENT_SECRET = read('instagram_client_secret')
   WORDPRESS_CLIENT_ID = read('wordpress.com_client_id')
