@@ -283,12 +283,9 @@ you have it as a relative directory. pip requires fully qualified directories.
     InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
     ```
 
-  You may need to upgrade your `setuptools`. Try running `pip install --upgrade
-  setuptools` outside the virtualenv.
-
-  ...you may be hitting pypa/pip#1833. Are you trying to skip the virtualenv?
-  Use the virtualenv, it's your friend. If you really want to avoid it, you can
-  try removing the `-e` from the lines in `requirements.freeze.txt` that have it.
+  ...you may be hitting pypa/pip#1833. Are you passing `-t` to `pip install`?
+  Use the virtualenv instead, it's your friend. If you really want `-t`, try
+  removing the `-e` from the lines in `requirements.freeze.txt` that have it.
 
 
 Development
