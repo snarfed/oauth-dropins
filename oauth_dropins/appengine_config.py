@@ -47,7 +47,10 @@ socket.getdefaulttimeout = lambda: HTTP_TIMEOUT
 
 # Twitter returns HTTP 429 for rate limiting, which webob doesn't know. Tell it.
 import webob
-webob.util.status_reasons[429] = 'Twitter rate limited'
+try:
+  webob.util.status_reasons[429] = 'Twitter rate limited'  # webob <= 0.9
+except AttributeError:
+  webob.status_reasons[429] = 'Twitter rate limited'  # webob >= 1.1.1
 
 
 def read(filename):
