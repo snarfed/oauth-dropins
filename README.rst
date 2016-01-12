@@ -1,4 +1,7 @@
-|OAuth logo|
+.. image:: https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny_128.png
+   :target: https://github.com/snarfed/oauth-dropins
+.. image:: https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg
+   :target: https://circleci.com/gh/snarfed/oauth-dropins
 
 This is a collection of drop-in
 `Google App Engine <https://appengine.google.com/>`__ request handlers for the
@@ -53,4 +56,3 @@ for app keys and secrets also differ by site;
 has the full list.
 
 
-.. |OAuth logo| image:: https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny_128.png

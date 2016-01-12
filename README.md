@@ -288,6 +288,25 @@ you have it as a relative directory. pip requires fully qualified directories.
   removing the `-e` from the lines in `requirements.freeze.txt` that have it.
 
 
+Changes
+---
+
+#### 1.2 - 2016-01-11
+* Flickr:
+  * Add upload method.
+  * Improve error handling and logging.
+* Bug fixes and cleanup for constructing scope strings.
+* Add developer setup and troubleshooting docs.
+* Set up CircleCI.
+
+#### 1.1 - 2015-09-06
+* Flickr: split out flickr_auth.py file.
+* Add a number of utility functions to webutil.
+
+#### 1.0 - 2015-06-27
+* Initial PyPi release.
+
+
 Development
 ---
 You'll need the
