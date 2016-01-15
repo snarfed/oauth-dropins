@@ -2,6 +2,19 @@
 oauth-dropins [![Circle CI](https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg)](https://circleci.com/gh/snarfed/oauth-dropins)
 =============
 
+Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
+
+* [About](#about)
+* [Quick start](#quick-start)
+* [Usage details](#usage-details)
+* [Troubleshooting/FAQ](#troubleshootingfaq)
+* [Changes](#changes)
+* [Development](#development)
+
+
+About
+---
+
 This is a collection of drop-in
 [Google App Engine](https://appengine.google.com/) request handlers for the
 initial [OAuth](http://oauth.net/) client flows for many popular sites,
