@@ -91,8 +91,8 @@ def call_api_method(method, params, token_key, token_secret):
   return body
 
 
-def upload(params, photo_file, token_key, token_secret):
-  """Upload a photo to this user's Flickr account.
+def upload(params, file, token_key, token_secret):
+  """Upload a photo or video to this user's Flickr account.
 
   Flickr uploads use their own API endpoint, that returns only XML.
   https://www.flickr.com/services/api/upload.api.html
@@ -102,7 +102,7 @@ def upload(params, photo_file, token_key, token_secret):
 
   Args:
     params (dict): the parameters to send to the API method
-    photo_file (File-like object): the image to upload
+    file (File-like object): the image or video to upload
     token_key (string): the user's API access token
     token_secret (string): the user's API access token secret
 
@@ -130,7 +130,7 @@ def upload(params, photo_file, token_key, token_secret):
   # and use them in the real request
   logging.debug('uploading with data: %s', data)
   resp = requests.post(upload_url, data=data, files={
-    'photo': photo_file,
+    'photo': file,
   }, timeout=appengine_config.HTTP_TIMEOUT)
   logging.debug('upload response: %s, %s', resp, resp.content)
   resp.raise_for_status()
