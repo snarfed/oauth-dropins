@@ -11,7 +11,15 @@ dependencies:
     - unzip -q -d $HOME $HOME/google_appengine_1.9.28.zip
   post:
     - ln -s $VIRTUAL_ENV local  # we use app engine's vendor module to point here
+    - pip install coverage coveralls  # for https://coveralls.io/
 
 machine:
   environment:
     PYTHONPATH: $PYTHONPATH:$HOME/google_appengine
+
+test:
+  override:
+    - python -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v
+    - python -m coverage html -d $CIRCLE_ARTIFACTS
+  post:
+    - coveralls
