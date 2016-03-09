@@ -34,11 +34,8 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
     resource_owner_key=token_key,
     resource_owner_secret=token_secret)
   uri, headers, body = auth.sign(url, **kwargs)
-  timeout = kwargs.pop('timeout', appengine_config.HTTP_TIMEOUT)
-  logging.debug('Fetching %s', uri)
   try:
-    return urllib2.urlopen(urllib2.Request(uri, body, headers),
-                           timeout=timeout)
+    return util.urlopen(urllib2.Request(uri, body, headers))
   except BaseException, e:
     util.interpret_http_exception(e)
     raise
@@ -128,10 +125,7 @@ def upload(params, file, token_key, token_secret):
   data = urlparse.parse_qsl(faux_req.body)
 
   # and use them in the real request
-  logging.debug('uploading with data: %s', data)
-  resp = requests.post(upload_url, data=data, files={
-    'photo': file,
-  }, timeout=appengine_config.HTTP_TIMEOUT)
+  resp = util.requests_post(upload_url, data=data, files={'photo': file})
   logging.debug('upload response: %s, %s', resp, resp.content)
   resp.raise_for_status()
 

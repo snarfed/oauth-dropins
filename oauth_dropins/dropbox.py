@@ -67,15 +67,9 @@ class DropboxAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
     """
-    logging.info('Fetching %s with header "Authorization: Bearer %s..',
-                 url, self.access_token_str[:4])
-
-    if 'timeout' not in kwargs:
-      kwargs['timeout'] = appengine_config.HTTP_TIMEOUT
     headers = {'Authorization': 'Bearer %s' % self.access_token_str}
-
     try:
-      return urllib2.urlopen(urllib2.Request(url, headers=headers), **kwargs)
+      return util.urlopen(urllib2.Request(url, headers=headers), **kwargs)
     except BaseException, e:
       util.interpret_http_exception(e)
       raise
@@ -139,11 +133,8 @@ class CallbackHandler(handlers.CallbackHandler):
       'code': util.get_required_param(self, 'code'),
       'redirect_uri': self.request.path_url,
     }
-
-    logging.debug('Fetching: %s with data %s', GET_ACCESS_TOKEN_URL, data)
     try:
-      resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
-                             timeout=HTTP_TIMEOUT).read()
+      resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data)).read()
     except BaseException, e:
       util.interpret_http_exception(e)
       raise

@@ -157,9 +157,8 @@ class CallbackHandler(handlers.CallbackHandler):
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
       'redirect_uri': urllib.quote_plus(self.request_url_with_state()),
       }
-    logging.debug('Fetching: %s', url)
     try:
-      resp = urllib2.urlopen(url, timeout=HTTP_TIMEOUT).read()
+      resp = util.urlopen(url).read()
     except urllib2.HTTPError, e:
       logging.error(e.read())
       raise

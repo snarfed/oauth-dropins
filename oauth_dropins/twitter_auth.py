@@ -53,11 +53,8 @@ def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
     method = 'GET'
 
   headers.update(auth_header(url, token_key, token_secret, method=method))
-  timeout = kwargs.pop('timeout', appengine_config.HTTP_TIMEOUT)
-  logging.debug('Fetching %s', url)
   try:
-    return urllib2.urlopen(urllib2.Request(url, headers=headers, **kwargs),
-                           timeout=timeout)
+    return util.urlopen(urllib2.Request(url, headers=headers, **kwargs))
   except BaseException, e:
     util.interpret_http_exception(e)
     raise

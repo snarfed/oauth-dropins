@@ -64,7 +64,7 @@ class TwitterAuth(models.BaseAuth):
     """Wraps requests.get() and adds an OAuth signature.
     """
     oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
-    resp = requests.get(*args, auth=oauth1, **kwargs)
+    resp = util.requests_get(*args, auth=oauth1, **kwargs)
     try:
       resp.raise_for_status()
     except BaseException, e:
@@ -76,7 +76,7 @@ class TwitterAuth(models.BaseAuth):
     """Wraps requests.post() and adds an OAuth signature.
     """
     oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
-    resp = requests.post(*args, auth=oauth1, **kwargs)
+    resp = util.requests_post(*args, auth=oauth1, **kwargs)
     try:
       resp.raise_for_status()
     except BaseException, e:

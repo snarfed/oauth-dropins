@@ -91,13 +91,10 @@ class BaseAuth(models.StringIdModel):
       log_params.append(('api_key', api_key[:4] + '...'))
       real_params.append(('api_key', api_key))
     log_url = util.add_query_params(url, log_params)
-    logging.info('Fetching %s', log_url)
     url = util.add_query_params(url, real_params)
-    if 'timeout' not in kwargs:
-      kwargs['timeout'] = appengine_config.HTTP_TIMEOUT
 
     try:
-      return urllib2.urlopen(url, **kwargs)
+      return util.urlopen(url, **kwargs)
     except BaseException, e:
       util.interpret_http_exception(e)
       raise

@@ -92,8 +92,7 @@ class StartHandler(handlers.StartHandler):
       callback_uri=self.to_url(state=state))
 
     uri, headers, body = client.sign(REQUEST_TOKEN_URL)
-    resp = urllib2.urlopen(urllib2.Request(uri, body, headers),
-                           timeout=appengine_config.HTTP_TIMEOUT)
+    resp = util.urlopen(urllib2.Request(uri, body, headers))
     parsed = dict(urlparse.parse_qs(resp.read()))
 
     resource_owner_key = parsed.get('oauth_token')[0]
@@ -138,7 +137,7 @@ class CallbackHandler(handlers.CallbackHandler):
 
     uri, headers, body = client.sign(ACCESS_TOKEN_URL)
     try:
-      resp = urllib2.urlopen(urllib2.Request(uri, body, headers))
+      resp = util.urlopen(urllib2.Request(uri, body, headers))
     except BaseException, e:
       util.interpret_http_exception(e)
       raise

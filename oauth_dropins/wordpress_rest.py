@@ -83,13 +83,8 @@ class WordPressAuth(BaseAuth):
     """
     kwargs.setdefault('headers', {})['authorization'] = \
         'Bearer ' + self.access_token_str
-    logging.info('Fetching %s', url)
-    data = kwargs.get('data')
-    if data:
-      logging.info('...with data: %r', data)
     try:
-      return urllib2.urlopen(urllib2.Request(url, **kwargs),
-                             timeout=appengine_config.HTTP_TIMEOUT)
+      return util.urlopen(urllib2.Request(url, **kwargs))
     except BaseException, e:
       util.interpret_http_exception(e)
       raise
@@ -140,10 +135,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'redirect_uri': self.request.path_url,
       'grant_type': 'authorization_code',
       }
-    logging.debug('Fetching %s with %r', GET_ACCESS_TOKEN_URL, data)
-    resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL,
-                           data=urllib.urlencode(data),
-                           timeout=appengine_config.HTTP_TIMEOUT).read()
+    resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data)).read()
     logging.debug('Access token response: %s', resp)
 
     try:

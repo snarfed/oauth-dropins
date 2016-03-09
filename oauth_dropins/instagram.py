@@ -114,10 +114,8 @@ class CallbackHandler(handlers.CallbackHandler):
       'grant_type': 'authorization_code',
     }
 
-    logging.debug('Fetching: %s with data %s', GET_ACCESS_TOKEN_URL, data)
     try:
-      resp = urllib2.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
-                             timeout=HTTP_TIMEOUT).read()
+      resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data)).read()
     except BaseException, e:
       util.interpret_http_exception(e)
       raise
