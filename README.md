@@ -18,8 +18,8 @@ About
 This is a collection of drop-in
 [Google App Engine](https://appengine.google.com/) request handlers for the
 initial [OAuth](http://oauth.net/) client flows for many popular sites,
-including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, Instagram,
-Tumblr, Twitter, and WordPress.com.
+including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth,
+Instagram, Tumblr, Twitter, and WordPress.com.
 
 This repo also provides an example demo app, deployed at
 http://oauth-dropins.appspot.com/.
@@ -303,6 +303,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changes
 ---
+
+#### 1.3
+* Add [IndieAuth](https://indieauth.com/).
 
 #### 1.2 - 2016-01-11
 * Flickr:

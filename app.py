@@ -9,6 +9,7 @@ from oauth_dropins import dropbox
 from oauth_dropins import facebook
 from oauth_dropins import flickr
 from oauth_dropins import googleplus
+from oauth_dropins import indieauth
 from oauth_dropins import instagram
 from oauth_dropins import tumblr
 from oauth_dropins import twitter
@@ -47,6 +48,8 @@ application = webapp2.WSGIApplication([
     ('/flickr/oauth_callback', flickr.CallbackHandler.to('/')),
     ('/googleplus/start', googleplus.StartHandler.to('/googleplus/oauth_callback')),
     ('/googleplus/oauth_callback', googleplus.CallbackHandler.to('/')),
+    ('/indieauth/start', indieauth.StartHandler.to('/indieauth/oauth_callback')),
+    ('/indieauth/oauth_callback', indieauth.CallbackHandler.to('/')),
     ('/instagram/start', instagram.StartHandler.to('/instagram/oauth_callback')),
     ('/instagram/oauth_callback', instagram.CallbackHandler.to('/')),
     ('/tumblr/start', tumblr.StartHandler.to('/tumblr/oauth_callback')),
