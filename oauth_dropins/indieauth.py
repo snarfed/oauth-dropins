@@ -13,6 +13,7 @@ import handlers
 import models
 from webutil import util
 
+import bs4
 import requests
 from google.appengine.ext import ndb
 
@@ -94,7 +95,7 @@ class StartHandler(handlers.StartHandler):
     })
 
     logging.info('Redirecting to IndieAuth: %s', url)
-    return url
+    return str(url)
 
 
 class CallbackHandler(handlers.CallbackHandler):
