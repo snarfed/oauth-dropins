@@ -2,7 +2,7 @@
 -e git+git@github.com:snarfed/gdata-python-client-1.git#egg=gdata
 google-api-python-client>=1.4.0
 httplib2
-oauth2client
+oauth2client<2.0
 oauthlib
 python-tumblpy
 requests<2.6.0

@@ -140,7 +140,7 @@ class CallbackHandler(BaseHandler):
       token = auth_entity.access_token()
       if isinstance(token, basestring):
         params.append(('access_token', token))
-      else:
+      elif token:
         params += [('access_token_key', token[0]),
                    ('access_token_secret', token[1])]
 
