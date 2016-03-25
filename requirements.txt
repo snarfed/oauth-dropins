@@ -9,3 +9,5 @@ requests<2.6.0
 requests-oauthlib
 tweepy>=3.0
 beautifulsoup4
+mf2py
+mf2util

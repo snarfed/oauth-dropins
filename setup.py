@@ -43,6 +43,8 @@ setup(name='oauth-dropins',
           'requests-oauthlib',
           'tweepy>=3.0',
           'beautifulsoup4',
+          'mf2py',
+          'mf2util',
       ],
       test_suite='oauth_dropins.webutil',
 )
