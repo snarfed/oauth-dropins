@@ -8,3 +8,4 @@ python-tumblpy
 requests<2.6.0
 requests-oauthlib
 tweepy>=3.0
+beautifulsoup4

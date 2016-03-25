@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 import oauth_dropins.webutil.test
 
 setup(name='oauth-dropins',
-      version='1.2',
+      version='1.3',
       description='Drop-in App Engine OAuth client handlers for many popular sites.',
       long_description=open('README.rst').read(),
       url='https://github.com/snarfed/oauth-dropins',
@@ -42,6 +42,7 @@ setup(name='oauth-dropins',
           'requests<2.6.0',
           'requests-oauthlib',
           'tweepy>=3.0',
+          'beautifulsoup4',
       ],
       test_suite='oauth_dropins.webutil',
 )
