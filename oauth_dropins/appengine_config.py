@@ -14,6 +14,7 @@ flickr_app_key
 flickr_app_secret
 google_client_id
 google_client_secret
+indieauth_client_id
 instagram_client_id
 instagram_client_secret
 instagram_client_id_local
@@ -90,6 +91,7 @@ FLICKR_APP_KEY = read('flickr_app_key')
 FLICKR_APP_SECRET = read('flickr_app_secret')
 GOOGLE_CLIENT_ID = read('google_client_id')
 GOOGLE_CLIENT_SECRET = read('google_client_secret')
+INDIEAUTH_CLIENT_ID = read('indieauth_client_id')
 TUMBLR_APP_KEY = read('tumblr_app_key')
 TUMBLR_APP_SECRET = read('tumblr_app_secret')
 TWITTER_APP_KEY = read('twitter_app_key')
