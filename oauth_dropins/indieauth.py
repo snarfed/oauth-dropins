@@ -70,6 +70,9 @@ def build_user_json(me, resp=None):
       'could not fetch user url "%s". got response code: %d',
       me, resp.status_code)
     return user_json
+  # Requests doesn't look at the HTML body to find <meta charset>
+  # tags, so if the character encoding isn't given in a header, then
+  # we pass on the raw bytes and let BS4 deal with it.
   p = mf2py.parse(doc=resp.text
                   if 'charset' in resp.headers.get('content-type', '')
                   else resp.content, url=me)
