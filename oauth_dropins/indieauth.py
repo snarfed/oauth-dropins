@@ -7,14 +7,14 @@ import json
 import logging
 import urllib
 import urlparse
+from webob import exc
 
+import bs4
 import appengine_config
 import handlers
 import models
 from webutil import util
 
-import bs4
-import requests
 from google.appengine.ext import ndb
 
 
@@ -31,10 +31,9 @@ def discover_authorization_endpoint(me):
   Return:
     string, the discovered indieauth URL or the default indieauth.com URL
   """
-  logging.debug('trying to fetch user url "%s"', me)
   resp = util.requests_get(me)
-  if resp.status_code < 200 or resp.status_code >= 300:
-    logging.debug(
+  if resp.status_code // 100 != 2:
+    logging.warning(
       'could not fetch user url "%s". got response code: %d',
       me, resp.status_code)
     return INDIEAUTH_URL
@@ -45,11 +44,10 @@ def discover_authorization_endpoint(me):
   # check the html content
   soup = bs4.BeautifulSoup(resp.text)
   auth_link = soup.find('link', {'rel': 'authorization_endpoint'})
-  auth_endpoint = auth_link and auth_link['href']
+  auth_endpoint = auth_link and auth_link.get('href')
   if auth_endpoint:
     return auth_endpoint
   return INDIEAUTH_URL
-
 
 
 class IndieAuth(models.BaseAuth):
@@ -60,7 +58,6 @@ class IndieAuth(models.BaseAuth):
   details.
   """
   # access token
-  token = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty(required=True)  # generally this has only 'me'
 
   def site_name(self):
@@ -69,10 +66,6 @@ class IndieAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the user's domain."""
     return self.key.string_id()
-
-  def access_token(self):
-    """Returns theAuth access token string."""
-    return self.token
 
 
 class StartHandler(handlers.StartHandler):
@@ -83,7 +76,7 @@ class StartHandler(handlers.StartHandler):
     assert appengine_config.INDIEAUTH_CLIENT_ID, (
       "Please fill in the indieauth_client_id in your app's root directory.")
 
-    me = self.request.get('me')
+    me = util.get_required_param(self, 'me')
     redirect_uri = self.to_url()
     endpoint = discover_authorization_endpoint(me)
 
@@ -102,9 +95,9 @@ class CallbackHandler(handlers.CallbackHandler):
   """The callback handler from the IndieAuth request. POSTs back to the
   auth endpoint to verify the authentication code."""
   def get(self):
-    me = self.request.get('me')
-    code = self.request.get('code')
-    state = self.request.get('state')
+    me = util.get_required_param(self, 'me')
+    code = util.get_required_param(self, 'code')
+    state = util.get_required_param(self, 'state')
     endpoint = discover_authorization_endpoint(me)
 
     resp = util.requests_post(endpoint, data={
@@ -119,10 +112,13 @@ class CallbackHandler(handlers.CallbackHandler):
       data = urlparse.parse_qs(resp.content)
       if data.get('me'):
         verified = data.get('me')[0]
-        indie_auth = IndieAuth(id=verified, token='', user_json=json.dumps({'me': verified}))
+        indie_auth = IndieAuth(id=verified, user_json=json.dumps({
+          'me': verified,
+        }))
         indie_auth.put()
         self.finish(indie_auth, state=state)
-        return
-
-    logging.warning('IndieAuth verification failed %r %s', resp, resp.text)
-    self.finish(None, state=state)
+      else:
+        raise exc.HTTPBadRequest(
+          'Verification response missing required "me" field')
+    else:
+      raise exc.HTTPBadRequest('IndieAuth verification failed: %s' % resp.text)
