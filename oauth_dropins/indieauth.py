@@ -67,6 +67,10 @@ class IndieAuth(models.BaseAuth):
     """Returns the user's domain."""
     return self.key.string_id()
 
+  def access_token(self):
+    """Return the access token, N/A for IndieAuth"""
+    return None
+
 
 class StartHandler(handlers.StartHandler):
   """Starts the IndieAuth flow. Requires the 'me' parameter with the
