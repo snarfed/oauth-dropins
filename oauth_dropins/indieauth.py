@@ -134,7 +134,6 @@ class CallbackHandler(handlers.CallbackHandler):
     me = util.get_required_param(self, 'me')
     code = util.get_required_param(self, 'code')
     state = self.request.get('state', '')
-    endpoint = discover_authorization_endpoint(me)
 
     me_resp = util.requests_get(me)
     endpoint = discover_authorization_endpoint(me, me_resp)
