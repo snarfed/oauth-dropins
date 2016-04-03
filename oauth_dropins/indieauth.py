@@ -113,6 +113,10 @@ class StartHandler(handlers.StartHandler):
       "Please fill in the indieauth_client_id in your app's root directory.")
 
     me = util.get_required_param(self, 'me')
+    parsed = urlparse.urlparse(me)
+    if not parsed.scheme:
+      me = 'http://' + me
+
     redirect_uri = self.to_url()
     endpoint = discover_authorization_endpoint(me)
 
