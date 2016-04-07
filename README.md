@@ -8,8 +8,9 @@ Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
 * [Quick start](#quick-start)
 * [Usage details](#usage-details)
 * [Troubleshooting/FAQ](#troubleshootingfaq)
-* [Changes](#changes)
+* [Changelog](#changelog)
 * [Development](#development)
+* [TODO](#TODO)
 
 
 About
@@ -301,11 +302,13 @@ you have it as a relative directory. pip requires fully qualified directories.
   removing the `-e` from the lines in `requirements.freeze.txt` that have it.
 
 
-Changes
+Changelog
 ---
 
-#### 1.3
+#### 1.3 - 2016-04-07
 * Add [IndieAuth](https://indieauth.com/).
+* More consistent logging of HTTP requests.
+* Set up Coveralls.
 
 #### 1.2 - 2016-01-11
 * Flickr:
@@ -365,7 +368,9 @@ Related work:
 
 * [Python Social Auth](http://psa.matiasaguirre.net/)
 
-TODO:
+
+TODO
+---
 
 * Google+ and Blogger need some love:
   * handle declines
