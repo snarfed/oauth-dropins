@@ -21,10 +21,6 @@ handlers:
   static_files: oauth_dropins/static/favicon.ico
   upload: oauth_dropins/static/favicon.ico
 
-- url: /_ereporter.*
-  script: google.appengine.ext.ereporter.report_generator.application
-  login: admin
-
 - url: .*
   script: app.application
   secure: always
