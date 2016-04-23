@@ -305,6 +305,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+#### 1.4 - unreleased
+* Upgrade Facebook API from v2.2 to v2.6.
+
 #### 1.3 - 2016-04-07
 * Add [IndieAuth](https://indieauth.com/).
 * More consistent logging of HTTP requests.

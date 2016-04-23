@@ -1,6 +1,6 @@
 """Facebook OAuth drop-in.
 
-https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.2
+https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
 
 TODO: implement client state param
 TODO: unify this with instagram. see file docstring comment there.
@@ -24,8 +24,9 @@ from google.appengine.ext import ndb
 
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
+# https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#logindialog
 GET_AUTH_CODE_URL = str('&'.join((
-    'https://www.facebook.com/v2.2/dialog/oauth?'
+    'https://www.facebook.com/v2.6/dialog/oauth?'
     # https://developers.facebook.com/docs/reference/login/
     'scope=%(scope)s',
     'client_id=%(client_id)s',
@@ -33,8 +34,9 @@ GET_AUTH_CODE_URL = str('&'.join((
     'redirect_uri=%(redirect_uri)s',
     'response_type=code',
     )))
+# https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#exchangecode
 GET_ACCESS_TOKEN_URL = str('&'.join((
-    'https://graph.facebook.com/v2.2/oauth/access_token?'
+    'https://graph.facebook.com/v2.6/oauth/access_token?'
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the oauth request!
     # (the value here doesn't actually matter since it's requested server side.)
@@ -42,8 +44,8 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
-API_USER_URL = 'https://graph.facebook.com/v2.2/me'
-API_PAGES_URL = 'https://graph.facebook.com/v2.2/me/accounts'
+API_USER_URL = 'https://graph.facebook.com/v2.6/me'
+API_PAGES_URL = 'https://graph.facebook.com/v2.6/me/accounts'
 
 
 class FacebookAuth(models.BaseAuth):
@@ -59,9 +61,9 @@ class FacebookAuth(models.BaseAuth):
   type = ndb.StringProperty(choices=('user', 'page'))
   auth_code = ndb.StringProperty()
   access_token_str = ndb.StringProperty(required=True)
-  # https://developers.facebook.com/docs/graph-api/reference/v2.2/user#fields
+  # https://developers.facebook.com/docs/graph-api/reference/user#fields
   user_json = ndb.TextProperty(required=True)
-  # https://developers.facebook.com/docs/graph-api/reference/v2.2/user/accounts#fields
+  # https://developers.facebook.com/docs/graph-api/reference/user/accounts#fields
   pages_json = ndb.TextProperty()
 
   def site_name(self):
@@ -158,14 +160,13 @@ class CallbackHandler(handlers.CallbackHandler):
       'redirect_uri': urllib.quote_plus(self.request_url_with_state()),
       }
     try:
-      resp = util.urlopen(url).read()
+      resp = json.loads(util.urlopen(url).read())
     except urllib2.HTTPError, e:
       logging.error(e.read())
       raise
 
     logging.debug('Access token response: %s', resp)
-    params = urlparse.parse_qs(resp)
-    access_token = params['access_token'][0]
+    access_token = resp['access_token']
 
     user = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
     logging.debug('User info response: %s', user)
