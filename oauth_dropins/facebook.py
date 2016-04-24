@@ -22,6 +22,8 @@ from webutil import util
 from google.appengine.ext import ndb
 
 
+API_BASE = 'https://graph.facebook.com/v2.6/'
+
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#logindialog
@@ -36,7 +38,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     )))
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#exchangecode
 GET_ACCESS_TOKEN_URL = str('&'.join((
-    'https://graph.facebook.com/v2.6/oauth/access_token?'
+    API_BASE + 'oauth/access_token?'
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the oauth request!
     # (the value here doesn't actually matter since it's requested server side.)
@@ -44,8 +46,9 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     )))
-API_USER_URL = 'https://graph.facebook.com/v2.6/me'
-API_PAGES_URL = 'https://graph.facebook.com/v2.6/me/accounts'
+API_USER_URL = API_BASE + 'me?fields=id,about,bio,cover,email,gender,link,location,name,public_key,timezone,updated_time,website'
+API_PAGE_URL = API_BASE + 'me?fields=id,about,bio,cover,description,emails,general_info,is_published,link,location,name,personal_info,phone,username,website'
+API_PAGES_URL = API_BASE + 'me/accounts'
 
 
 class FacebookAuth(models.BaseAuth):
@@ -102,7 +105,7 @@ class FacebookAuth(models.BaseAuth):
       if id == page_id:
         entity = FacebookAuth(id=id, type='page', pages_json=json.dumps([page]),
                               access_token_str=page.get('access_token'))
-        entity.user_json = entity.urlopen(API_USER_URL).read()
+        entity.user_json = entity.urlopen(API_PAGE_URL).read()
         logging.debug('Page object: %s', entity.user_json)
         return entity
 
