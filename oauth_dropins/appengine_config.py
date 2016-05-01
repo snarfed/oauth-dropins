@@ -53,6 +53,11 @@ try:
 except AttributeError:
   webob.status_reasons[429] = 'Twitter rate limited'  # webob >= 1.1.1
 
+# Make requests and urllib3 play nice with App Engine.
+# https://github.com/snarfed/bridgy/issues/396
+# http://stackoverflow.com/questions/34574740
+from requests_toolbelt.adapters import appengine
+appengine.monkeypatch()
 
 def read(filename):
   """Returns the contents of filename, or None if it doesn't exist."""

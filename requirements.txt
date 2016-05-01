@@ -5,9 +5,11 @@ httplib2
 oauth2client<2.0
 oauthlib
 python-tumblpy
-requests<2.6.0
+requests>=2.10.0
 requests-oauthlib
+requests-toolbelt>=0.6.0
 tweepy>=3.0
 beautifulsoup4
 mf2py
 mf2util
+urllib3>=1.14
