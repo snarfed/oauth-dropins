@@ -10,3 +10,9 @@ from oauth_dropins.appengine_config import *
 # http://stackoverflow.com/questions/34574740
 from requests_toolbelt.adapters import appengine
 appengine.monkeypatch()
+
+# Suppress warnings. These are duplicated in granary and bridgy; keep them in sync!
+import warnings
+warnings.filterwarnings('ignore', module='bs4',
+                        message='No parser was explicitly specified')
+warnings.filterwarnings('ignore', message='urllib3 is using URLFetch')
