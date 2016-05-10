@@ -7,7 +7,7 @@ oauthlib
 python-tumblpy
 requests>=2.10.0
 requests-oauthlib
-requests-toolbelt>=0.6.1
+requests-toolbelt>=0.6.2
 tweepy>=3.0
 beautifulsoup4
 mf2py
