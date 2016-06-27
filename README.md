@@ -305,7 +305,7 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
-#### 1.4 - unreleased
+#### 1.4 - 2016-06-27
 * Upgrade Facebook API from v2.2 to v2.6.
 
 #### 1.3 - 2016-04-07
