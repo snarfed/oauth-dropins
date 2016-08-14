@@ -56,7 +56,7 @@ class MediumAuth(BaseAuth):
   See models.BaseAuth for usage details.
 
   Medium-specific details: implements get() but not urlopen(), http(), or api().
-  The key name is the username.
+  The key name is the user id (*not* username).
   """
   access_token_str = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
@@ -156,8 +156,8 @@ class CallbackHandler(handlers.CallbackHandler):
       raise
 
     user_json = MediumAuth(access_token_str=access_token).get(API_USER_URL).text
-    username = json.loads(user_json)['data']['username']
-    auth = MediumAuth(id=username, access_token_str=access_token, user_json=user_json)
+    id = json.loads(user_json)['data']['id']
+    auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
     auth.put()
 
     self.finish(auth, state=self.request.get('state'))
