@@ -11,6 +11,7 @@ from oauth_dropins import flickr
 from oauth_dropins import googleplus
 from oauth_dropins import indieauth
 from oauth_dropins import instagram
+from oauth_dropins import medium
 from oauth_dropins import tumblr
 from oauth_dropins import twitter
 from oauth_dropins import wordpress_rest
@@ -52,6 +53,8 @@ application = webapp2.WSGIApplication([
     ('/indieauth/oauth_callback', indieauth.CallbackHandler.to('/')),
     ('/instagram/start', instagram.StartHandler.to('/instagram/oauth_callback')),
     ('/instagram/oauth_callback', instagram.CallbackHandler.to('/')),
+    ('/medium/start', medium.StartHandler.to('/medium/oauth_callback')),
+    ('/medium/oauth_callback', medium.CallbackHandler.to('/')),
     ('/tumblr/start', tumblr.StartHandler.to('/tumblr/oauth_callback')),
     ('/tumblr/oauth_callback', tumblr.CallbackHandler.to('/')),
     ('/twitter/start', twitter.StartHandler.to('/twitter/oauth_callback')),

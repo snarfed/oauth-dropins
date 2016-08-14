@@ -20,7 +20,7 @@ This is a collection of drop-in
 [Google App Engine](https://appengine.google.com/) request handlers for the
 initial [OAuth](http://oauth.net/) client flows for many popular sites,
 including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth,
-Instagram, Tumblr, Twitter, and WordPress.com.
+Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
 This repo also provides an example demo app, deployed at
 http://oauth-dropins.appspot.com/.
@@ -226,7 +226,8 @@ least one of them, but not all.
 
 - `urlopen(data=None, timeout=None)` wraps `urllib2.urlopen()` and adds the
   OAuth credentials to the request. Use this for making direct HTTP request to a
-  site's REST API.
+  site's REST API. Some sites may provide `get()` instead, which wraps
+  `requests.get()`.
 
 - `http()` returns an `httplib2.Http` instance that adds the OAuth credentials
   to requests.
@@ -304,6 +305,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
+
+#### 1.5 - unreleased
+* Add [Medium](https://medium.com/).
 
 #### 1.4 - 2016-06-27
 * Upgrade Facebook API from v2.2 to v2.6.

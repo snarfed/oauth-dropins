@@ -21,6 +21,8 @@ instagram_client_id
 instagram_client_secret
 instagram_client_id_local
 instagram_client_secret_local
+medium_client_id
+medium_client_secret
 tumblr_app_key
 tumblr_app_secret
 twitter_app_key
