@@ -122,10 +122,8 @@ class CallbackHandler(handlers.CallbackHandler):
     # handle errors
     error = self.request.get('error')
     if error:
-      error_description = urllib.unquote_plus(
-        self.request.get('error_description', ''))
       if error == 'access_denied':
-        logging.info('User declined: %s', error_description)
+        logging.info('User declined')
         self.finish(None, state=self.request.get('state'))
         return
       else:
@@ -149,12 +147,17 @@ class CallbackHandler(handlers.CallbackHandler):
 
     try:
       resp = json.loads(resp)
-      access_token = resp['access_token']
-      # TODO: handle refresh token
     except:
       logging.exception('Could not decode JSON')
       raise
 
+    errors = resp.get('errors') or resp.get('error')
+    if errors:
+      logging.info('Errors: %s', errors)
+      raise exc.HTTPBadRequest(errors[0].get('message'))
+
+    # TODO: handle refresh token
+    access_token = resp['access_token']
     user_json = MediumAuth(access_token_str=access_token).get(API_USER_URL).text
     id = json.loads(user_json)['data']['id']
     auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
