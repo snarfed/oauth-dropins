@@ -82,10 +82,10 @@ class MediumAuth(BaseAuth):
   def get(self, *args, **kwargs):
     """Wraps requests.get() and adds the Bearer token header.
     """
-    kwargs.setdefault('headers', {}).update({
-      'Authorization': 'Bearer ' + self.access_token_str,
-      'User-Agent': USER_AGENT,
-    })
+    headers = kwargs.setdefault('headers', {})
+    headers['Authorization'] = 'Bearer ' + self.access_token_str
+    headers.setdefault('User-Agent', USER_AGENT)
+
     resp = util.requests_get(*args, **kwargs)
     try:
       resp.raise_for_status()
