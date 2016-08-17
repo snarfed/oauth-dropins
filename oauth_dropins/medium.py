@@ -60,6 +60,10 @@ class MediumAuth(BaseAuth):
   """
   access_token_str = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
+  # used by bridgy in
+  # https://github.com/snarfed/bridgy/commit/58cce60790e746d300e7e5dac331543c56bd9108
+  # background: https://github.com/snarfed/bridgy/issues/506
+  publications_json = ndb.TextProperty()
 
   def site_name(self):
     return 'Medium'
