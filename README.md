@@ -306,7 +306,7 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
-#### 1.5 - unreleased
+#### 1.5 - 2016-08-25
 * Add [Medium](https://medium.com/).
 
 #### 1.4 - 2016-06-27

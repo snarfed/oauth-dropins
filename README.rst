@@ -9,8 +9,8 @@ This is a collection of drop-in
 `Google App Engine <https://appengine.google.com/>`__ request handlers for the
 initial
 `OAuth <http://oauth.net/>`__ client flows for many popular sites, including
-Blogger, Dropbox, Facebook, Flickr, Google+, IndieAuth, Instagram, Twitter,
-Tumblr, and WordPress.com.
+Blogger, Dropbox, Facebook, Flickr, Google+, IndieAuth, Instagram, Medium,
+Twitter, Tumblr, and WordPress.com.
 
 Check out the demo app! https://oauth-dropins.appspot.com/
 
