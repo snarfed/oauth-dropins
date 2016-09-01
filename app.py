@@ -25,7 +25,12 @@ class FrontPageHandler(webapp2.RequestHandler):
   """Renders and serves /, ie the front page.
   """
   def get(self):
-    self.response.headers['Content-Type'] = 'text/html'
+    self.response.headers.update({
+      'Access-Control-Allow-Origin': '*',
+      'Strict-Transport-Security':
+          'max-age=16070400; includeSubDomains; preload',  # 6 months
+      'Content-Type': 'text/html',
+    })
 
     vars = dict(self.request.params)
     key = vars.get('auth_entity')
