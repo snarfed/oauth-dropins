@@ -2,6 +2,12 @@
 """
 
 import appengine_config
+import jinja2
+
+from google.appengine.ext import ndb
+import webapp2
+
+from oauth_dropins.webutil import handlers
 
 from oauth_dropins import blogger_v2
 from oauth_dropins import disqus
@@ -16,12 +22,6 @@ from oauth_dropins import tumblr
 from oauth_dropins import twitter
 from oauth_dropins import wordpress_rest
 
-from google.appengine.ext import ndb
-from google.appengine.ext.webapp import template
-import webapp2
-
-from oauth_dropins.webutil import handlers
-
 
 class FrontPageHandler(handlers.ModernHandler):
   """Renders and serves /, ie the front page.
@@ -34,7 +34,8 @@ class FrontPageHandler(handlers.ModernHandler):
     if key:
       vars['entity'] = ndb.Key(urlsafe=key).get()
 
-    self.response.out.write(template.render('templates/index.html', vars))
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(('.')), autoescape=True)
+    self.response.out.write(env.get_template('templates/index.html').render(vars))
 
 
 application = webapp2.WSGIApplication([

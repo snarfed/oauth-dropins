@@ -14,6 +14,8 @@ builtins:
 - remote_api: on
 
 libraries:
+- name: jinja2
+  version: latest
 - name: ssl
   version: latest
 
