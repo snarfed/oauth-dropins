@@ -306,6 +306,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+#### 1.6 - unreleased
+* Fix Dropbox bug with fetching access token.
+
 #### 1.5 - 2016-08-25
 * Add [Medium](https://medium.com/).
 

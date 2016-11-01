@@ -134,7 +134,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'redirect_uri': self.request.path_url,
     }
     try:
-      resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data)).read()
+      resp = util.urlopen(GET_ACCESS_TOKEN_URL % data, data='').read()
     except BaseException, e:
       util.interpret_http_exception(e)
       raise
