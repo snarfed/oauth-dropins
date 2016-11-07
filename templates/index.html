@@ -36,7 +36,7 @@ the <a href="https://github.com/snarfed/oauth-dropins">GitHub repo.</a></p>
 {% endif %}
 {% if entity %}
 <span style="color: green">
- Authenticated {{ entity.user_display_name }} on {{ entity.site_name }}.</span>
+ Authenticated {{ entity.user_display_name() }} on {{ entity.site_name() }}.</span>
 <!--
 {% if access_token %}
   Access token {{ access_token }}.<br />
