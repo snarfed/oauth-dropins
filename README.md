@@ -22,8 +22,8 @@ initial [OAuth](http://oauth.net/) client flows for many popular sites,
 including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth,
 Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
-This repo also provides an example demo app, deployed at
-http://oauth-dropins.appspot.com/.
+An example demo app is deployed at
+[oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 
 Depends on the
 [App Engine Python SDK](https://developers.google.com/appengine/downloads). All
@@ -360,22 +360,42 @@ ln -s ../../../src/gdata/src/atom local/lib/python2.7/site-packages/atom
 python setup.py test
 ```
 
-Most dependencies are clean, but we've made patches to some that we haven't
-(yet) tried to push upstream. If we ever switch submodule repos for those
-dependencies, make sure the patches are included!
+Most dependencies are clean, but we've made patches
+to [gdata-python-client](https://github.com/snarfed/gdata-python-client) below
+that we haven't (yet) tried to push upstream. If we ever switch its submodule
+repo for, make sure the patches are included!
 
 * [snarfed/gdata-python-client@fabb622](https://github.com/snarfed/gdata-python-client/commit/fabb6227361612ac4fcb8bef4438719cb00eaa2b)
 * [snarfed/gdata-python-client@8453e33](https://github.com/snarfed/gdata-python-client/commit/8453e3388d152ac650e22d219fae36da56d9a85d)
 
 To deploy:
+
 `python -m unittest discover && git push && ~/google_appengine/appcfg.py update .`
 
 To convert README.md to README.rst:
 
 `pandoc --from=markdown --to=rst --output=README.rst README.md`
 
-Related work:
+Then tweak the top header by moving the `===` down to the next line and
+extending it all the way.
 
+The docs are built with [Sphinx](http://sphinx-doc.org/), including
+[apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html),
+[autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and
+[napoleon[(http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration
+is in
+[`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py)
+
+To build the docs, run these commands in the repo root dir:
+
+```sh
+sphinx-apidoc -f -o docs oauth_dropins oauth_dropins/webutil/{appengine_config.py,test}
+sphinx-build -b html docs docs/_build/html
+```
+
+
+Related work
+---
 * [Python Social Auth](http://psa.matiasaguirre.net/)
 
 

@@ -17,7 +17,8 @@ import urlparse
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):
-  """Call urllib2.urlopen, signing the request with Flickr credentials.
+  """Call :func:`urllib2.urlopen`, signing the request with Flickr credentials.
+
   Args:
     url (string): the url to open
     token_key (string): user's access token
@@ -26,7 +27,7 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
       back to HTTP_TIMEOUT if not specified
 
   Returns:
-    the file-like object that is the result of urllib2.urlopen
+    the file-like object that is the result of :func:`urllib2.urlopen`
   """
   auth = oauthlib.oauth1.Client(
     appengine_config.FLICKR_APP_KEY,
@@ -50,14 +51,15 @@ def raise_for_failure(url, code, msg):
 
 
 def call_api_method(method, params, token_key, token_secret):
-  """Call a Flickr API method. Flickr has one API endpoint, where
-  different methods are called by name.
+  """Call a Flickr API method.
+
+  Flickr has one API endpoint, where different methods are called by name.
 
   If the "stat" field contains "fail", then this method creates
   an artificial HTTPError 400 or 401 depending on the type of failure.
 
   Args:
-    method (string): the API method name (e.g. flickr.photos.getInfo)
+    method (string): the API method name (e.g. ``flickr.photos.getInfo``)
     params (dict): the parameters to send to the API method
     token_key (string): the user's API access token
     token_secret (string): the user's API access token secret
@@ -94,12 +96,12 @@ def upload(params, file, token_key, token_secret):
   Flickr uploads use their own API endpoint, that returns only XML.
   https://www.flickr.com/services/api/upload.api.html
 
-  Unlike call_api_method, this uses the requests library because
-  urllib2 does support multi-part POSTs on its own.
+  Unlike :func:`call_api_method`, this uses the requests library because
+  :mod:`urllib2` doesn't support multi-part POSTs on its own.
 
   Args:
     params (dict): the parameters to send to the API method
-    file (File-like object): the image or video to upload
+    file (file-like object): the image or video to upload
     token_key (string): the user's API access token
     token_secret (string): the user's API access token secret
 
@@ -107,8 +109,8 @@ def upload(params, file, token_key, token_secret):
     dict containing the photo id (as 'id')
 
   Raises:
-    requests.HTTPError on http error or urllib2.HTTPError if we get a
-    stat='fail' response from Flickr.
+    :class:`requests.HTTPError` on HTTP error or :class:`urllib2.HTTPError` if
+    we get a stat='fail' response from Flickr.
   """
   upload_url = 'https://up.flickr.com/services/upload'
   auth = requests_oauthlib.OAuth1(
