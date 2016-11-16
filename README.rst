@@ -14,7 +14,7 @@ Twitter, Tumblr, and WordPress.com.
 
 Check out the demo app! https://oauth-dropins.appspot.com/
 
-[See the GitHub repo](https://github.com/snarfed/oauth-dropins) for full documentation, changelog, etc.
+`See the GitHub repo <https://github.com/snarfed/oauth-dropins>`__ for full documentation, changelog, etc.
 
 
 Quick start

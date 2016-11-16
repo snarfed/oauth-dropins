@@ -389,7 +389,7 @@ is in
 To build the docs, run these commands in the repo root dir:
 
 ```sh
-sphinx-apidoc -f -o docs oauth_dropins oauth_dropins/webutil/{appengine_config.py,test}
+sphinx-apidoc -f -o docs/source oauth_dropins oauth_dropins/webutil/{appengine_config.py,test}
 sphinx-build -b html docs docs/_build/html
 ```
 
