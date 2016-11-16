@@ -6,9 +6,11 @@ http://pythonhosted.org/setuptools/setuptools.html
 
 Based on https://github.com/pypa/sampleproject/blob/master/setup.py
 """
+import os, sys
 from setuptools import setup, find_packages
 
 # webutil/test/__init__.py makes App Engine SDK's bundled libraries importable.
+sys.path.append(os.path.dirname(__file__))
 import oauth_dropins.webutil.test
 
 setup(name='oauth-dropins',
