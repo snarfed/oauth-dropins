@@ -1,0 +1,5 @@
+python:
+  setup_py_install: true
+  requirements_file: requirements.txt
+  extra_requirements:
+    - appengine-sdk
