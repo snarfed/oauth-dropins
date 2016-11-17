@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# oauth-dropins documentation build configuration file, created by
-# sphinx-quickstart on Fri Oct  7 21:56:55 2016.
+# oauth-dropins documentation Sphinx build configuration file.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.

@@ -1,4 +1,5 @@
 # Keep in sync with setup.py's install_requires!
+appengine-sdk
 -e git+https://github.com/snarfed/gdata-python-client-1.git#egg=gdata
 google-api-python-client>=1.4.0,!=1.5.0
 httplib2
