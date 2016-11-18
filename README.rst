@@ -1,3 +1,10 @@
+.. image:: https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny_128.png
+   :target: https://github.com/snarfed/oauth-dropins
+.. image:: https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg
+   :target: https://circleci.com/gh/snarfed/oauth-dropins
+.. image:: https://coveralls.io/repos/github/snarfed/oauth-dropins/badge.svg?branch=master
+   :target: https://coveralls.io/github/snarfed/oauth-dropins?branch=master
+
 This is a collection of drop-in
 `Google App Engine <https://appengine.google.com/>`__ request handlers for the
 initial

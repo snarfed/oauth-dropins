@@ -22,9 +22,6 @@ initial [OAuth](http://oauth.net/) client flows for many popular sites,
 including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth,
 Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
-An example demo app is deployed at
-[oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
-
 [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
 Install with `pip install oauth-dropins`.
 
@@ -33,8 +30,11 @@ Depends on the
 other dependencies are handled by pip and enumerated in
 [requirements.txt](https://github.com/snarfed/oauth-dropins/blob/master/requirements.txt).
 We recommend that you install with pip in a
-[`virtualenv`](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
-([App Engine details.](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring))
+[virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
+[App Engine details here.](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
+
+An example demo app is deployed at
+[oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 
 If you clone the repo directly or want to contribute, see
 [Development](#development) for setup instructions.
@@ -50,7 +50,7 @@ Here's a full example of using the Facebook drop-in.
 1. Make sure you have the
   [App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
   version 1.9.15 or later (for
-  [`vendor`](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
+  [vendor](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
   support) installed and on your `$PYTHONPATH`, e.g.
   `export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine`. oauth-dropins's
   `setup.py` file needs it during installation.
@@ -71,7 +71,7 @@ directory, e.g. `local/`:
     from oauth_dropins.appengine_config import *
     ```
 
-1. Put your [Facebook application](https://developers.facebook.com/apps)'s ID
+1. Put your [Facebook application's](https://developers.facebook.com/apps) ID
   and secret in two plain text files in your app's root directory,
   `facebook_app_id` and `facebook_app_secret`. (If you use git, you'll probably
   also want to add them to your `.gitignore`.)
@@ -140,7 +140,7 @@ the user to grant your app permission. It has two useful methods:
   Some of the sites that use OAuth 1 support alternatives. For Twitter,
   `StartHandler.to` takes an additional `access_type` kwarg that may be `read`
   or `write`. It's passed through to Twitter
-  [as `x_auth_access_type`](https://dev.twitter.com/docs/api/1/post/oauth/request_token).
+  [`x_auth_access_type`](https://dev.twitter.com/docs/api/1/post/oauth/request_token).
   For Flickr, the start handler accepts a `perms` POST query parameter that may
   be `read`, `write` or `delete`; it's
   [passed through to Flickr](https://www.flickr.com/services/api/auth.oauth.html#authorization)
@@ -301,41 +301,43 @@ you have it as a relative directory. pip requires fully qualified directories.
     InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
     ```
 
-  ...you may be hitting pypa/pip#1833. Are you passing `-t` to `pip install`?
-  Use the virtualenv instead, it's your friend. If you really want `-t`, try
-  removing the `-e` from the lines in `requirements.freeze.txt` that have it.
+  ...you may be hitting [Pip bug 1833](https://github.com/pypa/pip/issues/1833).
+  Are you passing `-t` to `pip install`? Use the virtualenv instead, it's your
+  friend. If you really want `-t`, try removing the `-e` from the lines in
+  `requirements.freeze.txt` that have it.
 
 
 Changelog
 ---
 
-#### 1.6 - unreleased
+### 1.6 - unreleased
+* Add auto-generated docs with Sphinx. Published at [oauth-dropins.readthedocs.io](http://oauth-dropins.readthedocs.io/).
 * Fix Dropbox bug with fetching access token.
 
-#### 1.5 - 2016-08-25
+### 1.5 - 2016-08-25
 * Add [Medium](https://medium.com/).
 
-#### 1.4 - 2016-06-27
+### 1.4 - 2016-06-27
 * Upgrade Facebook API from v2.2 to v2.6.
 
-#### 1.3 - 2016-04-07
+### 1.3 - 2016-04-07
 * Add [IndieAuth](https://indieauth.com/).
 * More consistent logging of HTTP requests.
 * Set up Coveralls.
 
-#### 1.2 - 2016-01-11
+### 1.2 - 2016-01-11
 * Flickr:
-  * Add upload method.
-  * Improve error handling and logging.
+    * Add upload method.
+    * Improve error handling and logging.
 * Bug fixes and cleanup for constructing scope strings.
 * Add developer setup and troubleshooting docs.
 * Set up CircleCI.
 
-#### 1.1 - 2015-09-06
+### 1.1 - 2015-09-06
 * Flickr: split out flickr_auth.py file.
 * Add a number of utility functions to webutil.
 
-#### 1.0 - 2015-06-27
+### 1.0 - 2015-06-27
 * Initial PyPi release.
 
 
@@ -375,26 +377,15 @@ To deploy:
 
 `python -m unittest discover && git push && ~/google_appengine/appcfg.py update .`
 
-To convert README.md to README.rst:
-
-`pandoc --from=markdown --to=rst --output=README.rst README.md`
-
-Then tweak the top header by moving the `===` down to the next line and
-extending it all the way.
-
 The docs are built with [Sphinx](http://sphinx-doc.org/), including
 [apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html),
 [autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and
-[napoleon[(http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration
+[napoleon](http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration
 is in
 [`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py)
+To build them, run [`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
 
-To build the docs, run these commands in the repo root dir:
-
-```sh
-sphinx-apidoc -f -o docs/source oauth_dropins oauth_dropins/webutil/{appengine_config.py,test}
-sphinx-build -b html docs docs/_build/html
-```
+To convert README.md to README.rst for PyPI or index.rst for Sphinx:
 
 
 Related work
@@ -406,10 +397,10 @@ TODO
 ---
 
 * Google+ and Blogger need some love:
-  * handle declines
-  * allow overriding `CallbackHandler.finish()`
-  * support `StartHandler.redirect_url()`
-  * allow more than one `CallbackHandler` per app
+    * handle declines
+    * allow overriding `CallbackHandler.finish()`
+    * support `StartHandler.redirect_url()`
+    * allow more than one `CallbackHandler` per app
 * clean up app key/secret file handling. (standardize file names? put them in a subdir?)
 * implement CSRF protection for all sites
 * implement [Blogger's v3 API](https://developers.google.com/blogger/docs/3.0/getting_started)
