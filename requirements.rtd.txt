@@ -1,0 +1,4 @@
+# Extra requirements installed during the ReadTheDocs build. Needed because
+# Sphinx imports the code, which requires the App Engine SDK.
+# https://docs.readthedocs.io/en/latest/yaml-config.html#requirements-file
+appengine-sdk>=1.9.40.post0

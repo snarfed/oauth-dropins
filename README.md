@@ -258,7 +258,7 @@ Troubleshooting/FAQ
     ImportError: cannot import name certs
     ```
 
-  *or* you see an exception like:
+    *or* you see an exception like:
 
     ```
     File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
@@ -266,7 +266,7 @@ Troubleshooting/FAQ
     TweepError: must be _socket.socket, not socket
     ```
 
-  ...you need to [configure App Engine's SSL](https://cloud.google.com/appengine/docs/python/sockets/ssl_support). Add this to your `app.yaml`:
+    ...you need to [configure App Engine's SSL](https://cloud.google.com/appengine/docs/python/sockets/ssl_support). Add this to your `app.yaml`:
 
     ```
     libraries:

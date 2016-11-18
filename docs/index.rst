@@ -19,8 +19,8 @@ dependencies are handled by pip and enumerated in
 `requirements.txt <https://github.com/snarfed/oauth-dropins/blob/master/requirements.txt>`__.
 We recommend that you install with pip in a
 `virtualenv <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`__.
-(`App Engine
-details. <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__)
+`App Engine details
+here. <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__
 
 An example demo app is deployed at
 `oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
@@ -133,7 +133,7 @@ Blogger, and Instagram.
 
 Some of the sites that use OAuth 1 support alternatives. For Twitter,
 ``StartHandler.to`` takes an additional ``access_type`` kwarg that may
-be ``read`` or ``write``. It's passed through to Twitter as
+be ``read`` or ``write``. It's passed through to Twitter
 `x_auth_access_type <https://dev.twitter.com/docs/api/1/post/oauth/request_token>`__.
 For Flickr, the start handler accepts a ``perms`` POST query parameter
 that may be ``read``, ``write`` or ``delete``; it's `passed through to
@@ -274,27 +274,23 @@ since they'll prevent virtualenv from installing into the local
 
        ImportError: cannot import name certs
 
-*or* you see an exception like:
+   *or* you see an exception like:
 
-::
+   ::
 
-    `
-    File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
-      raise TweepError(e)
-    TweepError: must be _socket.socket, not socket
-    `
+       File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
+         raise TweepError(e)
+       TweepError: must be _socket.socket, not socket
 
-...you need to `configure App Engine's
-SSL <https://cloud.google.com/appengine/docs/python/sockets/ssl_support>`__.
-Add this to your ``app.yaml``:
+   ...you need to `configure App Engine's
+   SSL <https://cloud.google.com/appengine/docs/python/sockets/ssl_support>`__.
+   Add this to your ``app.yaml``:
 
-::
+   ::
 
-    `
-    libraries:
-    - name: ssl
-      version: latest
-    `
+       libraries:
+       - name: ssl
+         version: latest
 
 If you use dev\_appserver, you'll also need to `apply this
 workaround <https://code.google.com/p/googleappengine/issues/detail?id=9246>`__
