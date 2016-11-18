@@ -1,10 +1,3 @@
-.. image:: https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny_128.png
-   :target: https://github.com/snarfed/oauth-dropins
-.. image:: https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg
-   :target: https://circleci.com/gh/snarfed/oauth-dropins
-.. image:: https://coveralls.io/repos/github/snarfed/oauth-dropins/badge.svg?branch=master
-   :target: https://coveralls.io/github/snarfed/oauth-dropins?branch=master
-
 This is a collection of drop-in
 `Google App Engine <https://appengine.google.com/>`__ request handlers for the
 initial
@@ -12,21 +5,23 @@ initial
 Blogger, Dropbox, Facebook, Flickr, Google+, IndieAuth, Instagram, Medium,
 Twitter, Tumblr, and WordPress.com.
 
-Check out the demo app! https://oauth-dropins.appspot.com/
+An example demo app is deployed at
+`oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
+
+`Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__ Install with ``pip install oauth-dropins``.
 
 `See the GitHub repo <https://github.com/snarfed/oauth-dropins>`__ for full documentation, changelog, etc.
 
 
 Quick start
-===========
+-----------
 
 Here's a full example of using the Facebook drop-in.
 
 1. `Install oauth-dropins into your App Engine app. <https://github.com/snarfed/oauth-dropins#quick-start>`__
 
-1. Put your `Facebook
-   application <https://developers.facebook.com/apps>`__'s ID and secret
-   in two plain text files in your app's root directory,
+1. Put your `Facebook application's <https://developers.facebook.com/apps>`__'s
+   ID and secret in two plain text files in your app's root directory,
    ``facebook_app_id`` and ``facebook_app_secret``. (If you use git,
    you'll probably also want to add them to your ``.gitignore``.)
 
@@ -58,5 +53,3 @@ import the site module you want and follow the same steps. The filenames
 for app keys and secrets also differ by site;
 `appengine_config.py <https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/appengine_config.py>`__
 has the full list.
-
-

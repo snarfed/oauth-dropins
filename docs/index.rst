@@ -1,23 +1,9 @@
-.. oauth-dropins documentation master file, created by
-   sphinx-quickstart on Fri Oct  7 21:56:55 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+oauth-dropins
+=============
 
-Welcome to oauth-dropins's documentation!
-=========================================
+.. include:: ../README.rst
 
-Contents:
+Reference documentation:
 
-.. toctree::
-   :maxdepth: 2
-
-   readme
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+* :doc:`source/oauth_dropins`
+* :doc:`source/oauth_dropins.webutil`

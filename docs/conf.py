@@ -13,7 +13,6 @@
 
 import sys
 import os
-import shlex
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -98,7 +97,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', '**/test', '**/test_*.py']
+exclude_patterns = ['_build', '**/appengine_config.py', '**/test', '**/test_*.py']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -155,12 +154,12 @@ html_theme = 'alabaster'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = '../oauth_dropins/static/oauth_shiny.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+html_favicon = '../oauth_dropins/static/oauth_16.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -181,7 +180,10 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+html_sidebars = {
+  'index': ['description.html', 'searchbox.html'],
+  '**': ['description.html', 'localtoc.html', 'searchbox.html'],
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -228,7 +230,7 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'oauth-dropinsdoc'
+htmlhelp_basename = 'oauth-dropins-doc'
 
 # -- Options for LaTeX output ---------------------------------------------
 

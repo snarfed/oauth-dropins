@@ -25,6 +25,9 @@ Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 An example demo app is deployed at
 [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 
+[Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
+Install with `pip install oauth-dropins`.
+
 Depends on the
 [App Engine Python SDK](https://developers.google.com/appengine/downloads). All
 other dependencies are handled by pip and enumerated in

@@ -1,25 +1,12 @@
-oauth_dropins package
+oauth_dropins
 =====================
-
-Subpackages
------------
 
 .. toctree::
 
-    oauth_dropins.webutil
+    oauth_dropins
 
-Submodules
-----------
 
-oauth_dropins.appengine_config module
--------------------------------------
-
-.. automodule:: oauth_dropins.appengine_config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oauth_dropins.blogger_v2 module
+blogger_v2
 -------------------------------
 
 .. automodule:: oauth_dropins.blogger_v2
@@ -27,7 +14,7 @@ oauth_dropins.blogger_v2 module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.disqus module
+disqus
 ---------------------------
 
 .. automodule:: oauth_dropins.disqus
@@ -35,7 +22,7 @@ oauth_dropins.disqus module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.dropbox module
+dropbox
 ----------------------------
 
 .. automodule:: oauth_dropins.dropbox
@@ -43,7 +30,7 @@ oauth_dropins.dropbox module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.facebook module
+facebook
 -----------------------------
 
 .. automodule:: oauth_dropins.facebook
@@ -51,7 +38,7 @@ oauth_dropins.facebook module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.flickr module
+flickr
 ---------------------------
 
 .. automodule:: oauth_dropins.flickr
@@ -59,7 +46,7 @@ oauth_dropins.flickr module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.flickr_auth module
+flickr_auth
 --------------------------------
 
 .. automodule:: oauth_dropins.flickr_auth
@@ -67,7 +54,7 @@ oauth_dropins.flickr_auth module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.googleplus module
+googleplus
 -------------------------------
 
 .. automodule:: oauth_dropins.googleplus
@@ -75,7 +62,7 @@ oauth_dropins.googleplus module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.handlers module
+handlers
 -----------------------------
 
 .. automodule:: oauth_dropins.handlers
@@ -83,7 +70,7 @@ oauth_dropins.handlers module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.indieauth module
+indieauth
 ------------------------------
 
 .. automodule:: oauth_dropins.indieauth
@@ -91,7 +78,7 @@ oauth_dropins.indieauth module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.instagram module
+instagram
 ------------------------------
 
 .. automodule:: oauth_dropins.instagram
@@ -99,7 +86,7 @@ oauth_dropins.instagram module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.medium module
+medium
 ---------------------------
 
 .. automodule:: oauth_dropins.medium
@@ -107,7 +94,7 @@ oauth_dropins.medium module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.models module
+models
 ---------------------------
 
 .. automodule:: oauth_dropins.models
@@ -115,7 +102,7 @@ oauth_dropins.models module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.tumblr module
+tumblr
 ---------------------------
 
 .. automodule:: oauth_dropins.tumblr
@@ -123,7 +110,7 @@ oauth_dropins.tumblr module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.twitter module
+twitter
 ----------------------------
 
 .. automodule:: oauth_dropins.twitter
@@ -131,7 +118,7 @@ oauth_dropins.twitter module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.twitter_auth module
+twitter_auth
 ---------------------------------
 
 .. automodule:: oauth_dropins.twitter_auth
@@ -139,19 +126,10 @@ oauth_dropins.twitter_auth module
     :undoc-members:
     :show-inheritance:
 
-oauth_dropins.wordpress_rest module
+wordpress_rest
 -----------------------------------
 
 .. automodule:: oauth_dropins.wordpress_rest
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: oauth_dropins
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,42 +1,12 @@
-oauth_dropins.webutil package
+oauth_dropins.webutil
 =============================
 
-Submodules
-----------
+.. toctree::
 
-oauth_dropins.webutil.handlers module
--------------------------------------
+    oauth_dropins.webutil
 
-.. automodule:: oauth_dropins.webutil.handlers
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
-oauth_dropins.webutil.instance_info module
-------------------------------------------
-
-.. automodule:: oauth_dropins.webutil.instance_info
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oauth_dropins.webutil.models module
------------------------------------
-
-.. automodule:: oauth_dropins.webutil.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oauth_dropins.webutil.testutil module
--------------------------------------
-
-.. automodule:: oauth_dropins.webutil.testutil
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oauth_dropins.webutil.util module
+util
 ---------------------------------
 
 .. automodule:: oauth_dropins.webutil.util
@@ -44,11 +14,26 @@ oauth_dropins.webutil.util module
     :undoc-members:
     :show-inheritance:
 
+handlers
+-------------------------------------
 
-Module contents
----------------
+.. automodule:: oauth_dropins.webutil.handlers
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. automodule:: oauth_dropins.webutil
+models
+-----------------------------------
+
+.. automodule:: oauth_dropins.webutil.models
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+testutil
+-------------------------------------
+
+.. automodule:: oauth_dropins.webutil.testutil
     :members:
     :undoc-members:
     :show-inheritance:
