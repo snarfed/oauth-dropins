@@ -217,7 +217,7 @@ e.g. FacebookAuth. Here are the useful methods:
 
 -  ``access_token()`` returns the OAuth access token. For OAuth 2 sites,
    this is a single string. For OAuth 1.1 sites (currently just Twitter,
-   Tumblr, and Flickr), this is a (string key, string secret) tuple.
+   Tumblr, and Flickr), this is a ``(string key, string secret)`` tuple.
 
 The following methods are optional. Auth entity classes usually
 implement at least one of them, but not all.

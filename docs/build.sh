@@ -6,6 +6,9 @@
 # header and remove the manual TOC and the footer images.
 set -e
 
+absfile=`readlink -f $0`
+cd `dirname $absfile`
+
 # pandoc --from=markdown --to=rst ../README.md \
 #   | sed -E 's/```/`/; s/`` </ </' \
 #   > index.rst
