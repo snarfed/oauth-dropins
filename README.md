@@ -22,8 +22,13 @@ initial [OAuth](http://oauth.net/) client flows for many popular sites,
 including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth,
 Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
-[Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
-Install with `pip install oauth-dropins`.
+* [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
+  Install with `pip install oauth-dropins`.
+* [Click here for getting started docs.](#quick-start)
+* [Click here for reference docs.](https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html)
+* A demo app is deployed at
+[oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
+
 
 Depends on the
 [App Engine Python SDK](https://developers.google.com/appengine/downloads). All
@@ -32,9 +37,6 @@ other dependencies are handled by pip and enumerated in
 We recommend that you install with pip in a
 [virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
 [App Engine details here.](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
-
-An example demo app is deployed at
-[oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 
 If you clone the repo directly or want to contribute, see
 [Development](#development) for setup instructions.
@@ -217,7 +219,7 @@ FacebookAuth. Here are the useful methods:
 
 - `access_token()` returns the OAuth access token. For OAuth 2 sites, this is a
   single string. For OAuth 1.1 sites (currently just Twitter, Tumblr, and Flickr),
-  this is a (string key, string secret) tuple.
+  this is a `(string key, string secret)` tuple.
 
 The following methods are optional. Auth entity classes usually implement at
 least one of them, but not all.

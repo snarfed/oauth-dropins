@@ -9,11 +9,19 @@ set -e
 absfile=`readlink -f $0`
 cd `dirname $absfile`
 
-# pandoc --from=markdown --to=rst ../README.md \
-#   | sed -E 's/```/`/; s/`` </ </' \
-#   > index.rst
-
 # sphinx-apidoc -f -o source ../oauth_dropins \
 #   ../oauth_dropins/{webutil,}/{appengine_config.py,test}
+
+rm -f index.rst
+cat > index.rst <<EOF
+oauth-dropins
+=============
+
+EOF
+
+tail -n +15 ../README.md \
+  | pandoc --from=markdown --to=rst \
+  | sed -E 's/```/`/; s/`` </ </' \
+  >> index.rst
 
 sphinx-build -b html . _build/html
