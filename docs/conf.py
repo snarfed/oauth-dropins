@@ -318,8 +318,7 @@ intersphinx_mapping = {
   # TODO
   # 'appengine': ('https://cloud.google.com/appengine/docs/python/refdocs', None),
   'python': ('https://docs.python.org/', None),
-  # TODO
-  # 'requests': ('http://docs.python-requests.org/en/master/api', None),
+  'requests': ('http://docs.python-requests.org/en/latest', None),
   'urllib3': ('http://urllib3.readthedocs.io/en/latest', None),
   'webapp2': ('https://webapp2.readthedocs.io/en/latest', None),
 }

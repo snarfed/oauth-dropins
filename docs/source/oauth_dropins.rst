@@ -1,6 +1,8 @@
 oauth_dropins
 =====================
 
+Reference documentation.
+
 .. toctree::
 
     oauth_dropins

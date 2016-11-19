@@ -1,9 +1,7 @@
 # Load packages from virtualenv
 # https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring
-import os
 from google.appengine.ext import vendor
-virtualenv = os.getenv('VIRTUAL_ENV', 'local')
-vendor.add(virtualenv)
+vendor.add('local')
 
 from oauth_dropins.appengine_config import *
 
