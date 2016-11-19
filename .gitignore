@@ -1,6 +1,5 @@
 /build/
 /docs/_build/
-/docs/index.rst
 /dist/
 /.eggs/
 /*.egg-info
