@@ -430,7 +430,10 @@ The docs are built with `Sphinx <http://sphinx-doc.org/>`__, including
 `napoleon <http://www.sphinx-doc.org/en/stable/ext/napoleon.html>`__.
 Configuration is in
 `docs/conf.py <https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py>`__
-To build them, run
+To build them, first install Sphinx with ``pip install sphinx``. (You
+may want to do this outside your virtualenv; if so, you'll need to
+reconfigure it to see system packages with
+``virtualenv --system-site-packages local``.) Then, run
 `docs/build.sh <https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh>`__.
 
 To convert README.md to README.rst for PyPI or index.rst for Sphinx:

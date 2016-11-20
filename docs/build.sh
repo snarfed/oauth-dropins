@@ -24,4 +24,9 @@ tail -n +15 ../README.md \
   | sed -E 's/```/`/; s/`` </ </' \
   >> index.rst
 
-sphinx-build -b html . _build/html
+source ../local/bin/activate
+
+# Run sphinx in the virtualenv's python interpreter so it can import packages
+# installed in the virtualenv.
+python `which sphinx-build` -b html . _build/html
+
