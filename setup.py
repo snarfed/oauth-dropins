@@ -6,12 +6,16 @@ http://pythonhosted.org/setuptools/setuptools.html
 
 Based on https://github.com/pypa/sampleproject/blob/master/setup.py
 """
-import os, sys
 from setuptools import setup, find_packages
+from setuptools.command.test import ScanningLoader
 
-# webutil/test/__init__.py makes App Engine SDK's bundled libraries importable.
-sys.path.append(os.path.dirname(__file__))
-import oauth_dropins.webutil.test
+
+class TestLoader(ScanningLoader):
+  def __init__(self, *args, **kwargs):
+    super(ScanningLoader, self).__init__(*args, **kwargs)
+    # webutil/test/__init__.py makes App Engine SDK's bundled libraries importable.
+    import oauth_dropins.webutil.test
+
 
 setup(name='oauth-dropins',
       version='1.5',
@@ -53,5 +57,6 @@ setup(name='oauth-dropins',
       extras_require={
           'appengine-sdk': ['appengine-sdk >= 1.9.40.post0'],
       },
+      test_loader='setup:TestLoader',
       test_suite='oauth_dropins.webutil',
 )
