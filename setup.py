@@ -18,7 +18,7 @@ class TestLoader(ScanningLoader):
 
 
 setup(name='oauth-dropins',
-      version='1.5',
+      version='1.6',
       description='Drop-in App Engine OAuth client handlers for many popular sites.',
       long_description=open('README.rst').read(),
       url='https://github.com/snarfed/oauth-dropins',

@@ -339,7 +339,7 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
-1.6 - unreleased
+1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
 
 -  Add auto-generated docs with Sphinx. Published at
