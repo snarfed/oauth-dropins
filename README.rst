@@ -12,12 +12,14 @@ initial
 Blogger, Dropbox, Facebook, Flickr, Google+, IndieAuth, Instagram, Medium,
 Twitter, Tumblr, and WordPress.com.
 
-An example demo app is deployed at
-`oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
-
-`Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__ Install with ``pip install oauth-dropins``.
-
-`See the GitHub repo <https://github.com/snarfed/oauth-dropins>`__ for full documentation, changelog, etc.
+-  `Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__
+   Install with ``pip install oauth-dropins``.
+-  `Click here for getting started docs. <#quick-start>`__
+-  `Click here for reference
+   docs. <https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html>`__
+-  A demo app is deployed at
+   `oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
+-  `Source in GitHub. <https://github.com/snarfed/oauth-dropins>`__
 
 
 Quick start
