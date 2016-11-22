@@ -75,7 +75,8 @@ class BaseAuth(models.StringIdModel):
     Args:
       key: ndb.Key
 
-    Returns: boolean, true if key represents the same account as this entity
+    Returns:
+      boolean, true if key represents the same account as this entity
     """
     return self.key == key
 

@@ -157,7 +157,8 @@ class CallbackHandler(handlers.CallbackHandler):
     Args:
       handler: CallbackHandler
 
-    Returns: True if there was an error, False otherwise.
+    Returns:
+      True if there was an error, False otherwise.
     """
     error = handler.request.get('error')
     if error:

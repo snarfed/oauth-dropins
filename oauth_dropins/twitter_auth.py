@@ -24,7 +24,8 @@ def auth_header(url, token_key, token_secret, method='GET'):
     token_secret: string
     method: string
 
-  Returns: single element dict with key 'Authorization'
+  Returns:
+    dict: single element with key 'Authorization'
   """
   oauth1 = requests_oauthlib.OAuth1(
     client_key=appengine_config.TWITTER_APP_KEY,

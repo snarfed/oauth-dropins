@@ -118,8 +118,8 @@ class FacebookAuth(models.BaseAuth):
     Args:
       auth_entity_key: ndb.Key
 
-    Returns: boolean, true if key represents this user or one of the
-    user's pages.
+    Returns:
+      boolean: true if key represents this user or one of the user's pages.
     """
     return super(FacebookAuth, self).is_authority_for(key) or any(
       key == self.for_page(page.get('id')).key
@@ -195,7 +195,8 @@ class CallbackHandler(handlers.CallbackHandler):
     Args:
       handler: CallbackHandler
 
-    Returns: True if there was an error, False otherwise.
+    Returns:
+      True if there was an error, False otherwise.
     """
     error = handler.request.get('error')
     error_reason = handler.request.get('error_reason')
