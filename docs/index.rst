@@ -1,5 +1,5 @@
-oauth-dropins
-=============
+oauth-dropins documentation
+===========================
 
 About
 -----
