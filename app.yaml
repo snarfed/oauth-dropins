@@ -2,7 +2,7 @@ application: oauth-dropins
 version: 1
 threadsafe: true
 api_version: 1
-default_expiration: 1d
+default_expiration: 1h
 runtime: python27
 
 # background: https://github.com/snarfed/bridgy/issues/578
