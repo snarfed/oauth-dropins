@@ -312,6 +312,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+### 1.7 - 2017-02-27
+* Updates to bundled webutil library, notably WideUnicode class.
+
 ### 1.6 - 2016-11-21
 * Add auto-generated docs with Sphinx. Published at [oauth-dropins.readthedocs.io](http://oauth-dropins.readthedocs.io/).
 * Fix Dropbox bug with fetching access token.

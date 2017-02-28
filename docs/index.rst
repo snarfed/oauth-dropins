@@ -339,6 +339,11 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+1.7 - 2017-02-27
+~~~~~~~~~~~~~~~~
+
+-  Updates to bundled webutil library, notably WideUnicode class.
+
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
 
