@@ -312,8 +312,10 @@ Changelog
 ---
 
 ### 1.8 - unreleased
-* Flickr
+* Flickr:
     * Fix broken `FlickrAuth.urlopen()` method.
+* Medium:
+    * Bug fix for Medium OAuth callback error handling.
 
 ### 1.7 - 2017-02-27
 * Updates to bundled webutil library, notably WideUnicode class.

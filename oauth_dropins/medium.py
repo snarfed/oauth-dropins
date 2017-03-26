@@ -131,7 +131,7 @@ class CallbackHandler(handlers.CallbackHandler):
         self.finish(None, state=self.request.get('state'))
         return
       else:
-        raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
+        raise exc.HTTPBadRequest('Error: %s' % error)
 
     # extract auth code and request access token
     auth_code = util.get_required_param(self, 'code')
