@@ -29,7 +29,6 @@ Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 * A demo app is deployed at
 [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 
-
 Depends on the
 [App Engine Python SDK](https://developers.google.com/appengine/downloads). All
 other dependencies are handled by pip and enumerated in
@@ -311,6 +310,10 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
+
+### 1.8 - unreleased
+* Flickr
+    * Fix broken `FlickrAuth.urlopen()` method.
 
 ### 1.7 - 2017-02-27
 * Updates to bundled webutil library, notably WideUnicode class.

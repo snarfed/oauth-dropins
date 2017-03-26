@@ -67,7 +67,7 @@ class FlickrAuth(models.BaseAuth):
 
   def urlopen(self, url, **kwargs):
     return flickr_auth.signed_urlopen(
-      url, self.token_key, self.token_secret, kwargs)
+      url, self.token_key, self.token_secret, **kwargs)
 
   def call_api_method(self, method, params):
     return flickr_auth.call_api_method(
