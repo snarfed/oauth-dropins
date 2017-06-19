@@ -16,19 +16,16 @@ import models
 
 from apiclient import discovery
 from apiclient.errors import HttpError
-from oauth2client.appengine import CredentialsModel, OAuth2Decorator
+try:
+  from oauth2client.appengine import CredentialsModel, OAuth2Decorator
+except ImportError:
+  from oauth2client.contrib.appengine import CredentialsModel, OAuth2Decorator
 from oauth2client.client import OAuth2Credentials
 from google.appengine.ext import db
 from google.appengine.ext import ndb
 from webutil import handlers as webutil_handlers
 from webutil import util
 
-
-# suppress "execute() takes at most 1 positional argument (2 given)"
-# log warnings from google-api-python-client/oauth2client/util.py:124
-import oauth2client
-oauth2client.util.positional_parameters_enforcement = \
-    oauth2client.util.POSITIONAL_IGNORE
 
 # global
 json_service = None
@@ -137,11 +134,11 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         scope=cls.make_scope_str(scopes, separator=' '),
         callback_path=to_path,
         # make sure we ask for a refresh token so we can use it to get an access
-        # token offline. requires approval_prompt=force! more:
+        # token offline. requires prompt=consent! more:
         # ~/etc/google+_oauth_credentials_debugging_for_plusstreamfeed_bridgy
         # http://googleappsdeveloper.blogspot.com.au/2011/10/upcoming-changes-to-oauth-20-endpoint.html
         access_type='offline',
-        approval_prompt='force',
+        prompt='consent',
         # https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth
         include_granted_scopes='true')
 
