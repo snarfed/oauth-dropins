@@ -1,5 +1,7 @@
-application: oauth-dropins
-version: 1
+# https://cloud.google.com/appengine/docs/standard/python/config/appref
+
+# application: oauth-dropins
+# version: 1
 threadsafe: true
 api_version: 1
 default_expiration: 1h
