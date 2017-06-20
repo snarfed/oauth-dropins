@@ -29,8 +29,12 @@ Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 * A demo app is deployed at
 [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 
-Depends on the
-[App Engine Python SDK](https://developers.google.com/appengine/downloads). All
+Requires either the
+[App Engine Python SDK](https://developers.google.com/appengine/downloads)
+or the
+[Google Cloud SDK](https://cloud.google.com/sdk/gcloud/) (aka `gcloud`)
+with the `gcloud-appengine-python` and `gcloud-appengine-python-extras`
+[components](https://cloud.google.com/sdk/docs/components#additional_components). All
 other dependencies are handled by pip and enumerated in
 [requirements.txt](https://github.com/snarfed/oauth-dropins/blob/master/requirements.txt).
 We recommend that you install with pip in a
@@ -48,11 +52,13 @@ Quick start
 
 Here's a full example of using the Facebook drop-in.
 
-1. Make sure you have the
+1. Make sure you have either the
   [App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
   version 1.9.15 or later (for
   [vendor](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
-  support) installed and on your `$PYTHONPATH`, e.g.
+  support) or the
+  [Google Cloud SDK](https://cloud.google.com/sdk/gcloud/) (aka `gcloud`)
+  installed and on your `$PYTHONPATH`, e.g.
   `export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine`. oauth-dropins's
   `setup.py` file needs it during installation.
 1. Install oauth-dropins into a virtualenv somewhere your App Engine project's
@@ -357,7 +363,11 @@ You'll need the
 [App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
 version 1.9.15 or later (for
 [`vendor`](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
-support). Add it to your `$PYTHONPATH`, e.g.
+support) or the
+[Google Cloud SDK](https://cloud.google.com/sdk/gcloud/) (aka `gcloud`)
+with the `gcloud-appengine-python` and `gcloud-appengine-python-extras`
+[components](https://cloud.google.com/sdk/docs/components#additional_components).
+Add them to your `$PYTHONPATH`, e.g.
 `export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine`, and then run:
 
 ```shell
