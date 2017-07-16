@@ -89,7 +89,12 @@ class StartHandler(handlers.StartHandler):
     client = oauthlib.oauth1.Client(
       appengine_config.FLICKR_APP_KEY,
       client_secret=appengine_config.FLICKR_APP_SECRET,
-      callback_uri=self.to_url(state=state))
+      # double-URL-encode state because Flickr URL-decodes the redirect URL
+      # before redirecting to it, and JSON values may have ?s and &s. e.g. the
+      # Bridgy WordPress plugin's redirect URL when using Bridgy's registration
+      # API (https://brid.gy/about#registration-api) looks like:
+      # /wp-admin/admin.php?page=bridgy_options&service=flickr
+      callback_uri=self.to_url(state=urllib.quote(state)))
 
     uri, headers, body = client.sign(REQUEST_TOKEN_URL)
     resp = util.urlopen(urllib2.Request(uri, body, headers))
