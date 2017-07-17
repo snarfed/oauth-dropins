@@ -108,11 +108,12 @@ class StartHandler(handlers.StartHandler):
   """Starts the IndieAuth flow. Requires the 'me' parameter with the
   user URL that we want to authenticate.
   """
-  def redirect_url(self, state=None):
+  def redirect_url(self, state=None, me=None):
     assert appengine_config.INDIEAUTH_CLIENT_ID, (
       "Please fill in the indieauth_client_id in your app's root directory.")
 
-    me = util.get_required_param(self, 'me')
+    if not me:
+      me = util.get_required_param(self, 'me')
     parsed = urlparse.urlparse(me)
     if not parsed.scheme:
       me = 'http://' + me
