@@ -144,10 +144,12 @@ class CallbackHandler(handlers.CallbackHandler):
     code = util.get_required_param(self, 'code')
     state = util.decode_oauth_state(util.get_required_param(self, 'state'))
 
-    endpoint, me, state = state.get('endpoint'), state.get('me'), state.get('state')
+    endpoint = state.get('endpoint')
+    me = state.get('me')
     if not endpoint or not me:
         raise exc.HTTPBadRequest("invalid state parameter")
 
+    state = state.get('state') or ''
     validate_resp = util.requests_post(endpoint, data={
       'me': me,
       'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
@@ -160,8 +162,7 @@ class CallbackHandler(handlers.CallbackHandler):
       data = urlparse.parse_qs(validate_resp.content)
       if data.get('me'):
         verified = data.get('me')[0]
-        # re-use the response from above if verified is the same URL as me
-        user_json = build_user_json(verified, me_resp if verified == me else None)
+        user_json = build_user_json(verified)
         indie_auth = IndieAuth(id=verified, user_json=json.dumps(user_json))
         indie_auth.put()
         self.finish(indie_auth, state=state)
