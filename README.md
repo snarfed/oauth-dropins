@@ -322,6 +322,8 @@ Changelog
     * Fix broken `FlickrAuth.urlopen()` method.
 * Medium:
     * Bug fix for Medium OAuth callback error handling.
+* IndieAuth:
+    * Store authorization endpoint in state instead of rediscovering it from `me` parameter, [which is going away](https://github.com/aaronpk/IndieAuth.com/issues/167).
 
 ### 1.7 - 2017-02-27
 * Updates to bundled webutil library, notably WideUnicode class.

@@ -55,9 +55,11 @@ def discover_authorization_endpoint(me, resp=None):
 
 def build_user_json(me, resp=None):
   """user_json contains an h-card, rel-me links, and "me"
+
   Args:
     me: string, URL of the user, returned by
     resp: requests.Response (optional), re-use response if it's already been fetched
+
   Return:
     dict, with 'me', the URL for this person; 'h-card', the representative h-card
       for this page; 'rel-me', a list of rel-me URLs found at this page
@@ -89,7 +91,6 @@ class IndieAuth(models.BaseAuth):
   in the datastore. Key is the domain name. See models.BaseAuth for usage
   details.
   """
-  # access token
   user_json = ndb.TextProperty(required=True)  # generally this has only 'me'
 
   def site_name(self):
@@ -125,7 +126,11 @@ class StartHandler(handlers.StartHandler):
       'me': me,
       'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
       'redirect_uri': redirect_uri,
-      'state': state,
+      'state': util.encode_oauth_state({
+        'endpoint': endpoint,
+        'me': me,
+        'state': state,
+      }),
     })
 
     logging.info('Redirecting to IndieAuth: %s', url)
@@ -136,12 +141,12 @@ class CallbackHandler(handlers.CallbackHandler):
   """The callback handler from the IndieAuth request. POSTs back to the
   auth endpoint to verify the authentication code."""
   def get(self):
-    me = util.get_required_param(self, 'me')
     code = util.get_required_param(self, 'code')
-    state = self.request.get('state', '')
+    state = util.decode_oauth_state(util.get_required_param(self, 'state'))
 
-    me_resp = util.requests_get(me)
-    endpoint = discover_authorization_endpoint(me, me_resp)
+    endpoint, me, state = state.get('endpoint'), state.get('me'), state.get('state')
+    if not endpoint or not me:
+        raise exc.HTTPBadRequest("invalid state parameter")
 
     validate_resp = util.requests_post(endpoint, data={
       'me': me,
