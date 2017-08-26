@@ -318,6 +318,8 @@ Changelog
 ---
 
 ### 1.8 - unreleased
+* Facebook:
+    * Upgrade Graph API from v2.6 to v2.10.
 * Flickr:
     * Fix broken `FlickrAuth.urlopen()` method.
 * Medium:
