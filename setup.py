@@ -40,7 +40,7 @@ setup(name='oauth-dropins',
       # Keep in sync with requirements.txt!
       install_requires=[
           'gdata>=2.0.18',
-          'google-api-python-client>=1.6.2',
+          'google-api-python-client>=1.6.3',
           'httplib2',
           'oauth2client>=4.1.1',
           'oauthlib',
