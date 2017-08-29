@@ -18,9 +18,13 @@ IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 -  A demo app is deployed at
    `oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
 
-Depends on the `App Engine Python
-SDK <https://developers.google.com/appengine/downloads>`__. All other
-dependencies are handled by pip and enumerated in
+Requires either the `App Engine Python
+SDK <https://developers.google.com/appengine/downloads>`__ or the
+`Google Cloud SDK <https://cloud.google.com/sdk/gcloud/>`__ (aka
+``gcloud``) with the ``gcloud-appengine-python`` and
+``gcloud-appengine-python-extras``
+`components <https://cloud.google.com/sdk/docs/components#additional_components>`__.
+All other dependencies are handled by pip and enumerated in
 `requirements.txt <https://github.com/snarfed/oauth-dropins/blob/master/requirements.txt>`__.
 We recommend that you install with pip in a
 `virtualenv <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`__.
@@ -38,11 +42,13 @@ Quick start
 
 Here's a full example of using the Facebook drop-in.
 
-1. Make sure you have the `App Engine Python
+1. Make sure you have either the `App Engine Python
    SDK <https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python>`__
    version 1.9.15 or later (for
    `vendor <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__
-   support) installed and on your ``$PYTHONPATH``, e.g.
+   support) or the `Google Cloud
+   SDK <https://cloud.google.com/sdk/gcloud/>`__ (aka ``gcloud``)
+   installed and on your ``$PYTHONPATH``, e.g.
    ``export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine``.
    oauth-dropins's ``setup.py`` file needs it during installation.
 2. Install oauth-dropins into a virtualenv somewhere your App Engine
@@ -339,6 +345,27 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+1.8 - 2017-08-29
+~~~~~~~~~~~~~~~~
+
+-  Facebook:
+
+   -  Upgrade Graph API from v2.6 to v2.10.
+
+-  Flickr:
+
+   -  Fix broken ``FlickrAuth.urlopen()`` method.
+
+-  Medium:
+
+   -  Bug fix for Medium OAuth callback error handling.
+
+-  IndieAuth:
+
+   -  Store authorization endpoint in state instead of rediscovering it
+      from ``me`` parameter, `which is going
+      away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
+
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
@@ -398,7 +425,11 @@ You'll need the `App Engine Python
 SDK <https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python>`__
 version 1.9.15 or later (for
 `vendor <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__
-support). Add it to your ``$PYTHONPATH``, e.g.
+support) or the `Google Cloud
+SDK <https://cloud.google.com/sdk/gcloud/>`__ (aka ``gcloud``) with the
+``gcloud-appengine-python`` and ``gcloud-appengine-python-extras``
+`components <https://cloud.google.com/sdk/docs/components#additional_components>`__.
+Add them to your ``$PYTHONPATH``, e.g.
 ``export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine``, and then
 run:
 
