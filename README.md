@@ -317,7 +317,7 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
-### 1.8 - unreleased
+### 1.8 - 2017-08-29
 * Facebook:
     * Upgrade Graph API from v2.6 to v2.10.
 * Flickr:
