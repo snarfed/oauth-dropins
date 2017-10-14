@@ -138,7 +138,7 @@ def upload(params, file, token_key, token_secret):
 
   stat = m.group(1)
   if stat == 'fail':
-    m = re.search('<err code="(\d+)" msg="([\w ]+)" />', resp.content, re.DOTALL)
+    m = re.search('<err code="(\d+)" msg="([^"]+)" />', resp.content, re.DOTALL)
     if not m:
       raise BaseException(
         'Expected response with <err code="..." msg=".." />. Got: %s'
