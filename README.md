@@ -316,6 +316,10 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
+### 1.9 - 2017-10-24
+Mostly just internal changes to webutil to support granary v1.9.
+* Flickr:
+    * Handle punctuation in error messages.
 
 ### 1.8 - 2017-08-29
 * Facebook:
