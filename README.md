@@ -316,6 +316,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
+### 1.10 - 2017-12-10
+Mostly just internal changes to webutil to support granary v1.10.
+
 ### 1.9 - 2017-10-24
 Mostly just internal changes to webutil to support granary v1.9.
 * Flickr:
@@ -403,7 +406,7 @@ repo for, make sure the patches are included!
 
 To deploy:
 
-`python -m unittest discover && git push && ~/google_appengine/appcfg.py update .`
+`python -m unittest discover && git push && gcloud -q app deploy oauth-dropins *.yaml`
 
 The docs are built with [Sphinx](http://sphinx-doc.org/), including
 [apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html),
