@@ -1,17 +1,9 @@
-<h3>oauth-dropins</h3>
-
-<p>A collection of drop-in
-<a href="https://appengine.google.com/">Google App Engine</a> request handlers
-for the initial <a href="http://oauth.net/">OAuth</a> client flows for many
-popular sites.
-</p>
-
-<p>
-Documentation:<br>
-<a href="{{ pathto('index') }}#quick-start">Getting started</a><br>
-<a href="{{ pathto('source/oauth_dropins') }}">oauth_dropins reference</a><br>
-<a href="{{ pathto('source/oauth_dropins.webutil') }}">webutil reference</a>
-</p>
+<div style="text-align: center">
+<h2 style="margin: 0">oauth-dropins</h2>
+<p><big>Drop-in <a href="http://oauth.net/">OAuth</a> client flows
+for <a href="https://appengine.google.com/">Google App Engine</a>.</big></p>
+</div>
+<hr style="width: 100%">
 
 <p>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
@@ -22,14 +14,8 @@ Documentation:<br>
    data-count-api="/repos/snarfed/oauth-dropins#stargazers_count"
    data-count-aria-label="# stargazers on GitHub"
    aria-label="Star snarfed/oauth-dropins on GitHub">Star</a>
-<a class="github-button"
-   href="https://github.com/snarfed/oauth-dropins"
-   data-icon="octicon-eye" data-style="mega"
-   data-count-href="/snarfed/oauth-dropins/watchers"
-   data-count-api="/repos/snarfed/oauth-dropins#subscribers_count"
-   data-count-aria-label="# watchers on GitHub"
-   aria-label="Watch snarfed/oauth-dropins on GitHub">Watch</a>
-<br>
+</p>
+<p>
 <a href="https://circleci.com/gh/snarfed/oauth-dropins">
   <img alt="Tests on Circle CI" src="https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg" />
 </a>
@@ -38,22 +24,16 @@ Documentation:<br>
 </a>
 </p>
 
+<p><big>
+Documentation:<br>
+<a href="{{ pathto('index') }}#quick-start">Getting started</a><br>
+<a href="{{ pathto('source/oauth_dropins') }}">oauth_dropins reference</a><br>
+<a href="{{ pathto('source/oauth_dropins.webutil') }}">webutil reference</a>
+</big></p>
+
 <!-- github ribbon: https://github.com/blog/273-github-ribbons -->
 <a href="https://github.com/snarfed/oauth-dropins">
   <img style="position: absolute; top: 0; right: 0; border: 0;"
        src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"
        alt="Fork me on GitHub" />
 </a>
-
-<style>
-/* Workaround for https://github.com/snide/sphinx_rtd_theme/issues/144
- * Override bad rule in https://media.readthedocs.org/css/badge_only.css that
- * sets all images to width 100% on narrow screens.
- * TODO: remove when bug is fixed!
- */
-@media screen and (max-width: 768px) {
-  img {
-    width: auto;
-  }
-}
-</style>

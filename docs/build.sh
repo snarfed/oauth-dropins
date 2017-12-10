@@ -15,8 +15,8 @@ cd `dirname $absfile`
 
 rm -f index.rst
 cat > index.rst <<EOF
-oauth-dropins documentation
-===========================
+oauth-dropins
+=============
 
 EOF
 
