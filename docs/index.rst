@@ -5,8 +5,8 @@ About
 -----
 
 This is a collection of drop-in `Google App
-Engine <https://appengine.google.com/>`__ request handlers for the
-initial `OAuth <http://oauth.net/>`__ client flows for many popular
+Engine <https://appengine.google.com/>`__ Python request handlers for
+the initial `OAuth <http://oauth.net/>`__ client flows for many popular
 sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+,
 IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
@@ -319,8 +319,11 @@ Mostly just internal changes to webutil to support granary v1.10.
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
 
-Mostly just internal changes to webutil to support granary v1.9. \*
-Flickr: \* Handle punctuation in error messages.
+Mostly just internal changes to webutil to support granary v1.9.
+
+-  Flickr:
+
+   -  Handle punctuation in error messages.
 
 .. section-2:
 

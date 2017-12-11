@@ -16,11 +16,7 @@ Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
 About
 ---
 
-This is a collection of drop-in
-[Google App Engine](https://appengine.google.com/) request handlers for the
-initial [OAuth](http://oauth.net/) client flows for many popular sites,
-including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth,
-Instagram, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
 * [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
   Install with `pip install oauth-dropins`.
@@ -321,6 +317,7 @@ Mostly just internal changes to webutil to support granary v1.10.
 
 ### 1.9 - 2017-10-24
 Mostly just internal changes to webutil to support granary v1.9.
+
 * Flickr:
     * Handle punctuation in error messages.
 
