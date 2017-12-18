@@ -312,6 +312,10 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
+### 1.11 - unreleased
+* Facebook
+    * Pass `state` to the initial OAuth endpoint directly, instead of encoding it into the redirect URL, so the redirect can [match the Strict Mode whitelist](https://developers.facebook.com/blog/post/2017/12/18/strict-uri-matching/).
+
 ### 1.10 - 2017-12-10
 Mostly just internal changes to webutil to support granary v1.10.
 

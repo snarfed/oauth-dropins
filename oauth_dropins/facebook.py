@@ -34,6 +34,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the access token request!
     'redirect_uri=%(redirect_uri)s',
+    'state=%(state)s',
     'response_type=code',
     )))
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#exchangecode
@@ -143,8 +144,9 @@ class StartHandler(handlers.StartHandler):
       'scope': self.scope,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
-      'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
-      })
+      'redirect_uri': urllib.quote_plus(self.to_url()),
+      'state': state,
+    })
 
 
 class CallbackHandler(handlers.CallbackHandler):
@@ -160,7 +162,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'auth_code': auth_code,
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
-      'redirect_uri': urllib.quote_plus(self.request_url_with_state()),
+      'redirect_uri': urllib.quote_plus(self.request.path_url),
       }
     try:
       resp = json.loads(util.urlopen(url).read())
