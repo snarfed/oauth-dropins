@@ -1,5 +1,6 @@
 # Keep in sync with setup.py's install_requires!
 -e git+https://github.com/snarfed/gdata-python-client-1.git#egg=gdata
+future
 google-api-python-client>=1.6.3
 httplib2
 humanize
@@ -13,4 +14,6 @@ tweepy>=3.0
 beautifulsoup4
 mf2py
 mf2util
+mox3>=0.24.0
 urllib3>=1.14
+webapp2>=3.0.0b1

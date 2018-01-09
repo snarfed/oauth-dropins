@@ -3,6 +3,7 @@ certifi==2017.7.27.1
 chardet==3.0.4
 coverage==4.0.3
 -e git+git@github.com:snarfed/gdata-python-client-1.git@1df4e1efea7e5cf2754bc7eec6c1ab48ab09e3b1#egg=gdata
+future==0.16.0
 google-api-python-client==1.6.3
 html5lib==0.9999999
 httplib2==0.10.3
@@ -12,6 +13,7 @@ Jinja2==2.10
 MarkupSafe==1.0
 mf2py==1.0.4
 mf2util==0.3.2
+mox3==0.24.0
 oauth2client==4.1.2
 oauthlib==2.0.2
 pyasn1==0.3.3
@@ -26,3 +28,4 @@ six==1.10.0
 tweepy==3.4.0
 uritemplate==3.0.0
 urllib3==1.22
+webapp2==3.0.0b1

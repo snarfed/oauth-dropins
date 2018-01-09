@@ -314,8 +314,9 @@ Changelog
 ---
 ### 1.11 - 2018-03-08
 * Add GitHub!
-* Facebook
+* Facebook:
     * Pass `state` to the initial OAuth endpoint directly, instead of encoding it into the redirect URL, so the redirect can [match the Strict Mode whitelist](https://developers.facebook.com/blog/post/2017/12/18/strict-uri-matching/).
+* Add Python 3 support to webutil.util!
 * Add humanize dependency for webutil.logs.
 
 ### 1.10 - 2017-12-10
