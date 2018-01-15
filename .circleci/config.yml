@@ -21,29 +21,48 @@ jobs:
           key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
 
       - run:
-          name: Install dependencies
+          name: Base dependencies
           command: |
+            pyenv local 2.7.12 3.6.2
             apt-get install google-cloud-sdk-app-engine-python-extras
             git submodule sync
             git submodule update --init
+
+      - run:
+          name: Python 2 dependencies
+          command: |
             pip install virtualenv
             virtualenv local
             . local/bin/activate
             pip install -r requirements.freeze.txt
-            pip install coverage coveralls  # for https://coveralls.io/
+            pip install coverage coveralls
 
       - run:
-          name: Test
+          name: Test Python 2
           command: |
             . local/bin/activate
-            python -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v -p 'test_*.py'
-            python -m coverage html -d /tmp/coverage_html
+            python2 -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v -p 'test_*.py'
+            python2 -m coverage html -d /tmp/coverage_html
             if [ "$COVERALLS_REPO_TOKEN" != "" ]; then coveralls; fi
+
+      - run:
+          name: Python 3 dependencies
+          command: |
+            python3 -m venv local3
+            . local3/bin/activate
+            pip3 install -r requirements.freeze.txt
+
+      - run:
+          name: Test Python 3
+          command: |
+            . local3/bin/activate
+            PYTHONPATH= python3.6 -m unittest -v oauth_dropins.webutil.test.test_util
 
       - save_cache:
           key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
           paths:
             - "local"
+            - "local3"
 
       - store_artifacts:
           path: /tmp/coverage_html

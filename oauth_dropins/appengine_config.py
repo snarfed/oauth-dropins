@@ -32,10 +32,11 @@ wordpress_client_secret
 wordpress_client_id_local
 wordpress_client_secret_local
 """
+from __future__ import absolute_import
 
 import os
 
-from webutil.appengine_config import *
+from .webutil.appengine_config import *
 
 # quiet down oauth1 log messages
 import logging

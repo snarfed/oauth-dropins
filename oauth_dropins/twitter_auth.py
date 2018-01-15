@@ -2,17 +2,22 @@
 
 This is a separate module from twitter.py so that projects like granary can use
 it without pulling in App Engine dependencies.
+
+Supports Python 3. Should not depend on App Engine API or SDK packages.
 """
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
 
 import logging
-import urllib2
+import urllib.error, urllib.parse, urllib.request
 
-import appengine_config
+from . import appengine_config
 import requests
 import requests_oauthlib
 import tweepy
 
-from webutil import util
+from .webutil import util
 
 
 def auth_header(url, token_key, token_secret, method='GET'):
@@ -55,8 +60,8 @@ def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
 
   headers.update(auth_header(url, token_key, token_secret, method=method))
   try:
-    return util.urlopen(urllib2.Request(url, headers=headers, **kwargs))
-  except BaseException, e:
+    return util.urlopen(urllib.request.Request(url, headers=headers, **kwargs))
+  except BaseException as e:
     util.interpret_http_exception(e)
     raise
 

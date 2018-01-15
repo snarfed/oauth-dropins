@@ -1,8 +1,13 @@
 """Utility functions for calling signed Flickr API methods.
-"""
 
-import appengine_config
-from webutil import util
+Supports Python 3. Should not depend on App Engine API or SDK packages.
+"""
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+
+from . import appengine_config
+from .webutil import util
 
 import oauthlib.oauth1
 import requests_oauthlib
@@ -11,9 +16,7 @@ import requests
 import json
 import logging
 import re
-import urllib
-import urllib2
-import urlparse
+import urllib.error, urllib.parse, urllib.request
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):
@@ -36,8 +39,8 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
     resource_owner_secret=token_secret)
   uri, headers, body = auth.sign(url, **kwargs)
   try:
-    return util.urlopen(urllib2.Request(uri, body, headers))
-  except BaseException, e:
+    return util.urlopen(urllib.request.Request(uri, body, headers))
+  except BaseException as e:
     util.interpret_http_exception(e)
     raise
 
@@ -46,7 +49,7 @@ def raise_for_failure(url, code, msg):
   # https://www.flickr.com/services/api/flickr.auth.checkToken.html#Error%20Codes
   # invalid auth token or API key -> unauthorized
   http_code = 401 if code == 98 or code == 100 else 400
-  raise urllib2.HTTPError(
+  raise urllib.error.HTTPError(
     url, http_code, 'message=%s, flickr code=%d' % (msg, code), {}, None)
 
 
@@ -73,7 +76,7 @@ def call_api_method(method, params, token_key, token_secret):
     'method': method,
   }
   full_params.update(params)
-  url = 'https://api.flickr.com/services/rest?' + urllib.urlencode(full_params)
+  url = 'https://api.flickr.com/services/rest?' + urllib.parse.urlencode(full_params)
   resp = signed_urlopen(url, token_key, token_secret)
 
   text = resp.read()
@@ -124,31 +127,31 @@ def upload(params, file, token_key, token_secret):
   faux_req = requests.Request(
     'POST', upload_url, data=params, auth=auth).prepare()
   # parse the signed parameters back out of the body
-  data = urlparse.parse_qsl(faux_req.body)
+  data = urllib.parse.parse_qsl(faux_req.body.decode('utf-8'))
 
   # and use them in the real request
   resp = util.requests_post(upload_url, data=data, files={'photo': file})
-  logging.debug('upload response: %s, %s', resp, resp.content)
+  logging.debug('upload response: %s, %s', resp, resp.text)
   resp.raise_for_status()
 
-  m = re.search('<rsp stat="(\w+)">', resp.content, re.DOTALL)
+  m = re.search('<rsp stat="(\w+)">', resp.text, re.DOTALL)
   if not m:
     raise BaseException(
-      'Expected response with <rsp stat="...">. Got: %s' % resp.content)
+      'Expected response with <rsp stat="...">. Got: %s' % resp.text)
 
   stat = m.group(1)
   if stat == 'fail':
-    m = re.search('<err code="(\d+)" msg="([^"]+)" />', resp.content, re.DOTALL)
+    m = re.search('<err code="(\d+)" msg="([^"]+)" />', resp.text, re.DOTALL)
     if not m:
       raise BaseException(
         'Expected response with <err code="..." msg=".." />. Got: %s'
-        % resp.content)
+        % resp.text)
     raise_for_failure(upload_url, int(m.group(1)), m.group(2))
 
-  m = re.search('<photoid>(\d+)</photoid>', resp.content, re.DOTALL)
+  m = re.search('<photoid>(\d+)</photoid>', resp.text, re.DOTALL)
   if not m:
     raise BaseException(
       'Expected response with <photoid>...</photoid>. Got: %s'
-      % resp.content)
+      % resp.text)
 
   return {'id': m.group(1)}
