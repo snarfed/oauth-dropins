@@ -5,14 +5,10 @@ Python API client docs: https://developers.google.com/api-client-library/python/
 
 TODO: check that overriding CallbackHandler.finish() actually works.
 """
-
 import json
-import httplib2
 import logging
 
 import appengine_config
-import handlers
-import models
 
 from apiclient import discovery
 from apiclient.errors import HttpError
@@ -23,19 +19,23 @@ except ImportError:
 from oauth2client.client import OAuth2Credentials
 from google.appengine.ext import db
 from google.appengine.ext import ndb
+import httplib2
 from webutil import handlers as webutil_handlers
 from webutil import util
 
+import handlers
+import models
 
 # global
 json_service = None
+
 
 def init_json_service():
   global json_service
   if json_service is None:
     # service names and versions:
     # https://developers.google.com/api-client-library/python/apis/
-    json_service = discovery.build('plus', 'v1')
+    json_service = discovery.build('plus', 'v1', http=httplib2.Http())
 
 # global. initialized in StartHandler.to_path().
 oauth_decorator = None
