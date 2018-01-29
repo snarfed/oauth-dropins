@@ -9,18 +9,21 @@ import webapp2
 
 from oauth_dropins.webutil import handlers
 
-from oauth_dropins import blogger_v2
-from oauth_dropins import disqus
-from oauth_dropins import dropbox
-from oauth_dropins import facebook
-from oauth_dropins import flickr
-from oauth_dropins import googleplus
-from oauth_dropins import indieauth
-from oauth_dropins import instagram
-from oauth_dropins import medium
-from oauth_dropins import tumblr
-from oauth_dropins import twitter
-from oauth_dropins import wordpress_rest
+from oauth_dropins import (
+  blogger_v2,
+  disqus,
+  dropbox,
+  facebook,
+  flickr,
+  github,
+  googleplus,
+  indieauth,
+  instagram,
+  medium,
+  tumblr,
+  twitter,
+  wordpress_rest,
+)
 
 
 class FrontPageHandler(handlers.ModernHandler):
@@ -50,6 +53,8 @@ application = webapp2.WSGIApplication([
     ('/facebook/oauth_callback', facebook.CallbackHandler.to('/')),
     ('/flickr/start', flickr.StartHandler.to('/flickr/oauth_callback')),
     ('/flickr/oauth_callback', flickr.CallbackHandler.to('/')),
+    ('/github/start', github.StartHandler.to('/github/oauth_callback')),
+    ('/github/oauth_callback', github.CallbackHandler.to('/')),
     ('/googleplus/start', googleplus.StartHandler.to('/googleplus/oauth_callback')),
     ('/googleplus/oauth_callback', googleplus.CallbackHandler.to('/')),
     ('/indieauth/start', indieauth.StartHandler.to('/indieauth/oauth_callback')),

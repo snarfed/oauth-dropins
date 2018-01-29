@@ -69,6 +69,8 @@ if DEBUG:
                      read('facebook_app_id_local'))
   FACEBOOK_APP_SECRET = (os.getenv('FACEBOOK_APP_SECRET') or
                          read('facebook_app_secret_local'))
+  GITHUB_CLIENT_ID = read('github_client_id_local')
+  GITHUB_CLIENT_SECRET = read('github_client_secret_local')
   INSTAGRAM_CLIENT_ID = read('instagram_client_id_local')
   INSTAGRAM_CLIENT_SECRET = read('instagram_client_secret_local')
   WORDPRESS_CLIENT_ID = read('wordpress.com_client_id_local')
@@ -80,6 +82,8 @@ else:
                      read('facebook_app_id'))
   FACEBOOK_APP_SECRET = (os.getenv('FACEBOOK_APP_SECRET') or
                          read('facebook_app_secret'))
+  GITHUB_CLIENT_ID = read('github_client_id')
+  GITHUB_CLIENT_SECRET = read('github_client_secret')
   INSTAGRAM_CLIENT_ID = read('instagram_client_id')
   INSTAGRAM_CLIENT_SECRET = read('instagram_client_secret')
   WORDPRESS_CLIENT_ID = read('wordpress.com_client_id')
