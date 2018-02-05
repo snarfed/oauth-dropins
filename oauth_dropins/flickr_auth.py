@@ -5,6 +5,7 @@ Supports Python 3. Should not depend on App Engine API or SDK packages.
 from __future__ import absolute_import
 from future import standard_library
 standard_library.install_aliases()
+from future.moves.urllib import error as urllib_error
 
 from . import appengine_config
 from .webutil import util
@@ -16,7 +17,7 @@ import requests
 import json
 import logging
 import re
-import urllib.error, urllib.parse, urllib.request
+import urllib.parse, urllib.request
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):
@@ -49,7 +50,7 @@ def raise_for_failure(url, code, msg):
   # https://www.flickr.com/services/api/flickr.auth.checkToken.html#Error%20Codes
   # invalid auth token or API key -> unauthorized
   http_code = 401 if code == 98 or code == 100 else 400
-  raise urllib.error.HTTPError(
+  raise urllib_error.HTTPError(
     url, http_code, 'message=%s, flickr code=%d' % (msg, code), {}, None)
 
 

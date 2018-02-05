@@ -155,7 +155,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         try:
           user = json_service.people().get(userId='me')\
               .execute(oauth_decorator.http())
-        except BaseException, e:
+        except BaseException as e:
           util.interpret_http_exception(e)
           raise
         logging.debug('Got one person: %r', user)
