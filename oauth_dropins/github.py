@@ -34,7 +34,20 @@ GET_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 API_GRAPHQL = 'https://api.github.com/graphql'
 # https://developer.github.com/v4/object/user/
 GRAPHQL_USER = {
-  'query': 'query { viewer { id login name location websiteUrl } }',
+  'query': """
+query {
+  viewer {
+    id
+    login
+    name
+    url
+    avatarUrl
+    id
+    location
+    websiteUrl
+    bio
+  }
+}""",
 }
 
 
@@ -83,6 +96,8 @@ class GitHubAuth(BaseAuth):
     headers['Authorization'] = 'Bearer ' + self.access_token_str
 
     resp = fn(*args, **kwargs)
+    assert 'errors' not in resp, resp
+
     try:
       resp.raise_for_status()
     except BaseException, e:

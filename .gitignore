@@ -4,7 +4,9 @@
 /.eggs/
 /*.egg-info
 /l
+/l3
 /local/
+/local3/
 datastore.dat
 oauth_client_secret
 private_notes
@@ -19,7 +21,7 @@ flickr_app_secret
 github_client_id
 github_client_secret
 github_client_id_local
-github_client_secret_local 
+github_client_secret_local
 google_client_id
 google_client_secret
 instagram_client_id
