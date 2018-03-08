@@ -312,7 +312,7 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
-### 1.11 - unreleased
+### 1.11 - 2018-03-08
 * Add GitHub!
 * Facebook
     * Pass `state` to the initial OAuth endpoint directly, instead of encoding it into the redirect URL, so the redirect can [match the Strict Mode whitelist](https://developers.facebook.com/blog/post/2017/12/18/strict-uri-matching/).
