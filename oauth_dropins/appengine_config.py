@@ -12,6 +12,10 @@ facebook_app_id_local
 facebook_app_secret_local
 flickr_app_key
 flickr_app_secret
+github_client_id
+github_client_id_local
+github_client_secret
+github_client_secret_local
 google_client_id
 google_client_secret
 indieauth_client_id
