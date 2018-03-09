@@ -31,6 +31,10 @@ flickr_auth
 -----------
 .. automodule:: oauth_dropins.flickr_auth
 
+github
+------
+.. automodule:: oauth_dropins.github
+
 googleplus
 ----------
 .. automodule:: oauth_dropins.googleplus
