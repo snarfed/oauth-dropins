@@ -54,13 +54,20 @@ Here’s a full example of using the Facebook drop-in.
 2. Install oauth-dropins into a virtualenv somewhere your App Engine
    project’s directory, e.g. ``local/``:
 
-   ``shell  source local/bin/activate  pip install oauth-dropins``
+   .. code:: shell
+
+       source local/bin/activate
+       pip install oauth-dropins
 
 3. Add this to the ``appengine_config.py`` file in your project’s root
    directory
    (`background <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__):
 
-   ``py  from google.appengine.ext import vendor  vendor.add('local')  from oauth_dropins.appengine_config import *``
+   .. code:: py
+
+       from google.appengine.ext import vendor
+       vendor.add('local')
+       from oauth_dropins.appengine_config import *
 
 4. Put your `Facebook
    application’s <https://developers.facebook.com/apps>`__ ID and secret
@@ -69,16 +76,22 @@ Here’s a full example of using the Facebook drop-in.
    you’ll probably also want to add them to your ``.gitignore``.)
 5. Create a ``facebook_oauth.py`` file with these contents:
 
-   \`python from oauth_dropins import facebook import webapp2
+   .. code:: python
 
-   application = webapp2.WSGIApplication([ (‘/facebook/start_oauth’,
-   facebook.StartHandler.to(‘/facebook/oauth_callback’)),
-   (‘/facebook/oauth_callback’, facebook.CallbackHandler.to(‘/next’))]
-   \``\`
+       from oauth_dropins import facebook
+       import webapp2
+
+       application = webapp2.WSGIApplication([
+         ('/facebook/start_oauth', facebook.StartHandler.to('/facebook/oauth_callback')),
+         ('/facebook/oauth_callback', facebook.CallbackHandler.to('/next'))]
 
 6. Add these lines to ``app.yaml``:
 
-   ``yaml  - url: /facebook/(start_oauth|oauth_callback)    script: facebook_oauth.application    secure: always``
+   .. code:: yaml
+
+       - url: /facebook/(start_oauth|oauth_callback)
+         script: facebook_oauth.application
+         secure: always
 
 Voila! Send your users to ``/facebook/start_oauth`` when you want them
 to connect their Facebook account to your app, and when they’re done,
@@ -237,7 +250,9 @@ Troubleshooting/FAQ
 
 1. If you get this error:
 
-   ``bash: ./bin/easy_install: ...bad interpreter: No such file or directory``
+   ::
+
+       bash: ./bin/easy_install: ...bad interpreter: No such file or directory
 
 You’ve probably hit `this open virtualenv
 bug <https://github.com/pypa/virtualenv/issues/53>`__ (`fixed but not
@@ -264,17 +279,27 @@ since they’ll prevent virtualenv from installing into the local
 1. If you’re using Twitter, and ``import requests`` or something similar
    fails with:
 
-   ``ImportError: cannot import name certs``
+   ::
+
+       ImportError: cannot import name certs
 
    *or* you see an exception like:
 
-   ``File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token    raise TweepError(e)  TweepError: must be _socket.socket, not socket``
+   ::
+
+       File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
+         raise TweepError(e)
+       TweepError: must be _socket.socket, not socket
 
    …you need to `configure App Engine’s
    SSL <https://cloud.google.com/appengine/docs/python/sockets/ssl_support>`__.
    Add this to your ``app.yaml``:
 
-   ``libraries:  - name: ssl    version: latest``
+   ::
+
+       libraries:
+       - name: ssl
+         version: latest
 
 If you use dev_appserver, you’ll also need to `apply this
 workaround <https://code.google.com/p/googleappengine/issues/detail?id=9246>`__
@@ -290,7 +315,13 @@ workaround <https://code.google.com/p/googleappengine/issues/detail?id=9246>`__
 
 2. If you get an error like this:
 
-   ``File "oauth_dropins/webutil/test/__init__.py", line 5, in <module>      import dev_appserver  ImportError: No module named dev_appserver  ...  InstallationError: Command python setup.py egg_info failed with error code 1 in /home/singpolyma/src/bridgy/src/oauth-dropins-master``
+   ::
+
+         File "oauth_dropins/webutil/test/__init__.py", line 5, in <module>
+           import dev_appserver
+       ImportError: No module named dev_appserver
+       ...
+       InstallationError: Command python setup.py egg_info failed with error code 1 in /home/singpolyma/src/bridgy/src/oauth-dropins-master
 
 …you either don’t have ``/usr/local/google_appengine`` in your
 ``PYTHONPATH``, or you have it as a relative directory. pip requires
@@ -298,7 +329,13 @@ fully qualified directories.
 
 1. If you get an error like this:
 
-   ``Running setup.py develop for gdata  ...  error: option --home not recognized  ...  InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata``
+   ::
+
+       Running setup.py develop for gdata
+       ...
+       error: option --home not recognized
+       ...
+       InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
 
 …you may be hitting `Pip bug
 1833 <https://github.com/pypa/pip/issues/1833>`__. Are you passing
@@ -309,12 +346,27 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+1.11 - 2018-03-08
+~~~~~~~~~~~~~~~~~
+
+-  Add GitHub!
+-  Facebook
+
+   -  Pass ``state`` to the initial OAuth endpoint directly, instead of
+      encoding it into the redirect URL, so the redirect can `match the
+      Strict Mode
+      whitelist <https://developers.facebook.com/blog/post/2017/12/18/strict-uri-matching/>`__.
+
+-  Add humanize dependency for webutil.logs.
+
+.. section-1:
+
 1.10 - 2017-12-10
 ~~~~~~~~~~~~~~~~~
 
 Mostly just internal changes to webutil to support granary v1.10.
 
-.. section-1:
+.. section-2:
 
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
@@ -325,7 +377,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 
    -  Handle punctuation in error messages.
 
-.. section-2:
+.. section-3:
 
 1.8 - 2017-08-29
 ~~~~~~~~~~~~~~~~
@@ -348,14 +400,14 @@ Mostly just internal changes to webutil to support granary v1.9.
       from ``me`` parameter, `which is going
       away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
 
-.. section-3:
+.. section-4:
 
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
 -  Updates to bundled webutil library, notably WideUnicode class.
 
-.. section-4:
+.. section-5:
 
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
@@ -364,21 +416,21 @@ Mostly just internal changes to webutil to support granary v1.9.
    `oauth-dropins.readthedocs.io <http://oauth-dropins.readthedocs.io/>`__.
 -  Fix Dropbox bug with fetching access token.
 
-.. section-5:
+.. section-6:
 
 1.5 - 2016-08-25
 ~~~~~~~~~~~~~~~~
 
 -  Add `Medium <https://medium.com/>`__.
 
-.. section-6:
+.. section-7:
 
 1.4 - 2016-06-27
 ~~~~~~~~~~~~~~~~
 
 -  Upgrade Facebook API from v2.2 to v2.6.
 
-.. section-7:
+.. section-8:
 
 1.3 - 2016-04-07
 ~~~~~~~~~~~~~~~~
@@ -387,7 +439,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  More consistent logging of HTTP requests.
 -  Set up Coveralls.
 
-.. section-8:
+.. section-9:
 
 1.2 - 2016-01-11
 ~~~~~~~~~~~~~~~~
@@ -401,7 +453,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Add developer setup and troubleshooting docs.
 -  Set up CircleCI.
 
-.. section-9:
+.. section-10:
 
 1.1 - 2015-09-06
 ~~~~~~~~~~~~~~~~
@@ -409,7 +461,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Flickr: split out flickr_auth.py file.
 -  Add a number of utility functions to webutil.
 
-.. section-10:
+.. section-11:
 
 1.0 - 2015-06-27
 ~~~~~~~~~~~~~~~~
