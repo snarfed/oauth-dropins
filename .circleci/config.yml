@@ -1,0 +1,49 @@
+# CircleCI automatically reads this file from our repo and uses it for
+# configuration. Docs:
+# https://circleci.com/docs/2.0/configuration-reference/
+# https://circleci.com/docs/2.0/sample-config/
+version: 2
+
+jobs:
+  build:
+    docker:
+      # https://circleci.com/docs/2.0/google-container-engine/#selecting-a-base-image
+      - image: google/cloud-sdk
+      - image: circleci/python:2.7
+
+    environment:
+      - PYTHONPATH: /usr/lib/google-cloud-sdk/platform/google_appengine
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
+
+      - run:
+          name: Install dependencies
+          command: |
+            apt-get install google-cloud-sdk-app-engine-python-extras
+            git submodule sync
+            git submodule update --init
+            pip install virtualenv
+            virtualenv local
+            . local/bin/activate
+            pip install -r requirements.freeze.txt
+            pip install coverage coveralls  # for https://coveralls.io/
+
+      - run:
+          name: Test
+          command: |
+            . local/bin/activate
+            python -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v
+            python -m coverage html -d /tmp/coverage_html
+            if [ "$COVERALLS_REPO_TOKEN" != "" ]; then coveralls; fi
+
+      - save_cache:
+          key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
+          paths:
+            - "local"
+
+      - store_artifacts:
+          path: /tmp/coverage_html
