@@ -17,7 +17,7 @@ from webutil import util
 from google.appengine.ext import ndb
 from webob import exc
 
-# URL templates. Can't (easily) use urllib.urlencode() because I want to keep
+# URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = str('&'.join((
     'https://github.com/login/oauth/authorize?'

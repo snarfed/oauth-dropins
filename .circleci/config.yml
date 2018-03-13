@@ -9,7 +9,6 @@ jobs:
     docker:
       # https://circleci.com/docs/2.0/google-container-engine/#selecting-a-base-image
       - image: google/cloud-sdk
-      # - image: circleci/python:3.3
       - image: circleci/python:2.7
 
     environment:

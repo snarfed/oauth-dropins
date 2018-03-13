@@ -16,7 +16,7 @@ Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
 About
 ---
 
-This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+, IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google+, IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
 * [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
   Install with `pip install oauth-dropins`.
@@ -312,6 +312,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
+### 1.12 - unreleased
+* Add Python 3 support to webutil.util.
+
 ### 1.11 - 2018-03-08
 * Add GitHub!
 * Facebook:
