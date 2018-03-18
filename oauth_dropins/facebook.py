@@ -5,6 +5,7 @@ https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
 TODO: implement client state param
 TODO: unify this with instagram. see file docstring comment there.
 """
+from __future__ import unicode_literals
 
 import json
 import logging
