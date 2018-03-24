@@ -312,8 +312,8 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
-### 1.12 - unreleased
-* Add Python 3 support to webutil.util.
+### 1.12 - 2018-03-24
+* More Python 3 updates and bug fixes in webutil.util.
 
 ### 1.11 - 2018-03-08
 * Add GitHub!

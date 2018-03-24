@@ -7,8 +7,9 @@ About
 This is a collection of drop-in `Google App
 Engine <https://appengine.google.com/>`__ Python request handlers for
 the initial `OAuth <http://oauth.net/>`__ client flows for many popular
-sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, Google+,
-IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
+sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub,
+Google+, IndieAuth, Instagram, Medium, Tumblr, Twitter, and
+WordPress.com.
 
 -  `Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__
    Install with ``pip install oauth-dropins``.
@@ -346,27 +347,35 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+1.12 - 2018-03-24
+~~~~~~~~~~~~~~~~~
+
+-  More Python 3 updates and bug fixes in webutil.util.
+
+.. section-1:
+
 1.11 - 2018-03-08
 ~~~~~~~~~~~~~~~~~
 
 -  Add GitHub!
--  Facebook
+-  Facebook:
 
    -  Pass ``state`` to the initial OAuth endpoint directly, instead of
       encoding it into the redirect URL, so the redirect can `match the
       Strict Mode
       whitelist <https://developers.facebook.com/blog/post/2017/12/18/strict-uri-matching/>`__.
 
+-  Add Python 3 support to webutil.util!
 -  Add humanize dependency for webutil.logs.
 
-.. section-1:
+.. section-2:
 
 1.10 - 2017-12-10
 ~~~~~~~~~~~~~~~~~
 
 Mostly just internal changes to webutil to support granary v1.10.
 
-.. section-2:
+.. section-3:
 
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
@@ -377,7 +386,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 
    -  Handle punctuation in error messages.
 
-.. section-3:
+.. section-4:
 
 1.8 - 2017-08-29
 ~~~~~~~~~~~~~~~~
@@ -400,14 +409,14 @@ Mostly just internal changes to webutil to support granary v1.9.
       from ``me`` parameter, `which is going
       away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
 
-.. section-4:
+.. section-5:
 
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
 -  Updates to bundled webutil library, notably WideUnicode class.
 
-.. section-5:
+.. section-6:
 
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
@@ -416,21 +425,21 @@ Mostly just internal changes to webutil to support granary v1.9.
    `oauth-dropins.readthedocs.io <http://oauth-dropins.readthedocs.io/>`__.
 -  Fix Dropbox bug with fetching access token.
 
-.. section-6:
+.. section-7:
 
 1.5 - 2016-08-25
 ~~~~~~~~~~~~~~~~
 
 -  Add `Medium <https://medium.com/>`__.
 
-.. section-7:
+.. section-8:
 
 1.4 - 2016-06-27
 ~~~~~~~~~~~~~~~~
 
 -  Upgrade Facebook API from v2.2 to v2.6.
 
-.. section-8:
+.. section-9:
 
 1.3 - 2016-04-07
 ~~~~~~~~~~~~~~~~
@@ -439,7 +448,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  More consistent logging of HTTP requests.
 -  Set up Coveralls.
 
-.. section-9:
+.. section-10:
 
 1.2 - 2016-01-11
 ~~~~~~~~~~~~~~~~
@@ -453,7 +462,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Add developer setup and troubleshooting docs.
 -  Set up CircleCI.
 
-.. section-10:
+.. section-11:
 
 1.1 - 2015-09-06
 ~~~~~~~~~~~~~~~~
@@ -461,7 +470,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Flickr: split out flickr_auth.py file.
 -  Add a number of utility functions to webutil.
 
-.. section-11:
+.. section-12:
 
 1.0 - 2015-06-27
 ~~~~~~~~~~~~~~~~

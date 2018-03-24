@@ -18,7 +18,7 @@ class TestLoader(ScanningLoader):
 
 
 setup(name='oauth-dropins',
-      version='1.11',
+      version='1.12',
       description='Drop-in App Engine OAuth client handlers for many popular sites.',
       long_description=open('README.rst').read(),
       url='https://github.com/snarfed/oauth-dropins',
@@ -36,10 +36,13 @@ setup(name='oauth-dropins',
           'License :: Public Domain',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.3',
       ],
       keywords='oauth appengine',
       # Keep in sync with requirements.txt!
       install_requires=[
+          'future>=0.16.0',
           'gdata>=2.0.18',
           'google-api-python-client>=1.6.3',
           'httplib2',
