@@ -17,7 +17,6 @@ TODO unify Disqus, Facebook, and Instagram
 import json
 import logging
 import urllib
-import urllib2
 from webob import exc
 
 from webutil import util
