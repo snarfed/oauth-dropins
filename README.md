@@ -10,6 +10,7 @@ Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
 * [Troubleshooting/FAQ](#troubleshootingfaq)
 * [Changelog](#changelog)
 * [Development](#development)
+* [Release instructions](#release-instructions)
 * [TODO](#TODO)
 
 
@@ -426,7 +427,77 @@ do this outside your virtualenv; if so, you'll need to reconfigure it to see
 system packages with `virtualenv --system-site-packages local`.) Then, run
 [`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
 
-To convert README.md to README.rst for PyPI or index.rst for Sphinx:
+
+Release instructions
+---
+Here's how to package, test, and ship a new release. (Note that this is [largely duplicated in granary's readme too](https://github.com/snarfed/granary#release-instructions).)
+
+1. Run the unit tests.
+    ```sh
+    source local/bin/activate.csh
+    python2 -m unittest discover
+    deactivate
+
+    source local3/bin/activate.csh
+    python3 -m unittest oauth_dropins.webutil.test.test_util
+    deactivate
+    ```
+1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
+1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`.
+1. `git commit -m 'release vX.Y'`
+1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
+    ```sh
+    python setup.py clean build sdist
+    twine upload -r pypitest dist/oauth-dropins-X.Y.tar.gz
+    ```
+1. Install from test.pypi.org, both Python 2 and 3.
+    ```sh
+    cd /tmp
+    virtualenv local
+    source local/bin/activate.csh
+    pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
+    deactivate
+    ```
+    ```sh
+    python3 -m venv local3
+    source local3/bin/activate.csh
+    pip3 install --upgrade pip
+    pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
+    deactivate
+    ```
+1. Smoke test that the code trivially loads and runs, in both Python 2 and 3.
+   ```sh
+    source local/bin/activate.csh
+    python2
+    # run test code below
+    deactivate
+    ```
+    ```sh
+    source local3/bin/activate.csh
+    python3
+    # run test code below
+    deactivate
+    ```
+    Test code to paste into the interpreter:
+    ```py
+    from oauth_dropins.webutil import util
+    util.__file__
+    util.UrlCanonicalizer()('http://asdf.com')
+    # should print 'https://asdf.com/'
+    exit()
+    ```
+1. Tag the release in git. In the tag message editor, delete the generated comments at bottom, leave the first line blank (to omit the release "title" in github), put `### Notable changes` on the second line, then copy and paste this version's changelog contents below it.
+    ```sh
+    git tag -a vX.Y --cleanup=verbatim
+    git push
+    git push --tags
+    ```
+1. [Click here to draft a new release on GitHub.](https://github.com/snarfed/oauth-dropins/releases/new) Enter `vX.Y` in the _Tag version_ box. Leave _Release title_ empty. Copy `### Notable changes` and the changelog contents into the description text box.
+1. Upload to [pypi.org](https://pypi.org/)!
+    ```sh
+    python setup.py clean build sdist
+    twine upload dist/oauth-dropins-X.Y.tar.gz
+    ```
 
 
 Related work
