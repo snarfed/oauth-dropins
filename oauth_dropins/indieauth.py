@@ -15,6 +15,7 @@ import handlers
 import mf2py
 import mf2util
 import models
+import requests
 from webutil import util
 
 from google.appengine.ext import ndb
@@ -34,7 +35,11 @@ def discover_authorization_endpoint(me, resp=None):
   Return:
     string, the discovered indieauth URL or the default indieauth.com URL
   """
-  resp = resp or util.requests_get(me)
+  try:
+    resp = resp or util.requests_get(me)
+  except requests.RequestException as e:
+    raise exc.HTTPBadRequest(str(e))
+
   if resp.status_code // 100 != 2:
     logging.warning(
       'could not fetch user url "%s". got response code: %d',
