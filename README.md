@@ -313,6 +313,10 @@ you have it as a relative directory. pip requires fully qualified directories.
 
 Changelog
 ---
+
+### 1.13 - unreleased
+* IndieAuth: support JSON code verification responses as well as form-encoded ([snarfed/bridgy#809](https://github.com/snarfed/bridgy/issues/809)).
+
 ### 1.12 - 2018-03-24
 * More Python 3 updates and bug fixes in webutil.util.
 

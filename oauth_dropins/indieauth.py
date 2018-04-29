@@ -159,9 +159,9 @@ class CallbackHandler(handlers.CallbackHandler):
     })
 
     if validate_resp.status_code // 100 == 2:
-      data = urlparse.parse_qs(validate_resp.content)
+      data = util.sniff_json_or_form_encoded(validate_resp.content)
       if data.get('me'):
-        verified = data.get('me')[0]
+        verified = data.get('me')
         user_json = build_user_json(verified)
         indie_auth = IndieAuth(id=verified, user_json=json.dumps(user_json))
         indie_auth.put()
