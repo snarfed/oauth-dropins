@@ -531,8 +531,6 @@ reconfigure it to see system packages with
 ``virtualenv --system-site-packages local``.) Then, run
 `docs/build.sh <https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh>`__.
 
-To convert README.md to README.rst for PyPI or index.rst for Sphinx:
-
 Related work
 ------------
 
