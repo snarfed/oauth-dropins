@@ -175,4 +175,5 @@ class CallbackHandler(handlers.CallbackHandler):
         raise exc.HTTPBadRequest(
           'Verification response missing required "me" field')
     else:
-      raise exc.HTTPBadRequest('IndieAuth verification failed: %s' % validate_resp.text)
+      raise exc.HTTPBadRequest('IndieAuth verification failed: %s %s' %
+                               (validate_resp.status_code, validate_resp.text))
