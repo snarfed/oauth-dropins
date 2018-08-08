@@ -11,7 +11,7 @@ humanize==0.5.1
 idna==2.6
 Jinja2==2.10
 MarkupSafe==1.0
-mf2py==1.0.4
+mf2py==1.1.2
 mf2util==0.3.2
 mox3==0.24.0
 oauth2client==4.1.2

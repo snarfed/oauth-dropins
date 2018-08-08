@@ -18,7 +18,7 @@ class TestLoader(ScanningLoader):
 
 
 setup(name='oauth-dropins',
-      version='1.12',
+      version='1.13',
       description='Drop-in App Engine OAuth client handlers for many popular sites.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
@@ -56,7 +56,7 @@ setup(name='oauth-dropins',
           'requests-toolbelt>=0.6.2',
           'tweepy>=3.0',
           'beautifulsoup4',
-          'mf2py',
+          'mf2py>=1.1.2',
           'mf2util',
           'urllib3>=1.14',
       ],

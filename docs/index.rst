@@ -57,8 +57,8 @@ Here’s a full example of using the Facebook drop-in.
 
    .. code:: shell
 
-       source local/bin/activate
-       pip install oauth-dropins
+      source local/bin/activate
+      pip install oauth-dropins
 
 3. Add this to the ``appengine_config.py`` file in your project’s root
    directory
@@ -66,9 +66,9 @@ Here’s a full example of using the Facebook drop-in.
 
    .. code:: py
 
-       from google.appengine.ext import vendor
-       vendor.add('local')
-       from oauth_dropins.appengine_config import *
+      from google.appengine.ext import vendor
+      vendor.add('local')
+      from oauth_dropins.appengine_config import *
 
 4. Put your `Facebook
    application’s <https://developers.facebook.com/apps>`__ ID and secret
@@ -79,20 +79,20 @@ Here’s a full example of using the Facebook drop-in.
 
    .. code:: python
 
-       from oauth_dropins import facebook
-       import webapp2
+      from oauth_dropins import facebook
+      import webapp2
 
-       application = webapp2.WSGIApplication([
-         ('/facebook/start_oauth', facebook.StartHandler.to('/facebook/oauth_callback')),
-         ('/facebook/oauth_callback', facebook.CallbackHandler.to('/next'))]
+      application = webapp2.WSGIApplication([
+        ('/facebook/start_oauth', facebook.StartHandler.to('/facebook/oauth_callback')),
+        ('/facebook/oauth_callback', facebook.CallbackHandler.to('/next'))]
 
 6. Add these lines to ``app.yaml``:
 
    .. code:: yaml
 
-       - url: /facebook/(start_oauth|oauth_callback)
-         script: facebook_oauth.application
-         secure: always
+      - url: /facebook/(start_oauth|oauth_callback)
+        script: facebook_oauth.application
+        secure: always
 
 Voila! Send your users to ``/facebook/start_oauth`` when you want them
 to connect their Facebook account to your app, and when they’re done,
@@ -160,12 +160,12 @@ methods:
 
 .. code:: python
 
-    class MyHandler(webapp2.RequestHandler):
-      def get(self):
-        ...
-        handler_cls = facebook.StartHandler.to('/facebook/oauth_callback')
-        handler = handler_cls(self.request, self.response)
-        self.redirect(handler.redirect_url())
+   class MyHandler(webapp2.RequestHandler):
+     def get(self):
+       ...
+       handler_cls = facebook.StartHandler.to('/facebook/oauth_callback')
+       handler = handler_cls(self.request, self.response)
+       self.redirect(handler.redirect_url())
 
 However, this is *not* currently supported for Google+ and Blogger.
 Hopefully that will be fixed in the future.
@@ -201,10 +201,10 @@ granted or declined permission. It also has two useful methods:
 
 .. code:: python
 
-    class MyCallbackHandler(facebook.CallbackHandler):
-      def finish(self, auth_entity, state=None):
-        self.response.write('Hi %s, thanks for connecting your %s account.' %
-            (auth_entity.user_display_name(), auth_entity.site_name()))
+   class MyCallbackHandler(facebook.CallbackHandler):
+     def finish(self, auth_entity, state=None):
+       self.response.write('Hi %s, thanks for connecting your %s account.' %
+           (auth_entity.user_display_name(), auth_entity.site_name()))
 
 However, this is *not* currently supported for Google+ and Blogger.
 Hopefully that will be fixed in the future.
@@ -253,7 +253,7 @@ Troubleshooting/FAQ
 
    ::
 
-       bash: ./bin/easy_install: ...bad interpreter: No such file or directory
+      bash: ./bin/easy_install: ...bad interpreter: No such file or directory
 
 You’ve probably hit `this open virtualenv
 bug <https://github.com/pypa/virtualenv/issues/53>`__ (`fixed but not
@@ -282,15 +282,15 @@ since they’ll prevent virtualenv from installing into the local
 
    ::
 
-       ImportError: cannot import name certs
+      ImportError: cannot import name certs
 
    *or* you see an exception like:
 
    ::
 
-       File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
-         raise TweepError(e)
-       TweepError: must be _socket.socket, not socket
+      File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
+        raise TweepError(e)
+      TweepError: must be _socket.socket, not socket
 
    …you need to `configure App Engine’s
    SSL <https://cloud.google.com/appengine/docs/python/sockets/ssl_support>`__.
@@ -298,9 +298,9 @@ since they’ll prevent virtualenv from installing into the local
 
    ::
 
-       libraries:
-       - name: ssl
-         version: latest
+      libraries:
+      - name: ssl
+        version: latest
 
 If you use dev_appserver, you’ll also need to `apply this
 workaround <https://code.google.com/p/googleappengine/issues/detail?id=9246>`__
@@ -318,11 +318,11 @@ workaround <https://code.google.com/p/googleappengine/issues/detail?id=9246>`__
 
    ::
 
-         File "oauth_dropins/webutil/test/__init__.py", line 5, in <module>
-           import dev_appserver
-       ImportError: No module named dev_appserver
-       ...
-       InstallationError: Command python setup.py egg_info failed with error code 1 in /home/singpolyma/src/bridgy/src/oauth-dropins-master
+        File "oauth_dropins/webutil/test/__init__.py", line 5, in <module>
+          import dev_appserver
+      ImportError: No module named dev_appserver
+      ...
+      InstallationError: Command python setup.py egg_info failed with error code 1 in /home/singpolyma/src/bridgy/src/oauth-dropins-master
 
 …you either don’t have ``/usr/local/google_appengine`` in your
 ``PYTHONPATH``, or you have it as a relative directory. pip requires
@@ -332,11 +332,11 @@ fully qualified directories.
 
    ::
 
-       Running setup.py develop for gdata
-       ...
-       error: option --home not recognized
-       ...
-       InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
+      Running setup.py develop for gdata
+      ...
+      error: option --home not recognized
+      ...
+      InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
 
 …you may be hitting `Pip bug
 1833 <https://github.com/pypa/pip/issues/1833>`__. Are you passing
@@ -347,12 +347,19 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+1.13 - unreleased
+~~~~~~~~~~~~~~~~~
+
+-  IndieAuth: support JSON code verification responses as well as
+   form-encoded
+   (`snarfed/bridgy#809 <https://github.com/snarfed/bridgy/issues/809>`__).
+
 1.12 - 2018-03-24
 ~~~~~~~~~~~~~~~~~
 
 -  More Python 3 updates and bug fixes in webutil.util.
 
-.. section-1:
+.. _section-1:
 
 1.11 - 2018-03-08
 ~~~~~~~~~~~~~~~~~
@@ -368,14 +375,14 @@ Changelog
 -  Add Python 3 support to webutil.util!
 -  Add humanize dependency for webutil.logs.
 
-.. section-2:
+.. _section-2:
 
 1.10 - 2017-12-10
 ~~~~~~~~~~~~~~~~~
 
 Mostly just internal changes to webutil to support granary v1.10.
 
-.. section-3:
+.. _section-3:
 
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
@@ -386,7 +393,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 
    -  Handle punctuation in error messages.
 
-.. section-4:
+.. _section-4:
 
 1.8 - 2017-08-29
 ~~~~~~~~~~~~~~~~
@@ -409,14 +416,14 @@ Mostly just internal changes to webutil to support granary v1.9.
       from ``me`` parameter, `which is going
       away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
 
-.. section-5:
+.. _section-5:
 
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
 -  Updates to bundled webutil library, notably WideUnicode class.
 
-.. section-6:
+.. _section-6:
 
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
@@ -425,21 +432,21 @@ Mostly just internal changes to webutil to support granary v1.9.
    `oauth-dropins.readthedocs.io <http://oauth-dropins.readthedocs.io/>`__.
 -  Fix Dropbox bug with fetching access token.
 
-.. section-7:
+.. _section-7:
 
 1.5 - 2016-08-25
 ~~~~~~~~~~~~~~~~
 
 -  Add `Medium <https://medium.com/>`__.
 
-.. section-8:
+.. _section-8:
 
 1.4 - 2016-06-27
 ~~~~~~~~~~~~~~~~
 
 -  Upgrade Facebook API from v2.2 to v2.6.
 
-.. section-9:
+.. _section-9:
 
 1.3 - 2016-04-07
 ~~~~~~~~~~~~~~~~
@@ -448,7 +455,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  More consistent logging of HTTP requests.
 -  Set up Coveralls.
 
-.. section-10:
+.. _section-10:
 
 1.2 - 2016-01-11
 ~~~~~~~~~~~~~~~~
@@ -462,7 +469,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Add developer setup and troubleshooting docs.
 -  Set up CircleCI.
 
-.. section-11:
+.. _section-11:
 
 1.1 - 2015-09-06
 ~~~~~~~~~~~~~~~~
@@ -470,7 +477,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Flickr: split out flickr_auth.py file.
 -  Add a number of utility functions to webutil.
 
-.. section-12:
+.. _section-12:
 
 1.0 - 2015-06-27
 ~~~~~~~~~~~~~~~~
@@ -494,18 +501,18 @@ run:
 
 .. code:: shell
 
-    git submodule init
-    git submodule update
-    virtualenv local
-    source local/bin/activate
-    pip install -r requirements.txt
+   git submodule init
+   git submodule update
+   virtualenv local
+   source local/bin/activate
+   pip install -r requirements.txt
 
-    # We install gdata in source mode, and App Engine doesn't follow .egg-link
-    # files, so add a symlink to it.
-    ln -s ../../../src/gdata/src/gdata local/lib/python2.7/site-packages/gdata
-    ln -s ../../../src/gdata/src/atom local/lib/python2.7/site-packages/atom
+   # We install gdata in source mode, and App Engine doesn't follow .egg-link
+   # files, so add a symlink to it.
+   ln -s ../../../src/gdata/src/gdata local/lib/python2.7/site-packages/gdata
+   ln -s ../../../src/gdata/src/atom local/lib/python2.7/site-packages/atom
 
-    python setup.py test
+   python setup.py test
 
 Most dependencies are clean, but we’ve made patches to
 `gdata-python-client <https://github.com/snarfed/gdata-python-client>`__
@@ -530,6 +537,64 @@ may want to do this outside your virtualenv; if so, you’ll need to
 reconfigure it to see system packages with
 ``virtualenv --system-site-packages local``.) Then, run
 `docs/build.sh <https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh>`__.
+
+Release instructions
+--------------------
+
+Here’s how to package, test, and ship a new release. (Note that this is
+`largely duplicated in granary’s readme
+too <https://github.com/snarfed/granary#release-instructions>`__.)
+
+1.  Run the unit tests. \`sh source local/bin/activate.csh python2 -m
+    unittest discover deactivate
+
+    source local3/bin/activate.csh python3 -m unittest
+    oauth_dropins.webutil.test.test_util deactivate \``\`
+2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
+    ``git grep`` the old version number to make sure it only appears in
+    the changelog. Change the current changelog entry in ``README.md``
+    for this new version from *unreleased* to the current date.
+3.  Build the docs. If you added any new modules, add them to the
+    appropriate file(s) in ``docs/source/``. Then run
+    ``./docs/build.sh``.
+4.  ``git commit -m 'release vX.Y'``
+5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
+    ``sh  python3 setup.py clean build sdist  twine upload -r pypitest dist/oauth-dropins-X.Y.tar.gz``
+6.  Install from test.pypi.org, both Python 2 and 3.
+    ``sh  cd /tmp  virtualenv local  source local/bin/activate.csh  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
+    ``sh  python3 -m venv local3  source local3/bin/activate.csh  pip3 install --upgrade pip  pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
+7.  Smoke test that the code trivially loads and runs, in both Python 2
+    and 3.
+
+    .. code:: sh
+
+        source local/bin/activate.csh
+        python2
+        # run test code below
+        deactivate
+
+    .. code:: sh
+
+       source local3/bin/activate.csh
+       python3
+       # run test code below
+       deactivate
+
+    Test code to paste into the interpreter:
+    ``py  from oauth_dropins.webutil import util  util.__file__  util.UrlCanonicalizer()('http://asdf.com')  # should print 'https://asdf.com/'  exit()``
+8.  Tag the release in git. In the tag message editor, delete the
+    generated comments at bottom, leave the first line blank (to omit
+    the release “title” in github), put ``### Notable changes`` on the
+    second line, then copy and paste this version’s changelog contents
+    below it.
+    ``sh  git tag -a vX.Y --cleanup=verbatim  git push  git push --tags``
+9.  `Click here to draft a new release on
+    GitHub. <https://github.com/snarfed/oauth-dropins/releases/new>`__
+    Enter ``vX.Y`` in the *Tag version* box. Leave *Release title*
+    empty. Copy ``### Notable changes`` and the changelog contents into
+    the description text box.
+10. Upload to `pypi.org <https://pypi.org/>`__!
+    ``sh  python3 setup.py clean build sdist  twine upload dist/oauth-dropins-X.Y.tar.gz``
 
 Related work
 ------------

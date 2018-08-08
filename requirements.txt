@@ -12,7 +12,7 @@ requests-oauthlib
 requests-toolbelt>=0.6.2
 tweepy>=3.0
 beautifulsoup4
-mf2py
+mf2py>=1.1.2
 mf2util
 mox3>=0.24.0
 urllib3>=1.14
