@@ -1,36 +1,6 @@
 """App Engine settings.
 
-Reads app keys and secrets into constants from these files:
-
-disqus_client_id
-disqus_client_secret
-dropbox_app_key
-dropbox_app_secret
-facebook_app_id
-facebook_app_secret
-facebook_app_id_local
-facebook_app_secret_local
-flickr_app_key
-flickr_app_secret
-github_client_id
-github_client_id_local
-github_client_secret
-github_client_secret_local
-google_client_id
-google_client_secret
-indieauth_client_id
-instagram_client_id
-instagram_client_secret
-instagram_client_id_local
-instagram_client_secret_local
-twitter_app_key
-twitter_app_secret
-tumblr_app_key
-tumblr_app_secret
-wordpress_client_id
-wordpress_client_secret
-wordpress_client_id_local
-wordpress_client_secret_local
+Reads app keys and secrets from local files into constants.
 """
 from __future__ import absolute_import
 
@@ -103,6 +73,8 @@ FLICKR_APP_SECRET = read('flickr_app_secret')
 GOOGLE_CLIENT_ID = read('google_client_id')
 GOOGLE_CLIENT_SECRET = read('google_client_secret')
 INDIEAUTH_CLIENT_ID = read('indieauth_client_id')
+INSTAGRAM_SESSIONID_COOKIE = (os.getenv('instagram_sessionid_cookie') or
+                              read('instagram_sessionid_cookie'))
 MEDIUM_CLIENT_ID = read('medium_client_id')
 MEDIUM_CLIENT_SECRET = read('medium_client_secret')
 TUMBLR_APP_KEY = read('tumblr_app_key')
