@@ -73,7 +73,7 @@ FLICKR_APP_SECRET = read('flickr_app_secret')
 GOOGLE_CLIENT_ID = read('google_client_id')
 GOOGLE_CLIENT_SECRET = read('google_client_secret')
 INDIEAUTH_CLIENT_ID = read('indieauth_client_id')
-INSTAGRAM_SESSIONID_COOKIE = (os.getenv('instagram_sessionid_cookie') or
+INSTAGRAM_SESSIONID_COOKIE = (os.getenv('INSTAGRAM_SESSIONID_COOKIE') or
                               read('instagram_sessionid_cookie'))
 MEDIUM_CLIENT_ID = read('medium_client_id')
 MEDIUM_CLIENT_SECRET = read('medium_client_secret')
