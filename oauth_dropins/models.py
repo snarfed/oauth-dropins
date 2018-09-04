@@ -1,11 +1,6 @@
 """Base datastore model class for an authenticated account.
 """
-
-import logging
-import urllib2
-
 import appengine_config
-import handlers
 from webutil import models
 from webutil import util
 
@@ -86,13 +81,10 @@ class BaseAuth(models.StringIdModel):
 
     Kwargs are passed through to urlopen().
     """
-    log_params = [('access_token', access_token[:4] + '...')]
-    real_params = [('access_token', access_token)]
+    params = [('access_token', access_token)]
     if api_key:
-      log_params.append(('api_key', api_key[:4] + '...'))
-      real_params.append(('api_key', api_key))
-    log_url = util.add_query_params(url, log_params)
-    url = util.add_query_params(url, real_params)
+      params.append(('api_key', api_key))
+    url = util.add_query_params(url, params)
 
     try:
       return util.urlopen(url, **kwargs)

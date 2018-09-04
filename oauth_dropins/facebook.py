@@ -11,11 +11,9 @@ import json
 import logging
 import urllib
 import urllib2
-import urlparse
 from webob import exc
 
 import appengine_config
-from appengine_config import HTTP_TIMEOUT
 import handlers
 import models
 from webutil import util

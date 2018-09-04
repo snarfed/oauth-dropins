@@ -13,7 +13,6 @@ from webob import exc
 import appengine_config
 import handlers
 import models
-import requests
 import tweepy
 import twitter_auth
 

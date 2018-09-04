@@ -12,10 +12,8 @@ TODO: unify them.
 import json
 import logging
 import urllib
-import urllib2
 
 import appengine_config
-from appengine_config import HTTP_TIMEOUT
 import facebook  # we reuse facebook.CallbackHandler.handle_error()
 import handlers
 import models

@@ -22,7 +22,6 @@ from webob import exc
 from webutil import util
 
 import appengine_config
-from appengine_config import HTTP_TIMEOUT
 import handlers
 import models
 

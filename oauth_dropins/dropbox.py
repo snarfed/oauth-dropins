@@ -11,7 +11,6 @@ import urllib
 import urllib2
 
 import appengine_config
-from appengine_config import HTTP_TIMEOUT
 
 from google.appengine.ext import ndb
 from webob import exc
