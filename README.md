@@ -443,7 +443,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     deactivate
 
     source local3/bin/activate.csh
-    python3 -m unittest oauth_dropins.webutil.test.test_util
+    python3 -m unittest oauth_dropins.webutil.tests.test_util
     deactivate
     ```
 1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.

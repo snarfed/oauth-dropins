@@ -347,19 +347,21 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
-1.13 - unreleased
+1.13 - 2018-08-08
 ~~~~~~~~~~~~~~~~~
 
 -  IndieAuth: support JSON code verification responses as well as
    form-encoded
    (`snarfed/bridgy#809 <https://github.com/snarfed/bridgy/issues/809>`__).
 
+.. _section-1:
+
 1.12 - 2018-03-24
 ~~~~~~~~~~~~~~~~~
 
 -  More Python 3 updates and bug fixes in webutil.util.
 
-.. _section-1:
+.. _section-2:
 
 1.11 - 2018-03-08
 ~~~~~~~~~~~~~~~~~
@@ -375,14 +377,14 @@ Changelog
 -  Add Python 3 support to webutil.util!
 -  Add humanize dependency for webutil.logs.
 
-.. _section-2:
+.. _section-3:
 
 1.10 - 2017-12-10
 ~~~~~~~~~~~~~~~~~
 
 Mostly just internal changes to webutil to support granary v1.10.
 
-.. _section-3:
+.. _section-4:
 
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
@@ -393,7 +395,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 
    -  Handle punctuation in error messages.
 
-.. _section-4:
+.. _section-5:
 
 1.8 - 2017-08-29
 ~~~~~~~~~~~~~~~~
@@ -416,14 +418,14 @@ Mostly just internal changes to webutil to support granary v1.9.
       from ``me`` parameter, `which is going
       away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
 
-.. _section-5:
+.. _section-6:
 
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
 -  Updates to bundled webutil library, notably WideUnicode class.
 
-.. _section-6:
+.. _section-7:
 
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
@@ -432,21 +434,21 @@ Mostly just internal changes to webutil to support granary v1.9.
    `oauth-dropins.readthedocs.io <http://oauth-dropins.readthedocs.io/>`__.
 -  Fix Dropbox bug with fetching access token.
 
-.. _section-7:
+.. _section-8:
 
 1.5 - 2016-08-25
 ~~~~~~~~~~~~~~~~
 
 -  Add `Medium <https://medium.com/>`__.
 
-.. _section-8:
+.. _section-9:
 
 1.4 - 2016-06-27
 ~~~~~~~~~~~~~~~~
 
 -  Upgrade Facebook API from v2.2 to v2.6.
 
-.. _section-9:
+.. _section-10:
 
 1.3 - 2016-04-07
 ~~~~~~~~~~~~~~~~
@@ -455,7 +457,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  More consistent logging of HTTP requests.
 -  Set up Coveralls.
 
-.. _section-10:
+.. _section-11:
 
 1.2 - 2016-01-11
 ~~~~~~~~~~~~~~~~
@@ -469,7 +471,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Add developer setup and troubleshooting docs.
 -  Set up CircleCI.
 
-.. _section-11:
+.. _section-12:
 
 1.1 - 2015-09-06
 ~~~~~~~~~~~~~~~~
@@ -477,7 +479,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Flickr: split out flickr_auth.py file.
 -  Add a number of utility functions to webutil.
 
-.. _section-12:
+.. _section-13:
 
 1.0 - 2015-06-27
 ~~~~~~~~~~~~~~~~
@@ -549,7 +551,7 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
     unittest discover deactivate
 
     source local3/bin/activate.csh python3 -m unittest
-    oauth_dropins.webutil.test.test_util deactivate \``\`
+    oauth_dropins.webutil.tests.test_util deactivate \``\`
 2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``

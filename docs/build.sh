@@ -11,7 +11,7 @@ cd `dirname $absfile`
 # only used to bootstrap. we've edited by hand since ten so don't run any more
 # or it will overwrite them.
 # sphinx-apidoc -f -o source ../oauth_dropins \
-#   ../oauth_dropins/{webutil,}/{appengine_config.py,test}
+#   ../oauth_dropins/{webutil,}/{appengine_config.py,tests}
 
 rm -f index.rst
 cat > index.rst <<EOF
