@@ -1,7 +1,7 @@
 # Keep in sync with setup.py's install_requires!
 -e git+https://github.com/snarfed/gdata-python-client-1.git#egg=gdata
 future
-google-api-python-client>=1.6.3
+google-api-python-client>=1.7.4
 httplib2
 humanize
 oauth2client>=4.1.1

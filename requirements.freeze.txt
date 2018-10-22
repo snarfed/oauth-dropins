@@ -4,7 +4,7 @@ chardet==3.0.4
 coverage==4.0.3
 -e git+git@github.com:snarfed/gdata-python-client-1.git@1df4e1efea7e5cf2754bc7eec6c1ab48ab09e3b1#egg=gdata
 future==0.16.0
-google-api-python-client==1.6.3
+google-api-python-client==1.7.4
 html5lib==0.9999999
 httplib2==0.10.3
 humanize==0.5.1
