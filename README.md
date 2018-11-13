@@ -314,7 +314,7 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
-### 1.14 - 2018-11-XX
+### 1.14 - 2018-11-12
 * Fix dev_appserver in Cloud SDK 219 / `app-engine-python` 1.9.76 and onward. [Background.](https://issuetracker.google.com/issues/117145272#comment25)
 * Upgrade `google-api-python-client` from 1.6.3 to 1.7.4 to [stop using the global HTTP Batch endpoint](https://developers.googleblog.com/2018/03/discontinuing-support-for-json-rpc-and.html).
 * Other minor internal updates.
@@ -504,7 +504,6 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. [Click here to draft a new release on GitHub.](https://github.com/snarfed/oauth-dropins/releases/new) Enter `vX.Y` in the _Tag version_ box. Leave _Release title_ empty. Copy `### Notable changes` and the changelog contents into the description text box.
 1. Upload to [pypi.org](https://pypi.org/)!
     ```sh
-    python3 setup.py clean build sdist
     twine upload dist/oauth-dropins-X.Y.tar.gz
     ```
 
