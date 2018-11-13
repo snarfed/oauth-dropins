@@ -314,6 +314,11 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+### 1.14 - 2018-11-XX
+* Fix dev_appserver in Cloud SDK 219 / `app-engine-python` 1.9.76 and onward. [Background.](https://issuetracker.google.com/issues/117145272#comment25)
+* Upgrade `google-api-python-client` from 1.6.3 to 1.7.4 to [stop using the global HTTP Batch endpoint](https://developers.googleblog.com/2018/03/discontinuing-support-for-json-rpc-and.html).
+* Other minor internal updates.
+
 ### 1.13 - 2018-08-08
 * IndieAuth: support JSON code verification responses as well as form-encoded ([snarfed/bridgy#809](https://github.com/snarfed/bridgy/issues/809)).
 
@@ -448,7 +453,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```
 1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`.
-1. `git commit -m 'release vX.Y'`
+1. `git commit -am 'release vX.Y'`
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
     ```sh
     python3 setup.py clean build sdist

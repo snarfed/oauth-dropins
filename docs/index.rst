@@ -347,6 +347,17 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+1.14 - 2018-11-XX
+~~~~~~~~~~~~~~~~~
+
+-  Fix dev_appserver in Cloud SDK 219 / ``app-engine-python`` 1.9.76 and
+   onward.
+   `Background. <https://issuetracker.google.com/issues/117145272#comment25>`__
+-  Upgrade ``google-api-python-client`` from 1.6.3 to 1.7.4 to `stop
+   using the global HTTP Batch
+   endpoint <https://developers.googleblog.com/2018/03/discontinuing-support-for-json-rpc-and.html>`__.
+-  Other minor internal updates.
+
 1.13 - 2018-08-08
 ~~~~~~~~~~~~~~~~~
 
