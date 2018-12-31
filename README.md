@@ -314,6 +314,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+### 1.15 - unreleased
+* webutil.logs: return HTTP 400 if `start_time` is before 2018-04-01 (App Engine's rough launch window).
+
 ### 1.14 - 2018-11-12
 * Fix dev_appserver in Cloud SDK 219 / `app-engine-python` 1.9.76 and onward. [Background.](https://issuetracker.google.com/issues/117145272#comment25)
 * Upgrade `google-api-python-client` from 1.6.3 to 1.7.4 to [stop using the global HTTP Batch endpoint](https://developers.googleblog.com/2018/03/discontinuing-support-for-json-rpc-and.html).
