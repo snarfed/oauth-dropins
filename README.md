@@ -17,7 +17,7 @@ Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
 About
 ---
 
-This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google+, IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
 
 * [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
   Install with `pip install oauth-dropins`.
@@ -139,7 +139,7 @@ the user to grant your app permission. It has two useful methods:
   If you want to add OAuth scopes beyond the default one(s) needed for login,
   you can pass them to the `scopes` kwarg as a string or sequence of strings, or
   include them in the `scopes` query parameter in the POST request body. This is
-  currently supported with Facebook, Google+, Blogger, and Instagram.
+  currently supported with Facebook, Google, Blogger, and Instagram.
 
   Some of the sites that use OAuth 1 support alternatives. For Twitter,
   `StartHandler.to` takes an additional `access_type` kwarg that may be `read`
@@ -165,7 +165,7 @@ class MyHandler(webapp2.RequestHandler):
     self.redirect(handler.redirect_url())
 ```
 
-  However, this is *not* currently supported for Google+ and Blogger. Hopefully
+  However, this is *not* currently supported for Google and Blogger. Hopefully
   that will be fixed in the future.
 
 
@@ -202,7 +202,7 @@ class MyCallbackHandler(facebook.CallbackHandler):
         (auth_entity.user_display_name(), auth_entity.site_name()))
 ```
 
-  However, this is *not* currently supported for Google+ and Blogger. Hopefully
+  However, this is *not* currently supported for Google and Blogger. Hopefully
   that will be fixed in the future.
 
 ### Auth entities
@@ -314,7 +314,8 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
-### 1.15 - unreleased
+### 2.0 - unreleased
+* _Breaking change_: switch from [Google+ Sign-In](https://developers.google.com/+/web/signin/) ([which shuts down in March](https://developers.google.com/+/api-shutdown)) to [Google Sign-In](https://developers.google.com/identity/). Notably, this removes the `googleplus` module and adds a new `google_signin` module, renames the `GooglePlusAuth` class to  `GoogleAuth`, and removes its `api()` method. Otherwise, the implementation is mostly the same.
 * webutil.logs: return HTTP 400 if `start_time` is before 2018-04-01 (App Engine's rough launch window).
 
 ### 1.14 - 2018-11-12
@@ -519,7 +520,7 @@ Related work
 TODO
 ---
 
-* Google+ and Blogger need some love:
+* Google and Blogger need some love:
     * handle declines
     * allow overriding `CallbackHandler.finish()`
     * support `StartHandler.redirect_url()`

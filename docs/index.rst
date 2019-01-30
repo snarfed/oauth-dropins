@@ -8,7 +8,7 @@ This is a collection of drop-in `Google App
 Engine <https://appengine.google.com/>`__ Python request handlers for
 the initial `OAuth <http://oauth.net/>`__ client flows for many popular
 sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub,
-Google+, IndieAuth, Instagram, Medium, Tumblr, Twitter, and
+Google, IndieAuth, Instagram, Medium, Tumblr, Twitter, and
 WordPress.com.
 
 -  `Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__
@@ -138,7 +138,7 @@ methods:
    login, you can pass them to the ``scopes`` kwarg as a string or
    sequence of strings, or include them in the ``scopes`` query
    parameter in the POST request body. This is currently supported with
-   Facebook, Google+, Blogger, and Instagram.
+   Facebook, Google, Blogger, and Instagram.
 
    Some of the sites that use OAuth 1 support alternatives. For Twitter,
    ``StartHandler.to`` takes an additional ``access_type`` kwarg that
@@ -167,7 +167,7 @@ methods:
        handler = handler_cls(self.request, self.response)
        self.redirect(handler.redirect_url())
 
-However, this is *not* currently supported for Google+ and Blogger.
+However, this is *not* currently supported for Google and Blogger.
 Hopefully that will be fixed in the future.
 
 ``CallbackHandler``
@@ -206,7 +206,7 @@ granted or declined permission. It also has two useful methods:
        self.response.write('Hi %s, thanks for connecting your %s account.' %
            (auth_entity.user_display_name(), auth_entity.site_name()))
 
-However, this is *not* currently supported for Google+ and Blogger.
+However, this is *not* currently supported for Google and Blogger.
 Hopefully that will be fixed in the future.
 
 Auth entities
@@ -346,6 +346,21 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 
 Changelog
 ---------
+
+2.0 - unreleased
+~~~~~~~~~~~~~~~~
+
+-  *Breaking change*: switch from `Google+
+   Sign-In <https://developers.google.com/+/web/signin/>`__ (`which
+   shuts down in
+   March <https://developers.google.com/+/api-shutdown>`__) to `Google
+   Sign-In <https://developers.google.com/identity/>`__. Notably, this
+   removes the ``googleplus`` module and adds a new ``google_signin``
+   module, renames the ``GooglePlusAuth`` class to ``GoogleAuth``, and
+   removes its ``api()`` method. Otherwise, the implementation is mostly
+   the same.
+-  webutil.logs: return HTTP 400 if ``start_time`` is before 2018-04-01
+   (App Engine’s rough launch window).
 
 1.14 - 2018-11-12
 ~~~~~~~~~~~~~~~~~
@@ -619,7 +634,7 @@ Related work
 TODO
 ----
 
--  Google+ and Blogger need some love:
+-  Google and Blogger need some love:
 
    -  handle declines
    -  allow overriding ``CallbackHandler.finish()``

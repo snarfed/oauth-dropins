@@ -12,6 +12,9 @@ http://blog.bossylobster.com/2012/12/bridging-oauth-20-objects-between-gdata.htm
 
 Support was added to gdata-python-client here:
 https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc6c8525e18812ccc02badc0
+
+WARNING: oauth2client is deprecated! google-auth is its successor.
+https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 """
 
 import json
@@ -19,7 +22,7 @@ import logging
 import re
 
 import appengine_config
-import googleplus
+import google_signin
 import handlers
 import models
 from webutil import util
@@ -107,7 +110,7 @@ class BloggerV2Auth(models.BaseAuth):
 
 
 # Wrapper classes around the StorageByKeyName and CredentialsModel model classes
-# to change their kinds so we can store separate creds for Google+ and Blogger.
+# to change their kinds so we can store separate creds for Google and Blogger.
 # Without this, after you've signed into one, signing into the other tries to
 # reuse the existing creds without re-requesting access for the new product and
 # scope, which obviously fails. I hoped prompt=consent or
@@ -122,7 +125,7 @@ class CredentialsModel_Blogger(CredentialsModel):
 class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   """Connects a Blogger account. Authenticates via OAuth.
   """
-  handle_exception = googleplus.handle_exception
+  handle_exception = google_signin.handle_exception
 
   # extracts the Blogger id from a profile URL
   AUTHOR_URI_RE = re.compile(
@@ -163,7 +166,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
           # this api call often returns 401 Unauthorized for users who aren't
           # signed up for blogger and/or don't have any blogs.
           util.interpret_http_exception(e)
-          # we can't currently intercept declines for Google+ or Blogger, so the
+          # we can't currently intercept declines for Google or Blogger, so the
           # only time we return a None auth entity right now is on error.
           self.finish(None, state=state)
           return

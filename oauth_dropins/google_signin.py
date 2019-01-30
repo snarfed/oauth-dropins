@@ -1,7 +1,10 @@
-"""Google+ OAuth drop-in.
+"""Google Sign-In OAuth drop-in.
 
-Google+ API docs: https://developers.google.com/+/api/latest/
+Google Sign-In API docs: https://developers.google.com/identity/protocols/OAuth2WebServer
 Python API client docs: https://developers.google.com/api-client-library/python/
+
+WARNING: oauth2client is deprecated! google-auth is its successor.
+https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 
 TODO: check that overriding CallbackHandler.finish() actually works.
 """
@@ -26,32 +29,37 @@ from webutil import util
 import handlers
 import models
 
+# Discovered on 1/30/2019 from:
+#   https://accounts.google.com/.well-known/openid-configuration
+# Background: https://developers.google.com/identity/protocols/OpenIDConnect#discovery
+OPENID_CONNECT_USERINFO = 'https://openidconnect.googleapis.com/v1/userinfo'
+
 # global
 json_service = None
-
-
-def init_json_service():
-  global json_service
-  if json_service is None:
-    # service names and versions:
-    # https://developers.google.com/api-client-library/python/apis/
-    json_service = discovery.build('plus', 'v1', http=httplib2.Http())
 
 # global. initialized in StartHandler.to_path().
 oauth_decorator = None
 
 
-class GooglePlusAuth(models.BaseAuth):
-  """An authenticated Google+ user or page.
+class GoogleAuth(models.BaseAuth):
+  """An authenticated Google user.
 
-  Provides methods that return information about this user (or page) and make
-  OAuth-signed requests to the Google+ API. Stores OAuth credentials in the
-  datastore. See models.BaseAuth for usage details.
+  Provides methods that return information about this user and make OAuth-signed
+  requests to Google APIs. Stores OAuth credentials in the datastore. See
+  models.BaseAuth for usage details.
 
-  Google+-specific details: implements http() and api() but not urlopen(). api()
-  returns a apiclient.discovery.Resource. The datastore entity key name is the
-  Google+ user id. Uses credentials from the stored CredentialsModel since
-  google-api-python-client stores refresh tokens there.
+  Google-specific details: implements http() but not urlopen(). The datastore
+  entity key name is the Google user id. Uses credentials from the stored
+  CredentialsModel since google-api-python-client stores refresh tokens there.
+
+  To make an API call with Google's apiclient library, pass an authorized Http
+  instance retrieved from this object. For example:
+
+    service = discovery.build('calendar', 'v3', http=httplib2.Http())
+    gpa = GoogleAuth.get_by_id('123')
+    results = service.events().list(calendarId='primary').execute(gpa.http())
+
+  More details: https://developers.google.com/api-client-library/python/
   """
   user_json = ndb.TextProperty()
   creds_model = ndb.KeyProperty(kind='CredentialsModel')
@@ -60,12 +68,12 @@ class GooglePlusAuth(models.BaseAuth):
   creds_json = ndb.TextProperty()
 
   def site_name(self):
-    return 'Google+'
+    return 'Google'
 
   def user_display_name(self):
     """Returns the user's name.
     """
-    return json.loads(self.user_json)['displayName']
+    return json.loads(self.user_json)['name']
 
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
@@ -88,20 +96,6 @@ class GooglePlusAuth(models.BaseAuth):
     self.creds().authorize(http)
     return http
 
-  def api(self):
-    """Returns an apiclient.discovery.Resource for the Google+ JSON API.
-
-    To use it, first choose a resource type (e.g. People), then make a call,
-    then execute that call with an authorized Http instance. For example:
-
-    gpa = GooglePlusAuth.get_by_id('123')
-    results_json = gpa.people().search(query='ryan').execute(gpa.http())
-
-    More details: https://developers.google.com/api-client-library/python/
-    """
-    init_json_service()
-    return json_service
-
 
 def handle_exception(self, e, debug):
   """Exception handler that passes back HttpErrors as real HTTP errors.
@@ -119,8 +113,11 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   """
   handle_exception = handle_exception
 
-  # G+ scopes: https://developers.google.com/+/api/oauth#oauth-scopes
-  DEFAULT_SCOPE = 'https://www.googleapis.com/auth/plus.me'
+  # OAuth/OpenID Connect scopes:
+  #   https://developers.google.com/+/web/api/rest/oauth#authorization-scopes
+  # Google scopes:
+  #   https://developers.google.com/identity/protocols/googlescopes
+  DEFAULT_SCOPE = 'openid profile'
 
   @classmethod
   def to(cls, to_path, scopes=None):
@@ -150,21 +147,20 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
           "Please fill in the google_client_id and google_client_secret files in "
           "your app's root directory.")
 
-        # get the current user
-        init_json_service()
+        # get OpenID Connect user info
+        # https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         try:
-          user = json_service.people().get(userId='me')\
-              .execute(oauth_decorator.http())
+          _, user = oauth_decorator.http().request(OPENID_CONNECT_USERINFO)
         except BaseException as e:
           util.interpret_http_exception(e)
           raise
+        user = json.loads(user.decode('utf-8'))
         logging.debug('Got one person: %r', user)
 
         store = oauth_decorator.credentials.store
         creds_model_key = ndb.Key(store._model.kind(), store._key_name)
-        auth = GooglePlusAuth(id=user['id'],
-                              creds_model=creds_model_key,
-                              user_json=json.dumps(user))
+        auth = GoogleAuth(id=user['sub'], creds_model=creds_model_key,
+                          user_json=json.dumps(user))
         auth.put()
         self.finish(auth, state=self.request.get('state'))
 
