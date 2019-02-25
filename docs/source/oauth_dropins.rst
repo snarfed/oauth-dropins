@@ -35,9 +35,9 @@ github
 ------
 .. automodule:: oauth_dropins.github
 
-googleplus
-----------
-.. automodule:: oauth_dropins.googleplus
+google_signin
+-------------
+.. automodule:: oauth_dropins.google_signin
 
 handlers
 --------
