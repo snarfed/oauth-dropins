@@ -468,6 +468,8 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     cd /tmp
     virtualenv local
     source local/bin/activate.csh
+    # mf2py 1.1.2 on test.pypi.org is broken :(
+    pip install mf2py
     pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
     deactivate
     ```
@@ -475,6 +477,8 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     python3 -m venv local3
     source local3/bin/activate.csh
     pip3 install --upgrade pip
+    # mf2py 1.1.2 on test.pypi.org is broken :(
+    pip3 install mf2py
     pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
     deactivate
     ```
