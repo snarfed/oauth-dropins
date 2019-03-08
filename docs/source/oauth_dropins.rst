@@ -51,6 +51,10 @@ instagram
 ---------
 .. automodule:: oauth_dropins.instagram
 
+linkedin
+------
+.. automodule:: oauth_dropins.linkedin
+
 medium
 ------
 .. automodule:: oauth_dropins.medium

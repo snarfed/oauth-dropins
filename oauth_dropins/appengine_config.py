@@ -75,6 +75,8 @@ GOOGLE_CLIENT_SECRET = read('google_client_secret')
 INDIEAUTH_CLIENT_ID = read('indieauth_client_id')
 INSTAGRAM_SESSIONID_COOKIE = (os.getenv('INSTAGRAM_SESSIONID_COOKIE') or
                               read('instagram_sessionid_cookie'))
+LINKEDIN_CLIENT_ID = read('linkedin_client_id')
+LINKEDIN_CLIENT_SECRET = read('linkedin_client_secret')
 MEDIUM_CLIENT_ID = read('medium_client_id')
 MEDIUM_CLIENT_SECRET = read('medium_client_secret')
 TUMBLR_APP_KEY = read('tumblr_app_key')

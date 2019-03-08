@@ -314,6 +314,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+### 2.1 - unreleased
+* Add LinkedIn!
+
 ### 2.0 - 2019-02-25
 * _Breaking change_: switch from [Google+ Sign-In](https://developers.google.com/+/web/signin/) ([which shuts down in March](https://developers.google.com/+/api-shutdown)) to [Google Sign-In](https://developers.google.com/identity/). Notably, this removes the `googleplus` module and adds a new `google_signin` module, renames the `GooglePlusAuth` class to  `GoogleAuth`, and removes its `api()` method. Otherwise, the implementation is mostly the same.
 * webutil.logs: return HTTP 400 if `start_time` is before 2018-04-01 (App Engine's rough launch window).
