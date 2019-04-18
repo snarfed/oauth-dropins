@@ -319,7 +319,7 @@ Changelog
 
 ### 2.0 - 2019-02-25
 * _Breaking change_: switch from [Google+ Sign-In](https://developers.google.com/+/web/signin/) ([which shuts down in March](https://developers.google.com/+/api-shutdown)) to [Google Sign-In](https://developers.google.com/identity/). Notably, this removes the `googleplus` module and adds a new `google_signin` module, renames the `GooglePlusAuth` class to  `GoogleAuth`, and removes its `api()` method. Otherwise, the implementation is mostly the same.
-* webutil.logs: return HTTP 400 if `start_time` is before 2018-04-01 (App Engine's rough launch window).
+* webutil.logs: return HTTP 400 if `start_time` is before 2008-04-01 (App Engine's rough launch window).
 
 ### 1.14 - 2018-11-12
 * Fix dev_appserver in Cloud SDK 219 / `app-engine-python` 1.9.76 and onward. [Background.](https://issuetracker.google.com/issues/117145272#comment25)

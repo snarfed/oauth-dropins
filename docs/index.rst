@@ -359,7 +359,7 @@ Changelog
    module, renames the ``GooglePlusAuth`` class to ``GoogleAuth``, and
    removes its ``api()`` method. Otherwise, the implementation is mostly
    the same.
--  webutil.logs: return HTTP 400 if ``start_time`` is before 2018-04-01
+-  webutil.logs: return HTTP 400 if ``start_time`` is before 2008-04-01
    (App Engine’s rough launch window).
 
 .. _section-1:
