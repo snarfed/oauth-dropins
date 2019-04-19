@@ -73,7 +73,7 @@ class GoogleAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the user's name.
     """
-    return json.loads(self.user_json)['name']
+    return json.loads(self.user_json).get('name') or 'unknown'
 
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
