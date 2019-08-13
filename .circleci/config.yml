@@ -56,7 +56,7 @@ jobs:
             . local/bin/activate
             python2 -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v -p 'test_*.py'
             python2 -m coverage html -d /tmp/coverage_html
-            if [ "$COVERALLS_REPO_TOKEN" != "" ]; then coveralls; fi
+            if [ "$COVERALLS_REPO_TOKEN" != "" ]; then coveralls || true; fi
 
       - save_cache:
           key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
