@@ -347,6 +347,12 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+2.1 - unreleased
+~~~~~~~~~~~~~~~~
+
+-  Add LinkedIn!
+-  Google: fix crash when user object doesn’t have ``name`` field.
+
 2.0 - 2019-02-25
 ~~~~~~~~~~~~~~~~
 
@@ -593,8 +599,8 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
 5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
     ``sh  python3 setup.py clean build sdist  twine upload -r pypitest dist/oauth-dropins-X.Y.tar.gz``
 6.  Install from test.pypi.org, both Python 2 and 3.
-    ``sh  cd /tmp  virtualenv local  source local/bin/activate.csh  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
-    ``sh  python3 -m venv local3  source local3/bin/activate.csh  pip3 install --upgrade pip  pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
+    ``sh  cd /tmp  virtualenv local  source local/bin/activate.csh  # mf2py 1.1.2 on test.pypi.org is broken :(  pip install mf2py  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
+    ``sh  python3 -m venv local3  source local3/bin/activate.csh  pip3 install --upgrade pip  # mf2py 1.1.2 on test.pypi.org is broken :(  pip3 install mf2py  pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
 7.  Smoke test that the code trivially loads and runs, in both Python 2
     and 3.
 
