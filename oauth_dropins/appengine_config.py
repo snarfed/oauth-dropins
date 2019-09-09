@@ -3,6 +3,7 @@
 Reads app keys and secrets from local files into constants.
 """
 from __future__ import absolute_import
+from builtins import open
 
 import os
 
@@ -34,7 +35,7 @@ except ImportError:
 def read(filename):
   """Returns the contents of filename, or None if it doesn't exist."""
   if os.path.exists(filename):
-    with open(filename) as f:
+    with open(filename, encoding='utf-8') as f:
       return f.read().strip()
 
 if DEBUG:
