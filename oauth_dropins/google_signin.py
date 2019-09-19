@@ -13,7 +13,6 @@ import logging
 
 import appengine_config
 
-from apiclient import discovery
 from apiclient.errors import HttpError
 try:
   from oauth2client.appengine import CredentialsModel, OAuth2Decorator
