@@ -90,11 +90,11 @@ class StartHandler(handlers.StartHandler):
       "your app's root directory.")
 
     csrf_key = DropboxCsrf(state=state).put()
-    return GET_AUTH_CODE_URL % {
+    return str(GET_AUTH_CODE_URL % {
       'client_id': appengine_config.DROPBOX_APP_KEY,
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
       'state': '%s|%s' % (state, csrf_key.id()),
-    }
+    })
 
 
 class CallbackHandler(handlers.CallbackHandler):

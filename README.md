@@ -317,6 +317,7 @@ Changelog
 ### 2.1 - unreleased
 * Add LinkedIn!
 * Google: fix crash when user object doesn't have `name` field.
+* Dropbox: fix crash with unicode header value.
 
 ### 2.0 - 2019-02-25
 * _Breaking change_: switch from [Google+ Sign-In](https://developers.google.com/+/web/signin/) ([which shuts down in March](https://developers.google.com/+/api-shutdown)) to [Google Sign-In](https://developers.google.com/identity/). Notably, this removes the `googleplus` module and adds a new `google_signin` module, renames the `GooglePlusAuth` class to  `GoogleAuth`, and removes its `api()` method. Otherwise, the implementation is mostly the same.
