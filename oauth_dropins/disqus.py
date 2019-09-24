@@ -97,11 +97,11 @@ class StartHandler(handlers.StartHandler):
               if appengine_config.DEBUG else
               ('disqus_client_id', 'disqus_client_secret')
           ))
-      return GET_AUTH_CODE_URL % {
+      return str(GET_AUTH_CODE_URL % {
         'client_id': appengine_config.DISQUS_CLIENT_ID,
         'scope': self.scope,
         'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
-      }
+      })
 
 
 class CallbackHandler(handlers.CallbackHandler):
