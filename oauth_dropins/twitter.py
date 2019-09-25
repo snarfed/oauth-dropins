@@ -149,10 +149,7 @@ class StartHandler(handlers.StartHandler):
                              token_secret=auth.request_token['oauth_token_secret']
                              ).put()
     logging.info('Generated request token, redirecting to Twitter: %s', auth_url)
-
-    # app engine requires header values (ie Location for redirects) to be str,
-    # not unicode.
-    return str(auth_url)
+    return auth_url
 
 
 class CallbackHandler(handlers.CallbackHandler):

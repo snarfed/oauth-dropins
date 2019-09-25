@@ -97,7 +97,10 @@ class StartHandler(BaseHandler):
     if scopes:
       self.scope += (',' if self.scope else '') + ','.join(scopes)
 
-    url = self.redirect_url(state=self.request.get('state'))
+    # str() is since WSGI middleware chokes on unicode redirect URLs :/ eg:
+    # InvalidResponseError: header values must be str, got 'unicode' (u'...') for 'Location'
+    # https://console.cloud.google.com/errors/CPafw-Gq18CrnwE
+    url = str(self.redirect_url(state=self.request.get('state')))
     logging.info('Starting OAuth flow: redirecting to %s', url)
     self.redirect(url)
 

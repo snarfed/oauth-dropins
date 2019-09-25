@@ -26,7 +26,7 @@ API_BASE = 'https://graph.facebook.com/v2.10/'
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#logindialog
-GET_AUTH_CODE_URL = str('&'.join((
+GET_AUTH_CODE_URL = '&'.join((
     'https://www.facebook.com/v2.10/dialog/oauth?'
     # https://developers.facebook.com/docs/reference/login/
     'scope=%(scope)s',
@@ -35,9 +35,9 @@ GET_AUTH_CODE_URL = str('&'.join((
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
     'response_type=code',
-    )))
+    ))
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#exchangecode
-GET_ACCESS_TOKEN_URL = str('&'.join((
+GET_ACCESS_TOKEN_URL = '&'.join((
     API_BASE + 'oauth/access_token?'
     'client_id=%(client_id)s',
     # redirect_uri here must be the same in the oauth request!
@@ -45,7 +45,7 @@ GET_ACCESS_TOKEN_URL = str('&'.join((
     'redirect_uri=%(redirect_uri)s',
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
-    )))
+    ))
 API_USER_URL = API_BASE + 'me?fields=id,about,cover,email,gender,link,location,name,public_key,timezone,updated_time,website'
 API_PAGE_URL = API_BASE + 'me?fields=id,about,cover,description,emails,general_info,is_published,link,location,name,personal_info,phone,username,website'
 API_PAGES_URL = API_BASE + 'me/accounts'
@@ -138,14 +138,14 @@ class StartHandler(handlers.StartHandler):
               " in your app's root directory.")
       app_id = appengine_config.FACEBOOK_APP_ID
 
-    return str(GET_AUTH_CODE_URL % {
+    return GET_AUTH_CODE_URL % {
       'client_id': app_id,
       'scope': self.scope,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
       'redirect_uri': urllib.quote_plus(self.to_url()),
       'state': state,
-    })
+    }
 
 
 class CallbackHandler(handlers.CallbackHandler):

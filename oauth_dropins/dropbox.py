@@ -20,23 +20,22 @@ import handlers
 import models
 
 
-# the str() is since WSGI middleware chokes on unicode redirect URLs :/
-GET_AUTH_CODE_URL = str('&'.join((
+GET_AUTH_CODE_URL = '&'.join((
   'https://www.dropbox.com/1/oauth2/authorize?'
   'response_type=code',
   'client_id=%(client_id)s',
   'redirect_uri=%(redirect_uri)s',
   'state=%(state)s',
-)))
+))
 
-GET_ACCESS_TOKEN_URL = str('&'.join((
+GET_ACCESS_TOKEN_URL = '&'.join((
   'https://api.dropbox.com/1/oauth2/token?',
   'grant_type=authorization_code',
   'code=%(code)s',
   'client_id=%(client_id)s',
   'client_secret=%(client_secret)s',
   'redirect_uri=%(redirect_uri)s',
-)))
+))
 
 
 class DropboxAuth(models.BaseAuth):
@@ -90,11 +89,11 @@ class StartHandler(handlers.StartHandler):
       "your app's root directory.")
 
     csrf_key = DropboxCsrf(state=state).put()
-    return str(GET_AUTH_CODE_URL % {
+    return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.DROPBOX_APP_KEY,
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
       'state': '%s|%s' % (state, csrf_key.id()),
-    })
+    }
 
 
 class CallbackHandler(handlers.CallbackHandler):

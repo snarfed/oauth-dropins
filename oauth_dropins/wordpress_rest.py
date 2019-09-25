@@ -33,7 +33,7 @@ from webob import exc
 
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
-GET_AUTH_CODE_URL = str('&'.join((
+GET_AUTH_CODE_URL = '&'.join((
     'https://public-api.wordpress.com/oauth2/authorize?',
     'scope=',  # wordpress doesn't seem to use scope
     'client_id=%(client_id)s',
@@ -41,7 +41,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
     'response_type=code',
-    )))
+    ))
 GET_ACCESS_TOKEN_URL = 'https://public-api.wordpress.com/oauth2/token'
 API_USER_URL = 'https://public-api.wordpress.com/rest/v1/me?pretty=true'
 
@@ -100,11 +100,11 @@ class StartHandler(handlers.StartHandler):
       "Please fill in the wordpress.com_client_id and "
       "wordpress.com_client_secret files in your app's root directory.")
     # TODO: CSRF protection
-    return str(GET_AUTH_CODE_URL % {
+    return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
       'redirect_uri': urllib.quote_plus(self.to_url()),
       'state': urllib.quote_plus(state if state else ''),
-      })
+      }
 
 
 class CallbackHandler(handlers.CallbackHandler):

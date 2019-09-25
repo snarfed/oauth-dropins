@@ -25,15 +25,14 @@ from webob import exc
 
 # instagram api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
-# the str() is since WSGI middleware chokes on unicode redirect URLs :/
-GET_AUTH_CODE_URL = str('&'.join((
+GET_AUTH_CODE_URL = '&'.join((
     'https://api.instagram.com/oauth/authorize?',
     'client_id=%(client_id)s',
     'scope=%(scope)s',
     # redirect_uri here must be the same in the access token request!
     'redirect_uri=%(redirect_uri)s',
     'response_type=code',
-)))
+))
 
 GET_ACCESS_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 
@@ -87,8 +86,7 @@ class StartHandler(handlers.StartHandler):
       'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
       # instagram uses + instead of , to separate scopes
       # http://instagram.com/developer/authentication/#scope
-      # also, the str() is since WSGI middleware chokes on unicode redirect URLs :/
-      'scope': str(self.scope.replace(',', '+')),
+      'scope': self.scope.replace(',', '+'),
       # TODO: CSRF protection identifier.
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
     }

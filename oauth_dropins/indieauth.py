@@ -139,7 +139,7 @@ class StartHandler(handlers.StartHandler):
     })
 
     logging.info('Redirecting to IndieAuth: %s', url)
-    return str(url)
+    return url
 
 
 class CallbackHandler(handlers.CallbackHandler):

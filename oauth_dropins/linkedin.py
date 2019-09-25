@@ -18,7 +18,7 @@ from webob import exc
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
-AUTH_CODE_URL = str('&'.join((
+AUTH_CODE_URL = '&'.join((
     'https://www.linkedin.com/oauth/v2/authorization?'
     'response_type=code',
     'client_id=%(client_id)s',
@@ -27,7 +27,7 @@ AUTH_CODE_URL = str('&'.join((
     # must be the same in the access token request
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
-    )))
+    ))
 
 ACCESS_TOKEN_URL = 'https://www.linkedin.com/oauth/v2/accessToken'
 API_PROFILE_URL = 'https://api.linkedin.com/v2/me'
@@ -111,12 +111,12 @@ class StartHandler(handlers.StartHandler):
             appengine_config.LINKEDIN_CLIENT_SECRET), (
       "Please fill in the linkedin_client_id and "
       "linkedin_client_secret files in your app's root directory.")
-    return str(AUTH_CODE_URL % {
+    return AUTH_CODE_URL % {
       'client_id': appengine_config.LINKEDIN_CLIENT_ID,
       'redirect_uri': urllib.quote_plus(self.to_url()),
       'state': urllib.quote_plus(state or ''),
       'scope': self.scope,
-      })
+      }
 
 
 class CallbackHandler(handlers.CallbackHandler):

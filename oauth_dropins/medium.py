@@ -31,7 +31,7 @@ USER_AGENT = 'oauth-dropins (https://oauth-dropins.appspot.com/)'
 
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
-GET_AUTH_CODE_URL = str('&'.join((
+GET_AUTH_CODE_URL = '&'.join((
     'https://medium.com/m/oauth/authorize?'
     'client_id=%(client_id)s',
     # https://github.com/Medium/medium-api-docs#user-content-21-browser-based-authentication
@@ -41,7 +41,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
     'response_type=code',
-    )))
+    ))
 
 API_BASE = 'https://api.medium.com/v1/'
 GET_ACCESS_TOKEN_URL = API_BASE + 'tokens'
@@ -109,13 +109,13 @@ class StartHandler(handlers.StartHandler):
             appengine_config.MEDIUM_CLIENT_SECRET), (
       "Please fill in the medium_client_id and "
       "medium_client_secret files in your app's root directory.")
-    return str(GET_AUTH_CODE_URL % {
+    return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.MEDIUM_CLIENT_ID,
       'redirect_uri': urllib.quote_plus(self.to_url()),
       # Medium requires non-empty state
       'state': urllib.quote_plus(state if state else 'unused'),
       'scope': self.scope,
-      })
+      }
 
 
 class CallbackHandler(handlers.CallbackHandler):

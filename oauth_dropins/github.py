@@ -19,7 +19,7 @@ from webob import exc
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
-GET_AUTH_CODE_URL = str('&'.join((
+GET_AUTH_CODE_URL = '&'.join((
     'https://github.com/login/oauth/authorize?'
     'client_id=%(client_id)s',
     # https://developer.github.com/apps/building-oauth-apps/scopes-for-oauth-apps/
@@ -27,7 +27,7 @@ GET_AUTH_CODE_URL = str('&'.join((
     # if provided, must be the same in the access token request, or a subpath!
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
-    )))
+    ))
 
 GET_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
@@ -116,13 +116,13 @@ class StartHandler(handlers.StartHandler):
             appengine_config.GITHUB_CLIENT_SECRET), (
       "Please fill in the github_client_id and "
       "github_client_secret files in your app's root directory.")
-    return str(GET_AUTH_CODE_URL % {
+    return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.GITHUB_CLIENT_ID,
       'redirect_uri': urllib.quote_plus(self.to_url()),
       # TODO: does GitHub require non-empty state?
       'state': urllib.quote_plus(state if state else ''),
       'scope': self.scope,
-      })
+      }
 
 
 class CallbackHandler(handlers.CallbackHandler):
