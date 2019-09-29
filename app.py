@@ -28,6 +28,7 @@ for name in (
     'linkedin',
     'mastodon',
     'medium',
+    'meetup',
     'tumblr',
     'twitter',
     'wordpress_rest',
