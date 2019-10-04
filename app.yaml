@@ -18,7 +18,11 @@ automatic_scaling:
 libraries:
 - name: jinja2
   version: latest
+- name: lxml
+  version: latest
 - name: ssl
+  version: latest
+- name: webob
   version: latest
 
 handlers:

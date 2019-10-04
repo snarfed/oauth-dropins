@@ -2,17 +2,14 @@
 
 https://indieauth.com/developers
 """
-
 import json
 import logging
 import urllib
 import urlparse
 from webob import exc
 
-import bs4
 import appengine_config
 import handlers
-import mf2py
 import mf2util
 import models
 import requests
@@ -30,14 +27,15 @@ def discover_authorization_endpoint(me, resp=None):
 
   Args:
     me: string, URL to fetch
-    resp: requests.Response (optional), re-use response if it's already been fetched
+    resp: :class:`requests.Response` (optional), re-use response if it's already
+      been fetched
 
   Return:
     string, the discovered indieauth URL or the default indieauth.com URL
   """
   try:
     resp = resp or util.requests_get(me)
-  except requests.RequestException as e:
+  except (ValueError, requests.URLRequired, requests.TooManyRedirects) as e:
     raise exc.HTTPBadRequest(str(e))
 
   if resp.status_code // 100 != 2:
@@ -50,7 +48,7 @@ def discover_authorization_endpoint(me, resp=None):
   if auth_endpoint:
     return auth_endpoint
   # check the html content
-  soup = bs4.BeautifulSoup(resp.text)
+  soup = util.parse_html(resp.text)
   auth_link = soup.find('link', {'rel': 'authorization_endpoint'})
   auth_endpoint = auth_link and auth_link.get('href')
   if auth_endpoint:
@@ -63,7 +61,8 @@ def build_user_json(me, resp=None):
 
   Args:
     me: string, URL of the user, returned by
-    resp: requests.Response (optional), re-use response if it's already been fetched
+    resp: :class:`requests.Response` (optional), re-use response if it's already
+      been fetched
 
   Return:
     dict, with 'me', the URL for this person; 'h-card', the representative h-card
@@ -77,14 +76,10 @@ def build_user_json(me, resp=None):
       'could not fetch user url "%s". got response code: %d',
       me, resp.status_code)
     return user_json
-  # Requests doesn't look at the HTML body to find <meta charset>
-  # tags, so if the character encoding isn't given in a header, then
-  # we pass on the raw bytes and let BS4 deal with it.
-  p = mf2py.parse(doc=resp.text
-                  if 'charset' in resp.headers.get('content-type', '')
-                  else resp.content, url=me)
-  user_json['rel-me'] = p.get('rels', {}).get('me')
-  user_json['h-card'] = mf2util.representative_hcard(p, me)
+
+  mf2 = util.parse_mf2(resp, resp.url)
+  user_json['rel-me'] = mf2['rels'].get('me')
+  user_json['h-card'] = mf2util.representative_hcard(mf2, me)
   logging.debug('built user-json %r', user_json)
   return util.trim_nulls(user_json)
 
