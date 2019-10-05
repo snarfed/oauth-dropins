@@ -67,7 +67,6 @@ setup(name='oauth-dropins',
       ],
       extras_require={
           'appenginesdk': ['appengine-sdk >= 1.9.40.post0'],
-          'lxml==3.7.3',
       },
       test_loader='setup:TestLoader',
       test_suite='oauth_dropins.webutil',

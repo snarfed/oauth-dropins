@@ -1,5 +1,5 @@
 # These are the most recent releases of these packages as of 10/4/2019,
-# *except* for the ones that are built into App Engine Standard Python 2.
+# *except* for some that are built into App Engine Standard Python 2.
 # Those, we pin to App Engine's versions:
 # https://cloud.google.com/appengine/docs/standard/python/tools/built-in-libraries-27
 backports.functools-lru-cache==1.5
@@ -44,6 +44,6 @@ tweepy==3.8.0
 unittest2==1.1.0
 uritemplate==3.0.0
 urllib3==1.25.6
-webapp2==3.0.0b1  # *not* App Engine's; needed for Python 3 compatibility
+webapp2==3.0.0b1  # *not* App Engine's (2.5.2) for Python 3 compatibility
 webencodings==0.5.1
-WebOb==1.2.3  # App Engine's; see above
+WebOb==1.8.5  # *not* App Engine's (1.2.3) for more recent bug fixes
