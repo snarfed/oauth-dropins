@@ -315,6 +315,8 @@ Changelog
 ---
 
 ### 2.1 - unreleased
+* Add Python 3.7 support, and improve overall Python 3 compatibility.
+* Update a number of dependencies.
 * Add LinkedIn!
 * Google: fix crash when user object doesn't have `name` field.
 * Dropbox: fix crash with unicode header value.
