@@ -7,17 +7,18 @@ from future import standard_library
 standard_library.install_aliases()
 from future.moves.urllib import error as urllib_error
 
+import logging
+import re
+import urllib.parse, urllib.request
+
 from . import appengine_config
-from .webutil import util
 
 import oauthlib.oauth1
 import requests_oauthlib
 import requests
+import ujson as json
 
-import json
-import logging
-import re
-import urllib.parse, urllib.request
+from .webutil import util
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):

@@ -8,7 +8,6 @@ button, Flickr redirects them to its home page, *not* to us.
 """
 from future.utils import native_str
 
-import json
 import logging
 import oauthlib.oauth1
 import urllib
@@ -16,13 +15,15 @@ import urllib2
 import urlparse
 
 import appengine_config
+
+from google.appengine.ext import ndb
+import ujson as json
+from webob import exc
+
 import flickr_auth
 import handlers
 import models
 from webutil import util
-
-from google.appengine.ext import ndb
-from webob import exc
 
 
 REQUEST_TOKEN_URL = 'https://www.flickr.com/services/oauth/request_token'

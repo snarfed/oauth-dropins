@@ -6,20 +6,20 @@ just a wrapper around that anyway.
 """
 from future.utils import native_str
 
-import json
 import logging
-from webob import exc
 
 import appengine_config
-import handlers
-import models
-import tweepy
-import twitter_auth
-
-from webutil import handlers as webutil_handlers
-from webutil import util
 
 from google.appengine.ext import ndb
+import tweepy
+import ujson as json
+from webob import exc
+
+import handlers
+import models
+import twitter_auth
+from webutil import handlers as webutil_handlers
+from webutil import util
 
 
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'

@@ -8,7 +8,6 @@ https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 
 TODO: check that overriding CallbackHandler.finish() actually works.
 """
-import json
 import logging
 
 import appengine_config
@@ -22,6 +21,7 @@ from oauth2client.client import OAuth2Credentials
 from google.appengine.ext import db
 from google.appengine.ext import ndb
 import httplib2
+import ujson as json
 from webutil import handlers as webutil_handlers
 from webutil import util
 

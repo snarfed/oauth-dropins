@@ -16,20 +16,19 @@ to localhost in your /etc/hosts, e.g.:
 You can then test on your local machine by running dev_appserver and opening
 http://my.dev.com:8080/ instead of http://localhost:8080/ .
 """
-
-import json
 import logging
 import urllib
 import urllib2
 
 import appengine_config
+
+from google.appengine.ext import ndb
+import ujson as json
+from webob import exc
+
 import handlers
 from models import BaseAuth
 from webutil import util
-
-from google.appengine.ext import ndb
-from webob import exc
-
 
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.

@@ -7,18 +7,19 @@ TODO: unify this with instagram. see file docstring comment there.
 """
 from __future__ import unicode_literals
 
-import json
 import logging
 import urllib
 import urllib2
-from webob import exc
 
 import appengine_config
+
+from google.appengine.ext import ndb
+import ujson as json
+from webob import exc
+
 import handlers
 import models
 from webutil import util
-
-from google.appengine.ext import ndb
 
 
 API_BASE = 'https://graph.facebook.com/v2.10/'

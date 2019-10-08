@@ -4,19 +4,19 @@ API docs:
 http://www.tumblr.com/docs/en/api/v2
 http://www.tumblr.com/oauth/apps
 """
-
-import json
 import logging
 
 import appengine_config
-import handlers
-import models
-import tumblpy
-from webob import exc
 
 from google.appengine.ext import ndb
+import tumblpy
+import ujson as json
+from webob import exc
 from webutil import handlers as webutil_handlers
 from webutil import util
+
+import handlers
+import models
 
 
 class TumblrAuth(models.BaseAuth):

@@ -2,20 +2,21 @@
 
 https://indieauth.com/developers
 """
-import json
 import logging
 import urllib
 import urlparse
-from webob import exc
 
 import appengine_config
+
+from google.appengine.ext import ndb
+import ujson as json
+from webob import exc
+
 import handlers
 import mf2util
 import models
 import requests
 from webutil import util
-
-from google.appengine.ext import ndb
 
 
 INDIEAUTH_URL = 'https://indieauth.com/auth'

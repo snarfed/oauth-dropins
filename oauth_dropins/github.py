@@ -4,18 +4,19 @@ API docs:
 https://developer.github.com/v4/
 https://developer.github.com/apps/building-oauth-apps/authorization-options-for-oauth-apps/#web-application-flow
 """
-import json
 import logging
 import urllib
 import urlparse
 
 import appengine_config
-import handlers
-from models import BaseAuth
-from webutil import util
 
 from google.appengine.ext import ndb
 from webob import exc
+import ujson as json
+
+import handlers
+from models import BaseAuth
+from webutil import util
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.

@@ -4,8 +4,6 @@ Standard OAuth 2.0 flow. Docs:
 https://www.dropbox.com/developers/core/docs
 https://www.dropbox.com/developers/reference/oauthguide
 """
-
-import json
 import logging
 import urllib
 import urllib2
@@ -13,6 +11,7 @@ import urllib2
 import appengine_config
 
 from google.appengine.ext import ndb
+import ujson as json
 from webob import exc
 from webutil import util
 

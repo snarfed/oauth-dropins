@@ -14,11 +14,11 @@ Facebook. Differences:
 
 TODO unify Disqus, Facebook, and Instagram
 """
-import json
 import logging
 import urllib
 from webob import exc
 
+import ujson as json
 from webutil import util
 
 import appengine_config

@@ -8,19 +8,19 @@ has a `user` object instead of `id`, and the call to GET_ACCESS_TOKEN_URL
 is a POST instead of a GET.
 TODO: unify them.
 """
-
-import json
 import logging
 import urllib
 
 import appengine_config
+
+from google.appengine.ext import ndb
+import ujson as json
+from webob import exc
+
 import facebook  # we reuse facebook.CallbackHandler.handle_error()
 import handlers
 import models
 from webutil import util
-
-from google.appengine.ext import ndb
-from webob import exc
 
 
 # instagram api url templates. can't (easily) use urllib.urlencode() because i

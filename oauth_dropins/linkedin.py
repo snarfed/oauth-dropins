@@ -4,17 +4,18 @@ API docs:
 https://www.linkedin.com/developers/
 https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin
 """
-import json
 import logging
 import urllib
 
 import appengine_config
+
+from google.appengine.ext import ndb
+import ujson as json
+from webob import exc
+
 import handlers
 from models import BaseAuth
 from webutil import util
-
-from google.appengine.ext import ndb
-from webob import exc
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
@@ -90,7 +91,6 @@ class LinkedInAuth(BaseAuth):
     headers['Authorization'] = 'Bearer ' + self.access_token_str
 
     resp = fn(*args, **kwargs)
-    assert 'serviceErrorCode' not in resp, resp
 
     try:
       resp.raise_for_status()

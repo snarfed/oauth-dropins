@@ -16,16 +16,10 @@ https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc
 WARNING: oauth2client is deprecated! google-auth is its successor.
 https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 """
-
-import json
 import logging
 import re
 
 import appengine_config
-import google_signin
-import handlers
-import models
-from webutil import util
 
 try:
   from oauth2client.appengine import CredentialsModel, OAuth2Decorator, StorageByKeyName
@@ -36,7 +30,12 @@ from gdata.blogger import client
 from gdata import gauth
 from google.appengine.ext import ndb
 import httplib2
+import ujson as json
 
+import google_signin
+import handlers
+import models
+from webutil import util
 
 # global. initialized in StartHandler.to_path().
 oauth_decorator = None
