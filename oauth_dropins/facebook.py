@@ -22,13 +22,13 @@ import models
 from webutil import util
 
 
-API_BASE = 'https://graph.facebook.com/v2.10/'
+API_BASE = 'https://graph.facebook.com/v4.0/'
 
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#logindialog
 GET_AUTH_CODE_URL = '&'.join((
-    'https://www.facebook.com/v2.10/dialog/oauth?'
+    'https://www.facebook.com/v4.0/dialog/oauth?'
     # https://developers.facebook.com/docs/reference/login/
     'scope=%(scope)s',
     'client_id=%(client_id)s',
