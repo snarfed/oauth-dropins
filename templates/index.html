@@ -82,7 +82,7 @@ Click on a site to try it!</p>
 </form></div>
 <div class="clearfix visible-sm"></div>
 <div class="col-md-3 col-sm-6"><form method="post" action="/indieauth/start">
-  <input type="url" name="me" class="form-control" placeholder="http://..." required style="width: 150px; height: 50px; display:inline;" />
+  <input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />
   <input type="image" class="shadow" title="IndieAuth" alt="IndieAuth" src="/static/indieauth_button.png" />
 </form></div>
 </div>
@@ -96,19 +96,24 @@ Click on a site to try it!</p>
   <input type="image" class="shadow" alt="LinkedIn" src="/static/linkedin.png" />
 </form></div>
 <div class="clearfix visible-sm"></div>
+<div class="col-md-3 col-sm-6"><form method="post" action="/mastodon/start">
+  <input type="url" name="instance" class="form-control" placeholder="Mastodon instance" required style="width: 150px; height: 50px; display:inline;" />
+  <input type="image" class="shadow" title="Mastodon" alt="Mastodon" src="/static/mastodon_logo_button.png" style="background-color: #EBEBEB"/>
+</form></div>
 <div class="col-md-3 col-sm-6"><form method="post" action="/medium/start">
   <input type="image" class="shadow" alt="Medium" src="/static/medium.png" />
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/tumblr/start">
-  <input type="image" class="shadow" alt="Tumblr" src="/static/tumblr.png" />
 </form></div>
 </div>
 <br />
 
 <div class="row">
+<div class="col-md-3 col-sm-6"><form method="post" action="/tumblr/start">
+  <input type="image" class="shadow" alt="Tumblr" src="/static/tumblr.png" />
+</form></div>
 <div class="col-md-3 col-sm-6"><form method="post" action="/twitter/start">
   <input type="image" class="shadow" alt="Twitter" src="/static/twitter.png" />
 </form></div>
+<div class="clearfix visible-sm"></div>
 <div class="col-md-3 col-sm-6"><form method="post" action="/wordpress_rest/start">
   <input type="image" class="shadow" alt="WordPress.com" src="/static/wordpress_com.png" />
 </form></div>

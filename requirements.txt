@@ -3,6 +3,7 @@
 beautifulsoup4
 future>=0.16.0
 google-api-python-client>=1.7.4
+google-cloud-ndb
 httplib2
 humanize
 Jinja2

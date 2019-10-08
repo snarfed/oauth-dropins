@@ -114,6 +114,7 @@ class StartHandler(handlers.StartHandler):
     assert appengine_config.INDIEAUTH_CLIENT_ID, (
       "Please fill in the indieauth_client_id in your app's root directory.")
 
+    # TODO: unify with mastodon?
     if not me:
       me = util.get_required_param(self, 'me')
     parsed = urlparse.urlparse(me)
@@ -148,7 +149,7 @@ class CallbackHandler(handlers.CallbackHandler):
     endpoint = state.get('endpoint')
     me = state.get('me')
     if not endpoint or not me:
-        raise exc.HTTPBadRequest("invalid state parameter")
+      raise exc.HTTPBadRequest("invalid state parameter")
 
     state = state.get('state') or ''
     validate_resp = util.requests_post(endpoint, data={
