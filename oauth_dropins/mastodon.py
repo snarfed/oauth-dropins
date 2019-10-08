@@ -124,7 +124,7 @@ class StartHandler(handlers.StartHandler):
       instance = util.get_required_param(self, 'instance')
     parsed = urlparse.urlparse(instance)
     if not parsed.scheme:
-      instance = 'http://' + instance
+      instance = 'https://' + instance
 
     callback_url = self.to_url()
 

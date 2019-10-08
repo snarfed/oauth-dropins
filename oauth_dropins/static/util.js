@@ -5,7 +5,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   function addDefaultScheme(target) {
     if(target.value.match(/^(?!https?:).+\..+/)) {
-      target.value = "http://"+target.value;
+      scheme = target.attributes.scheme;
+      target.value = (scheme ? scheme.value : "http") + "://" + target.value;
     }
   }
   var elements = document.querySelectorAll("input[type=url]");
