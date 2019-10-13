@@ -124,6 +124,14 @@ class StartHandler(handlers.StartHandler):
   DEFAULT_SCOPE = 'read'
   SCOPE_SEPARATOR = ' '
 
+  @classmethod
+  def to(cls, path, app_name=None, app_url=None, **kwargs):
+    if app_name is not None:
+      cls.APP_NAME = app_name
+    if app_url is not None:
+      cls.APP_URL = app_url
+    return super(cls, cls).to(path, **kwargs)
+
   def redirect_url(self, state=None, instance=None):
     # TODO
     assert not state
