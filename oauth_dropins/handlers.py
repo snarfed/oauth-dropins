@@ -18,9 +18,9 @@ from webutil import util
 
 
 class BaseHandler(webapp2.RequestHandler):
-  """Base request handler class. Provides the to() factory method.
-  """
-  DEFAULT_SCOPE = ''  # may be overridden by subclasses
+  """Base request handler class. Provides the to() factory method."""
+  DEFAULT_SCOPE = ''
+  SCOPE_SEPARATOR = ','
 
   handle_exception = handlers.handle_exception
   to_path = None
@@ -33,21 +33,19 @@ class BaseHandler(webapp2.RequestHandler):
     return ToHandler
 
   @classmethod
-  def make_scope_str(cls, extra, separator=','):
+  def make_scope_str(cls, extra):
     """Returns an OAuth scopes query parameter value.
 
     Combines DEFAULT_SCOPE and extra.
 
     Args:
       extra: string, sequence of strings, or None
-      separator: string (optional), the separator between multiple scopes.
-        defaults to ','
     """
     if not extra:
       return cls.DEFAULT_SCOPE
 
-    return (cls.DEFAULT_SCOPE + separator if cls.DEFAULT_SCOPE else '') + (
-      extra if isinstance(extra, basestring) else separator.join(extra))
+    return (cls.DEFAULT_SCOPE + cls.SCOPE_SEPARATOR if cls.DEFAULT_SCOPE else '') + (
+      extra if isinstance(extra, basestring) else cls.SCOPE_SEPARATOR.join(extra))
 
   def to_url(self, state=None):
     """Returns a fully qualified callback URL based on to_path.
@@ -93,9 +91,10 @@ class StartHandler(BaseHandler):
     self.post()
 
   def post(self):
-    scopes = self.request.params.getall('scope')
-    if scopes:
-      self.scope += (',' if self.scope else '') + ','.join(scopes)
+    scopes = set(self.request.params.getall('scope'))
+    if self.scope:
+      scopes.add(self.scope)
+    self.scope = self.SCOPE_SEPARATOR.join(scopes)
 
     # str() is since WSGI middleware chokes on unicode redirect URLs :/ eg:
     # InvalidResponseError: header values must be str, got 'unicode' (u'...') for 'Location'

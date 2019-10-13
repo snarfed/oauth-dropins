@@ -71,8 +71,16 @@ class MastodonAuth(BaseAuth):
     return 'Mastodon'
 
   def user_display_name(self):
-    """Returns the user's first and last name."""
+    """Returns the user's full ActivityPub address, eg @ryan@mastodon.social."""
     return self.key.id()
+
+  def instance(self):
+    """Returns the instance base URL, eg https://mastodon.social/."""
+    return self.app.get().instance
+
+  def username(self):
+    """Returns the user's username, eg ryan."""
+    return json.loads(self.user_json).get('username')
 
   def access_token(self):
     """Returns the OAuth access token string."""
@@ -80,7 +88,7 @@ class MastodonAuth(BaseAuth):
 
   def get(self, *args, **kwargs):
     """Wraps requests.get() and adds instance base URL and Bearer token header."""
-    url = urlparse.urljoin(self.app.get().instance, args[0])
+    url = urlparse.urljoin(self.instance(), args[0])
     return self._requests_call(util.requests_get, url, *args[1:], **kwargs)
 
   def post(self, *args, **kwargs):
@@ -113,7 +121,8 @@ class StartHandler(handlers.StartHandler):
   """
   APP_NAME = 'oauth-dropins demo'
   APP_URL = 'https://oauth-dropins.appspot.com/'
-  DEFAULT_SCOPE = 'read:accounts'
+  DEFAULT_SCOPE = 'read'
+  SCOPE_SEPARATOR = ' '
 
   def redirect_url(self, state=None, instance=None):
     # TODO
@@ -142,7 +151,7 @@ class StartHandler(handlers.StartHandler):
           'redirect_uris': callback_url,
           'website': self.APP_URL,
           # https://docs.joinmastodon.org/api/permissions/
-          'scopes': 'read read:accounts write',
+          'scopes': 'read write follow',
         }))
       resp.raise_for_status()
       app_data = json.loads(resp.text)
