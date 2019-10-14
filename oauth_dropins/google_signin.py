@@ -117,6 +117,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   # Google scopes:
   #   https://developers.google.com/identity/protocols/googlescopes
   DEFAULT_SCOPE = 'openid profile'
+  SCOPE_SEPARATOR = ' '
 
   @classmethod
   def to(cls, to_path, scopes=None):
@@ -127,7 +128,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
       oauth_decorator = OAuth2Decorator(
         client_id=appengine_config.GOOGLE_CLIENT_ID,
         client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-        scope=cls.make_scope_str(scopes, separator=' '),
+        scope=cls.make_scope_str(scopes),
         callback_path=to_path,
         # make sure we ask for a refresh token so we can use it to get an access
         # token offline. requires prompt=consent! more:
