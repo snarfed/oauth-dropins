@@ -14,8 +14,8 @@ import urllib2
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
+from webutil.util import json_dumps, json_loads
 
 import handlers
 import models
@@ -76,7 +76,7 @@ class FacebookAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the user's or page's name.
     """
-    return json.loads(self.user_json)['name']
+    return json_loads(self.user_json)['name']
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -101,10 +101,10 @@ class FacebookAuth(models.BaseAuth):
     Args:
       page_id: string, Facebook page id
     """
-    for page in json.loads(self.pages_json):
+    for page in json_loads(self.pages_json):
       id = page.get('id')
       if id == page_id:
-        entity = FacebookAuth(id=id, type='page', pages_json=json.dumps([page]),
+        entity = FacebookAuth(id=id, type='page', pages_json=json_dumps([page]),
                               access_token_str=page.get('access_token'))
         entity.user_json = entity.urlopen(API_PAGE_URL).read()
         logging.debug('Page object: %s', entity.user_json)
@@ -124,7 +124,7 @@ class FacebookAuth(models.BaseAuth):
     """
     return super(FacebookAuth, self).is_authority_for(key) or any(
       key == self.for_page(page.get('id')).key
-      for page in json.loads(self.pages_json))
+      for page in json_loads(self.pages_json))
 
 
 class StartHandler(handlers.StartHandler):
@@ -165,7 +165,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'redirect_uri': urllib.quote_plus(self.request.path_url),
       }
     try:
-      resp = json.loads(util.urlopen(url).read())
+      resp = json_loads(util.urlopen(url).read())
     except urllib2.HTTPError, e:
       logging.error(e.read())
       raise
@@ -175,9 +175,9 @@ class CallbackHandler(handlers.CallbackHandler):
 
     user = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
     logging.debug('User info response: %s', user)
-    user_id = json.loads(user)['id']
+    user_id = json_loads(user)['id']
 
-    pages = json.dumps(json.loads(models.BaseAuth.urlopen_access_token(
+    pages = json_dumps(json_loads(models.BaseAuth.urlopen_access_token(
       API_PAGES_URL, access_token).read()).get('data'))
     logging.debug('Pages response: %s', pages)
 

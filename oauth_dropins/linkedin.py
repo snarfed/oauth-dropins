@@ -10,12 +10,12 @@ import urllib
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
 
 import handlers
 from models import BaseAuth
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
@@ -59,7 +59,7 @@ class LinkedInAuth(BaseAuth):
     """Returns the user's first and last name.
     """
     def name(field):
-      user = json.loads(self.user_json)
+      user = json_loads(self.user_json)
       loc = user.get(field, {}).get('localized', {})
       if loc:
           return loc.get('en_US') or loc.values()[0]
@@ -159,7 +159,7 @@ class CallbackHandler(handlers.CallbackHandler):
     resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()
     logging.debug('Profile response: %s', resp)
     auth = LinkedInAuth(id=resp['id'], access_token_str=access_token,
-                        user_json=json.dumps(resp))
+                        user_json=json_dumps(resp))
     auth.put()
 
     self.finish(auth, state=self.request.get('state'))

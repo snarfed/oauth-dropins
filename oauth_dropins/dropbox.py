@@ -11,9 +11,9 @@ import urllib2
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 import handlers
 import models
@@ -137,7 +137,7 @@ class CallbackHandler(handlers.CallbackHandler):
       raise
 
     try:
-      data = json.loads(resp)
+      data = json_loads(resp)
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
       raise exc.HttpBadRequest('Bad Dropbox response to access token request')

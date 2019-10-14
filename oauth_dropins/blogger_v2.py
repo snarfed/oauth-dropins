@@ -30,12 +30,12 @@ from gdata.blogger import client
 from gdata import gauth
 from google.appengine.ext import ndb
 import httplib2
-import ujson as json
 
 import google_signin
 import handlers
 import models
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 # global. initialized in StartHandler.to_path().
 oauth_decorator = None
@@ -79,7 +79,7 @@ class BloggerV2Auth(models.BaseAuth):
   def access_token(self):
     """Returns the OAuth access token string.
     """
-    return json.loads(self.creds_json)['access_token']
+    return json_loads(self.creds_json)['access_token']
 
   def http(self):
     """Returns an httplib2.Http that adds OAuth credentials to requests.

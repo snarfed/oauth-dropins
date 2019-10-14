@@ -23,12 +23,12 @@ import urllib2
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
 
 import handlers
 from models import BaseAuth
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
@@ -67,7 +67,7 @@ class WordPressAuth(BaseAuth):
     """Returns the blog hostname.
     """
     if self.user_json:
-      user = json.loads(self.user_json)
+      user = json_loads(self.user_json)
       return user.get('display_name') or user.get('username')
     else:
       return self.key.string_id()
@@ -138,7 +138,7 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.debug('Access token response: %s', resp)
 
     try:
-      resp = json.loads(resp)
+      resp = json_loads(resp)
       blog_id = resp['blog_id']
       blog_url = resp['blog_url']
       blog_domain = util.domain_from_link(resp['blog_url'])

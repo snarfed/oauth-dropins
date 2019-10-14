@@ -18,14 +18,13 @@ import logging
 import urllib
 from webob import exc
 
-import ujson as json
+from google.appengine.ext import ndb
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 import appengine_config
 import handlers
 import models
-
-from google.appengine.ext import ndb
 
 
 GET_AUTH_CODE_URL = (
@@ -63,7 +62,7 @@ class DisqusAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the user's name.
     """
-    return json.loads(self.user_json)['name']
+    return json_loads(self.user_json)['name']
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -123,7 +122,7 @@ class CallbackHandler(handlers.CallbackHandler):
 
     resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data)).read()
     try:
-      data = json.loads(resp)
+      data = json_loads(resp)
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
       raise exc.HttpBadRequest('Bad Disqus response to access token request')
@@ -139,12 +138,12 @@ class CallbackHandler(handlers.CallbackHandler):
 
     resp = auth.urlopen(USER_DETAILS_URL % user_id).read()
     try:
-      user_data = json.loads(resp)['response']
+      user_data = json_loads(resp)['response']
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
       raise exc.HttpBadRequest('Bad Disqus response to user details request')
 
-    auth.user_json = json.dumps(user_data)
+    auth.user_json = json_dumps(user_data)
     logging.info('created disqus auth %s', auth)
     auth.put()
     self.finish(auth, state=self.request.get('state'))

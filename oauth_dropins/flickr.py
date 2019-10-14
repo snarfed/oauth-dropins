@@ -17,8 +17,8 @@ import urlparse
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
+from webutil.util import json_dumps, json_loads
 
 import flickr_auth
 import handlers
@@ -162,7 +162,7 @@ class CallbackHandler(handlers.CallbackHandler):
     user_json = flickr_auth.call_api_method('flickr.people.getInfo',
                                             {'user_id': user_nsid})
 
-    flickr_auth.user_json = json.dumps(user_json)
+    flickr_auth.user_json = json_dumps(user_json)
     flickr_auth.put()
 
     self.finish(flickr_auth, state=self.request.get('state'))

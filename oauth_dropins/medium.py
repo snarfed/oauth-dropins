@@ -18,12 +18,12 @@ import urllib
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
 
 import handlers
 from models import BaseAuth
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 # medium is behind cloudflare, which often blocks requests's user agent, so set
 # our own.
@@ -72,7 +72,7 @@ class MediumAuth(BaseAuth):
     """Returns the user's full name or username.
     """
     if self.user_json:
-      data = json.loads(self.user_json).get('data')
+      data = json_loads(self.user_json).get('data')
       if data:
         return data.get('name') or data.get('username')
 
@@ -150,7 +150,7 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.debug('Access token response: %s', resp)
 
     try:
-      resp = json.loads(resp)
+      resp = json_loads(resp)
     except:
       logging.exception('Could not decode JSON')
       raise
@@ -163,7 +163,7 @@ class CallbackHandler(handlers.CallbackHandler):
     # TODO: handle refresh token
     access_token = resp['access_token']
     user_json = MediumAuth(access_token_str=access_token).get(API_USER_URL).text
-    id = json.loads(user_json)['data']['id']
+    id = json_loads(user_json)['data']['id']
     auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
     auth.put()
 

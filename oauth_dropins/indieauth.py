@@ -9,7 +9,6 @@ import urlparse
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
 
 import handlers
@@ -17,6 +16,7 @@ import mf2util
 import models
 import requests
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 
 INDIEAUTH_URL = 'https://indieauth.com/auth'
@@ -165,7 +165,7 @@ class CallbackHandler(handlers.CallbackHandler):
       if data.get('me'):
         verified = data.get('me')
         user_json = build_user_json(verified)
-        indie_auth = IndieAuth(id=verified, user_json=json.dumps(user_json))
+        indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
         indie_auth.put()
         self.finish(indie_auth, state=state)
       else:

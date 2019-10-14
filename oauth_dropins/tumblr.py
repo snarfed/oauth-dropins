@@ -10,10 +10,10 @@ import appengine_config
 
 from google.appengine.ext import ndb
 import tumblpy
-import ujson as json
 from webob import exc
 from webutil import handlers as webutil_handlers
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 import handlers
 import models
@@ -140,6 +140,6 @@ class CallbackHandler(handlers.CallbackHandler):
     auth = TumblrAuth(id=user['name'],
                       token_key=auth_token_key,
                       token_secret=auth_token_secret,
-                      user_json=json.dumps(resp))
+                      user_json=json_dumps(resp))
     auth.put()
     self.finish(auth, state=request_token.state)

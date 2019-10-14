@@ -12,7 +12,6 @@ import appengine_config
 
 from google.appengine.ext import ndb
 import tweepy
-import ujson as json
 from webob import exc
 
 import handlers
@@ -20,6 +19,7 @@ import models
 import twitter_auth
 from webutil import handlers as webutil_handlers
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
@@ -184,7 +184,7 @@ class CallbackHandler(handlers.CallbackHandler):
     user_json = twitter_auth.signed_urlopen(API_ACCOUNT_URL,
                                             access_token_key,
                                             access_token_secret).read()
-    username = json.loads(user_json)['screen_name']
+    username = json_loads(user_json)['screen_name']
 
     auth = TwitterAuth(id=username,
                        token_key=access_token_key,

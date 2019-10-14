@@ -17,9 +17,9 @@ import urlparse
 
 import appengine_config
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 import handlers
 from models import BaseAuth
@@ -80,7 +80,7 @@ class MastodonAuth(BaseAuth):
 
   def username(self):
     """Returns the user's username, eg ryan."""
-    return json.loads(self.user_json).get('username')
+    return json_loads(self.user_json).get('username')
 
   def access_token(self):
     """Returns the OAuth access token string."""
@@ -147,7 +147,7 @@ class StartHandler(handlers.StartHandler):
 
     app = MastodonApp.query(MastodonApp.instance == instance).get()
     if app:
-      app_data = json.loads(app.data)
+      app_data = json_loads(app.data)
     else:
       # register an API app!
       # https://docs.joinmastodon.org/api/rest/apps/
@@ -162,9 +162,9 @@ class StartHandler(handlers.StartHandler):
           'scopes': 'read write follow',
         }))
       resp.raise_for_status()
-      app_data = json.loads(resp.text)
+      app_data = json_loads(resp.text)
       logging.info('Got %s', app_data)
-      app = MastodonApp(instance=instance, data=json.dumps(app_data))
+      app = MastodonApp(instance=instance, data=json_dumps(app_data))
       app.put()
 
     return urlparse.urljoin(instance, AUTH_CODE_API % {
@@ -198,7 +198,7 @@ class CallbackHandler(handlers.CallbackHandler):
 
     app = MastodonApp.query(MastodonApp.instance == instance).get()
     assert app
-    app_data = json.loads(app.data)
+    app_data = json_loads(app.data)
 
     # extract auth code and request access token
     auth_code = util.get_required_param(self, 'code')
@@ -224,7 +224,7 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.debug('User: %s', user)
     address = '@%s@%s' % (user['username'], urlparse.urlparse(instance).netloc)
     auth = MastodonAuth(id=address, app=app.key, access_token_str=access_token,
-                        user_json=json.dumps(user))
+                        user_json=json_dumps(user))
     auth.put()
 
     self.finish(auth, state=self.request.get('state'))

@@ -14,13 +14,13 @@ import urllib
 import appengine_config
 
 from google.appengine.ext import ndb
-import ujson as json
 from webob import exc
 
 import facebook  # we reuse facebook.CallbackHandler.handle_error()
 import handlers
 import models
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 
 # instagram api url templates. can't (easily) use urllib.urlencode() because i
@@ -117,7 +117,7 @@ class CallbackHandler(handlers.CallbackHandler):
       raise
 
     try:
-      data = json.loads(resp)
+      data = json_loads(resp)
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
       raise exc.HttpBadRequest('Bad Instagram response to access token request')
@@ -132,6 +132,6 @@ class CallbackHandler(handlers.CallbackHandler):
     auth = InstagramAuth(id=username,
                          auth_code=auth_code,
                          access_token_str=access_token,
-                         user_json=json.dumps(data['user']))
+                         user_json=json_dumps(data['user']))
     auth.put()
     self.finish(auth, state=self.request.get('state'))

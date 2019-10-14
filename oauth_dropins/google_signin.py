@@ -21,9 +21,9 @@ from oauth2client.client import OAuth2Credentials
 from google.appengine.ext import db
 from google.appengine.ext import ndb
 import httplib2
-import ujson as json
 from webutil import handlers as webutil_handlers
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 import handlers
 import models
@@ -72,7 +72,7 @@ class GoogleAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the user's name.
     """
-    return json.loads(self.user_json).get('name') or 'unknown'
+    return json_loads(self.user_json).get('name') or 'unknown'
 
   def creds(self):
     """Returns an oauth2client.OAuth2Credentials.
@@ -154,13 +154,13 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         except BaseException as e:
           util.interpret_http_exception(e)
           raise
-        user = json.loads(user.decode('utf-8'))
+        user = json_loads(user.decode('utf-8'))
         logging.debug('Got one person: %r', user)
 
         store = oauth_decorator.credentials.store
         creds_model_key = ndb.Key(store._model.kind(), store._key_name)
         auth = GoogleAuth(id=user['sub'], creds_model=creds_model_key,
-                          user_json=json.dumps(user))
+                          user_json=json_dumps(user))
         auth.put()
         self.finish(auth, state=self.request.get('state'))
 

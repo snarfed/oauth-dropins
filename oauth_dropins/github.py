@@ -12,11 +12,11 @@ import appengine_config
 
 from google.appengine.ext import ndb
 from webob import exc
-import ujson as json
 
 import handlers
 from models import BaseAuth
 from webutil import util
+from webutil.util import json_dumps, json_loads
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
@@ -171,7 +171,7 @@ class CallbackHandler(handlers.CallbackHandler):
     logging.debug('GraphQL data.viewer response: %s', resp)
     user_json = resp['data']['viewer']
     auth = GitHubAuth(id=user_json['login'], access_token_str=access_token,
-                      user_json=json.dumps(user_json))
+                      user_json=json_dumps(user_json))
     auth.put()
 
     self.finish(auth, state=self.request.get('state'))

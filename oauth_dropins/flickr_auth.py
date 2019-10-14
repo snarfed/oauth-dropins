@@ -16,9 +16,9 @@ from . import appengine_config
 import oauthlib.oauth1
 import requests_oauthlib
 import requests
-import ujson as json
 
 from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):
@@ -83,7 +83,7 @@ def call_api_method(method, params, token_key, token_secret):
 
   text = resp.read()
   try:
-    body = json.loads(text)
+    body = json_loads(text)
   except BaseException:
     logging.warning('Ignoring malformed flickr response: %s', text[:1000])
     body = {}
