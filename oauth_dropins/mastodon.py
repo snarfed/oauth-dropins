@@ -24,6 +24,35 @@ from webutil.util import json_dumps, json_loads
 import handlers
 from models import BaseAuth
 
+# https://docs.joinmastodon.org/api/permissions/
+ALL_SCOPES = (
+  'read',
+  'read:accounts',
+  'read:blocks',
+  'read:favourites',
+  'read:filters',
+  'read:follows',
+  'read:lists',
+  'read:mutes',
+  'read:notifications',
+  'read:reports',
+  'read:search',
+  'read:statuses',
+  'write',
+  'write:accounts',
+  'write:blocks',
+  'write:favourites',
+  'write:filters',
+  'write:follows',
+  'write:lists',
+  'write:media',
+  'write:mutes',
+  'write:notifications',
+  'write:reports',
+  'write:statuses',
+  'follow',
+  'push',
+)
 
 REGISTER_APP_API = '/api/v1/apps'
 VERIFY_API = '/api/v1/accounts/verify_credentials'
@@ -121,7 +150,7 @@ class StartHandler(handlers.StartHandler):
   """
   APP_NAME = 'oauth-dropins demo'
   APP_URL = 'https://oauth-dropins.appspot.com/'
-  DEFAULT_SCOPE = 'read'
+  DEFAULT_SCOPE = 'read:accounts'
   SCOPE_SEPARATOR = ' '
 
   @classmethod
@@ -159,7 +188,7 @@ class StartHandler(handlers.StartHandler):
           'redirect_uris': callback_url,
           'website': self.APP_URL,
           # https://docs.joinmastodon.org/api/permissions/
-          'scopes': 'read write follow',
+          'scopes': self.SCOPE_SEPARATOR.join(ALL_SCOPES),
         }))
       resp.raise_for_status()
       app_data = json_loads(resp.text)
@@ -186,9 +215,9 @@ class CallbackHandler(handlers.CallbackHandler):
     desc = self.request.get('error_description')
     if error:
       # TODO: doc link
-      if error in ('user_cancelled_login', 'user_cancelled_authorize'):
+      if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
         logging.info('User declined: %s', self.request.get('error_description'))
-        self.finish(None, state=state)
+        self.finish(None, state=instance)
         return
       else:
         msg = 'Error: %s: %s' % (error, desc)
