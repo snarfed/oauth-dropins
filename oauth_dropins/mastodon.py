@@ -75,21 +75,25 @@ ACCESS_TOKEN_API = '/oauth/token'
 
 
 def _encode_state(instance, state):
-  return urllib.quote_plus(json_dumps({
+  wrapped = json_dumps({
     'instance': instance,
-    'state': state,
-  }))
+    'state': urllib.quote(state),
+  })
+  logging.debug('Encoding wrapper state: %r', wrapped)
+  return wrapped
 
 
 def _decode_state(state):
-  decoded = json_loads(urllib.unquote_plus(state))
-  return decoded['instance'], decoded['state']
+  logging.debug('Decoding wrapper state: %r', state)
+  decoded = json_loads(state)
+  return decoded['instance'], urllib.unquote(decoded['state'])
 
 
 class MastodonApp(ndb.Model):
   """A Mastodon API OAuth2 app registered with a specific instance."""
   instance = ndb.StringProperty(required=True)  # URL, eg https://mastodon.social/
   data = ndb.TextProperty(required=True)  # includes client_id and client_secret
+  app_url = ndb.StringProperty()
   created_at = ndb.DateTimeProperty(auto_now_add=True, required=True)
 
 
@@ -171,7 +175,7 @@ class StartHandler(handlers.StartHandler):
       cls.APP_NAME = app_name
     if app_url is not None:
       cls.APP_URL = app_url
-    return super(cls, cls).to(path, **kwargs)
+    return super(StartHandler, cls).to(path, **kwargs)
 
   def redirect_url(self, state=None, instance=None):
     # TODO: unify with indieauth?
@@ -183,13 +187,16 @@ class StartHandler(handlers.StartHandler):
 
     callback_url = self.to_url()
 
-    app = MastodonApp.query(MastodonApp.instance == instance).get()
+    app = MastodonApp.query(MastodonApp.instance == instance,
+                            MastodonApp.app_url == self.APP_URL).get()
     if app:
       app_data = json_loads(app.data)
     else:
       # register an API app!
       # https://docs.joinmastodon.org/api/rest/apps/
-      logging.info("first time we've seen instance %s! registering an API app now.", instance)
+      logging.info(
+        "first time we've seen instance %s with app %s! registering an API app now.",
+        instance, self.APP_URL)
       resp = util.requests_post(
         urlparse.urljoin(instance, REGISTER_APP_API),
         data=urllib.urlencode({
@@ -202,7 +209,8 @@ class StartHandler(handlers.StartHandler):
       resp.raise_for_status()
       app_data = json_loads(resp.text)
       logging.info('Got %s', app_data)
-      app = MastodonApp(instance=instance, data=json_dumps(app_data))
+      app = MastodonApp(instance=instance, app_url=self.APP_URL,
+                        data=json_dumps(app_data))
       app.put()
 
     return urlparse.urljoin(instance, AUTH_CODE_API % {
