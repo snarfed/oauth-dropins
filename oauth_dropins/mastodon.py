@@ -74,6 +74,18 @@ AUTH_CODE_API = '&'.join((
 ACCESS_TOKEN_API = '/oauth/token'
 
 
+def _encode_state(instance, state):
+  return urllib.quote_plus(json_dumps({
+    'instance': instance,
+    'state': state,
+  }))
+
+
+def _decode_state(state):
+  decoded = json_loads(urllib.unquote_plus(state))
+  return decoded['instance'], decoded['state']
+
+
 class MastodonApp(ndb.Model):
   """A Mastodon API OAuth2 app registered with a specific instance."""
   instance = ndb.StringProperty(required=True)  # URL, eg https://mastodon.social/
@@ -162,9 +174,6 @@ class StartHandler(handlers.StartHandler):
     return super(cls, cls).to(path, **kwargs)
 
   def redirect_url(self, state=None, instance=None):
-    # TODO
-    assert not state
-
     # TODO: unify with indieauth?
     if not instance:
       instance = util.get_required_param(self, 'instance')
@@ -200,15 +209,15 @@ class StartHandler(handlers.StartHandler):
       'client_id': app_data['client_id'],
       'client_secret': app_data['client_secret'],
       'redirect_uri': urllib.quote_plus(callback_url),
-      'state': urllib.quote_plus(instance),
+      'state': _encode_state(instance, state),
       'scope': self.scope,
-      })
+    })
 
 
 class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and stores it."""
   def get(self):
-    instance = self.request.get('state')
+    instance, state = _decode_state(util.get_required_param(self, 'state'))
 
     # handle errors
     error = self.request.get('error')
@@ -217,13 +226,12 @@ class CallbackHandler(handlers.CallbackHandler):
       # TODO: doc link
       if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
         logging.info('User declined: %s', self.request.get('error_description'))
-        self.finish(None, state=instance)
+        self.finish(None, state=state)
         return
       else:
         msg = 'Error: %s: %s' % (error, desc)
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
-
 
     app = MastodonApp.query(MastodonApp.instance == instance).get()
     assert app
@@ -256,4 +264,4 @@ class CallbackHandler(handlers.CallbackHandler):
                         user_json=json_dumps(user))
     auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+    self.finish(auth, state=state)
