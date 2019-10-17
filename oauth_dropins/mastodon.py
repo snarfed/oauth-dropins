@@ -160,6 +160,8 @@ class StartHandler(handlers.StartHandler):
     APP_NAME: string, user-visible name of this application. Displayed in Mastodon's
       OAuth prompt.
     APP_URL: string, this application's web site
+    REDIRECT_PATHS: sequence of string URL paths (on this host) to register as
+      OAuth callback (aka redirect) URIs in the OAuth app
 
   Args:
     instance: string, base URL of the Mastodon instance, eg 'https://mastodon.social/'
@@ -168,6 +170,7 @@ class StartHandler(handlers.StartHandler):
   APP_URL = 'https://oauth-dropins.appspot.com/'
   DEFAULT_SCOPE = 'read:accounts'
   SCOPE_SEPARATOR = ' '
+  REDIRECT_PATHS = ()
 
   @classmethod
   def to(cls, path, app_name=None, app_url=None, **kwargs):
@@ -197,11 +200,18 @@ class StartHandler(handlers.StartHandler):
       logging.info(
         "first time we've seen instance %s with app %s! registering an API app now.",
         instance, self.APP_URL)
+      redirect_uris = set(urlparse.urljoin(self.request.host_url, path)
+                          for path in set(self.REDIRECT_PATHS))
+      redirect_uris.add(callback_url)
       resp = util.requests_post(
         urlparse.urljoin(instance, REGISTER_APP_API),
         data=urllib.urlencode({
           'client_name': self.APP_NAME,
-          'redirect_uris': callback_url,
+          # Mastodon uses Doorkeeper for OAuth, which allows registering
+          # multiple redirect URIs, separated by newlines.
+          # https://github.com/doorkeeper-gem/doorkeeper/pull/298
+          # https://docs.joinmastodon.org/api/rest/apps/
+          'redirect_uris': '\n'.join(redirect_uris),
           'website': self.APP_URL,
           # https://docs.joinmastodon.org/api/permissions/
           'scopes': self.SCOPE_SEPARATOR.join(ALL_SCOPES),
