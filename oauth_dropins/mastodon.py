@@ -130,6 +130,10 @@ class MastodonAuth(BaseAuth):
     """Returns the user's username, eg ryan."""
     return json_loads(self.user_json).get('username')
 
+  def user_id(self):
+    """Returns the user's id, eg 123."""
+    return json_loads(self.user_json).get('id')
+
   def access_token(self):
     """Returns the OAuth access token string."""
     return self.access_token_str

@@ -81,5 +81,3 @@ for name in (
 application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
   ] + routes, debug=appengine_config.DEBUG)
-
-# application.error_handlers = defaultdict(lambda: handle_discovery_errors)
