@@ -181,12 +181,15 @@ class StartHandler(handlers.StartHandler):
     return super(StartHandler, cls).to(path, **kwargs)
 
   def redirect_url(self, state=None, instance=None):
+    # normalize instance to URL
     # TODO: unify with indieauth?
     if not instance:
       instance = util.get_required_param(self, 'instance')
+    instance = instance.strip().split('@')[-1]  # handle addresses, eg user@host.com
     parsed = urlparse.urlparse(instance)
     if not parsed.scheme:
       instance = 'https://' + instance
+    logging.info('Starting OAuth for Mastodon instance %s', instance)
 
     callback_url = self.to_url()
 
