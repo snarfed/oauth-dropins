@@ -4,9 +4,10 @@
  */
 document.addEventListener('DOMContentLoaded', function() {
   function addDefaultScheme(target) {
-    if(target.value.match(/^(?!https?:).+\..+/)) {
+    val = target.value.trim()
+    if(val.match(/^(?!https?:)[^@]+\.[^@]+$/)) {
       scheme = target.attributes.scheme;
-      target.value = (scheme ? scheme.value : "http") + "://" + target.value;
+      target.value = (scheme ? scheme.value : "http") + "://" + val;
     }
   }
   var elements = document.querySelectorAll("input[type=url]");
