@@ -35,7 +35,7 @@ Click on a site to try it!</p>
 {% if declined %}
 <span style="color: red">User declined the access request.</span>
 {% else %}{% if error %}
-<span style="color: red">Error fetching user details.</span>
+<span style="color: red">Error: {{ error }}</span>
 {% endif %}
 {% endif %}
 {% if entity %}

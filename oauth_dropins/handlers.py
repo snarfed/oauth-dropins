@@ -104,7 +104,13 @@ class StartHandler(BaseHandler):
     self.redirect(url)
 
   def redirect_url(self, state=None):
-    """oauth-dropin subclasses must implement this.
+    """Returns the local URL for the OAuth service to redirect back to.
+
+    oauth-dropin subclasses must implement this.
+
+    Args:
+      state: string, user-provided value to be returned as a query parameter in
+        the return redirect
     """
     raise NotImplementedError()
 

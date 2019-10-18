@@ -1,14 +1,31 @@
 """Example oauth-dropins app. Serves the front page and discovery files.
 """
+from collections import defaultdict
 import importlib
+import logging
+import urllib
 
 import appengine_config
-import jinja2
-
 from google.appengine.ext import ndb
+import jinja2
+import requests
 import webapp2
-
+from webob import exc
 from oauth_dropins.webutil import handlers
+
+from oauth_dropins import indieauth, mastodon
+
+
+def handle_discovery_errors(handler, e, debug):
+  """A webapp2 exception handler that handles URL discovery errors.
+
+  Used to catch Mastodon and IndieAuth connection failures, etc.
+  """
+  if isinstance(e, (ValueError, requests.RequestException, exc.HTTPException)):
+    logging.warning('', exc_info=True)
+    return handler.redirect('/?' + urllib.urlencode({'error': str(e)}))
+
+  raise
 
 
 class FrontPageHandler(handlers.ModernHandler):
@@ -26,7 +43,20 @@ class FrontPageHandler(handlers.ModernHandler):
     self.response.out.write(env.get_template('templates/index.html').render(vars))
 
 
-routes = []
+class IndieAuthStart(indieauth.StartHandler):
+  handle_exception = handle_discovery_errors
+
+class MastodonStart(mastodon.StartHandler):
+  handle_exception = handle_discovery_errors
+
+
+routes = [
+    ('/indieauth/start', IndieAuthStart.to('/indieauth/oauth_callback')),
+    ('/indieauth/oauth_callback', indieauth.CallbackHandler.to('/')),
+    ('/mastodon/start', MastodonStart.to('/mastodon/oauth_callback')),
+    ('/mastodon/oauth_callback', mastodon.CallbackHandler.to('/')),
+]
+
 for name in (
     'blogger_v2',
     'disqus',
@@ -35,10 +65,8 @@ for name in (
     'flickr',
     'github',
     'google_signin',
-    'indieauth',
     'instagram',
     'linkedin',
-    'mastodon',
     'medium',
     'tumblr',
     'twitter',
@@ -53,3 +81,5 @@ for name in (
 application = webapp2.WSGIApplication([
     ('/', FrontPageHandler),
   ] + routes, debug=appengine_config.DEBUG)
+
+# application.error_handlers = defaultdict(lambda: handle_discovery_errors)

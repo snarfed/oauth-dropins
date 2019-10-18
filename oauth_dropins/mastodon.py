@@ -17,6 +17,7 @@ import urlparse
 
 import appengine_config
 from google.appengine.ext import ndb
+import requests
 from webob import exc
 from webutil import util
 from webutil.util import json_dumps, json_loads
@@ -54,6 +55,7 @@ ALL_SCOPES = (
   'push',
 )
 
+INSTANCE_API = '/api/v1/instance'
 REGISTER_APP_API = '/api/v1/apps'
 VERIFY_API = '/api/v1/accounts/verify_credentials'
 
@@ -92,7 +94,8 @@ def _decode_state(state):
 class MastodonApp(ndb.Model):
   """A Mastodon API OAuth2 app registered with a specific instance."""
   instance = ndb.StringProperty(required=True)  # URL, eg https://mastodon.social/
-  data = ndb.TextProperty(required=True)  # includes client_id and client_secret
+  data = ndb.TextProperty(required=True)  # JSON; includes client id/secret
+  instance_info = ndb.TextProperty()  # JSON; from /api/v1/instance
   app_url = ndb.StringProperty()
   created_at = ndb.DateTimeProperty(auto_now_add=True, required=True)
 
@@ -167,7 +170,7 @@ class StartHandler(handlers.StartHandler):
     instance: string, base URL of the Mastodon instance, eg 'https://mastodon.social/'
   """
   APP_NAME = 'oauth-dropins demo'
-  APP_URL = 'https://oauth-dropins.appspot.com/'
+  APP_URL = appengine_config.HOST_URL
   DEFAULT_SCOPE = 'read:accounts'
   SCOPE_SEPARATOR = ' '
   REDIRECT_PATHS = ()
@@ -181,6 +184,17 @@ class StartHandler(handlers.StartHandler):
     return super(StartHandler, cls).to(path, **kwargs)
 
   def redirect_url(self, state=None, instance=None):
+    """Returns the local URL for Mastodon to redirect back to after OAuth prompt.
+
+    Args:
+      state: string, user-provided value to be returned as a query parameter in
+        the return redirect
+      instance: string, Mastodon instance base URL, e.g.
+        'https://mastodon.social'. May also be provided in the 'instance'
+        request as a URL query parameter or POST body.
+
+    Raises: ValueError if instance isn't a Mastodon instance.
+    """
     # normalize instance to URL
     # TODO: unify with indieauth?
     if not instance:
@@ -189,50 +203,81 @@ class StartHandler(handlers.StartHandler):
     parsed = urlparse.urlparse(instance)
     if not parsed.scheme:
       instance = 'https://' + instance
-    logging.info('Starting OAuth for Mastodon instance %s', instance)
 
-    callback_url = self.to_url()
+    # fetch instance info from this instance's API (mostly to test that it's
+    # actually a Mastodon instance)
+    try:
+      resp = util.requests_get(urlparse.urljoin(instance, INSTANCE_API))
+    except requests.RequestException as e:
+      logging.info('Error', exc_info=True)
+      resp = None
+
+    if not (resp and resp.ok and
+            resp.headers.get('Content-Type').strip().startswith('application/json')):
+      msg = "%s doesn't look like a Mastodon instance." % instance
+      logging.info(resp)
+      logging.info(msg)
+      raise ValueError(msg)
+
+    # if we got redirected, update instance URL
+    parsed = list(urlparse.urlparse(resp.url))
+    parsed[2] = '/'  # path
+    instance = urlparse.urlunparse(parsed)
 
     app = MastodonApp.query(MastodonApp.instance == instance,
                             MastodonApp.app_url == self.APP_URL).get()
-    if app:
-      app_data = json_loads(app.data)
-    else:
-      # register an API app!
-      # https://docs.joinmastodon.org/api/rest/apps/
-      logging.info(
-        "first time we've seen instance %s with app %s! registering an API app now.",
-        instance, self.APP_URL)
-      redirect_uris = set(urlparse.urljoin(self.request.host_url, path)
-                          for path in set(self.REDIRECT_PATHS))
-      redirect_uris.add(callback_url)
-      resp = util.requests_post(
-        urlparse.urljoin(instance, REGISTER_APP_API),
-        data=urllib.urlencode({
-          'client_name': self.APP_NAME,
-          # Mastodon uses Doorkeeper for OAuth, which allows registering
-          # multiple redirect URIs, separated by newlines.
-          # https://github.com/doorkeeper-gem/doorkeeper/pull/298
-          # https://docs.joinmastodon.org/api/rest/apps/
-          'redirect_uris': '\n'.join(redirect_uris),
-          'website': self.APP_URL,
-          # https://docs.joinmastodon.org/api/permissions/
-          'scopes': self.SCOPE_SEPARATOR.join(ALL_SCOPES),
-        }))
-      resp.raise_for_status()
-      app_data = json_loads(resp.text)
-      logging.info('Got %s', app_data)
-      app = MastodonApp(instance=instance, app_url=self.APP_URL,
-                        data=json_dumps(app_data))
-      app.put()
+    if not app:
+      app = self._register_app(instance)
+      app.instance_info = resp.text
 
+    logging.info('Starting OAuth for Mastodon instance %s', instance)
+    app_data = json_loads(app.data)
     return urlparse.urljoin(instance, AUTH_CODE_API % {
       'client_id': app_data['client_id'],
       'client_secret': app_data['client_secret'],
-      'redirect_uri': urllib.quote_plus(callback_url),
+      'redirect_uri': urllib.quote_plus(self.to_url()),
       'state': _encode_state(instance, state),
       'scope': self.scope,
     })
+
+  def _register_app(self, instance):
+    """Register a Mastodon API app on a specific instance.
+
+    https://docs.joinmastodon.org/api/rest/apps/
+
+    Args:
+      instance: string
+
+    Returns: MastodonApp
+    """
+    logging.info("first time we've seen Mastodon instance %s with app %s! "
+                 "registering an API app.", instance, self.APP_URL)
+
+    redirect_uris = set(urlparse.urljoin(self.request.host_url, path)
+                        for path in set(self.REDIRECT_PATHS))
+    redirect_uris.add(self.to_url())
+
+    resp = util.requests_post(
+      urlparse.urljoin(instance, REGISTER_APP_API),
+      data=urllib.urlencode({
+        'client_name': self.APP_NAME,
+        # Mastodon uses Doorkeeper for OAuth, which allows registering
+        # multiple redirect URIs, separated by newlines.
+        # https://github.com/doorkeeper-gem/doorkeeper/pull/298
+        # https://docs.joinmastodon.org/api/rest/apps/
+        'redirect_uris': '\n'.join(redirect_uris),
+        'website': self.APP_URL,
+        # https://docs.joinmastodon.org/api/permissions/
+        'scopes': self.SCOPE_SEPARATOR.join(ALL_SCOPES),
+      }))
+    resp.raise_for_status()
+
+    app_data = json_loads(resp.text)
+    logging.info('Got %s', app_data)
+    app = MastodonApp(instance=instance, app_url=self.APP_URL,
+                      data=json_dumps(app_data))
+    app.put()
+    return app
 
 
 class CallbackHandler(handlers.CallbackHandler):
