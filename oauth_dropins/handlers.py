@@ -18,7 +18,12 @@ from webutil import util
 
 
 class BaseHandler(webapp2.RequestHandler):
-  """Base request handler class. Provides the to() factory method."""
+  """Base request handler class. Provides the to() factory method.
+
+  Attributes (may be overridden by subclasses):
+    DEFAULT_SCOPE: string, default OAuth scope(s) to request
+    SCOPE_SEPARATOR: string, used to separate multiple scopes
+  """
   DEFAULT_SCOPE = ''
   SCOPE_SEPARATOR = ','
 

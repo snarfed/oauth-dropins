@@ -76,9 +76,9 @@ AUTH_CODE_API = '&'.join((
 ACCESS_TOKEN_API = '/oauth/token'
 
 
-def _encode_state(instance, state):
+def _encode_state(app, state):
   wrapped = json_dumps({
-    'instance': instance,
+    'app_key': app.key.urlsafe(),
     'state': urllib.quote(state),
   })
   logging.debug('Encoding wrapper state: %r', wrapped)
@@ -88,7 +88,7 @@ def _encode_state(instance, state):
 def _decode_state(state):
   logging.debug('Decoding wrapper state: %r', state)
   decoded = json_loads(state)
-  return decoded['instance'], urllib.unquote(decoded['state'])
+  return decoded['app_key'], urllib.unquote(decoded['state'])
 
 
 class MastodonApp(ndb.Model):
@@ -97,6 +97,7 @@ class MastodonApp(ndb.Model):
   data = ndb.TextProperty(required=True)  # JSON; includes client id/secret
   instance_info = ndb.TextProperty()  # JSON; from /api/v1/instance
   app_url = ndb.StringProperty()
+  app_name = ndb.StringProperty()
   created_at = ndb.DateTimeProperty(auto_now_add=True, required=True)
 
 
@@ -167,17 +168,16 @@ class StartHandler(handlers.StartHandler):
     APP_NAME: string, user-visible name of this application. Displayed in Mastodon's
       OAuth prompt.
     APP_URL: string, this application's web site
+    DEFAULT_SCOPE: string, default OAuth scope(s) to request
     REDIRECT_PATHS: sequence of string URL paths (on this host) to register as
       OAuth callback (aka redirect) URIs in the OAuth app
-
-  Args:
-    instance: string, base URL of the Mastodon instance, eg 'https://mastodon.social/'
+    SCOPE_SEPARATOR: string, used to separate multiple scopes
   """
   APP_NAME = 'oauth-dropins demo'
   APP_URL = appengine_config.HOST_URL
   DEFAULT_SCOPE = 'read:accounts'
-  SCOPE_SEPARATOR = ' '
   REDIRECT_PATHS = ()
+  SCOPE_SEPARATOR = ' '
 
   @classmethod
   def to(cls, path, app_name=None, app_url=None, **kwargs):
@@ -228,11 +228,17 @@ class StartHandler(handlers.StartHandler):
     parsed[2] = '/'  # path
     instance = urlparse.urlunparse(parsed)
 
-    app = MastodonApp.query(MastodonApp.instance == instance,
-                            MastodonApp.app_url == self.APP_URL).get()
+    query = MastodonApp.query(MastodonApp.instance == instance,
+                            MastodonApp.app_url == self.APP_URL)
+    if appengine_config.DEBUG:
+      # disambiguate different apps in dev_appserver, since their APP_URL will
+      # always be localhost
+      query = query.filter(MastodonApp.app_name == self.APP_NAME)
+    app = query.get()
     if not app:
       app = self._register_app(instance)
       app.instance_info = resp.text
+      app.put()
 
     logging.info('Starting OAuth for Mastodon instance %s', instance)
     app_data = json_loads(app.data)
@@ -240,7 +246,7 @@ class StartHandler(handlers.StartHandler):
       'client_id': app_data['client_id'],
       'client_secret': app_data['client_secret'],
       'redirect_uri': urllib.quote_plus(self.to_url()),
-      'state': _encode_state(instance, state),
+      'state': _encode_state(app, state),
       'scope': self.scope,
     })
 
@@ -287,7 +293,7 @@ class StartHandler(handlers.StartHandler):
 class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and stores it."""
   def get(self):
-    instance, state = _decode_state(util.get_required_param(self, 'state'))
+    app_key, state = _decode_state(util.get_required_param(self, 'state'))
 
     # handle errors
     error = self.request.get('error')
@@ -303,7 +309,7 @@ class CallbackHandler(handlers.CallbackHandler):
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
-    app = MastodonApp.query(MastodonApp.instance == instance).get()
+    app = ndb.Key(urlsafe=app_key).get()
     assert app
     app_data = json_loads(app.data)
 
@@ -318,7 +324,7 @@ class CallbackHandler(handlers.CallbackHandler):
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': self.request.path_url,
       }
-    resp = util.requests_post(urlparse.urljoin(instance, ACCESS_TOKEN_API),
+    resp = util.requests_post(urlparse.urljoin(app.instance, ACCESS_TOKEN_API),
                               data=urllib.urlencode(data))
     resp.raise_for_status()
     resp_json = resp.json()
@@ -329,7 +335,7 @@ class CallbackHandler(handlers.CallbackHandler):
     access_token = resp_json['access_token']
     user = MastodonAuth(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
     logging.debug('User: %s', user)
-    address = '@%s@%s' % (user['username'], urlparse.urlparse(instance).netloc)
+    address = '@%s@%s' % (user['username'], urlparse.urlparse(app.instance).netloc)
     auth = MastodonAuth(id=address, app=app.key, access_token_str=access_token,
                         user_json=json_dumps(user))
     auth.put()
