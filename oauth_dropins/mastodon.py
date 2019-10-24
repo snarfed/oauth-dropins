@@ -216,8 +216,12 @@ class StartHandler(handlers.StartHandler):
       logging.info('Error', exc_info=True)
       resp = None
 
-    if not (resp and resp.ok and
-            resp.headers.get('Content-Type').strip().startswith('application/json')):
+    is_json = resp.headers.get('Content-Type').strip().startswith('application/json')
+    if is_json:
+      logging.info(resp.text)
+    if (not resp or not resp.ok or not is_json or
+        # Pixelfed (https://pixelfed.org/) pretends to be Mastodon but isn't
+        'Pixelfed' in resp.json().get('version')):
       msg = "%s doesn't look like a Mastodon instance." % instance
       logging.info(resp)
       logging.info(msg)
