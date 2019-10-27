@@ -92,6 +92,8 @@ class WordPressAuth(BaseAuth):
 class StartHandler(handlers.StartHandler):
   """Starts WordPress auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'wordpress.com'
+  LABEL = 'WordPress.com'
 
   def redirect_url(self, state=None):
     assert (appengine_config.WORDPRESS_CLIENT_ID and
@@ -106,16 +108,9 @@ class StartHandler(handlers.StartHandler):
       }
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="clearfix visible-sm"></div>
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="WordPress.com" src="/static/wordpress_com_2x.png" style="background-color: #3499CD" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args, input_style='background-color: #3499CD', **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

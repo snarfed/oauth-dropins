@@ -21,7 +21,6 @@ import handlers
 import models
 from webutil import util
 
-
 API_BASE = 'https://graph.facebook.com/v4.0/'
 
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
@@ -130,6 +129,8 @@ class FacebookAuth(models.BaseAuth):
 class StartHandler(handlers.StartHandler):
   """Starts Facebook auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'facebook'
+  LABEL = 'Facebook'
 
   def redirect_url(self, state=None, app_id=None):
     if app_id is None:
@@ -147,17 +148,6 @@ class StartHandler(handlers.StartHandler):
       'redirect_uri': urllib.quote_plus(self.to_url()),
       'state': state,
     }
-
-  @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="Facebook" src="/static/facebook_button_2x.png" />
- </form>
-</div>
-""" % post_url
 
 
 class CallbackHandler(handlers.CallbackHandler):

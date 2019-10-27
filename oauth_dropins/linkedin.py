@@ -103,6 +103,8 @@ class LinkedInAuth(BaseAuth):
 class StartHandler(handlers.StartHandler):
   """Starts LinkedIn auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'linkedin'
+  LABEL = 'LinkedIn'
   DEFAULT_SCOPE = 'r_liteprofile'
 
   def redirect_url(self, state=None):
@@ -119,15 +121,11 @@ class StartHandler(handlers.StartHandler):
       }
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="LinkedIn" src="/static/linkedin_2x.png" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args,
+      input_style='background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px',
+      **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

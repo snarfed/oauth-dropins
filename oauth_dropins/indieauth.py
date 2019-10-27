@@ -18,7 +18,6 @@ import requests
 from webutil import util
 from webutil.util import json_dumps, json_loads
 
-
 INDIEAUTH_URL = 'https://indieauth.com/auth'
 
 
@@ -110,6 +109,9 @@ class StartHandler(handlers.StartHandler):
   """Starts the IndieAuth flow. Requires the 'me' parameter with the
   user URL that we want to authenticate.
   """
+  NAME = 'indieauth'
+  LABEL = 'IndieAuth'
+
   def redirect_url(self, state=None, me=None):
     assert appengine_config.INDIEAUTH_CLIENT_ID, (
       "Please fill in the indieauth_client_id in your app's root directory.")
@@ -139,18 +141,12 @@ class StartHandler(handlers.StartHandler):
     return url
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />
-  <input type="image" class="shadow" height="50" title="IndieAuth" title="IndieAuth"
-         src="/static/indieauth_button_2x.png"
-         style="background-color: #EBEBEB; padding: 5px" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args,
+      input_style='background-color: #EBEBEB; padding: 5px',
+      extra_form='<input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />',
+      **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

@@ -25,7 +25,6 @@ import handlers
 import models
 from webutil import util
 
-
 REQUEST_TOKEN_URL = 'https://www.flickr.com/services/oauth/request_token'
 AUTHORIZE_URL = 'https://www.flickr.com/services/oauth/authorize'
 AUTHENTICATE_URL = 'https://www.flickr.com/services/oauth/authenticate'
@@ -82,6 +81,9 @@ class StartHandler(handlers.StartHandler):
   Fetches an OAuth request token, then redirects to Flickr's auth page to
   request an access token.
   """
+  NAME = 'flickr'
+  LABEL = 'Flickr'
+
   def redirect_url(self, state=None):
     assert (appengine_config.FLICKR_APP_KEY and
             appengine_config.FLICKR_APP_SECRET), (
@@ -126,17 +128,10 @@ class StartHandler(handlers.StartHandler):
     return auth_url
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="row">
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="Flickr" src="/static/flickr_2x.png"
-         style="background-color: #EEEEEE; padding: 10px" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
+
 
 
 class CallbackHandler(handlers.CallbackHandler):

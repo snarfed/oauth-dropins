@@ -10,7 +10,7 @@ application = webapp2.WSGIApplication([
   ]
 """
 import logging
-import urllib
+import urlparse
 
 import webapp2
 from webutil import handlers
@@ -20,12 +20,16 @@ from webutil import util
 class BaseHandler(webapp2.RequestHandler):
   """Base request handler class. Provides the to() factory method.
 
-  Attributes (may be overridden by subclasses):
+  Attributes (some may be overridden by subclasses):
     DEFAULT_SCOPE: string, default OAuth scope(s) to request
     SCOPE_SEPARATOR: string, used to separate multiple scopes
+    LABEL: string, human-readable label, eg 'Blogger'
+    NAME: string module name; usually same as `__name__.split('.')[-1]`
   """
   DEFAULT_SCOPE = ''
   SCOPE_SEPARATOR = ','
+  LABEL = None
+  NAME = None
 
   handle_exception = handlers.handle_exception
   to_path = None
@@ -49,8 +53,10 @@ class BaseHandler(webapp2.RequestHandler):
     if not extra:
       return cls.DEFAULT_SCOPE
 
-    return (cls.DEFAULT_SCOPE + cls.SCOPE_SEPARATOR if cls.DEFAULT_SCOPE else '') + (
-      extra if isinstance(extra, basestring) else cls.SCOPE_SEPARATOR.join(extra))
+    if not isinstance(extra, basestring):
+      extra = cls.SCOPE_SEPARATOR.join(extra)
+
+    return cls.SCOPE_SEPARATOR.join(util.trim_nulls(cls.DEFAULT_SCOPE, extra))
 
   def to_url(self, state=None):
     """Returns a fully qualified callback URL based on to_path.
@@ -99,7 +105,7 @@ class StartHandler(BaseHandler):
     scopes = set(self.request.params.getall('scope'))
     if self.scope:
       scopes.add(self.scope)
-    self.scope = self.SCOPE_SEPARATOR.join(scopes)
+    self.scope = self.SCOPE_SEPARATOR.join(util.trim_nulls(scopes))
 
     # str() is since WSGI middleware chokes on unicode redirect URLs :/ eg:
     # InvalidResponseError: header values must be str, got 'unicode' (u'...') for 'Location'
@@ -120,16 +126,36 @@ class StartHandler(BaseHandler):
     raise NotImplementedError()
 
   @classmethod
-  def button_html(cls, post_to):
+  def button_html(cls, to_path, outer_classes='', extra_form='', image_prefix='',
+                  input_style='', scopes=''):
     """Returns an HTML string with a login form and button for this site.
 
     Args:
-      post_to: string, path or URL for the form to POST to
+      to_path: string, path or URL for the form to POST to
+      outer_classes: string, HTML classes to add to the outer <div>
+      extra_form: string, optional, extra HTML to insert inside the <form>
+        before the button
+      scopes: string, optional, OAuth scopes to override site's default(s)
+      image_prefix: string, optional, prefix to add to the beginning of image
+        URL path, eg '/oauth_dropins/'
+      input_style: string, inline style to apply to the button <input>
 
     Returns: string
     """
-    return ''
-    # raise NotImplementedError()
+    vars = locals()
+    vars.update({
+      'label': cls.LABEL,
+      'image': urlparse.urljoin(image_prefix, '%s_2x.png' % cls.NAME),
+    })
+    return """\
+<div class="%(outer_classes)s">
+  <form method="post" action="%(to_path)s"><nobr>
+    %(extra_form)s
+    <input type="image" height="50" title="%(label)s" class="shadow"
+           src="%(image)s" style="%(input_style)s" />
+    <input name="scope" type="hidden" value="%(scopes)s">
+  </nobr></form>
+</div>""" % vars
 
 
 class CallbackHandler(BaseHandler):

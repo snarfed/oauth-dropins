@@ -22,7 +22,6 @@ import models
 from webutil import util
 from webutil.util import json_dumps, json_loads
 
-
 # instagram api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
@@ -74,6 +73,8 @@ class InstagramAuth(models.BaseAuth):
 class StartHandler(handlers.StartHandler):
   """Starts Instagram auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'instagram'
+  LABEL = 'Instagram'
   DEFAULT_SCOPE = 'basic'
 
   def redirect_url(self, state=None):
@@ -92,16 +93,12 @@ class StartHandler(handlers.StartHandler):
     }
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="Instagram" src="/static/instagram_button_2x.png"
-         style="background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args,
+      input_style='background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px',
+      **kwargs)
+
 
 
 class CallbackHandler(handlers.CallbackHandler):

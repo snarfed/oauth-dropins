@@ -18,7 +18,6 @@ from webutil.util import json_dumps, json_loads
 import handlers
 import models
 
-
 GET_AUTH_CODE_URL = '&'.join((
   'https://www.dropbox.com/1/oauth2/authorize?'
   'response_type=code',
@@ -81,6 +80,9 @@ class DropboxCsrf(ndb.Model):
 class StartHandler(handlers.StartHandler):
   """Starts Dropbox auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'dropbox'
+  LABEL = 'Dropbox'
+
   def redirect_url(self, state=None):
     assert (appengine_config.DROPBOX_APP_KEY and
             appengine_config.DROPBOX_APP_SECRET), (
@@ -95,17 +97,9 @@ class StartHandler(handlers.StartHandler):
     }
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="od-dropbox col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" title="Dropbox" class="shadow"
-         src="/static/dropbox_2x.png"
-         style="background-color: #EEEEEE; padding: 10px" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

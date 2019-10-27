@@ -110,6 +110,8 @@ class GitHubAuth(BaseAuth):
 class StartHandler(handlers.StartHandler):
   """Starts GitHub auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'github'
+  LABEL = 'GitHub'
   DEFAULT_SCOPE = ''
 
   def redirect_url(self, state=None):
@@ -126,16 +128,9 @@ class StartHandler(handlers.StartHandler):
       }
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="GitHub" src="/static/github_button_2x.png"
-         style="background-color: #444444" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args, input_style='background-color: #444444', **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

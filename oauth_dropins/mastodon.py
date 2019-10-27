@@ -173,6 +173,8 @@ class StartHandler(handlers.StartHandler):
       OAuth callback (aka redirect) URIs in the OAuth app
     SCOPE_SEPARATOR: string, used to separate multiple scopes
   """
+  NAME = 'mastodon'
+  LABEL = 'Mastodon'
   APP_NAME = 'oauth-dropins demo'
   APP_URL = appengine_config.HOST_URL
   DEFAULT_SCOPE = 'read:accounts'
@@ -294,16 +296,12 @@ class StartHandler(handlers.StartHandler):
     return app
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="url" name="instance" class="form-control" placeholder="Mastodon instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />
-  <input type="image" height="50" class="shadow" title="Mastodon" title="Mastodon" src="/static/mastodon_logo_button_2x.png" style="background-color: #EBEBEB; padding: 5px" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args,
+      input_style='background-color: #EBEBEB; padding: 5px',
+      extra_form='<input type="url" name="instance" class="form-control" placeholder="Mastodon instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />',
+      **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

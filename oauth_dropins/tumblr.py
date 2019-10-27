@@ -79,6 +79,9 @@ def handle_exception(self, e, debug):
 class StartHandler(handlers.StartHandler):
   """Starts Tumblr auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'tumblr'
+  LABEL = 'Tumblr'
+
   handle_exception = handle_exception
 
   def redirect_url(self, state=None):
@@ -98,15 +101,11 @@ class StartHandler(handlers.StartHandler):
     return auth_props['auth_url']
 
   @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="Tumblr" src="/static/tumblr_2x.png" style="background-color: #406784; padding: 10px" />
- </form>
-</div>
-""" % post_url
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args,
+      input_style='background-color: #406784; padding: 10px',
+      **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

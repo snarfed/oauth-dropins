@@ -21,7 +21,6 @@ from webutil import handlers as webutil_handlers
 from webutil import util
 from webutil.util import json_dumps, json_loads
 
-
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
 
 
@@ -111,6 +110,9 @@ class StartHandler(handlers.StartHandler):
       permissions, this lets you request a read-only token. Details:
       https://dev.twitter.com/docs/api/1/post/oauth/request_token
   """
+  NAME = 'twitter'
+  LABEL = 'Twitter'
+
   handle_exception = handle_exception
 
   @classmethod
@@ -150,17 +152,6 @@ class StartHandler(handlers.StartHandler):
                              ).put()
     logging.info('Generated request token, redirecting to Twitter: %s', auth_url)
     return auth_url
-
-  @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="Twitter" src="/static/twitter_2x.png" />
- </form>
-</div>
-""" % post_url
 
 
 class CallbackHandler(handlers.CallbackHandler):

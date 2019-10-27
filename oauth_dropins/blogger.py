@@ -18,6 +18,7 @@ https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 """
 import logging
 import re
+import urllib
 
 import appengine_config
 
@@ -124,6 +125,9 @@ class CredentialsModel_Blogger(CredentialsModel):
 class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   """Connects a Blogger account. Authenticates via OAuth.
   """
+  NAME = 'twitter'
+  LABEL = 'Twitter'
+
   handle_exception = google_signin.handle_exception
 
   # extracts the Blogger id from a profile URL
@@ -214,17 +218,6 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
 
 
     return Handler
-
-  @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
-   <form method="post" action="%s">
-    <input type="image" height="50" title="Blogger" class="shadow"
-           src="/static/blogger_2x.png" />
-   </form>
-</div>""" % post_url
 
 
 class CallbackHandler(object):

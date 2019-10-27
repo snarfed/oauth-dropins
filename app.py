@@ -61,7 +61,8 @@ class FrontPageHandler(handlers.TemplateHandler):
       vars['entity'] = ndb.Key(urlsafe=key).get()
 
     vars.update({
-      site + '_html': module.StartHandler.button_html('/%s/start' % site)
+      site + '_html': module.StartHandler.button_html(
+        '/%s/start' % site, image_prefix='/static/', outer_classes='col-md-3 col-sm-6')
       for site, module in SITES.items()})
     return vars
 

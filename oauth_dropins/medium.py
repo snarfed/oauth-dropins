@@ -102,6 +102,8 @@ class MediumAuth(BaseAuth):
 class StartHandler(handlers.StartHandler):
   """Starts Medium auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'medium'
+  LABEL = 'Medium'
   DEFAULT_SCOPE = 'basicProfile'
 
   def redirect_url(self, state=None):
@@ -116,17 +118,6 @@ class StartHandler(handlers.StartHandler):
       'state': urllib.quote_plus(state if state else 'unused'),
       'scope': self.scope,
       }
-
-  @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" class="shadow" title="Medium" src="/static/medium_2x.png" />
- </form>
-</div>
-""" % post_url
 
 
 class CallbackHandler(handlers.CallbackHandler):

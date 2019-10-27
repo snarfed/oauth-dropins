@@ -26,7 +26,6 @@ import appengine_config
 import handlers
 import models
 
-
 GET_AUTH_CODE_URL = (
     'https://disqus.com/api/oauth/2.0/authorize/?' +
     '&'.join((
@@ -83,6 +82,8 @@ class DisqusAuth(models.BaseAuth):
 class StartHandler(handlers.StartHandler):
   """Starts Disqus auth. Requests an auth code and expects a redirect back.
   """
+  NAME = 'disqus'
+  LABEL = 'Disqus'
 
   # Disqus scopes are comma separated: read, write, admin, email
   # https://disqus.com/api/docs/requests/#data-availability
@@ -101,18 +102,6 @@ class StartHandler(handlers.StartHandler):
         'scope': self.scope,
         'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
       }
-
-  @classmethod
-  def button_html(cls, post_url):
-    """Returns an HTML string with a login form and button for this site."""
-    return """\
-<div class="col-md-3 col-sm-6">
- <form method="post" action="%s">
-  <input type="image" height="50" title="Disqus" class="shadow"
-         src="/static/disqus_2x.png" />
- </form>
-</div>
-""" % post_url
 
 
 class CallbackHandler(handlers.CallbackHandler):

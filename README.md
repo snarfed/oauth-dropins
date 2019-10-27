@@ -315,14 +315,15 @@ Changelog
 ---
 
 ### 2.2 - unreleased
-* Add Python 3.7 support, and improve overall Python 3 compatibility.
-* Update a number of dependencies.
-* Switch from Python's built in `json` module to [`ujson`](https://github.com/esnme/ultrajson/) (built into App Engine) to speed up JSON parsing and encoding.
 * Add LinkedIn and Mastodon!
+* Add Python 3.7 support, and improve overall Python 3 compatibility.
+* Add new `button_html()` method to all `StartHandler` classes. Generates the same button HTML and styling as on [oauth-dropins.appspot.com](https://oauth-dropins.appspot.com/).
 * Blogger: rename module from `blogger_v2` to `blogger`. The `blogger_v2` module name is still available as an alias, implemented via symlink, but is now deprecated.
 * Dropbox: fix crash with unicode header value.
 * Google: fix crash when user object doesn't have `name` field.
 * Facebook: [upgrade Graph API version from 2.10 to 4.0.](https://developers.facebook.com/docs/graph-api/changelog)
+* Update a number of dependencies.
+* Switch from Python's built in `json` module to [`ujson`](https://github.com/esnme/ultrajson/) (built into App Engine) to speed up JSON parsing and encoding.
 
 ### 2.0 - 2019-02-25
 * _Breaking change_: switch from [Google+ Sign-In](https://developers.google.com/+/web/signin/) ([which shuts down in March](https://developers.google.com/+/api-shutdown)) to [Google Sign-In](https://developers.google.com/identity/). Notably, this removes the `googleplus` module and adds a new `google_signin` module, renames the `GooglePlusAuth` class to  `GoogleAuth`, and removes its `api()` method. Otherwise, the implementation is mostly the same.
