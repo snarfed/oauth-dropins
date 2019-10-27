@@ -293,6 +293,18 @@ class StartHandler(handlers.StartHandler):
     app.put()
     return app
 
+  @classmethod
+  def button_html(cls, post_url):
+    """Returns an HTML string with a login form and button for this site."""
+    return """\
+<div class="col-md-3 col-sm-6">
+ <form method="post" action="%s">
+  <input type="url" name="instance" class="form-control" placeholder="Mastodon instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />
+  <input type="image" height="50" class="shadow" title="Mastodon" title="Mastodon" src="/static/mastodon_logo_button_2x.png" style="background-color: #EBEBEB; padding: 5px" />
+ </form>
+</div>
+""" % post_url
+
 
 class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and stores it."""

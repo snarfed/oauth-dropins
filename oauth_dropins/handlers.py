@@ -119,6 +119,18 @@ class StartHandler(BaseHandler):
     """
     raise NotImplementedError()
 
+  @classmethod
+  def button_html(cls, post_to):
+    """Returns an HTML string with a login form and button for this site.
+
+    Args:
+      post_to: string, path or URL for the form to POST to
+
+    Returns: string
+    """
+    return ''
+    # raise NotImplementedError()
+
 
 class CallbackHandler(BaseHandler):
   """Base OAuth callback request handler.

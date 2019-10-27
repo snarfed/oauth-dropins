@@ -125,6 +125,19 @@ class StartHandler(handlers.StartHandler):
       auth_url)
     return auth_url
 
+  @classmethod
+  def button_html(cls, post_url):
+    """Returns an HTML string with a login form and button for this site."""
+    return """\
+<div class="row">
+<div class="col-md-3 col-sm-6">
+ <form method="post" action="%s">
+  <input type="image" height="50" class="shadow" title="Flickr" src="/static/flickr_2x.png"
+         style="background-color: #EEEEEE; padding: 10px" />
+ </form>
+</div>
+""" % post_url
+
 
 class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and redirects to the

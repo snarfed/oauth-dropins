@@ -94,6 +94,19 @@ class StartHandler(handlers.StartHandler):
       'state': '%s|%s' % (state, csrf_key.id()),
     }
 
+  @classmethod
+  def button_html(cls, post_url):
+    """Returns an HTML string with a login form and button for this site."""
+    return """\
+<div class="od-dropbox col-md-3 col-sm-6">
+ <form method="post" action="%s">
+  <input type="image" height="50" title="Dropbox" class="shadow"
+         src="/static/dropbox_2x.png"
+         style="background-color: #EEEEEE; padding: 10px" />
+ </form>
+</div>
+""" % post_url
+
 
 class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.

@@ -91,6 +91,18 @@ class StartHandler(handlers.StartHandler):
       'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
     }
 
+  @classmethod
+  def button_html(cls, post_url):
+    """Returns an HTML string with a login form and button for this site."""
+    return """\
+<div class="col-md-3 col-sm-6">
+ <form method="post" action="%s">
+  <input type="image" height="50" class="shadow" title="Instagram" src="/static/instagram_button_2x.png"
+         style="background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px" />
+ </form>
+</div>
+""" % post_url
+
 
 class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.

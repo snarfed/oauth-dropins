@@ -15,6 +15,26 @@ from oauth_dropins.webutil import handlers
 
 from oauth_dropins import indieauth, mastodon
 
+SITES = {}  # maps module name to module
+for name in (
+    'blogger_v2',
+    'disqus',
+    'dropbox',
+    'facebook',
+    'flickr',
+    'github',
+    'google_signin',
+    'indieauth',
+    'instagram',
+    'linkedin',
+    'mastodon',
+    'medium',
+    'tumblr',
+    'twitter',
+    'wordpress_rest',
+  ):
+  SITES[name] = importlib.import_module('oauth_dropins.%s' % name)
+
 
 def handle_discovery_errors(handler, e, debug):
   """A webapp2 exception handler that handles URL discovery errors.
@@ -28,19 +48,22 @@ def handle_discovery_errors(handler, e, debug):
   raise
 
 
-class FrontPageHandler(handlers.ModernHandler):
+class FrontPageHandler(handlers.TemplateHandler):
   """Renders and serves /, ie the front page.
   """
-  def get(self):
-    self.response.headers['Content-Type'] = 'text/html'
+  def template_file(self):
+    return 'templates/index.html'
 
+  def template_vars(self, *args, **kwargs):
     vars = dict(self.request.params)
     key = vars.get('auth_entity')
     if key:
       vars['entity'] = ndb.Key(urlsafe=key).get()
 
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(('.')), autoescape=True)
-    self.response.out.write(env.get_template('templates/index.html').render(vars))
+    vars.update({
+      site + '_html': module.StartHandler.button_html('/%s/start' % site)
+      for site, module in SITES.items()})
+    return vars
 
 
 class IndieAuthStart(indieauth.StartHandler):
@@ -50,32 +73,14 @@ class MastodonStart(mastodon.StartHandler):
   handle_exception = handle_discovery_errors
 
 
-routes = [
-    ('/indieauth/start', IndieAuthStart.to('/indieauth/oauth_callback')),
-    ('/indieauth/oauth_callback', indieauth.CallbackHandler.to('/')),
-    ('/mastodon/start', MastodonStart.to('/mastodon/oauth_callback')),
-    ('/mastodon/oauth_callback', mastodon.CallbackHandler.to('/')),
-]
-
-for name in (
-    'blogger_v2',
-    'disqus',
-    'dropbox',
-    'facebook',
-    'flickr',
-    'github',
-    'google_signin',
-    'instagram',
-    'linkedin',
-    'medium',
-    'tumblr',
-    'twitter',
-    'wordpress_rest',
-  ):
-  module = importlib.import_module('oauth_dropins.%s' % name)
+routes = []
+for site, module in SITES.items():
+  starter = (IndieAuthStart if site == 'indieauth'
+             else MastodonStart if site == 'mastodon'
+             else module.StartHandler)
   routes.extend((
-    ('/%s/start' % name, module.StartHandler.to('/%s/oauth_callback' % name)),
-    ('/%s/oauth_callback' % name, module.CallbackHandler.to('/')),
+    ('/%s/start' % site, starter.to('/%s/oauth_callback' % site)),
+    ('/%s/oauth_callback' % site, module.CallbackHandler.to('/')),
   ))
 
 application = webapp2.WSGIApplication([

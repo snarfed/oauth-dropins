@@ -138,6 +138,20 @@ class StartHandler(handlers.StartHandler):
     logging.info('Redirecting to IndieAuth: %s', url)
     return url
 
+  @classmethod
+  def button_html(cls, post_url):
+    """Returns an HTML string with a login form and button for this site."""
+    return """\
+<div class="col-md-3 col-sm-6">
+ <form method="post" action="%s">
+  <input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />
+  <input type="image" class="shadow" height="50" title="IndieAuth" title="IndieAuth"
+         src="/static/indieauth_button_2x.png"
+         style="background-color: #EBEBEB; padding: 5px" />
+ </form>
+</div>
+""" % post_url
+
 
 class CallbackHandler(handlers.CallbackHandler):
   """The callback handler from the IndieAuth request. POSTs back to the

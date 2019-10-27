@@ -170,6 +170,17 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
 
     return Handler
 
+  @classmethod
+  def button_html(cls, post_url):
+    """Returns an HTML string with a login form and button for this site."""
+    return """\
+<div class="col-md-3 col-sm-6">
+ <form method="post" action="%s">
+  <input type="image" height="50" class="shadow" title="Google" src="/static/google_signin_2x.png" />
+ </form>
+</div>
+""" % post_url
+
 
 class CallbackHandler(object):
   """OAuth callback handler factory.

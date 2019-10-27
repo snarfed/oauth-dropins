@@ -148,6 +148,17 @@ class StartHandler(handlers.StartHandler):
       'state': state,
     }
 
+  @classmethod
+  def button_html(cls, post_url):
+    """Returns an HTML string with a login form and button for this site."""
+    return """\
+<div class="col-md-3 col-sm-6">
+ <form method="post" action="%s">
+  <input type="image" height="50" class="shadow" title="Facebook" src="/static/facebook_button_2x.png" />
+ </form>
+</div>
+""" % post_url
+
 
 class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.

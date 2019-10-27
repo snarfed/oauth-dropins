@@ -11,17 +11,10 @@
 </head>
 <body>
 
-<!-- github ribbon: https://github.com/blog/273-github-ribbons -->
-<a href="https://github.com/snarfed/oauth-dropins">
-  <img style="position: absolute; top: 0; right: 0; border: 0;"
-       src="//s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"
-       alt="Fork me on GitHub" />
-</a>
-
 <main class="tp-main">
   <div class="container">
     <h1>
-      <img id="logo" src="/static/oauth_shiny_128.png" />
+      <img id="logo" width="125" src="/static/oauth_shiny.png" />
       oauth-dropins
     </h1>
     <p class="lead">A collection of drop-in
@@ -54,69 +47,37 @@ Click on a site to try it!</p>
 
 <br />
 <div class="row">
-<div class="col-md-3 col-sm-6"><form method="post" action="/blogger_v2/start">
-  <input type="image" class="shadow" alt="Blogger" src="/static/blogger.png" />
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/disqus/start">
-  <input type="image" class="shadow" alt="Disqus" src="/static/disqus.png" />
-</form></div>
+{{ blogger_v2_html|safe }}
+{{ disqus_html|safe }}
 <div class="clearfix visible-sm"></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/dropbox/start">
-  <input type="image" alt="Dropbox" src="/static/dropbox.png" />
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/facebook/start">
-  <input type="image" class="shadow" alt="Facebook" src="/static/facebook.png" />
-</form></div>
+{{ dropbox_html|safe }}
+{{ facebook_html|safe }}
 </div>
 <br />
 
 <div class="row">
-<div class="col-md-3 col-sm-6"><form method="post" action="/flickr/start">
-  <input type="image" class="shadow" alt="Flickr" src="/static/flickr.png" />
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/github/start">
-  <input type="image" class="shadow" alt="GitHub" src="/static/github_button_squared.png" />
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/google_signin/start">
-  <input type="image" class="shadow" alt="Google" src="/static/google_signin_large.png" />
-</form></div>
+{{ flickr_html|safe }}
+{{ github_html|safe }}
 <div class="clearfix visible-sm"></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/indieauth/start">
-  <input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />
-  <input type="image" class="shadow" title="IndieAuth" alt="IndieAuth" src="/static/indieauth_button.png" />
-</form></div>
+{{ google_signin_html|safe }}
+{{ indieauth_html|safe }}
 </div>
 <br />
 
 <div class="row">
-<div class="col-md-3 col-sm-6"><form method="post" action="/instagram/start">
-  <input type="image" class="shadow" alt="Instagram" src="/static/instagram.png" />
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/linkedin/start">
-  <input type="image" class="shadow" alt="LinkedIn" src="/static/linkedin.png" />
-</form></div>
+{{ instagram_html|safe }}
+{{ linkedin_html|safe }}
 <div class="clearfix visible-sm"></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/mastodon/start">
-  <input type="url" name="instance" class="form-control" placeholder="Mastodon instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />
-  <input type="image" class="shadow" title="Mastodon" alt="Mastodon" src="/static/mastodon_logo_button.png" style="background-color: #EBEBEB"/>
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/medium/start">
-  <input type="image" class="shadow" alt="Medium" src="/static/medium.png" />
-</form></div>
+{{ mastodon_html|safe }}
+{{ medium_html|safe }}
 </div>
 <br />
 
 <div class="row">
-<div class="col-md-3 col-sm-6"><form method="post" action="/tumblr/start">
-  <input type="image" class="shadow" alt="Tumblr" src="/static/tumblr.png" />
-</form></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/twitter/start">
-  <input type="image" class="shadow" alt="Twitter" src="/static/twitter.png" />
-</form></div>
+{{ tumblr_html|safe }}
+{{ twitter_html|safe }}
 <div class="clearfix visible-sm"></div>
-<div class="col-md-3 col-sm-6"><form method="post" action="/wordpress_rest/start">
-  <input type="image" class="shadow" alt="WordPress.com" src="/static/wordpress_com.png" />
-</form></div>
+{{ wordpress_rest_html|safe }}
 </div>
 
 </div>
