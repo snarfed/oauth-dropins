@@ -319,8 +319,9 @@ Changelog
 * Update a number of dependencies.
 * Switch from Python's built in `json` module to [`ujson`](https://github.com/esnme/ultrajson/) (built into App Engine) to speed up JSON parsing and encoding.
 * Add LinkedIn and Mastodon!
-* Google: fix crash when user object doesn't have `name` field.
+* Blogger: rename module from `blogger_v2` to `blogger`. The `blogger_v2` module name is still available as an alias, implemented via symlink, but is now deprecated.
 * Dropbox: fix crash with unicode header value.
+* Google: fix crash when user object doesn't have `name` field.
 * Facebook: [upgrade Graph API version from 2.10 to 4.0.](https://developers.facebook.com/docs/graph-api/changelog)
 
 ### 2.0 - 2019-02-25
