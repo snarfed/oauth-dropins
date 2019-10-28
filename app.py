@@ -62,7 +62,7 @@ class FrontPageHandler(handlers.TemplateHandler):
 
     vars.update({
       site + '_html': module.StartHandler.button_html(
-        '/%s/start' % site, image_prefix='/static/', outer_classes='col-md-3 col-sm-6')
+        '/%s/start' % site, image_prefix='/static/', form_classes='col-md-3 col-sm-6')
       for site, module in SITES.items()})
     return vars
 

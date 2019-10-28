@@ -125,8 +125,8 @@ class CredentialsModel_Blogger(CredentialsModel):
 class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
   """Connects a Blogger account. Authenticates via OAuth.
   """
-  NAME = 'twitter'
-  LABEL = 'Twitter'
+  NAME = 'blogger'
+  LABEL = 'Blogger'
 
   handle_exception = google_signin.handle_exception
 

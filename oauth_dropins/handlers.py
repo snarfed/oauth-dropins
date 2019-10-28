@@ -10,6 +10,7 @@ application = webapp2.WSGIApplication([
   ]
 """
 import logging
+import urllib
 import urlparse
 
 import webapp2
@@ -126,19 +127,21 @@ class StartHandler(BaseHandler):
     raise NotImplementedError()
 
   @classmethod
-  def button_html(cls, to_path, outer_classes='', extra_form='', image_prefix='',
-                  input_style='', scopes=''):
+  def button_html(cls, to_path, form_classes='', form_method='post',
+                  form_extra='', image_prefix='', input_style='', scopes=''):
     """Returns an HTML string with a login form and button for this site.
 
     Args:
       to_path: string, path or URL for the form to POST to
-      outer_classes: string, HTML classes to add to the outer <div>
-      extra_form: string, optional, extra HTML to insert inside the <form>
+      form_classes: string, optional, HTML classes to add to the <form>
+      form_method: string, optional, form action ie HTTP method, eg 'get';
+        defaults to 'post'
+      form_extra: string, optional, extra HTML to insert inside the <form>
         before the button
       scopes: string, optional, OAuth scopes to override site's default(s)
       image_prefix: string, optional, prefix to add to the beginning of image
         URL path, eg '/oauth_dropins/'
-      input_style: string, inline style to apply to the button <input>
+      input_style: string, optional, inline style to apply to the button <input>
 
     Returns: string
     """
@@ -148,14 +151,15 @@ class StartHandler(BaseHandler):
       'image': urlparse.urljoin(image_prefix, '%s_2x.png' % cls.NAME),
     })
     return """\
-<div class="%(outer_classes)s">
-  <form method="post" action="%(to_path)s"><nobr>
-    %(extra_form)s
+<form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s"">
+  <nobr>
+    %(form_extra)s
     <input type="image" height="50" title="%(label)s" class="shadow"
            src="%(image)s" style="%(input_style)s" />
     <input name="scope" type="hidden" value="%(scopes)s">
-  </nobr></form>
-</div>""" % vars
+  </nobr>
+</form>
+""" % vars
 
 
 class CallbackHandler(BaseHandler):

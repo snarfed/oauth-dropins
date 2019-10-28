@@ -297,11 +297,10 @@ class StartHandler(handlers.StartHandler):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
+    kwargs['form_extra'] = kwargs.get('form_extra', '') + """
+<input type="url" name="instance" class="form-control" placeholder="Mastodon instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />"""
     return super(cls, cls).button_html(
-      *args,
-      input_style='background-color: #EBEBEB; padding: 5px',
-      extra_form='<input type="url" name="instance" class="form-control" placeholder="Mastodon instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />',
-      **kwargs)
+      *args, input_style='background-color: #EBEBEB; padding: 5px', **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):

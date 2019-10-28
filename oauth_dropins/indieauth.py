@@ -145,7 +145,7 @@ class StartHandler(handlers.StartHandler):
     return super(cls, cls).button_html(
       *args,
       input_style='background-color: #EBEBEB; padding: 5px',
-      extra_form='<input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />',
+      form_extra='<input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />',
       **kwargs)
 
 
