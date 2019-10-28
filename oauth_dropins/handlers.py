@@ -57,7 +57,7 @@ class BaseHandler(webapp2.RequestHandler):
     if not isinstance(extra, basestring):
       extra = cls.SCOPE_SEPARATOR.join(extra)
 
-    return cls.SCOPE_SEPARATOR.join(util.trim_nulls(cls.DEFAULT_SCOPE, extra))
+    return cls.SCOPE_SEPARATOR.join(util.trim_nulls((cls.DEFAULT_SCOPE, extra)))
 
   def to_url(self, state=None):
     """Returns a fully qualified callback URL based on to_path.
