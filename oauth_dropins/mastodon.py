@@ -218,7 +218,8 @@ class StartHandler(handlers.StartHandler):
       logging.info('Error', exc_info=True)
       resp = None
 
-    is_json = resp.headers.get('Content-Type').strip().startswith('application/json')
+    is_json = resp and resp.headers.get('Content-Type', '').strip().startswith(
+      'application/json')
     if is_json:
       logging.info(resp.text)
     if (not resp or not resp.ok or not is_json or
