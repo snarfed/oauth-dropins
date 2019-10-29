@@ -1,5 +1,4 @@
-![OAuth logo](https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny_128.png)
-oauth-dropins [![Circle CI](https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg)](https://circleci.com/gh/snarfed/oauth-dropins)
+<img src="https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny.png" alt="OAuth logo" width="125" /> oauth-dropins [![Circle CI](https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg)](https://circleci.com/gh/snarfed/oauth-dropins)
 =============
 
 Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
