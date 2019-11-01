@@ -313,7 +313,7 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
-### 2.2 - unreleased
+### 2.2 - 2019-11-01
 * Add LinkedIn and Mastodon!
 * Add Python 3.7 support, and improve overall Python 3 compatibility.
 * Add new `button_html()` method to all `StartHandler` classes. Generates the same button HTML and styling as on [oauth-dropins.appspot.com](https://oauth-dropins.appspot.com/).

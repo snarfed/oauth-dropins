@@ -18,7 +18,7 @@ class TestLoader(ScanningLoader):
 
 
 setup(name='oauth-dropins',
-      version='2.0',
+      version='2.2',
       description='Drop-in App Engine OAuth client handlers for many popular sites.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
@@ -50,7 +50,6 @@ setup(name='oauth-dropins',
           'future>=0.16.0',
           'gdata>=2.0.18',
           'google-api-python-client>=1.7.4',
-          'google-cloud-ndb',
           'httplib2',
           'humanize',
           'Jinja2',

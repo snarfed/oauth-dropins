@@ -55,6 +55,10 @@ linkedin
 ------
 .. automodule:: oauth_dropins.linkedin
 
+mastodon
+------
+.. automodule:: oauth_dropins.mastodon
+
 medium
 ------
 .. automodule:: oauth_dropins.medium
