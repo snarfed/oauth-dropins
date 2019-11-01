@@ -202,7 +202,6 @@ class StartHandler(handlers.StartHandler):
     Raises: ValueError if instance isn't a Mastodon instance.
     """
     # normalize instance to URL
-    # TODO: unify with indieauth?
     if not instance:
       instance = util.get_required_param(self, 'instance')
     instance = instance.strip().split('@')[-1]  # handle addresses, eg user@host.com
@@ -313,7 +312,8 @@ class CallbackHandler(handlers.CallbackHandler):
     error = self.request.get('error')
     desc = self.request.get('error_description')
     if error:
-      # TODO: doc link
+      # user_cancelled_login and user_cancelled_authorize are non-standard.
+      # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
       if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
         logging.info('User declined: %s', self.request.get('error_description'))
         self.finish(None, state=state)
