@@ -128,12 +128,14 @@ class StartHandler(BaseHandler):
 
   @classmethod
   def button_html(cls, to_path, form_classes='', form_method='post',
-                  form_extra='', image_prefix='', input_style='', scopes=''):
+                  form_extra='', image_prefix='', input_style='', scopes='',
+                  outer_classes=''):
     """Returns an HTML string with a login form and button for this site.
 
     Args:
       to_path: string, path or URL for the form to POST to
       form_classes: string, optional, HTML classes to add to the <form>
+      form_classes: string, optional, HTML classes to add to the outer <div>
       form_method: string, optional, form action ie HTTP method, eg 'get';
         defaults to 'post'
       form_extra: string, optional, extra HTML to insert inside the <form>
@@ -151,14 +153,16 @@ class StartHandler(BaseHandler):
       'image': urlparse.urljoin(image_prefix, '%s_2x.png' % cls.NAME),
     })
     return """\
-<form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s"">
-  <nobr>
-    %(form_extra)s
-    <input type="image" height="50" title="%(label)s" class="shadow"
-           src="%(image)s" style="%(input_style)s" />
-    <input name="scope" type="hidden" value="%(scopes)s">
-  </nobr>
-</form>
+<div class="%(outer_classes)s">
+  <form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s">
+    <nobr>
+      %(form_extra)s
+      <input type="image" height="50" title="%(label)s" class="shadow"
+             src="%(image)s" style="%(input_style)s" />
+      <input name="scope" type="hidden" value="%(scopes)s">
+    </nobr>
+  </form>
+</div>
 """ % vars
 
 

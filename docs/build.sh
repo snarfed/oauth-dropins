@@ -8,7 +8,7 @@ cd `dirname $absfile`
 
 # generates the module index files:
 #   docs/source/oauth_dropins.rst, oauth_dropins.webutil.rst
-# only used to bootstrap. we've edited by hand since ten so don't run any more
+# only used to bootstrap. we've edited by hand since then so don't run any more
 # or it will overwrite them.
 # sphinx-apidoc -f -o source ../oauth_dropins \
 #   ../oauth_dropins/{webutil,}/{appengine_config.py,tests}
@@ -25,9 +25,9 @@ tail -n +15 ../README.md \
   | sed -E 's/```/`/; s/`` </ </' \
   >> index.rst
 
-source ../local/bin/activate
+source ../local3/bin/activate
 
 # Run sphinx in the virtualenv's python interpreter so it can import packages
 # installed in the virtualenv.
-python `which sphinx-build` -b html . _build/html
+python3 `which sphinx-build` -b html . _build/html
 

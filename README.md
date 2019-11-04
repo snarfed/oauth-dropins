@@ -1,7 +1,7 @@
 <img src="https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny.png" alt="OAuth logo" width="125" /> oauth-dropins [![Circle CI](https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg)](https://circleci.com/gh/snarfed/oauth-dropins)
 =============
 
-Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
+Drop-in [OAuth](http://oauth.net/) for [Python App Engine](https://appengine.google.com/)!
 
 * [About](#about)
 * [Quick start](#quick-start)
@@ -16,7 +16,7 @@ Drop-in OAuth for Python [App Engine](https://appengine.google.com/)!
 About
 ---
 
-This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
 
 * [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
   Install with `pip install oauth-dropins`.
@@ -313,6 +313,9 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+### 2.3 - unreleased
+* Add new `outer_classes` kwarg to `button_html()` for the outer `<div>`, eg as Bootstrap columns.
+
 ### 2.2 - 2019-11-01
 * Add LinkedIn and Mastodon!
 * Add Python 3.7 support, and improve overall Python 3 compatibility.
@@ -471,7 +474,9 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
     ```sh
     python3 setup.py clean build sdist
-    twine upload -r pypitest dist/oauth-dropins-X.Y.tar.gz
+    setenv ver X.Y
+    source local/bin/activate.csh
+    twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz
     ```
 1. Install from test.pypi.org, both Python 2 and 3.
     ```sh
@@ -515,14 +520,14 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```
 1. Tag the release in git. In the tag message editor, delete the generated comments at bottom, leave the first line blank (to omit the release "title" in github), put `### Notable changes` on the second line, then copy and paste this version's changelog contents below it.
     ```sh
-    git tag -a vX.Y --cleanup=verbatim
+    git tag -a v$ver --cleanup=verbatim
     git push
     git push --tags
     ```
 1. [Click here to draft a new release on GitHub.](https://github.com/snarfed/oauth-dropins/releases/new) Enter `vX.Y` in the _Tag version_ box. Leave _Release title_ empty. Copy `### Notable changes` and the changelog contents into the description text box.
 1. Upload to [pypi.org](https://pypi.org/)!
     ```sh
-    twine upload dist/oauth-dropins-X.Y.tar.gz
+    twine upload dist/oauth-dropins-$ver.tar.gz
     ```
 
 

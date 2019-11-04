@@ -8,8 +8,8 @@ This is a collection of drop-in `Google App
 Engine <https://appengine.google.com/>`__ Python request handlers for
 the initial `OAuth <http://oauth.net/>`__ client flows for many popular
 sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub,
-Google, IndieAuth, Instagram, Medium, Tumblr, Twitter, and
-WordPress.com.
+Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr,
+Twitter, and WordPress.com.
 
 -  `Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__
    Install with ``pip install oauth-dropins``.
@@ -613,7 +613,7 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
     ``./docs/build.sh``.
 4.  ``git commit -am 'release vX.Y'``
 5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
-    ``sh  python3 setup.py clean build sdist  twine upload -r pypitest dist/oauth-dropins-X.Y.tar.gz``
+    ``sh  python3 setup.py clean build sdist  setenv ver X.Y  source local/bin/activate.csh  twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz``
 6.  Install from test.pypi.org, both Python 2 and 3.
     ``sh  cd /tmp  virtualenv local  source local/bin/activate.csh  # mf2py 1.1.2 on test.pypi.org is broken :(  pip install mf2py  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
     ``sh  python3 -m venv local3  source local3/bin/activate.csh  pip3 install --upgrade pip  # mf2py 1.1.2 on test.pypi.org is broken :(  pip3 install mf2py  pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
@@ -641,14 +641,14 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
     the release “title” in github), put ``### Notable changes`` on the
     second line, then copy and paste this version’s changelog contents
     below it.
-    ``sh  git tag -a vX.Y --cleanup=verbatim  git push  git push --tags``
+    ``sh  git tag -a v$ver --cleanup=verbatim  git push  git push --tags``
 9.  `Click here to draft a new release on
     GitHub. <https://github.com/snarfed/oauth-dropins/releases/new>`__
     Enter ``vX.Y`` in the *Tag version* box. Leave *Release title*
     empty. Copy ``### Notable changes`` and the changelog contents into
     the description text box.
 10. Upload to `pypi.org <https://pypi.org/>`__!
-    ``sh  twine upload dist/oauth-dropins-X.Y.tar.gz``
+    ``sh  twine upload dist/oauth-dropins-$ver.tar.gz``
 
 Related work
 ------------
