@@ -152,19 +152,19 @@ class StartHandler(BaseHandler):
       'label': cls.LABEL,
       'image': urlparse.urljoin(image_prefix, '%s_2x.png' % cls.NAME),
     })
-    return """\
-<div class="%(outer_classes)s">
-  <form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s">
-    <nobr>
-      %(form_extra)s
-      <input type="image" height="50" title="%(label)s" class="shadow"
-             src="%(image)s" style="%(input_style)s" />
-      <input name="scope" type="hidden" value="%(scopes)s">
-    </nobr>
-  </form>
-</div>
+    html = """\
+<form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s">
+  <nobr>
+    %(form_extra)s
+    <input type="image" height="50" title="%(label)s" class="shadow"
+           src="%(image)s" style="%(input_style)s" />
+    <input name="scope" type="hidden" value="%(scopes)s">
+  </nobr>
+</form>
 """ % vars
-
+    if outer_classes:
+      html = '<div class="%s">%s</div>' % (outer_classes, html)
+    return html
 
 class CallbackHandler(BaseHandler):
   """Base OAuth callback request handler.
