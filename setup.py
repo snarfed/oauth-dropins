@@ -47,6 +47,7 @@ setup(name='oauth-dropins',
       # Keep in sync with requirements.txt!
       install_requires=[
           'beautifulsoup4',
+          'cachetools',
           'future>=0.16.0',
           'gdata>=2.0.18',
           'google-api-python-client>=1.7.4',

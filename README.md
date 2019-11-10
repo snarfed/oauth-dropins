@@ -314,6 +314,10 @@ Changelog
 ---
 
 ### 2.3 - unreleased
+Breaking changes:
+* Remove `cache` and `fail_cache_time_secs` kwargs from `webutil.util.follow_redirects()`. Caching is now built in. You can bypass the cache with `follow_redirects.__wrapped__()`. [Details.](https://cachetools.readthedocs.io/en/stable/#cachetools.cached)
+
+Non-breaking changes:
 * Add new `outer_classes` kwarg to `button_html()` for the outer `<div>`, eg as Bootstrap columns.
 
 ### 2.2 - 2019-11-01
