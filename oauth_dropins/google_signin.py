@@ -8,25 +8,27 @@ https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 
 TODO: check that overriding CallbackHandler.finish() actually works.
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
 
 import appengine_config
 
 from apiclient.errors import HttpError
+from google.cloud import ndb
+import httplib2
 try:
   from oauth2client.appengine import CredentialsModel, OAuth2Decorator
 except ImportError:
   from oauth2client.contrib.appengine import CredentialsModel, OAuth2Decorator
 from oauth2client.client import OAuth2Credentials
-from google.appengine.ext import db
-from google.appengine.ext import ndb
-import httplib2
-from webutil import handlers as webutil_handlers
-from webutil import util
-from webutil.util import json_dumps, json_loads
 
-import handlers
-import models
+from . import handlers, models
+from .webutil import handlers as webutil_handlers
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 # Discovered on 1/30/2019 from:
 #   https://accounts.google.com/.well-known/openid-configuration
@@ -78,7 +80,8 @@ class GoogleAuth(models.BaseAuth):
     """Returns an oauth2client.OAuth2Credentials.
     """
     if self.creds_model:
-      return db.get(self.creds_model.to_old_key()).credentials
+      return self.creds_model.credentials
+      # return db.get(self.creds_model.to_old_key()).credentials
     else:
       # TODO: remove creds_json
       return OAuth2Credentials.from_json(self.creds_json)

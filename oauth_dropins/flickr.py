@@ -6,24 +6,23 @@ Uses oauthlib directly to authenticate and sign requests with OAuth
 Note that when users decline Flickr's OAuth prompt by clicking the Cancel
 button, Flickr redirects them to its home page, *not* to us.
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 from future.utils import native_str
 
 import logging
 import oauthlib.oauth1
-import urllib
-import urllib2
-import urlparse
+import urllib.parse, urllib.request
 
 import appengine_config
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from webob import exc
-from webutil.util import json_dumps, json_loads
 
-import flickr_auth
-import handlers
-import models
-from webutil import util
+from . import flickr_auth, handlers, models
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 REQUEST_TOKEN_URL = 'https://www.flickr.com/services/oauth/request_token'
 AUTHORIZE_URL = 'https://www.flickr.com/services/oauth/authorize'
@@ -98,11 +97,11 @@ class StartHandler(handlers.StartHandler):
       # Bridgy WordPress plugin's redirect URL when using Bridgy's registration
       # API (https://brid.gy/about#registration-api) looks like:
       # /wp-admin/admin.php?page=bridgy_options&service=flickr
-      callback_uri=native_str(self.to_url(state=urllib.quote(state))))
+      callback_uri=native_str(self.to_url(state=urllib.parse.quote(state))))
 
-    uri, headers, body = client.sign(REQUEST_TOKEN_URL)
-    resp = util.urlopen(urllib2.Request(uri, body, headers))
-    parsed = dict(urlparse.parse_qs(resp.read()))
+    url, headers, data = client.sign(REQUEST_TOKEN_URL)
+    resp = util.requests_get(url, headers=headers, data=data)
+    parsed = urllib.parse.parse_qs(resp.text)
 
     resource_owner_key = parsed.get('oauth_token')[0]
     resource_owner_secret = parsed.get('oauth_token_secret')[0]
@@ -113,12 +112,12 @@ class StartHandler(handlers.StartHandler):
       state=state).put()
 
     if self.scope:
-      auth_url = AUTHORIZE_URL + '?' + urllib.urlencode({
+      auth_url = AUTHORIZE_URL + '?' + urllib.parse.urlencode({
         'perms': self.scope or 'read',
         'oauth_token': resource_owner_key
       })
     else:
-      auth_url = AUTHENTICATE_URL + '?' + urllib.urlencode({
+      auth_url = AUTHENTICATE_URL + '?' + urllib.parse.urlencode({
         'oauth_token': resource_owner_key
       })
 
@@ -152,11 +151,11 @@ class CallbackHandler(handlers.CallbackHandler):
 
     uri, headers, body = client.sign(ACCESS_TOKEN_URL)
     try:
-      resp = util.urlopen(urllib2.Request(uri, body, headers))
-    except BaseException, e:
+      resp = util.urlopen(urllib.request.Request(uri, body, headers))
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
-    parsed = dict(urlparse.parse_qs(resp.read()))
+    parsed = dict(urllib.parse.parse_qs(resp.read()))
     access_token = parsed.get('oauth_token')[0]
     access_secret = parsed.get('oauth_token_secret')[0]
     user_nsid = parsed.get('user_nsid')[0]

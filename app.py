@@ -1,29 +1,34 @@
 """Example oauth-dropins app. Serves the front page and discovery files.
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 from collections import defaultdict
 import importlib
 import logging
-import urllib
+import urllib.parse
 
 import appengine_config
-from google.appengine.ext import ndb
+from appengine_config import ndb_client
+from google.cloud import ndb
 import jinja2
 import requests
 import webapp2
 from webob import exc
-from oauth_dropins.webutil import handlers
 
 from oauth_dropins import indieauth, mastodon
+from oauth_dropins.webutil import handlers
 
 SITES = {}  # maps module name to module
 for name in (
-    'blogger_v2',
+    # 'blogger_v2',
     'disqus',
     'dropbox',
     'facebook',
     'flickr',
     'github',
-    'google_signin',
+    # 'google_signin',
     'indieauth',
     'instagram',
     'linkedin',
@@ -43,7 +48,7 @@ def handle_discovery_errors(handler, e, debug):
   """
   if isinstance(e, (ValueError, requests.RequestException, exc.HTTPException)):
     logging.warning('', exc_info=True)
-    return handler.redirect('/?' + urllib.urlencode({'error': str(e)}))
+    return handler.redirect('/?' + urllib.parse.urlencode({'error': str(e)}))
 
   raise
 
@@ -58,7 +63,8 @@ class FrontPageHandler(handlers.TemplateHandler):
     vars = dict(self.request.params)
     key = vars.get('auth_entity')
     if key:
-      vars['entity'] = ndb.Key(urlsafe=key).get()
+      with ndb_client.context():
+        vars['entity'] = ndb.Key(urlsafe=key).get()
 
     vars.update({
       site + '_html': module.StartHandler.button_html(

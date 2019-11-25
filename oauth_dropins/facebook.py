@@ -5,21 +5,21 @@ https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
 TODO: implement client state param
 TODO: unify this with instagram. see file docstring comment there.
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 
 import logging
-import urllib
-import urllib2
+import urllib.error, urllib.parse
 
 import appengine_config
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from webob import exc
-from webutil.util import json_dumps, json_loads
 
-import handlers
-import models
-from webutil import util
+from . import handlers, models
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 API_BASE = 'https://graph.facebook.com/v4.0/'
 
@@ -83,7 +83,7 @@ class FacebookAuth(models.BaseAuth):
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """Wraps urlopen() and adds OAuth credentials to the request.
     """
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
@@ -145,7 +145,7 @@ class StartHandler(handlers.StartHandler):
       'scope': self.scope,
       # TODO: CSRF protection identifier.
       # http://developers.facebook.com/docs/authentication/
-      'redirect_uri': urllib.quote_plus(self.to_url()),
+      'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       'state': state,
     }
 
@@ -163,11 +163,11 @@ class CallbackHandler(handlers.CallbackHandler):
       'auth_code': auth_code,
       'client_id': appengine_config.FACEBOOK_APP_ID,
       'client_secret': appengine_config.FACEBOOK_APP_SECRET,
-      'redirect_uri': urllib.quote_plus(self.request.path_url),
+      'redirect_uri': urllib.parse.quote_plus(self.request.path_url),
       }
     try:
       resp = json_loads(util.urlopen(url).read())
-    except urllib2.HTTPError, e:
+    except urllib.error.HTTPError as e:
       logging.error(e.read())
       raise
 
@@ -205,7 +205,7 @@ class CallbackHandler(handlers.CallbackHandler):
     error_reason = handler.request.get('error_reason')
 
     if error or error_reason:
-      error_description = urllib.unquote_plus(
+      error_description = urllib.parse.unquote_plus(
         handler.request.get('error_description', ''))
       if error == 'access_denied' and error_reason == 'user_denied':
         logging.info('User declined: %s', error_description)

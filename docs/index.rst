@@ -238,7 +238,7 @@ implement at least one of them, but not all.
    `python-instagram <https://github.com/Instagram/python-instagram>`__.
    See the site class’s docstring for details.
 
--  ``urlopen(data=None, timeout=None)`` wraps ``urllib2.urlopen()`` and
+-  ``urlopen(data=None, timeout=None)`` wraps ``urlopen()`` and
    adds the OAuth credentials to the request. Use this for making direct
    HTTP request to a site’s REST API. Some sites may provide ``get()``
    instead, which wraps ``requests.get()``.

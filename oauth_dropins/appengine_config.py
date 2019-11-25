@@ -22,6 +22,19 @@ socket.setdefaulttimeout(HTTP_TIMEOUT)
 # http://stackoverflow.com/a/8465202/186123
 socket.getdefaulttimeout = lambda: HTTP_TIMEOUT
 
+# NDB client
+# https://googleapis.dev/python/python-ndb/latest/
+# TODO: make thread local?
+# https://googleapis.dev/python/python-ndb/latest/migrating.html#setting-up-a-connection
+from google.cloud import ndb
+ndb_client = ndb.Client()
+
+# XXX HACK
+# work around that the python 3 ndb lib doesn't support dev_appserver.py
+# https://github.com/googleapis/python-ndb/issues/238
+ndb_client.host = 'localhost:8089'
+ndb_client.secure = False
+
 # Twitter returns HTTP 429 for rate limiting, which webob doesn't know. Tell it.
 try:
   import webob

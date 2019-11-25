@@ -1,10 +1,14 @@
 """Base datastore model class for an authenticated account.
 """
-import appengine_config
-from webutil import models
-from webutil import util
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
+
+import appengine_config
+from .webutil import models
+from .webutil import util
 
 
 class BaseAuth(models.StringIdModel):
@@ -49,13 +53,13 @@ class BaseAuth(models.StringIdModel):
     raise NotImplementedError()
 
   def urlopen(self, url, **kwargs):
-    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """Wraps urllib.request.urlopen() and adds OAuth credentials to the request.
 
     Use this for making direct HTTP REST request to a site's API. Not guaranteed
     to be implemented by all sites.
 
-    The arguments, return value (urllib2.Response), and exceptions raised
-    (urllib2.URLError) are the same as urllib2.urlopen.
+    The arguments, return value (urllib.request.Response), and exceptions raised
+    (urllib.error.URLError) are the same as urllib2.urlopen.
     """
     raise NotImplementedError()
 
@@ -77,7 +81,7 @@ class BaseAuth(models.StringIdModel):
 
   @staticmethod
   def urlopen_access_token(url, access_token, api_key=None, **kwargs):
-    """Wraps urllib2.urlopen() and adds an access_token query parameter.
+    """Wraps urllib.request.urlopen() and adds an access_token query parameter.
 
     Kwargs are passed through to urlopen().
     """
@@ -88,7 +92,7 @@ class BaseAuth(models.StringIdModel):
 
     try:
       return util.urlopen(url, **kwargs)
-    except BaseException, e:
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
 

@@ -4,19 +4,23 @@ API docs:
 https://developer.github.com/v4/
 https://developer.github.com/apps/building-oauth-apps/authorization-options-for-oauth-apps/#web-application-flow
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
-import urlparse
+import urllib.parse
 
 import appengine_config
+from appengine_config import ndb_client
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from webob import exc
 
-import handlers
-from models import BaseAuth
-from webutil import util
-from webutil.util import json_dumps, json_loads
+from . import handlers
+from .models import BaseAuth
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
@@ -101,7 +105,7 @@ class GitHubAuth(BaseAuth):
 
     try:
       resp.raise_for_status()
-    except BaseException, e:
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
     return resp
@@ -121,9 +125,9 @@ class StartHandler(handlers.StartHandler):
       "github_client_secret files in your app's root directory.")
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.GITHUB_CLIENT_ID,
-      'redirect_uri': urllib.quote_plus(self.to_url()),
+      'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       # TODO: does GitHub require non-empty state?
-      'state': urllib.quote_plus(state if state else ''),
+      'state': urllib.parse.quote_plus(state if state else ''),
       'scope': self.scope,
       }
 
@@ -138,47 +142,48 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    # handle errors
-    error = self.request.get('error')
-    if error:
-      if error == 'access_denied':
-        logging.info('User declined')
-        self.finish(None, state=self.request.get('state'))
-        return
-      else:
-        msg = 'Error: %s: %s' % (error, self.request.get('error_description'))
+    with ndb_client.context():
+      # handle errors
+      error = self.request.get('error')
+      if error:
+        if error == 'access_denied':
+          logging.info('User declined')
+          self.finish(None, state=self.request.get('state'))
+          return
+        else:
+          msg = 'Error: %s: %s' % (error, self.request.get('error_description'))
+          logging.info(msg)
+          raise exc.HTTPBadRequest(msg)
+
+      # extract auth code and request access token
+      auth_code = util.get_required_param(self, 'code')
+      data = {
+        'code': auth_code,
+        'client_id': appengine_config.GITHUB_CLIENT_ID,
+        'client_secret': appengine_config.GITHUB_CLIENT_SECRET,
+        # redirect_uri here must be the same in the oauth code request!
+        # (the value here doesn't actually matter since it's requested server side.)
+        'redirect_uri': self.request.path_url,
+        }
+      resp = util.requests_post(GET_ACCESS_TOKEN_URL,
+                                data=urllib.parse.urlencode(data)).text
+      logging.debug('Access token response: %s', resp)
+
+      resp = urllib.parse.parse_qs(resp)
+
+      error = resp.get('error')
+      if error:
+        msg = 'Error: %s: %s' % (error[0], resp.get('error_description'))
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
-    # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
-    data = {
-      'code': auth_code,
-      'client_id': appengine_config.GITHUB_CLIENT_ID,
-      'client_secret': appengine_config.GITHUB_CLIENT_SECRET,
-      # redirect_uri here must be the same in the oauth code request!
-      # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
-      }
-    resp = util.requests_post(GET_ACCESS_TOKEN_URL,
-                              data=urllib.urlencode(data)).text
-    logging.debug('Access token response: %s', resp)
+      access_token = resp['access_token'][0]
+      resp = GitHubAuth(access_token_str=access_token).post(
+          API_GRAPHQL, json=GRAPHQL_USER).json()
+      logging.debug('GraphQL data.viewer response: %s', resp)
+      user_json = resp['data']['viewer']
+      auth = GitHubAuth(id=user_json['login'], access_token_str=access_token,
+                        user_json=json_dumps(user_json))
+      auth.put()
 
-    resp = urlparse.parse_qs(resp)
-
-    error = resp.get('error')
-    if error:
-      msg = 'Error: %s: %s' % (error[0], resp.get('error_description'))
-      logging.info(msg)
-      raise exc.HTTPBadRequest(msg)
-
-    access_token = resp['access_token'][0]
-    resp = GitHubAuth(access_token_str=access_token).post(
-        API_GRAPHQL, json=GRAPHQL_USER).json()
-    logging.debug('GraphQL data.viewer response: %s', resp)
-    user_json = resp['data']['viewer']
-    auth = GitHubAuth(id=user_json['login'], access_token_str=access_token,
-                      user_json=json_dumps(user_json))
-    auth.put()
-
-    self.finish(auth, state=self.request.get('state'))
+      self.finish(auth, state=self.request.get('state'))

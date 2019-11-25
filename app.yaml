@@ -5,7 +5,8 @@
 threadsafe: true
 api_version: 1
 default_expiration: 1h
-runtime: python27
+runtime: python37
+entrypoint: gunicorn -b :$PORT app:application
 
 includes:
   - oauth_dropins/webutil/app.common.yaml
@@ -14,18 +15,6 @@ includes:
 automatic_scaling:
   max_idle_instances: 1
   max_concurrent_requests: 12
-
-libraries:
-- name: jinja2
-  version: latest
-- name: lxml
-  version: latest
-- name: ssl
-  version: latest
-- name: ujson
-  version: latest
-- name: webob
-  version: latest
 
 handlers:
 

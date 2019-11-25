@@ -16,19 +16,23 @@ to localhost in your /etc/hosts, e.g.:
 You can then test on your local machine by running dev_appserver and opening
 http://my.dev.com:8080/ instead of http://localhost:8080/ .
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
-import urllib2
+import urllib.parse, urllib.request
 
 import appengine_config
+from appengine_config import ndb_client
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from webob import exc
 
-import handlers
-from models import BaseAuth
-from webutil import util
-from webutil.util import json_dumps, json_loads
+from . import handlers
+from .models import BaseAuth
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
@@ -78,13 +82,13 @@ class WordPressAuth(BaseAuth):
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """Wraps urllib.request.urlopen() and adds OAuth credentials to the request.
     """
     kwargs.setdefault('headers', {})['authorization'] = \
         'Bearer ' + self.access_token_str
     try:
-      return util.urlopen(urllib2.Request(url, **kwargs))
-    except BaseException, e:
+      return util.urlopen(urllib.request.Request(url, **kwargs))
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
 
@@ -103,8 +107,8 @@ class StartHandler(handlers.StartHandler):
     # TODO: CSRF protection
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-      'redirect_uri': urllib.quote_plus(self.to_url()),
-      'state': urllib.quote_plus(state if state else ''),
+      'redirect_uri': urllib.parse.quote_plus(self.to_url()),
+      'state': urllib.parse.quote_plus(state if state else ''),
       }
 
   @classmethod
@@ -118,47 +122,49 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    # handle errors
-    error = self.request.get('error')
-    if error:
-      error_description = urllib.unquote_plus(
-        self.request.get('error_description', ''))
-      if error == 'access_denied':
-        logging.info('User declined: %s', error_description)
-        self.finish(None, state=self.request.get('state'))
-        return
-      else:
-        raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
+    with ndb_client.context():
+      # handle errors
+      error = self.request.get('error')
+      if error:
+        error_description = urllib.parse.unquote_plus(
+          self.request.get('error_description', ''))
+        if error == 'access_denied':
+          logging.info('User declined: %s', error_description)
+          self.finish(None, state=self.request.get('state'))
+          return
+        else:
+          raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
 
-    # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
-    data = {
-      'code': auth_code,
-      'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-      'client_secret': appengine_config.WORDPRESS_CLIENT_SECRET,
-      # redirect_uri here must be the same in the oauth code request!
-      # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
-      'grant_type': 'authorization_code',
+      # extract auth code and request access token
+      auth_code = util.get_required_param(self, 'code')
+      data = {
+        'code': auth_code,
+        'client_id': appengine_config.WORDPRESS_CLIENT_ID,
+        'client_secret': appengine_config.WORDPRESS_CLIENT_SECRET,
+        # redirect_uri here must be the same in the oauth code request!
+        # (the value here doesn't actually matter since it's requested server side.)
+        'redirect_uri': self.request.path_url,
+        'grant_type': 'authorization_code',
       }
-    resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data)).read()
-    logging.debug('Access token response: %s', resp)
+      resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
+      logging.debug('Access token response: %s', resp.text)
+      # TODO: handle errors, same JSON schema/fields as above
 
-    try:
-      resp = json_loads(resp)
-      blog_id = resp['blog_id']
-      blog_url = resp['blog_url']
-      blog_domain = util.domain_from_link(resp['blog_url'])
-      access_token = resp['access_token']
-    except:
-      logging.exception('Could not decode JSON')
-      raise
+      try:
+        resp = json_loads(resp.text)
+        blog_id = resp['blog_id']
+        blog_url = resp['blog_url']
+        blog_domain = util.domain_from_link(resp['blog_url'])
+        access_token = resp['access_token']
+      except:
+        logging.exception('Could not decode JSON')
+        raise
 
-    auth = WordPressAuth(id=blog_domain,
-                         blog_id=blog_id,
-                         blog_url=blog_url,
-                         access_token_str=access_token)
-    auth.user_json = auth.urlopen(API_USER_URL).read()
-    auth.put()
+      auth = WordPressAuth(id=blog_domain,
+                           blog_id=blog_id,
+                           blog_url=blog_url,
+                           access_token_str=access_token)
+      auth.user_json = auth.urlopen(API_USER_URL).read()
+      auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+      self.finish(auth, state=self.request.get('state'))

@@ -11,19 +11,23 @@ app. So they have an API for registering apps, per instance:
 https://docs.joinmastodon.org/api/authentication/
 Surprising, and unusual, but makes sense.
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
-import urlparse
+from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 
 import appengine_config
-from google.appengine.ext import ndb
+from appengine_config import ndb_client
+from google.cloud import ndb
 import requests
 from webob import exc
-from webutil import util
-from webutil.util import json_dumps, json_loads
 
-import handlers
-from models import BaseAuth
+from . import handlers
+from .models import BaseAuth
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 # https://docs.joinmastodon.org/api/permissions/
 ALL_SCOPES = (
@@ -78,8 +82,8 @@ ACCESS_TOKEN_API = '/oauth/token'
 
 def _encode_state(app, state):
   wrapped = json_dumps({
-    'app_key': app.key.urlsafe(),
-    'state': urllib.quote(state),
+    'app_key': app.key.urlsafe().decode(),
+    'state': quote_plus(state),
   })
   logging.debug('Encoding wrapper state: %r', wrapped)
   return wrapped
@@ -88,7 +92,7 @@ def _encode_state(app, state):
 def _decode_state(state):
   logging.debug('Decoding wrapper state: %r', state)
   decoded = json_loads(state)
-  return decoded['app_key'], urllib.unquote(decoded['state'])
+  return decoded['app_key'], unquote(decoded['state'])
 
 
 class MastodonApp(ndb.Model):
@@ -141,7 +145,7 @@ class MastodonAuth(BaseAuth):
 
   def get(self, *args, **kwargs):
     """Wraps requests.get() and adds instance base URL and Bearer token header."""
-    url = urlparse.urljoin(self.instance(), args[0])
+    url = urljoin(self.instance(), args[0])
     return self._requests_call(util.requests_get, url, *args[1:], **kwargs)
 
   def post(self, *args, **kwargs):
@@ -155,7 +159,7 @@ class MastodonAuth(BaseAuth):
     resp = fn(*args, **kwargs)
     try:
       resp.raise_for_status()
-    except BaseException, e:
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
     return resp
@@ -205,14 +209,14 @@ class StartHandler(handlers.StartHandler):
     if not instance:
       instance = util.get_required_param(self, 'instance')
     instance = instance.strip().split('@')[-1]  # handle addresses, eg user@host.com
-    parsed = urlparse.urlparse(instance)
+    parsed = urlparse(instance)
     if not parsed.scheme:
       instance = 'https://' + instance
 
     # fetch instance info from this instance's API (mostly to test that it's
     # actually a Mastodon instance)
     try:
-      resp = util.requests_get(urlparse.urljoin(instance, INSTANCE_API))
+      resp = util.requests_get(urljoin(instance, INSTANCE_API))
     except requests.RequestException as e:
       logging.info('Error', exc_info=True)
       resp = None
@@ -230,9 +234,9 @@ class StartHandler(handlers.StartHandler):
       raise ValueError(msg)
 
     # if we got redirected, update instance URL
-    parsed = list(urlparse.urlparse(resp.url))
+    parsed = list(urlparse(resp.url))
     parsed[2] = '/'  # path
-    instance = urlparse.urlunparse(parsed)
+    instance = urlunparse(parsed)
 
     query = MastodonApp.query(MastodonApp.instance == instance,
                             MastodonApp.app_url == self.APP_URL)
@@ -248,10 +252,10 @@ class StartHandler(handlers.StartHandler):
 
     logging.info('Starting OAuth for Mastodon instance %s', instance)
     app_data = json_loads(app.data)
-    return urlparse.urljoin(instance, AUTH_CODE_API % {
+    return urljoin(instance, AUTH_CODE_API % {
       'client_id': app_data['client_id'],
       'client_secret': app_data['client_secret'],
-      'redirect_uri': urllib.quote_plus(self.to_url()),
+      'redirect_uri': quote_plus(self.to_url()),
       'state': _encode_state(app, state),
       'scope': self.scope,
     })
@@ -269,13 +273,13 @@ class StartHandler(handlers.StartHandler):
     logging.info("first time we've seen Mastodon instance %s with app %s! "
                  "registering an API app.", instance, self.APP_URL)
 
-    redirect_uris = set(urlparse.urljoin(self.request.host_url, path)
+    redirect_uris = set(urljoin(self.request.host_url, path)
                         for path in set(self.REDIRECT_PATHS))
     redirect_uris.add(self.to_url())
 
     resp = util.requests_post(
-      urlparse.urljoin(instance, REGISTER_APP_API),
-      data=urllib.urlencode({
+      urljoin(instance, REGISTER_APP_API),
+      data=urlencode({
         'client_name': self.APP_NAME,
         # Mastodon uses Doorkeeper for OAuth, which allows registering
         # multiple redirect URIs, separated by newlines.
@@ -306,52 +310,53 @@ class StartHandler(handlers.StartHandler):
 class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and stores it."""
   def get(self):
-    app_key, state = _decode_state(util.get_required_param(self, 'state'))
+    with ndb_client.context():
+      app_key, state = _decode_state(util.get_required_param(self, 'state'))
 
-    # handle errors
-    error = self.request.get('error')
-    desc = self.request.get('error_description')
-    if error:
-      # user_cancelled_login and user_cancelled_authorize are non-standard.
-      # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
-      if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
-        logging.info('User declined: %s', self.request.get('error_description'))
-        self.finish(None, state=state)
-        return
-      else:
-        msg = 'Error: %s: %s' % (error, desc)
-        logging.info(msg)
-        raise exc.HTTPBadRequest(msg)
+      # handle errors
+      error = self.request.get('error')
+      desc = self.request.get('error_description')
+      if error:
+        # user_cancelled_login and user_cancelled_authorize are non-standard.
+        # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
+        if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
+          logging.info('User declined: %s', self.request.get('error_description'))
+          self.finish(None, state=state)
+          return
+        else:
+          msg = 'Error: %s: %s' % (error, desc)
+          logging.info(msg)
+          raise exc.HTTPBadRequest(msg)
 
-    app = ndb.Key(urlsafe=app_key).get()
-    assert app
-    app_data = json_loads(app.data)
+      app = ndb.Key(urlsafe=app_key).get()
+      assert app
+      app_data = json_loads(app.data)
 
-    # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
-    data = {
-      'grant_type': 'authorization_code',
-      'code': auth_code,
-      'client_id': app_data['client_id'],
-      'client_secret': app_data['client_secret'],
-      # redirect_uri here must be the same in the oauth code request!
-      # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
-      }
-    resp = util.requests_post(urlparse.urljoin(app.instance, ACCESS_TOKEN_API),
-                              data=urllib.urlencode(data))
-    resp.raise_for_status()
-    resp_json = resp.json()
-    logging.debug('Access token response: %s', resp_json)
-    if resp_json.get('error'):
-      raise exc.HTTPBadRequest(resp_json)
+      # extract auth code and request access token
+      auth_code = util.get_required_param(self, 'code')
+      data = {
+        'grant_type': 'authorization_code',
+        'code': auth_code,
+        'client_id': app_data['client_id'],
+        'client_secret': app_data['client_secret'],
+        # redirect_uri here must be the same in the oauth code request!
+        # (the value here doesn't actually matter since it's requested server side.)
+        'redirect_uri': self.request.path_url,
+        }
+      resp = util.requests_post(urljoin(app.instance, ACCESS_TOKEN_API),
+                                data=urlencode(data))
+      resp.raise_for_status()
+      resp_json = resp.json()
+      logging.debug('Access token response: %s', resp_json)
+      if resp_json.get('error'):
+        raise exc.HTTPBadRequest(resp_json)
 
-    access_token = resp_json['access_token']
-    user = MastodonAuth(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
-    logging.debug('User: %s', user)
-    address = '@%s@%s' % (user['username'], urlparse.urlparse(app.instance).netloc)
-    auth = MastodonAuth(id=address, app=app.key, access_token_str=access_token,
-                        user_json=json_dumps(user))
-    auth.put()
+      access_token = resp_json['access_token']
+      user = MastodonAuth(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
+      logging.debug('User: %s', user)
+      address = '@%s@%s' % (user['username'], urlparse(app.instance).netloc)
+      auth = MastodonAuth(id=address, app=app.key, access_token_str=access_token,
+                          user_json=json_dumps(user))
+      auth.put()
 
-    self.finish(auth, state=state)
+      self.finish(auth, state=state)

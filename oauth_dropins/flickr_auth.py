@@ -22,7 +22,7 @@ from .webutil.util import json_dumps, json_loads
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):
-  """Call :func:`urllib2.urlopen`, signing the request with Flickr credentials.
+  """Call :func:`urllib.request.urlopen`, signing the request with Flickr credentials.
 
   Args:
     url (string): the url to open
@@ -32,7 +32,7 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
       back to HTTP_TIMEOUT if not specified
 
   Returns:
-    the file-like object that is the result of :func:`urllib2.urlopen`
+    the file-like object that is the result of :func:`urllib.request.urlopen`
   """
   auth = oauthlib.oauth1.Client(
     appengine_config.FLICKR_APP_KEY,
@@ -102,7 +102,7 @@ def upload(params, file, token_key, token_secret):
   https://www.flickr.com/services/api/upload.api.html
 
   Unlike :func:`call_api_method`, this uses the requests library because
-  :mod:`urllib2` doesn't support multi-part POSTs on its own.
+  :mod:`urllib` doesn't support multi-part POSTs on its own.
 
   Args:
     params (dict): the parameters to send to the API method
@@ -114,7 +114,7 @@ def upload(params, file, token_key, token_secret):
     dict containing the photo id (as 'id')
 
   Raises:
-    :class:`requests.HTTPError` on HTTP error or :class:`urllib2.HTTPError` if
+    :class:`requests.HTTPError` on HTTP error or :class:`urllib.error.HTTPError` if
     we get a stat='fail' response from Flickr.
   """
   upload_url = 'https://up.flickr.com/services/upload'

@@ -4,18 +4,23 @@ API docs:
 https://www.linkedin.com/developers/
 https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
+import urllib.parse
 
 import appengine_config
+from appengine_config import ndb_client
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from webob import exc
 
-import handlers
-from models import BaseAuth
-from webutil import util
-from webutil.util import json_dumps, json_loads
+from . import handlers
+from .models import BaseAuth
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
@@ -94,7 +99,7 @@ class LinkedInAuth(BaseAuth):
 
     try:
       resp.raise_for_status()
-    except BaseException, e:
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
     return resp
@@ -115,8 +120,8 @@ class StartHandler(handlers.StartHandler):
       "linkedin_client_secret files in your app's root directory.")
     return AUTH_CODE_URL % {
       'client_id': appengine_config.LINKEDIN_CLIENT_ID,
-      'redirect_uri': urllib.quote_plus(self.to_url()),
-      'state': urllib.quote_plus(state or ''),
+      'redirect_uri': urllib.parse.quote_plus(self.to_url()),
+      'state': urllib.parse.quote_plus(state or ''),
       'scope': self.scope,
       }
 
@@ -132,43 +137,48 @@ class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and stores it.
   """
   def get(self):
-    # handle errors
-    error = self.request.get('error')
-    desc = self.request.get('error_description')
-    if error:
-      # https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin/consumer/context#application-is-rejected
-      if error in ('user_cancelled_login', 'user_cancelled_authorize'):
-        logging.info('User declined: %s', self.request.get('error_description'))
-        self.finish(None, state=self.request.get('state'))
-        return
-      else:
-        msg = 'Error: %s: %s' % (error, desc)
+    with ndb_client.context():
+      # handle errors
+      error = self.request.get('error')
+      desc = self.request.get('error_description')
+      if error:
+        # https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin/consumer/context#application-is-rejected
+        if error in ('user_cancelled_login', 'user_cancelled_authorize'):
+          logging.info('User declined: %s', self.request.get('error_description'))
+          self.finish(None, state=self.request.get('state'))
+          return
+        else:
+          msg = 'Error: %s: %s' % (error, desc)
+          logging.info(msg)
+          raise exc.HTTPBadRequest(msg)
+
+      # extract auth code and request access token
+      auth_code = util.get_required_param(self, 'code')
+      data = {
+        'grant_type': 'authorization_code',
+        'code': auth_code,
+        'client_id': appengine_config.LINKEDIN_CLIENT_ID,
+        'client_secret': appengine_config.LINKEDIN_CLIENT_SECRET,
+        # redirect_uri here must be the same in the oauth code request!
+        # (the value here doesn't actually matter since it's requested server side.)
+        'redirect_uri': self.request.path_url,
+        }
+
+      resp = util.requests_post(ACCESS_TOKEN_URL, data=data)
+      resp.raise_for_status()
+      resp = json_loads(resp.text)
+
+      logging.debug('Access token response: %s', resp)
+      if resp.get('serviceErrorCode'):
+        msg = 'Error: %s' % resp
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
-    # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
-    data = {
-      'grant_type': 'authorization_code',
-      'code': auth_code,
-      'client_id': appengine_config.LINKEDIN_CLIENT_ID,
-      'client_secret': appengine_config.LINKEDIN_CLIENT_SECRET,
-      # redirect_uri here must be the same in the oauth code request!
-      # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
-      }
-    resp = util.requests_post(ACCESS_TOKEN_URL, data=urllib.urlencode(data)).json()
-    logging.debug('Access token response: %s', resp)
-    if resp.get('serviceErrorCode'):
-      msg = 'Error: %s' % resp
-      logging.info(msg)
-      raise exc.HTTPBadRequest(msg)
+      access_token = resp['access_token']
+      resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()
+      logging.debug('Profile response: %s', resp)
+      auth = LinkedInAuth(id=resp['id'], access_token_str=access_token,
+                          user_json=json_dumps(resp))
+      auth.put()
 
-    access_token = resp['access_token']
-    resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()
-    logging.debug('Profile response: %s', resp)
-    auth = LinkedInAuth(id=resp['id'], access_token_str=access_token,
-                        user_json=json_dumps(resp))
-    auth.put()
-
-    self.finish(auth, state=self.request.get('state'))
+      self.finish(auth, state=self.request.get('state'))

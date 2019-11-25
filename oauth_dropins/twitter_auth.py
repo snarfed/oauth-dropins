@@ -5,11 +5,11 @@ it without pulling in App Engine dependencies.
 
 Supports Python 3. Should not depend on App Engine API or SDK packages.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 
-import urllib.error, urllib.parse, urllib.request
+import urllib.request
 
 from . import appengine_config
 import requests
@@ -42,7 +42,7 @@ def auth_header(url, token_key, token_secret, method='GET'):
 
 
 def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
-  """Wraps urllib2.urlopen() and adds an OAuth signature.
+  """Wraps urllib.request.urlopen() and adds an OAuth signature.
   """
   if headers is None:
     headers = {}

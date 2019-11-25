@@ -9,13 +9,18 @@ application = webapp2.WSGIApplication([
   ...
   ]
 """
-import logging
-import urllib
-import urlparse
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from past.builtins import basestring
 
+import logging
+import urllib.parse
 import webapp2
-from webutil import handlers
-from webutil import util
+
+from .appengine_config import ndb_client
+from .webutil import handlers
+from .webutil import util
 
 
 class BaseHandler(webapp2.RequestHandler):
@@ -67,7 +72,7 @@ class BaseHandler(webapp2.RequestHandler):
     url = self.request.host_url + self.to_path
     if state:
       # unquote first or state will be double-quoted
-      state = urllib.unquote_plus(state)
+      state = urllib.parse.unquote_plus(state)
       url = util.add_query_params(url, [('state', state)])
     return url
 
@@ -108,10 +113,12 @@ class StartHandler(BaseHandler):
       scopes.add(self.scope)
     self.scope = self.SCOPE_SEPARATOR.join(util.trim_nulls(scopes))
 
-    # str() is since WSGI middleware chokes on unicode redirect URLs :/ eg:
-    # InvalidResponseError: header values must be str, got 'unicode' (u'...') for 'Location'
-    # https://console.cloud.google.com/errors/CPafw-Gq18CrnwE
-    url = str(self.redirect_url(state=self.request.get('state')))
+    with ndb_client.context():
+      # str() is since WSGI middleware chokes on unicode redirect URLs :/ eg:
+      # InvalidResponseError: header values must be str, got 'unicode' (u'...') for 'Location'
+      # https://console.cloud.google.com/errors/CPafw-Gq18CrnwE
+      url = str(self.redirect_url(state=self.request.get('state')))
+
     logging.info('Starting OAuth flow: redirecting to %s', url)
     self.redirect(url)
 
@@ -150,7 +157,7 @@ class StartHandler(BaseHandler):
     vars = locals()
     vars.update({
       'label': cls.LABEL,
-      'image': urlparse.urljoin(image_prefix, '%s_2x.png' % cls.NAME),
+      'image': urllib.parse.urljoin(image_prefix, '%s_2x.png' % cls.NAME),
     })
     html = """\
 <form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s">
@@ -194,7 +201,8 @@ class CallbackHandler(BaseHandler):
     if auth_entity is None:
       params = [('declined', True)]
     else:
-      params = [('auth_entity', auth_entity.key.urlsafe()), ('state', state)]
+      params = [('auth_entity', auth_entity.key.urlsafe().decode()),
+                ('state', state)]
       token = auth_entity.access_token()
       if isinstance(token, basestring):
         params.append(('access_token', token))

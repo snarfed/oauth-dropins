@@ -4,19 +4,22 @@ Standard OAuth 2.0 flow. Docs:
 https://www.dropbox.com/developers/core/docs
 https://www.dropbox.com/developers/reference/oauthguide
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
-import urllib2
+import urllib.parse, urllib.request
 
 import appengine_config
+from appengine_config import ndb_client
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from webob import exc
-from webutil import util
-from webutil.util import json_dumps, json_loads
 
-import handlers
-import models
+from . import handlers, models
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 GET_AUTH_CODE_URL = '&'.join((
   'https://www.dropbox.com/1/oauth2/authorize?'
@@ -61,12 +64,12 @@ class DropboxAuth(models.BaseAuth):
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """Wraps urlopen() and adds OAuth credentials to the request.
     """
     headers = {'Authorization': 'Bearer %s' % self.access_token_str}
     try:
-      return util.urlopen(urllib2.Request(url, headers=headers), **kwargs)
-    except BaseException, e:
+      return util.urlopen(urllib.request.Request(url, headers=headers), **kwargs)
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
 
@@ -92,7 +95,7 @@ class StartHandler(handlers.StartHandler):
     csrf_key = DropboxCsrf(state=state).put()
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.DROPBOX_APP_KEY,
-      'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
+      'redirect_uri': urllib.parse.quote_plus(self.to_url(state=state)),
       'state': '%s|%s' % (state, csrf_key.id()),
     }
 
@@ -106,51 +109,51 @@ class CallbackHandler(handlers.CallbackHandler):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
   def get(self):
-    state = util.get_required_param(self, 'state')
+    with ndb_client.context():
+      state = util.get_required_param(self, 'state')
 
-    # handle errors
-    error = self.request.get('error')
-    error_reason = urllib.unquote_plus(self.request.get('error_reason', ''))
+      # handle errors
+      error = self.request.get('error')
+      error_reason = urllib.parse.unquote_plus(self.request.get('error_reason', ''))
 
-    if error or error_reason:
-      if error == 'access_denied':
-        logging.info('User declined: %s', error_reason)
-        self.finish(None, state=state)
-        return
-      else:
-        raise exc.HTTPBadRequest(' '.join((error, error_reason)))
+      if error or error_reason:
+        if error == 'access_denied':
+          logging.info('User declined: %s', error_reason)
+          self.finish(None, state=state)
+          return
+        else:
+          raise exc.HTTPBadRequest(' '.join((error, error_reason)))
 
-    # lookup the CSRF token
-    try:
-      csrf_id = int(urllib.unquote_plus(state).split('|')[-1])
-    except (ValueError, TypeError):
-      raise exc.HTTPBadRequest('Invalid state value %r' % state)
+      # lookup the CSRF token
+      try:
+        csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
+      except (ValueError, TypeError):
+        raise exc.HTTPBadRequest('Invalid state value %r' % state)
 
-    csrf = DropboxCsrf.get_by_id(csrf_id)
-    if not csrf:
-      raise exc.HTTPBadRequest('No CSRF token for id %s' % csrf_id)
+      csrf = DropboxCsrf.get_by_id(csrf_id)
+      if not csrf:
+        raise exc.HTTPBadRequest('No CSRF token for id %s' % csrf_id)
 
-    # request an access token
-    data = {
-      'client_id': appengine_config.DROPBOX_APP_KEY,
-      'client_secret': appengine_config.DROPBOX_APP_SECRET,
-      'code': util.get_required_param(self, 'code'),
-      'redirect_uri': self.request.path_url,
-    }
-    try:
-      resp = util.urlopen(GET_ACCESS_TOKEN_URL % data, data='').read()
-    except BaseException, e:
-      util.interpret_http_exception(e)
-      raise
+      # request an access token
+      data = {
+        'client_id': appengine_config.DROPBOX_APP_KEY,
+        'client_secret': appengine_config.DROPBOX_APP_SECRET,
+        'code': util.get_required_param(self, 'code'),
+        'redirect_uri': self.request.path_url,
+      }
+      try:
+        resp = util.urlopen(GET_ACCESS_TOKEN_URL % data, data=b'').read()
+      except BaseException as e:
+        util.interpret_http_exception(e)
+        raise
 
-    try:
-      data = json_loads(resp)
-    except (ValueError, TypeError):
-      logging.exception('Bad response:\n%s', resp)
-      raise exc.HttpBadRequest('Bad Dropbox response to access token request')
+      try:
+        data = json_loads(resp)
+      except (ValueError, TypeError):
+        logging.exception('Bad response:\n%s', resp)
+        raise exc.HttpBadRequest('Bad Dropbox response to access token request')
 
-
-    logging.info('Storing new Dropbox account: %s', data['uid'])
-    auth = DropboxAuth(id=data['uid'], access_token_str=data['access_token'])
-    auth.put()
-    self.finish(auth, state=csrf.state)
+      logging.info('Storing new Dropbox account: %s', data['uid'])
+      auth = DropboxAuth(id=data['uid'], access_token_str=data['access_token'])
+      auth.put()
+      self.finish(auth, state=csrf.state)

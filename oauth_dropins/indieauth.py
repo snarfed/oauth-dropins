@@ -2,21 +2,24 @@
 
 https://indieauth.com/developers
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
-import urlparse
+import urllib.parse
 
 import appengine_config
+from appengine_config import ndb_client
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
+import mf2util
+import requests
 from webob import exc
 
-import handlers
-import mf2util
-import models
-import requests
-from webutil import util
-from webutil.util import json_dumps, json_loads
+from . import handlers, models
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 INDIEAUTH_URL = 'https://indieauth.com/auth'
 
@@ -119,14 +122,14 @@ class StartHandler(handlers.StartHandler):
     # TODO: unify with mastodon?
     if not me:
       me = util.get_required_param(self, 'me')
-    parsed = urlparse.urlparse(me)
+    parsed = urllib.parse.urlparse(me)
     if not parsed.scheme:
       me = 'http://' + me
 
     redirect_uri = self.to_url()
     endpoint = discover_authorization_endpoint(me)
 
-    url = endpoint + '?' + urllib.urlencode({
+    url = endpoint + '?' + urllib.parse.urlencode({
       'me': me,
       'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
       'redirect_uri': redirect_uri,
@@ -153,34 +156,35 @@ class CallbackHandler(handlers.CallbackHandler):
   """The callback handler from the IndieAuth request. POSTs back to the
   auth endpoint to verify the authentication code."""
   def get(self):
-    code = util.get_required_param(self, 'code')
-    state = util.decode_oauth_state(util.get_required_param(self, 'state'))
+    with ndb_client.context():
+      code = util.get_required_param(self, 'code')
+      state = util.decode_oauth_state(util.get_required_param(self, 'state'))
 
-    endpoint = state.get('endpoint')
-    me = state.get('me')
-    if not endpoint or not me:
-      raise exc.HTTPBadRequest("invalid state parameter")
+      endpoint = state.get('endpoint')
+      me = state.get('me')
+      if not endpoint or not me:
+        raise exc.HTTPBadRequest("invalid state parameter")
 
-    state = state.get('state') or ''
-    validate_resp = util.requests_post(endpoint, data={
-      'me': me,
-      'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
-      'code': code,
-      'redirect_uri': self.request.path_url,
-      'state': state,
-    })
+      state = state.get('state') or ''
+      validate_resp = util.requests_post(endpoint, data={
+        'me': me,
+        'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
+        'code': code,
+        'redirect_uri': self.request.path_url,
+        'state': state,
+      })
 
-    if validate_resp.status_code // 100 == 2:
-      data = util.sniff_json_or_form_encoded(validate_resp.content)
-      if data.get('me'):
-        verified = data.get('me')
-        user_json = build_user_json(verified)
-        indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
-        indie_auth.put()
-        self.finish(indie_auth, state=state)
+      if validate_resp.status_code // 100 == 2:
+        data = util.sniff_json_or_form_encoded(validate_resp.text)
+        if data.get('me'):
+          verified = data.get('me')
+          user_json = build_user_json(verified)
+          indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
+          indie_auth.put()
+          self.finish(indie_auth, state=state)
+        else:
+          raise exc.HTTPBadRequest(
+            'Verification response missing required "me" field')
       else:
-        raise exc.HTTPBadRequest(
-          'Verification response missing required "me" field')
-    else:
-      raise exc.HTTPBadRequest('IndieAuth verification failed: %s %s' %
-                               (validate_resp.status_code, validate_resp.text))
+        raise exc.HTTPBadRequest('IndieAuth verification failed: %s %s' %
+                                 (validate_resp.status_code, validate_resp.text))

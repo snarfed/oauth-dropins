@@ -230,7 +230,7 @@ least one of them, but not all.
   or [python-instagram](https://github.com/Instagram/python-instagram). See the
   site class's docstring for details.
 
-- `urlopen(data=None, timeout=None)` wraps `urllib2.urlopen()` and adds the
+- `urlopen(data=None, timeout=None)` wraps `urlopen()` and adds the
   OAuth credentials to the request. Use this for making direct HTTP request to a
   site's REST API. Some sites may provide `get()` instead, which wraps
   `requests.get()`.
@@ -313,11 +313,21 @@ you have it as a relative directory. pip requires fully qualified directories.
 Changelog
 ---
 
+### 3.0 - unreleased
+
+_Breaking changes:_
+* Add support for the [App Engine Standard Python 3 runtime](https://cloud.google.com/appengine/docs/standard/python3/) and drops support for the [Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). See this [list of differences](https://cloud.google.com/appengine/docs/standard/python3/python-differences) for more details.
+* Drop `webutil.handlers.memcache_response()` since the Python 3 runtime doesn't include memcache.
+* Drop `webutil.handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`, since the Python 3 runtime doesn't include `webapp2` built in.
+
 ### 2.3 - unreleased
-Breaking changes:
+_Breaking changes:_
 * Remove `cache` and `fail_cache_time_secs` kwargs from `webutil.util.follow_redirects()`. Caching is now built in. You can bypass the cache with `follow_redirects.__wrapped__()`. [Details.](https://cachetools.readthedocs.io/en/stable/#cachetools.cached)
 
 Non-breaking changes:
+* Python 2 App Engine features in `webutil` are deprecated:
+  * `handlers.memcache_response()`
+  * `handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`.
 * Add new `outer_classes` kwarg to `button_html()` for the outer `<div>`, eg as Bootstrap columns.
 
 ### 2.2 - 2019-11-01

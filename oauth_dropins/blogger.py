@@ -16,6 +16,10 @@ https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc
 WARNING: oauth2client is deprecated! google-auth is its successor.
 https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
 import re
 import urllib
@@ -29,14 +33,12 @@ except ImportError:
 from oauth2client.client import OAuth2Credentials
 from gdata.blogger import client
 from gdata import gauth
-from google.appengine.ext import ndb
+from google.cloud import ndb
 import httplib2
 
-import google_signin
-import handlers
-import models
-from webutil import util
-from webutil.util import json_dumps, json_loads
+from . import google_signin, handlers, models
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 # global. initialized in StartHandler.to_path().
 oauth_decorator = None
@@ -165,7 +167,7 @@ class StartHandler(handlers.StartHandler, handlers.CallbackHandler):
         blogger = BloggerV2Auth.api_from_creds(oauth_decorator.credentials)
         try:
           blogs = blogger.get_blogs()
-        except BaseException, e:
+        except BaseException as e:
           # this api call often returns 401 Unauthorized for users who aren't
           # signed up for blogger and/or don't have any blogs.
           util.interpret_http_exception(e)

@@ -14,17 +14,19 @@ Facebook. Differences:
 
 TODO unify Disqus, Facebook, and Instagram
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
+import urllib.parse
+
+from google.cloud import ndb
 from webob import exc
 
-from google.appengine.ext import ndb
-from webutil import util
-from webutil.util import json_dumps, json_loads
-
-import appengine_config
-import handlers
-import models
+from . import appengine_config, handlers, models
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 GET_AUTH_CODE_URL = (
     'https://disqus.com/api/oauth/2.0/authorize/?' +
@@ -69,7 +71,7 @@ class DisqusAuth(models.BaseAuth):
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urllib2.urlopen() and adds OAuth credentials to the request.
+    """Wraps urlopen() and adds OAuth credentials to the request.
     """
     # TODO does work for POST requests? key is always passed as a
     # query param, regardless of method.
@@ -100,7 +102,7 @@ class StartHandler(handlers.StartHandler):
       return GET_AUTH_CODE_URL % {
         'client_id': appengine_config.DISQUS_CLIENT_ID,
         'scope': self.scope,
-        'redirect_uri': urllib.quote_plus(self.to_url(state=state)),
+        'redirect_uri': urllib.parse.quote_plus(self.to_url(state=state)),
       }
 
 
@@ -121,7 +123,8 @@ class CallbackHandler(handlers.CallbackHandler):
         'code': auth_code,
     }
 
-    resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data)).read()
+    resp = util.urlopen(GET_ACCESS_TOKEN_URL,
+                        data=urllib.parse.urlencode(data)).read()
     try:
       data = json_loads(resp)
     except (ValueError, TypeError):

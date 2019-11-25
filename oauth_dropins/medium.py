@@ -12,25 +12,30 @@ to map an arbitrary host to localhost in your /etc/hosts, e.g.:
 You can then test on your local machine by running dev_appserver and opening
 http://my.dev.com:8080/ instead of http://localhost:8080/ .
 """
+from __future__ import absolute_import, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+
 import logging
-import urllib
+import urllib.parse
 
 import appengine_config
+from appengine_config import ndb_client
 
-from google.appengine.ext import ndb
+from google.cloud import ndb
 from webob import exc
 
-import handlers
-from models import BaseAuth
-from webutil import util
-from webutil.util import json_dumps, json_loads
+from . import handlers
+from .models import BaseAuth
+from .webutil import util
+from .webutil.util import json_dumps, json_loads
 
 # medium is behind cloudflare, which often blocks requests's user agent, so set
 # our own.
 USER_AGENT = 'oauth-dropins (https://oauth-dropins.appspot.com/)'
 
-# URL templates. Can't (easily) use urllib.urlencode() because I want to keep
-# the %(...)s placeholders as is and fill them in later in code.
+# URL templates. Can't (easily) use urlencode() because I want to keep the
+# %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
     'https://medium.com/m/oauth/authorize?'
     'client_id=%(client_id)s',
@@ -93,7 +98,7 @@ class MediumAuth(BaseAuth):
     resp = util.requests_get(*args, **kwargs)
     try:
       resp.raise_for_status()
-    except BaseException, e:
+    except BaseException as e:
       util.interpret_http_exception(e)
       raise
     return resp
@@ -113,9 +118,9 @@ class StartHandler(handlers.StartHandler):
       "medium_client_secret files in your app's root directory.")
     return GET_AUTH_CODE_URL % {
       'client_id': appengine_config.MEDIUM_CLIENT_ID,
-      'redirect_uri': urllib.quote_plus(self.to_url()),
+      'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       # Medium requires non-empty state
-      'state': urllib.quote_plus(state if state else 'unused'),
+      'state': urllib.parse.quote_plus(state if state else 'unused'),
       'scope': self.scope,
       }
 
@@ -125,48 +130,49 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    # handle errors
-    error = self.request.get('error')
-    if error:
-      if error == 'access_denied':
-        logging.info('User declined')
-        self.finish(None, state=self.request.get('state'))
-        return
-      else:
-        raise exc.HTTPBadRequest('Error: %s' % error)
+    with ndb_client.context():
+      # handle errors
+      error = self.request.get('error')
+      if error:
+        if error == 'access_denied':
+          logging.info('User declined')
+          self.finish(None, state=self.request.get('state'))
+          return
+        else:
+          raise exc.HTTPBadRequest('Error: %s' % error)
 
-    # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
-    data = {
-      'code': auth_code,
-      'client_id': appengine_config.MEDIUM_CLIENT_ID,
-      'client_secret': appengine_config.MEDIUM_CLIENT_SECRET,
-      # redirect_uri here must be the same in the oauth code request!
-      # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
-      'grant_type': 'authorization_code',
+      # extract auth code and request access token
+      auth_code = util.get_required_param(self, 'code')
+      data = {
+        'code': auth_code,
+        'client_id': appengine_config.MEDIUM_CLIENT_ID,
+        'client_secret': appengine_config.MEDIUM_CLIENT_SECRET,
+        # redirect_uri here must be the same in the oauth code request!
+        # (the value here doesn't actually matter since it's requested server side.)
+        'redirect_uri': self.request.path_url,
+        'grant_type': 'authorization_code',
       }
-    resp = util.requests_post(
-      GET_ACCESS_TOKEN_URL, data=urllib.urlencode(data),
-      headers={'User-Agent': USER_AGENT}).text
-    logging.debug('Access token response: %s', resp)
+      resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data,
+                                headers={'User-Agent': USER_AGENT})
+      resp.raise_for_status()
+      logging.debug('Access token response: %s', resp.text)
 
-    try:
-      resp = json_loads(resp)
-    except:
-      logging.exception('Could not decode JSON')
-      raise
+      try:
+        resp = json_loads(resp.text)
+      except:
+        logging.exception('Could not decode JSON')
+        raise
 
-    errors = resp.get('errors') or resp.get('error')
-    if errors:
-      logging.info('Errors: %s', errors)
-      raise exc.HTTPBadRequest(errors[0].get('message'))
+      errors = resp.get('errors') or resp.get('error')
+      if errors:
+        logging.info('Errors: %s', errors)
+        raise exc.HTTPBadRequest(errors[0].get('message'))
 
-    # TODO: handle refresh token
-    access_token = resp['access_token']
-    user_json = MediumAuth(access_token_str=access_token).get(API_USER_URL).text
-    id = json_loads(user_json)['data']['id']
-    auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
-    auth.put()
+      # TODO: handle refresh token
+      access_token = resp['access_token']
+      user_json = MediumAuth(access_token_str=access_token).get(API_USER_URL).text
+      id = json_loads(user_json)['data']['id']
+      auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
+      auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+      self.finish(auth, state=self.request.get('state'))
