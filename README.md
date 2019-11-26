@@ -247,52 +247,15 @@ Troubleshooting/FAQ
     bash: ./bin/easy_install: ...bad interpreter: No such file or directory
     ```
 
-  You've probably hit [this open virtualenv bug](https://github.com/pypa/virtualenv/issues/53) ([fixed but not merged](https://github.com/pypa/virtualenv/issues/53)): virtualenv doesn't support paths with spaces.
-  
-  The easy fix is to recreate the virtualenv in a path without spaces. If you can't do that, then after creating the virtualenv, but before activating it, edit the activate, easy_install and pip files in `local/bin/` to escape any spaces in the path.
-  
-  For example, in `activate`, `VIRTUAL_ENV=".../has space/local"` becomes `VIRTUAL_ENV=".../has\ space/local"`, and in `pip` and `easy_install` the first line changes from `#!".../has space/local/bin/python"` to `#!".../has\ space/local/bin/python"`.
-  
-  This should get virtualenv to install in the right place. If you do this wrong at first, you'll have installs in `/usr/local/lib/python2.7/site-packages` that you need to delete, since they'll prevent virtualenv from installing into the local `site-packages`.
+  You've probably hit [this virtualenv bug](https://github.com/pypa/virtualenv/issues/53): virtualenv doesn't support paths with spaces.
 
-1. If you're using Twitter, and `import requests` or something similar fails with:
+  The easy fix is to recreate the virtualenv in a path without spaces. If you can't do that, then after creating the virtualenv, but before activating it, edit the activate, easy_install and pip files in `local3/bin/` to escape any spaces in the path.
 
-    ```
-    ImportError: cannot import name certs
-    ```
+  For example, in `activate`, `VIRTUAL_ENV=".../has space/local"` becomes `VIRTUAL_ENV=".../has\ space/local"`, and in `pip` and `easy_install` the first line changes from `#!".../has space/local3/bin/python"` to `#!".../has\ space/local3/bin/python"`.
 
-    *or* you see an exception like:
-
-    ```
-    File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
-      raise TweepError(e)
-    TweepError: must be _socket.socket, not socket
-    ```
-
-    ...you need to [configure App Engine's SSL](https://cloud.google.com/appengine/docs/python/sockets/ssl_support). Add this to your `app.yaml`:
-
-    ```
-    libraries:
-    - name: ssl
-      version: latest
-    ```
-
-  If you use dev_appserver, you'll also need to [apply this workaround](https://code.google.com/p/googleappengine/issues/detail?id=9246) ([more](http://stackoverflow.com/questions/16192916/importerror-no-module-named-ssl-with-dev-appserver-py-from-google-app-engine/16937668#16937668) [background](http://bekt.github.io/p/gae-ssl/)). Annoying, I know.
+  This should get virtualenv to install in the right place. If you do this wrong at first, you'll have installs in eg `/usr/local/lib/python3.7/site-packages` that you need to delete, since they'll prevent virtualenv from installing into the local `site-packages`.
 
 1. If you see errors importing or using `tweepy`, it may be because `six.py` isn't installed. Try `pip install six` manually. `tweepy` does include `six` in its dependencies, so this shouldn't be necessary. Please [let us know](https://github.com/snarfed/oauth-dropins/issues) if it happens to you so we can debug!
-
-1. If you get an error like this:
-
-    ```
-      File "oauth_dropins/webutil/test/__init__.py", line 5, in <module>
-        import dev_appserver
-    ImportError: No module named dev_appserver
-    ...
-    InstallationError: Command python setup.py egg_info failed with error code 1 in /home/singpolyma/src/bridgy/src/oauth-dropins-master
-    ```
-
-  ...you either don't have `/usr/local/google_appengine` in your `PYTHONPATH`, or
-you have it as a relative directory. pip requires fully qualified directories.
 
 1. If you get an error like this:
 
@@ -418,54 +381,35 @@ Mostly just internal changes to webutil to support granary v1.9.
 
 Development
 ---
-You'll need the
-[App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
-version 1.9.15 or later (for
-[`vendor`](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
-support) or the
-[Google Cloud SDK](https://cloud.google.com/sdk/gcloud/) (aka `gcloud`)
-with the `gcloud-appengine-python` and `gcloud-appengine-python-extras`
-[components](https://cloud.google.com/sdk/docs/components#additional_components).
-Add them to your `$PYTHONPATH`, e.g.
-`export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine`, and then run:
+First, fork and clone this repo. Then, you'll need the [Google Cloud SDK](https://cloud.google.com/sdk/) with the `gcloud-appengine-python` and `gcloud-appengine-python-extras` [components](https://cloud.google.com/sdk/docs/components#additional_components). Once you have them, set up your environment by running these commands in the root directory:
 
 ```shell
 git submodule init
 git submodule update
-virtualenv local
-source local/bin/activate
+python3 -m venv local3
+source local3/bin/activate
 pip install -r requirements.txt
-
-# We install gdata in source mode, and App Engine doesn't follow .egg-link
-# files, so add a symlink to it.
-ln -s ../../../src/gdata/src/gdata local/lib/python2.7/site-packages/gdata
-ln -s ../../../src/gdata/src/atom local/lib/python2.7/site-packages/atom
-
 python setup.py test
 ```
 
-Most dependencies are clean, but we've made patches
-to [gdata-python-client](https://github.com/snarfed/gdata-python-client) below
-that we haven't (yet) tried to push upstream. If we ever switch its submodule
-repo for, make sure the patches are included!
+Run the demo app locally [in dev_appserver.py](https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app#local-dev-server) ([so that static files work](https://groups.google.com/d/topic/google-appengine/BJDE8y2KISM/discussion)) with:
+
+```shell
+dev_appserver.py --log_level debug --enable_host_checking false \
+  --support_datastore_emulator --datastore_emulator_port=8089 \
+  --application=oauth-dropins app.yaml
+```
+
+Most dependencies are clean, but we've made patches to [gdata-python-client](https://github.com/snarfed/gdata-python-client) below that we haven't (yet) tried to push upstream. If we ever switch its submodule repo for, make sure the patches are included!
 
 * [snarfed/gdata-python-client@fabb622](https://github.com/snarfed/gdata-python-client/commit/fabb6227361612ac4fcb8bef4438719cb00eaa2b)
 * [snarfed/gdata-python-client@8453e33](https://github.com/snarfed/gdata-python-client/commit/8453e3388d152ac650e22d219fae36da56d9a85d)
 
 To deploy:
 
-`python -m unittest discover && git push && gcloud -q app deploy oauth-dropins *.yaml`
+`gcloud -q app deploy oauth-dropins *.yaml`
 
-The docs are built with [Sphinx](http://sphinx-doc.org/), including
-[apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html),
-[autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and
-[napoleon](http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration
-is in
-[`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py)
-To build them, first install Sphinx with `pip install sphinx`. (You may want to
-do this outside your virtualenv; if so, you'll need to reconfigure it to see
-system packages with `virtualenv --system-site-packages local`.) Then, run
-[`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
+The docs are built with [Sphinx](http://sphinx-doc.org/), including [apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html), [autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and [napoleon](http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration is in [`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py) To build them, first install Sphinx with `pip install sphinx`. (You may want to do this outside your virtualenv; if so, you'll need to reconfigure it to see system packages with `python3 -m venv --system-site-packages local3`.) Then, run [`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
 
 
 Release instructions
@@ -474,12 +418,12 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 
 1. Run the unit tests.
     ```sh
-    source local/bin/activate.csh
-    python2 -m unittest discover
-    deactivate
-
-    source local3/bin/activate.csh
-    python3 -m unittest oauth_dropins.webutil.tests.test_util
+    source local3/bin/activate.csha
+    gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &
+    sleep 2s
+    DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \
+      python3 -m unittest discover
+    kill %1
     deactivate
     ```
 1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
@@ -489,19 +433,10 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```sh
     python3 setup.py clean build sdist
     setenv ver X.Y
-    source local/bin/activate.csh
+    source local3/bin/activate.csh
     twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz
     ```
-1. Install from test.pypi.org, both Python 2 and 3.
-    ```sh
-    cd /tmp
-    virtualenv local
-    source local/bin/activate.csh
-    # mf2py 1.1.2 on test.pypi.org is broken :(
-    pip install mf2py
-    pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
-    deactivate
-    ```
+1. Install from test.pypi.org.
     ```sh
     python3 -m venv local3
     source local3/bin/activate.csh
@@ -511,13 +446,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
     deactivate
     ```
-1. Smoke test that the code trivially loads and runs, in both Python 2 and 3.
-   ```sh
-    source local/bin/activate.csh
-    python2
-    # run test code below
-    deactivate
-    ```
+1. Smoke test that the code trivially loads and runs.
     ```sh
     source local3/bin/activate.csh
     python3
