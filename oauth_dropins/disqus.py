@@ -50,7 +50,7 @@ class DisqusAuth(models.BaseAuth):
   APIs. Stores OAuth credentials in the datastore. See models.BaseAuth
   for usage details.
 
-  Disqus-specific details: implements urlopen() but not http() or api().
+  Disqus-specific details: implements urlopen() but not api().
   The key name is the Disqus user id.
   """
   auth_code = ndb.StringProperty(required=True)

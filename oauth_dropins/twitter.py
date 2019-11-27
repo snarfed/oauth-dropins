@@ -33,9 +33,9 @@ class TwitterAuth(models.BaseAuth):
   requests to the Twitter v1.1 API. Stores OAuth credentials in the datastore.
   See models.BaseAuth for usage details.
 
-  Twitter-specific details: implements api(), get(), and post() but not http().
-  api() returns a tweepy.API; get() and post() wrap the corresponding requests
-  methods. The datastore entity key name is the Twitter username.
+  Twitter-specific details: implements api(), get(), and post(). api() returns a
+  tweepy.API; get() and post() wrap the corresponding requests methods. The
+  datastore entity key name is the Twitter username.
   """
   # access token
   token_key = ndb.StringProperty(required=True)

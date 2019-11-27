@@ -14,6 +14,10 @@ import logging
 logging.getLogger('oauthlib').setLevel(logging.INFO)
 logging.getLogger('requests_oauthlib').setLevel(logging.INFO)
 
+# make oauthlib let us use non-SSL http://localhost in dev_appserver etc
+# https://oauthlib.readthedocs.io/en/latest/oauth2/security.html#envvar-OAUTHLIB_INSECURE_TRANSPORT
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
+
 # default timeout. the G+ and Instagram APIs use httplib2, which honors this.
 import socket
 socket.setdefaulttimeout(HTTP_TIMEOUT)

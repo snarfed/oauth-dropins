@@ -46,8 +46,8 @@ class InstagramAuth(models.BaseAuth):
   OAuth-signed requests to Instagram's HTTP-based APIs. Stores OAuth credentials
   in the datastore. See models.BaseAuth for usage details.
 
-  Instagram-specific details: implements urlopen() but not api() nor
-  http().  The key name is the Instagram username.
+  Instagram-specific details: implements urlopen() but not api(). The key name
+  is the Instagram username.
   """
   auth_code = ndb.StringProperty(required=True)
   access_token_str = ndb.StringProperty(required=True)

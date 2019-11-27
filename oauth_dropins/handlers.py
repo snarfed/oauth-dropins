@@ -173,6 +173,7 @@ class StartHandler(BaseHandler):
       html = '<div class="%s">%s</div>' % (outer_classes, html)
     return html
 
+
 class CallbackHandler(BaseHandler):
   """Base OAuth callback request handler.
 

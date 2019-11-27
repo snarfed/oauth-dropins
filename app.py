@@ -28,7 +28,7 @@ for name in (
     'facebook',
     'flickr',
     'github',
-    # 'google_signin',
+    'google_signin',
     'indieauth',
     'instagram',
     'linkedin',

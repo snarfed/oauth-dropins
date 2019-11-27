@@ -114,7 +114,7 @@ class MastodonAuth(BaseAuth):
 
   Key name is the fully qualified actor address, ie @username@instance.tld.
 
-  Implements get() and post() but not urlopen(), http(), or api().
+  Implements get() and post() but not urlopen() or api().
   """
   app = ndb.KeyProperty()
   access_token_str = ndb.TextProperty(required=True)

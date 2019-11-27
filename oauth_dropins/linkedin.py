@@ -46,9 +46,7 @@ class LinkedInAuth(BaseAuth):
   requests to the LinkedIn REST API. Stores OAuth credentials in the datastore.
   See models.BaseAuth for usage details.
 
-  LinkedIn-specific details: TODO
-  implements get() but not urlopen(), http(), or api().
-  The key name is the ID (a URN).
+  Implements get() but not urlopen() or api(). The key name is the ID (a URN).
 
   Note that LI access tokens can be over 500 chars (up to 1k!), so they need to
   be TextProperty instead of StringProperty.

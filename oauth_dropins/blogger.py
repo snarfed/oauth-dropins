@@ -12,9 +12,6 @@ http://blog.bossylobster.com/2012/12/bridging-oauth-20-objects-between-gdata.htm
 
 Support was added to gdata-python-client here:
 https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc6c8525e18812ccc02badc0
-
-WARNING: oauth2client is deprecated! google-auth is its successor.
-https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html
 """
 from __future__ import absolute_import, unicode_literals
 from future import standard_library
@@ -51,9 +48,9 @@ class BloggerV2Auth(models.BaseAuth):
   OAuth-signed requests to the Blogger API. Stores OAuth credentials in the
   datastore. See models.BaseAuth for usage details.
 
-  Blogger-specific details: implements http() and api() but not urlopen(). api()
-  returns a gdata.blogger.client.BloggerClient. The datastore entity key name is
-  the Blogger user id.
+  Blogger-specific details: implements api() but not urlopen(). api() returns a
+  gdata.blogger.client.BloggerClient. The datastore entity key name is the
+  Blogger user id.
   """
   name = ndb.StringProperty(required=True)
   creds_json = ndb.TextProperty(required=True)
@@ -83,13 +80,6 @@ class BloggerV2Auth(models.BaseAuth):
     """Returns the OAuth access token string.
     """
     return json_loads(self.creds_json)['access_token']
-
-  def http(self):
-    """Returns an httplib2.Http that adds OAuth credentials to requests.
-    """
-    http = httplib2.Http()
-    self.creds().authorize(http)
-    return http
 
   @staticmethod
   def api_from_creds(oauth2_creds):

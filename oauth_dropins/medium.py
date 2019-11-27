@@ -60,7 +60,7 @@ class MediumAuth(BaseAuth):
   requests to the Medium REST API. Stores OAuth credentials in the datastore.
   See models.BaseAuth for usage details.
 
-  Medium-specific details: implements get() but not urlopen(), http(), or api().
+  Medium-specific details: implements get() but not urlopen() or api().
   The key name is the user id (*not* username).
   """
   access_token_str = ndb.StringProperty(required=True)

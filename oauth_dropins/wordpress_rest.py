@@ -56,8 +56,8 @@ class WordPressAuth(BaseAuth):
   OAuth-signed requests to the WordPress REST API. Stores OAuth credentials in
   the datastore. See models.BaseAuth for usage details.
 
-  WordPress-specific details: implements urlopen() but not http() or api(). The
-  key name is the blog hostname.
+  WordPress-specific details: implements urlopen() but not api(). The key name
+  is the blog hostname.
   """
   blog_id = ndb.StringProperty(required=True)
   blog_url = ndb.StringProperty(required=True)

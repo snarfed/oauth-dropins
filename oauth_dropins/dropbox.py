@@ -46,7 +46,7 @@ class DropboxAuth(models.BaseAuth):
   OAuth-signed requests to Dropbox's HTTP-based APIs. Stores OAuth credentials
   in the datastore. See models.BaseAuth for usage details.
 
-  Implements urlopen() but not http() or api().
+  Implements urlopen() but not api().
   """
   access_token_str = ndb.StringProperty(required=True)
 

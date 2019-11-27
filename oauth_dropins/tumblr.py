@@ -30,7 +30,7 @@ class TumblrAuth(models.BaseAuth):
   requests to the Tumblr API. Stores OAuth credentials in the datastore. See
   models.BaseAuth for usage details.
 
-  Tumblr-specific details: implements api() but not urlopen() or http(). api()
+  Tumblr-specific details: implements api() but not urlopen(). api()
   returns a tumblpy.Tumblpy. The datastore entity key name is the Tumblr
   username.
   """

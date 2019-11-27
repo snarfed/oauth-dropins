@@ -58,7 +58,7 @@ class FacebookAuth(models.BaseAuth):
   OAuth-signed requests to Facebook's HTTP-based APIs. Stores OAuth credentials
   in the datastore. See models.BaseAuth for usage details.
 
-  Facebook-specific details: implements urlopen() but not http() or api(). The
+  Facebook-specific details: implements urlopen() but not api(). The
   key name is the user's or page's Facebook ID.
   """
   type = ndb.StringProperty(choices=('user', 'page'))

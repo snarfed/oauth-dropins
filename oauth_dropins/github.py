@@ -63,7 +63,7 @@ class GitHubAuth(BaseAuth):
   requests to the GitHub REST API. Stores OAuth credentials in the datastore.
   See models.BaseAuth for usage details.
 
-  GitHub-specific details: implements get() but not urlopen(), http(), or api().
+  GitHub-specific details: implements get() but not urlopen(), or api().
   The key name is the username.
   """
   access_token_str = ndb.StringProperty(required=True)

@@ -238,13 +238,10 @@ implement at least one of them, but not all.
    `python-instagram <https://github.com/Instagram/python-instagram>`__.
    See the site class’s docstring for details.
 
--  ``urlopen(data=None, timeout=None)`` wraps ``urlopen()`` and
-   adds the OAuth credentials to the request. Use this for making direct
-   HTTP request to a site’s REST API. Some sites may provide ``get()``
+-  ``urlopen(data=None, timeout=None)`` wraps ``urlopen()`` and adds the
+   OAuth credentials to the request. Use this for making direct HTTP
+   request to a site’s REST API. Some sites may provide ``get()``
    instead, which wraps ``requests.get()``.
-
--  ``http()`` returns an ``httplib2.Http`` instance that adds the OAuth
-   credentials to requests.
 
 Troubleshooting/FAQ
 -------------------
@@ -255,57 +252,26 @@ Troubleshooting/FAQ
 
       bash: ./bin/easy_install: ...bad interpreter: No such file or directory
 
-You’ve probably hit `this open virtualenv
-bug <https://github.com/pypa/virtualenv/issues/53>`__ (`fixed but not
-merged <https://github.com/pypa/virtualenv/issues/53>`__): virtualenv
+You’ve probably hit `this virtualenv
+bug <https://github.com/pypa/virtualenv/issues/53>`__: virtualenv
 doesn’t support paths with spaces.
 
 The easy fix is to recreate the virtualenv in a path without spaces. If
 you can’t do that, then after creating the virtualenv, but before
 activating it, edit the activate, easy_install and pip files in
-``local/bin/`` to escape any spaces in the path.
+``local3/bin/`` to escape any spaces in the path.
 
 For example, in ``activate``, ``VIRTUAL_ENV=".../has space/local"``
 becomes ``VIRTUAL_ENV=".../has\ space/local"``, and in ``pip`` and
 ``easy_install`` the first line changes from
-``#!".../has space/local/bin/python"`` to
-``#!".../has\ space/local/bin/python"``.
+``#!".../has space/local3/bin/python"`` to
+``#!".../has\ space/local3/bin/python"``.
 
 This should get virtualenv to install in the right place. If you do this
-wrong at first, you’ll have installs in
-``/usr/local/lib/python2.7/site-packages`` that you need to delete,
+wrong at first, you’ll have installs in eg
+``/usr/local/lib/python3.7/site-packages`` that you need to delete,
 since they’ll prevent virtualenv from installing into the local
 ``site-packages``.
-
-1. If you’re using Twitter, and ``import requests`` or something similar
-   fails with:
-
-   ::
-
-      ImportError: cannot import name certs
-
-   *or* you see an exception like:
-
-   ::
-
-      File ".../site-packages/tweepy/auth.py", line 68, in _get_request_token
-        raise TweepError(e)
-      TweepError: must be _socket.socket, not socket
-
-   …you need to `configure App Engine’s
-   SSL <https://cloud.google.com/appengine/docs/python/sockets/ssl_support>`__.
-   Add this to your ``app.yaml``:
-
-   ::
-
-      libraries:
-      - name: ssl
-        version: latest
-
-If you use dev_appserver, you’ll also need to `apply this
-workaround <https://code.google.com/p/googleappengine/issues/detail?id=9246>`__
-(`more <http://stackoverflow.com/questions/16192916/importerror-no-module-named-ssl-with-dev-appserver-py-from-google-app-engine/16937668#16937668>`__
-`background <http://bekt.github.io/p/gae-ssl/>`__). Annoying, I know.
 
 1. If you see errors importing or using ``tweepy``, it may be because
    ``six.py`` isn’t installed. Try ``pip install six`` manually.
@@ -315,20 +281,6 @@ workaround <https://code.google.com/p/googleappengine/issues/detail?id=9246>`__
    happens to you so we can debug!
 
 2. If you get an error like this:
-
-   ::
-
-        File "oauth_dropins/webutil/test/__init__.py", line 5, in <module>
-          import dev_appserver
-      ImportError: No module named dev_appserver
-      ...
-      InstallationError: Command python setup.py egg_info failed with error code 1 in /home/singpolyma/src/bridgy/src/oauth-dropins-master
-
-…you either don’t have ``/usr/local/google_appengine`` in your
-``PYTHONPATH``, or you have it as a relative directory. pip requires
-fully qualified directories.
-
-1. If you get an error like this:
 
    ::
 
@@ -346,6 +298,47 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 
 Changelog
 ---------
+
+3.0 - unreleased
+~~~~~~~~~~~~~~~~
+
+*Breaking changes:* \* Add support for the `App Engine Standard Python 3
+runtime <https://cloud.google.com/appengine/docs/standard/python3/>`__
+and drops support for the `Python 2
+runtime <https://cloud.google.com/appengine/docs/standard/python/>`__.
+See this `list of
+differences <https://cloud.google.com/appengine/docs/standard/python3/python-differences>`__
+for more details. \* Blogger: \* Drop ``http()`` method (which returned
+an ``httplib2.Http``). \* Google: \* Replace ``GoogleAuth`` with the new
+``GoogleUser`` NDB model class, which `doesn’t depend on
+oauth2client <https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html>`__.
+\* Drop ``http()`` method (which returned an ``httplib2.Http``). \* Drop
+``webutil.handlers.memcache_response()`` since the Python 3 runtime
+doesn’t include memcache. \* Drop ``webutil.handlers.TemplateHandler``
+support for ``webapp2.template`` via ``USE_APPENGINE_WEBAPP``, since the
+Python 3 runtime doesn’t include ``webapp2`` built in.
+
+.. _unreleased-1:
+
+2.3 - unreleased
+~~~~~~~~~~~~~~~~
+
+*Breaking changes:* \* Remove ``cache`` and ``fail_cache_time_secs``
+kwargs from ``webutil.util.follow_redirects()``. Caching is now built
+in. You can bypass the cache with ``follow_redirects.__wrapped__()``.
+`Details. <https://cachetools.readthedocs.io/en/stable/#cachetools.cached>`__
+
+Non-breaking changes: \* Google: \* The ``GoogleAuth`` NDB model class
+is deprecated, since it depends on
+`oauth2client <https://github.com/googleapis/oauth2client>`__, `which is
+also
+deprecated <https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html>`__.
+``GoogleAuth`` will be replaced in 3.0 with a new ``GoogleUser`` NDB
+model class. \* Python 2 App Engine features in ``webutil`` are
+deprecated: \* ``handlers.memcache_response()`` \*
+``handlers.TemplateHandler`` support for ``webapp2.template`` via
+``USE_APPENGINE_WEBAPP``. \* Add new ``outer_classes`` kwarg to
+``button_html()`` for the outer ``<div>``, eg as Bootstrap columns.
 
 2.2 - 2019-11-01
 ~~~~~~~~~~~~~~~~
@@ -541,32 +534,33 @@ Mostly just internal changes to webutil to support granary v1.9.
 Development
 -----------
 
-You’ll need the `App Engine Python
-SDK <https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python>`__
-version 1.9.15 or later (for
-`vendor <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__
-support) or the `Google Cloud
-SDK <https://cloud.google.com/sdk/gcloud/>`__ (aka ``gcloud``) with the
+First, fork and clone this repo. Then, you’ll need the `Google Cloud
+SDK <https://cloud.google.com/sdk/>`__ with the
 ``gcloud-appengine-python`` and ``gcloud-appengine-python-extras``
 `components <https://cloud.google.com/sdk/docs/components#additional_components>`__.
-Add them to your ``$PYTHONPATH``, e.g.
-``export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine``, and then
-run:
+Once you have them, set up your environment by running these commands in
+the root directory:
 
 .. code:: shell
 
    git submodule init
    git submodule update
-   virtualenv local
-   source local/bin/activate
+   python3 -m venv local3
+   source local3/bin/activate
    pip install -r requirements.txt
-
-   # We install gdata in source mode, and App Engine doesn't follow .egg-link
-   # files, so add a symlink to it.
-   ln -s ../../../src/gdata/src/gdata local/lib/python2.7/site-packages/gdata
-   ln -s ../../../src/gdata/src/atom local/lib/python2.7/site-packages/atom
-
    python setup.py test
+
+Run the demo app locally `in
+dev_appserver.py <https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app#local-dev-server>`__
+(`so that static files
+work <https://groups.google.com/d/topic/google-appengine/BJDE8y2KISM/discussion>`__)
+with:
+
+.. code:: shell
+
+   dev_appserver.py --log_level debug --enable_host_checking false \
+     --support_datastore_emulator --datastore_emulator_port=8089 \
+     --application=oauth-dropins app.yaml
 
 Most dependencies are clean, but we’ve made patches to
 `gdata-python-client <https://github.com/snarfed/gdata-python-client>`__
@@ -578,7 +572,7 @@ its submodule repo for, make sure the patches are included!
 
 To deploy:
 
-``python -m unittest discover && git push && gcloud -q app deploy oauth-dropins *.yaml``
+``gcloud -q app deploy oauth-dropins *.yaml``
 
 The docs are built with `Sphinx <http://sphinx-doc.org/>`__, including
 `apidoc <http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html>`__,
@@ -589,7 +583,7 @@ Configuration is in
 To build them, first install Sphinx with ``pip install sphinx``. (You
 may want to do this outside your virtualenv; if so, you’ll need to
 reconfigure it to see system packages with
-``virtualenv --system-site-packages local``.) Then, run
+``python3 -m venv --system-site-packages local3``.) Then, run
 `docs/build.sh <https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh>`__.
 
 Release instructions
@@ -599,11 +593,8 @@ Here’s how to package, test, and ship a new release. (Note that this is
 `largely duplicated in granary’s readme
 too <https://github.com/snarfed/granary#release-instructions>`__.)
 
-1.  Run the unit tests. \`sh source local/bin/activate.csh python2 -m
-    unittest discover deactivate
-
-    source local3/bin/activate.csh python3 -m unittest
-    oauth_dropins.webutil.tests.test_util deactivate \``\`
+1.  Run the unit tests.
+    ``sh  source local3/bin/activate.csha  gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &  sleep 2s  DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \    python3 -m unittest discover  kill %1  deactivate``
 2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``
@@ -613,27 +604,11 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
     ``./docs/build.sh``.
 4.  ``git commit -am 'release vX.Y'``
 5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
-    ``sh  python3 setup.py clean build sdist  setenv ver X.Y  source local/bin/activate.csh  twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz``
-6.  Install from test.pypi.org, both Python 2 and 3.
-    ``sh  cd /tmp  virtualenv local  source local/bin/activate.csh  # mf2py 1.1.2 on test.pypi.org is broken :(  pip install mf2py  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
+    ``sh  python3 setup.py clean build sdist  setenv ver X.Y  source local3/bin/activate.csh  twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz``
+6.  Install from test.pypi.org.
     ``sh  python3 -m venv local3  source local3/bin/activate.csh  pip3 install --upgrade pip  # mf2py 1.1.2 on test.pypi.org is broken :(  pip3 install mf2py  pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
-7.  Smoke test that the code trivially loads and runs, in both Python 2
-    and 3.
-
-    .. code:: sh
-
-        source local/bin/activate.csh
-        python2
-        # run test code below
-        deactivate
-
-    .. code:: sh
-
-       source local3/bin/activate.csh
-       python3
-       # run test code below
-       deactivate
-
+7.  Smoke test that the code trivially loads and runs.
+    ``sh  source local3/bin/activate.csh  python3  # run test code below  deactivate``
     Test code to paste into the interpreter:
     ``py  from oauth_dropins.webutil import util  util.__file__  util.UrlCanonicalizer()('http://asdf.com')  # should print 'https://asdf.com/'  exit()``
 8.  Tag the release in git. In the tag message editor, delete the
