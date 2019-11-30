@@ -82,7 +82,9 @@ class StartHandler(Scopes, handlers.StartHandler):
     auth_url, state = session.authorization_url(
       AUTH_CODE_URL,
       # ask for a refresh token so we can get an access token offline
-      access_type='offline', prompt='consent')
+      access_type='offline', prompt='consent',
+      # https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth
+      include_granted_scopes='true')
     return auth_url
 
 
@@ -92,12 +94,16 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
   def get(self):
     with ndb_client.context():
       # handle errors
+      state = self.request.get('state')
       error = self.request.get('error')
       desc = self.request.get('error_description')
       if error:
         msg = 'Error: %s: %s' % (error, desc)
         logging.info(msg)
-        raise exc.HTTPBadRequest(msg)
+        if error == 'access_denied':
+          return self.finish(None, state=state)
+        else:
+          raise exc.HTTPBadRequest(msg)
 
       # extract auth code and request access token
       session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
@@ -121,4 +127,4 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
       user = GoogleUser(id=user_json['sub'], user_json=json_dumps(user_json),
                         token_json=json_dumps(session.token))
       user.put()
-      self.finish(user, state=self.request.get('state'))
+      self.finish(user, state=state)

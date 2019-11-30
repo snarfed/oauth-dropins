@@ -22,7 +22,7 @@ from oauth_dropins.webutil import handlers
 
 SITES = {}  # maps module name to module
 for name in (
-    # 'blogger_v2',
+    'blogger_v2',
     'disqus',
     'dropbox',
     'facebook',

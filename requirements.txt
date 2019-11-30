@@ -11,7 +11,6 @@ Jinja2
 mf2py>=1.1.2
 mf2util
 mox3>=0.24.0
-oauth2client>=4.1.1
 oauthlib
 python-tumblpy
 requests-oauthlib
