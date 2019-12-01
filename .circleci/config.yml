@@ -11,9 +11,6 @@ jobs:
       - image: google/cloud-sdk
       - image: circleci/python:2.7
 
-    environment:
-      - PYTHONPATH: /usr/lib/google-cloud-sdk/platform/google_appengine
-
     steps:
       - checkout
 
@@ -34,35 +31,20 @@ jobs:
             apt-get install -y python3-venv python3-dev
             python3 -m venv local3
             . local3/bin/activate
-            pip install -r requirements.freeze.txt -c requirements.freeze.py3.txt
+            pip install -r requirements.freeze.txt
 
       - run:
           name: Test Python 3
           command: |
             . local3/bin/activate
-            PYTHONPATH= python3 -m unittest -v oauth_dropins.webutil.tests.test_util
-
-      - run:
-          name: Python 2 dependencies
-          command: |
-            pip install virtualenv
-            virtualenv local
-            . local/bin/activate
-            pip install -r requirements.freeze.txt
-            pip install coverage coveralls
-
-      - run:
-          name: Test Python 2
-          command: |
-            . local/bin/activate
-            python2 -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v -p 'test_*.py'
-            python2 -m coverage html -d /tmp/coverage_html
-            if [ "$COVERALLS_REPO_TOKEN" != "" ]; then coveralls || true; fi
+            CLOUDSDK_CORE_PROJECT=oauth-dropins gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &
+            sleep 2s
+            DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins python3 -m unittest discover -v
+            kill %1
 
       - save_cache:
           key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
           paths:
-            - "local"
             - "local3"
 
       - store_artifacts:
