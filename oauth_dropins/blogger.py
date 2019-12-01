@@ -74,7 +74,10 @@ class BloggerUser(models.BaseAuth):
   def _api(self):
     """Returns a gdata.blogger.client.BloggerClient.
     """
-    return BloggerClient(access_token=self.access_token())
+    return BloggerClient(auth_token=self)
+
+  def modify_token(self, http_request):
+    http_request.headers['Authorization'] = 'Bearer %s' % self.access_token()
 
 
 class Scopes(object):

@@ -1,15 +1,10 @@
-# https://cloud.google.com/appengine/docs/standard/python/config/appref
+# https://cloud.google.com/appengine/docs/standard/python3/config/appref
 
 # application: oauth-dropins
 # version: 1
-threadsafe: true
-api_version: 1
 default_expiration: 1h
 runtime: python37
 entrypoint: gunicorn -b :$PORT app:application
-
-includes:
-  - oauth_dropins/webutil/app.common.yaml
 
 # background: https://github.com/snarfed/bridgy/issues/578
 automatic_scaling:
@@ -26,5 +21,5 @@ handlers:
   upload: oauth_dropins/static/favicon.ico
 
 - url: .*
-  script: app.application
+  script: auto
   secure: always

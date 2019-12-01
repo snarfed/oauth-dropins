@@ -15,6 +15,7 @@ google-api-python-client==1.7.11
 google-auth-httplib2==0.0.3
 google-auth==1.6.3
 google-cloud-ndb==0.2.0
+gunicorn==19.10.0
 html5lib==1.0.1
 httplib2==0.14.0
 humanize==0.5.1
