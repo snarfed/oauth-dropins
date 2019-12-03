@@ -294,7 +294,7 @@ since they’ll prevent virtualenv from installing into the local
 1833 <https://github.com/pypa/pip/issues/1833>`__. Are you passing
 ``-t`` to ``pip install``? Use the virtualenv instead, it’s your friend.
 If you really want ``-t``, try removing the ``-e`` from the lines in
-``requirements.freeze.txt`` that have it.
+``requirements.txt`` that have it.
 
 Changelog
 ---------

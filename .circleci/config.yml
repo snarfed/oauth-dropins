@@ -9,18 +9,17 @@ jobs:
     docker:
       # https://circleci.com/docs/2.0/google-container-engine/#selecting-a-base-image
       - image: google/cloud-sdk
-      - image: circleci/python:2.7
 
     steps:
       - checkout
 
       - restore_cache:
-          key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
+          key: venv-{{ .Branch }}-{{ checksum "requirements.txt" }}
 
       - run:
           name: Base dependencies
           command: |
-            apt-get install -y python3 google-cloud-sdk-app-engine-python-extras
+            apt-get install -y python3
             git submodule sync
             git submodule update --init
 
@@ -31,7 +30,8 @@ jobs:
             apt-get install -y python3-venv python3-dev
             python3 -m venv local3
             . local3/bin/activate
-            pip install -r requirements.freeze.txt
+            pip install -U -r requirements.txt
+            pip install coverage coveralls
 
       - run:
           name: Test Python 3
@@ -43,7 +43,7 @@ jobs:
             kill %1
 
       - save_cache:
-          key: venv-{{ .Branch }}-{{ checksum "requirements.freeze.txt" }}
+          key: venv-{{ .Branch }}-{{ checksum "requirements.txt" }}
           paths:
             - "local3"
 
