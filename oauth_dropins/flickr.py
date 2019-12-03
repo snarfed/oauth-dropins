@@ -16,6 +16,7 @@ import oauthlib.oauth1
 import urllib.parse, urllib.request
 
 import appengine_config
+from appengine_config import ndb_client
 
 from google.cloud import ndb
 from webob import exc
@@ -138,38 +139,39 @@ class CallbackHandler(handlers.CallbackHandler):
   front page.
   """
   def get(self):
-    oauth_token = self.request.get('oauth_token')
-    oauth_verifier = self.request.get('oauth_verifier')
-    request_token = models.OAuthRequestToken.get_by_id(oauth_token)
+    with ndb_client.context():
+      oauth_token = self.request.get('oauth_token')
+      oauth_verifier = self.request.get('oauth_verifier')
+      request_token = models.OAuthRequestToken.get_by_id(oauth_token)
 
-    client = oauthlib.oauth1.Client(
-      appengine_config.FLICKR_APP_KEY,
-      client_secret=appengine_config.FLICKR_APP_SECRET,
-      resource_owner_key=oauth_token,
-      resource_owner_secret=request_token.token_secret,
-      verifier=oauth_verifier)
+      client = oauthlib.oauth1.Client(
+        appengine_config.FLICKR_APP_KEY,
+        client_secret=appengine_config.FLICKR_APP_SECRET,
+        resource_owner_key=oauth_token,
+        resource_owner_secret=request_token.token_secret,
+        verifier=oauth_verifier)
 
-    uri, headers, body = client.sign(ACCESS_TOKEN_URL)
-    try:
-      resp = util.urlopen(urllib.request.Request(uri, body, headers))
-    except BaseException as e:
-      util.interpret_http_exception(e)
-      raise
-    parsed = dict(urllib.parse.parse_qs(resp.read()))
-    access_token = parsed.get('oauth_token')[0]
-    access_secret = parsed.get('oauth_token_secret')[0]
-    user_nsid = parsed.get('user_nsid')[0]
+      uri, headers, body = client.sign(ACCESS_TOKEN_URL)
+      try:
+        resp = util.urlopen(urllib.request.Request(uri, body, headers))
+      except BaseException as e:
+        util.interpret_http_exception(e)
+        raise
+      parsed = dict(urllib.parse.parse_qs(resp.read().decode()))
+      access_token = parsed.get('oauth_token')[0]
+      access_secret = parsed.get('oauth_token_secret')[0]
+      user_nsid = parsed.get('user_nsid')[0]
 
-    if access_token is None:
-      raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
+      if access_token is None:
+        raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
 
-    flickr_auth = FlickrAuth(id=user_nsid,
-                             token_key=access_token,
-                             token_secret=access_secret)
-    user_json = flickr_auth.call_api_method('flickr.people.getInfo',
-                                            {'user_id': user_nsid})
+      flickr_auth = FlickrAuth(id=user_nsid,
+                               token_key=access_token,
+                               token_secret=access_secret)
+      user_json = flickr_auth.call_api_method('flickr.people.getInfo',
+                                              {'user_id': user_nsid})
 
-    flickr_auth.user_json = json_dumps(user_json)
-    flickr_auth.put()
+      flickr_auth.user_json = json_dumps(user_json)
+      flickr_auth.put()
 
-    self.finish(flickr_auth, state=self.request.get('state'))
+      self.finish(flickr_auth, state=self.request.get('state'))

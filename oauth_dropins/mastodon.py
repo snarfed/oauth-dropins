@@ -129,7 +129,8 @@ class MastodonAuth(BaseAuth):
 
   def instance(self):
     """Returns the instance base URL, eg https://mastodon.social/."""
-    return self.app.get().instance
+    with ndb_client.context():
+      return self.app.get().instance
 
   def username(self):
     """Returns the user's username, eg ryan."""

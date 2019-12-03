@@ -7,7 +7,6 @@ extras==1.0.0
 fixtures==3.0.0
 future==0.17.1
 -e git+https://github.com/dvska/gdata-python3.git#egg=gdata
-google-api-python-client==1.7.11
 google-auth-httplib2==0.0.3
 google-auth==1.6.3
 google-cloud-ndb==0.2.0

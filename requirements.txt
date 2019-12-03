@@ -3,7 +3,6 @@
 beautifulsoup4
 cachetools
 future>=0.16.0
-google-api-python-client>=1.7.4
 google-cloud-ndb
 gunicorn
 httplib2
