@@ -1,22 +1,7 @@
-# Keep in sync with setup.py's install_requires!
 -e git+https://github.com/dvska/gdata-python3.git#egg=gdata
-beautifulsoup4~=4.8
-cachetools~=3.1
-future~=0.17
-gdata-python3~=3.0
-google-cloud-ndb~=0.2
 gunicorn~=20.0
-humanize~=0.5
-jinja2~=2.10
-lxml~=4.4
-mf2py~=1.1,>=1.1.2
-mf2util~=0.5
 mox3~=0.28
-oauthlib~=3.1
-python-tumblpy~=1.1
-requests-oauthlib
-requests~=2.10
-tweepy~=3.7
-ujson~=1.35
-urllib3~=1.14
-webapp2>=3.0.0b1
+
+# this includes everything in setup.py's install_requires.
+# https://caremad.io/posts/2013/07/setup-vs-requirement/#developing-reusable-things-or-how-not-to-repeat-yourself
+-e .
