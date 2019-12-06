@@ -24,7 +24,6 @@ import logging
 import urllib.parse, urllib.request
 
 import appengine_config
-from appengine_config import ndb_client
 
 from google.cloud import ndb
 from webob import exc
@@ -122,49 +121,48 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    with ndb_client.context():
-      # handle errors
-      error = self.request.get('error')
-      if error:
-        error_description = urllib.parse.unquote_plus(
-          self.request.get('error_description', ''))
-        if error == 'access_denied':
-          logging.info('User declined: %s', error_description)
-          self.finish(None, state=self.request.get('state'))
-          return
-        else:
-          raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
+    # handle errors
+    error = self.request.get('error')
+    if error:
+      error_description = urllib.parse.unquote_plus(
+        self.request.get('error_description', ''))
+      if error == 'access_denied':
+        logging.info('User declined: %s', error_description)
+        self.finish(None, state=self.request.get('state'))
+        return
+      else:
+        raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
 
-      # extract auth code and request access token
-      auth_code = util.get_required_param(self, 'code')
-      data = {
-        'code': auth_code,
-        'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-        'client_secret': appengine_config.WORDPRESS_CLIENT_SECRET,
-        # redirect_uri here must be the same in the oauth code request!
-        # (the value here doesn't actually matter since it's requested server side.)
-        'redirect_uri': self.request.path_url,
-        'grant_type': 'authorization_code',
-      }
-      resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
-      logging.debug('Access token response: %s', resp.text)
-      # TODO: handle errors, same JSON schema/fields as above
+    # extract auth code and request access token
+    auth_code = util.get_required_param(self, 'code')
+    data = {
+      'code': auth_code,
+      'client_id': appengine_config.WORDPRESS_CLIENT_ID,
+      'client_secret': appengine_config.WORDPRESS_CLIENT_SECRET,
+      # redirect_uri here must be the same in the oauth code request!
+      # (the value here doesn't actually matter since it's requested server side.)
+      'redirect_uri': self.request.path_url,
+      'grant_type': 'authorization_code',
+    }
+    resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
+    logging.debug('Access token response: %s', resp.text)
+    # TODO: handle errors, same JSON schema/fields as above
 
-      try:
-        resp = json_loads(resp.text)
-        blog_id = resp['blog_id']
-        blog_url = resp['blog_url']
-        blog_domain = util.domain_from_link(resp['blog_url'])
-        access_token = resp['access_token']
-      except:
-        logging.exception('Could not decode JSON')
-        raise
+    try:
+      resp = json_loads(resp.text)
+      blog_id = resp['blog_id']
+      blog_url = resp['blog_url']
+      blog_domain = util.domain_from_link(resp['blog_url'])
+      access_token = resp['access_token']
+    except:
+      logging.exception('Could not decode JSON')
+      raise
 
-      auth = WordPressAuth(id=blog_domain,
-                           blog_id=blog_id,
-                           blog_url=blog_url,
-                           access_token_str=access_token)
-      auth.user_json = auth.urlopen(API_USER_URL).read()
-      auth.put()
+    auth = WordPressAuth(id=blog_domain,
+                         blog_id=blog_id,
+                         blog_url=blog_url,
+                         access_token_str=access_token)
+    auth.user_json = auth.urlopen(API_USER_URL).read()
+    auth.put()
 
-      self.finish(auth, state=self.request.get('state'))
+    self.finish(auth, state=self.request.get('state'))

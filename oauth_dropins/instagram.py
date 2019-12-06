@@ -16,7 +16,6 @@ import logging
 import urllib.parse
 
 import appengine_config
-from appengine_config import ndb_client
 
 from google.cloud import ndb
 from webob import exc
@@ -109,43 +108,42 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    with ndb_client.context():
-      if facebook.CallbackHandler.handle_error(self):
-        return
+    if facebook.CallbackHandler.handle_error(self):
+      return
 
-      # http://instagram.com/developer/authentication/
-      auth_code = util.get_required_param(self, 'code')
-      data = {
-        'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
-        'client_secret': appengine_config.INSTAGRAM_CLIENT_SECRET,
-        'code': auth_code,
-        'redirect_uri': self.request_url_with_state(),
-        'grant_type': 'authorization_code',
-      }
+    # http://instagram.com/developer/authentication/
+    auth_code = util.get_required_param(self, 'code')
+    data = {
+      'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
+      'client_secret': appengine_config.INSTAGRAM_CLIENT_SECRET,
+      'code': auth_code,
+      'redirect_uri': self.request_url_with_state(),
+      'grant_type': 'authorization_code',
+    }
 
-      try:
-        resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
-        resp.raise_for_status()
-      except BaseException as e:
-        util.interpret_http_exception(e)
-        raise
+    try:
+      resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
+      resp.raise_for_status()
+    except BaseException as e:
+      util.interpret_http_exception(e)
+      raise
 
-      try:
-        data = json_loads(resp.text)
-      except (ValueError, TypeError):
-        logging.exception('Bad response:\n%s', resp)
-        raise exc.HttpBadRequest('Bad Instagram response to access token request')
+    try:
+      data = json_loads(resp.text)
+    except (ValueError, TypeError):
+      logging.exception('Bad response:\n%s', resp)
+      raise exc.HttpBadRequest('Bad Instagram response to access token request')
 
-      if 'error_type' in resp:
-        error_class = exc.status_map[data.get('code', 500)]
-        raise error_class(data.get('error_message'))
+    if 'error_type' in resp:
+      error_class = exc.status_map[data.get('code', 500)]
+      raise error_class(data.get('error_message'))
 
-      access_token = data['access_token']
-      username = data['user']['username']
+    access_token = data['access_token']
+    username = data['user']['username']
 
-      auth = InstagramAuth(id=username,
-                           auth_code=auth_code,
-                           access_token_str=access_token,
-                           user_json=json_dumps(data['user']))
-      auth.put()
-      self.finish(auth, state=self.request.get('state'))
+    auth = InstagramAuth(id=username,
+                         auth_code=auth_code,
+                         access_token_str=access_token,
+                         user_json=json_dumps(data['user']))
+    auth.put()
+    self.finish(auth, state=self.request.get('state'))

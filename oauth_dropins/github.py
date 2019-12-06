@@ -12,7 +12,6 @@ import logging
 import urllib.parse
 
 import appengine_config
-from appengine_config import ndb_client
 
 from google.cloud import ndb
 from webob import exc
@@ -142,48 +141,47 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    with ndb_client.context():
-      # handle errors
-      error = self.request.get('error')
-      if error:
-        if error == 'access_denied':
-          logging.info('User declined')
-          self.finish(None, state=self.request.get('state'))
-          return
-        else:
-          msg = 'Error: %s: %s' % (error, self.request.get('error_description'))
-          logging.info(msg)
-          raise exc.HTTPBadRequest(msg)
-
-      # extract auth code and request access token
-      auth_code = util.get_required_param(self, 'code')
-      data = {
-        'code': auth_code,
-        'client_id': appengine_config.GITHUB_CLIENT_ID,
-        'client_secret': appengine_config.GITHUB_CLIENT_SECRET,
-        # redirect_uri here must be the same in the oauth code request!
-        # (the value here doesn't actually matter since it's requested server side.)
-        'redirect_uri': self.request.path_url,
-        }
-      resp = util.requests_post(GET_ACCESS_TOKEN_URL,
-                                data=urllib.parse.urlencode(data)).text
-      logging.debug('Access token response: %s', resp)
-
-      resp = urllib.parse.parse_qs(resp)
-
-      error = resp.get('error')
-      if error:
-        msg = 'Error: %s: %s' % (error[0], resp.get('error_description'))
+    # handle errors
+    error = self.request.get('error')
+    if error:
+      if error == 'access_denied':
+        logging.info('User declined')
+        self.finish(None, state=self.request.get('state'))
+        return
+      else:
+        msg = 'Error: %s: %s' % (error, self.request.get('error_description'))
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
-      access_token = resp['access_token'][0]
-      resp = GitHubAuth(access_token_str=access_token).post(
-          API_GRAPHQL, json=GRAPHQL_USER).json()
-      logging.debug('GraphQL data.viewer response: %s', resp)
-      user_json = resp['data']['viewer']
-      auth = GitHubAuth(id=user_json['login'], access_token_str=access_token,
-                        user_json=json_dumps(user_json))
-      auth.put()
+    # extract auth code and request access token
+    auth_code = util.get_required_param(self, 'code')
+    data = {
+      'code': auth_code,
+      'client_id': appengine_config.GITHUB_CLIENT_ID,
+      'client_secret': appengine_config.GITHUB_CLIENT_SECRET,
+      # redirect_uri here must be the same in the oauth code request!
+      # (the value here doesn't actually matter since it's requested server side.)
+      'redirect_uri': self.request.path_url,
+      }
+    resp = util.requests_post(GET_ACCESS_TOKEN_URL,
+                              data=urllib.parse.urlencode(data)).text
+    logging.debug('Access token response: %s', resp)
 
-      self.finish(auth, state=self.request.get('state'))
+    resp = urllib.parse.parse_qs(resp)
+
+    error = resp.get('error')
+    if error:
+      msg = 'Error: %s: %s' % (error[0], resp.get('error_description'))
+      logging.info(msg)
+      raise exc.HTTPBadRequest(msg)
+
+    access_token = resp['access_token'][0]
+    resp = GitHubAuth(access_token_str=access_token).post(
+        API_GRAPHQL, json=GRAPHQL_USER).json()
+    logging.debug('GraphQL data.viewer response: %s', resp)
+    user_json = resp['data']['viewer']
+    auth = GitHubAuth(id=user_json['login'], access_token_str=access_token,
+                      user_json=json_dumps(user_json))
+    auth.put()
+
+    self.finish(auth, state=self.request.get('state'))

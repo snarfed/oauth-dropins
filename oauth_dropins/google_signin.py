@@ -13,7 +13,6 @@ standard_library.install_aliases()
 import logging
 
 import appengine_config
-from appengine_config import ndb_client
 
 from google.cloud import ndb
 from requests_oauthlib import OAuth2Session
@@ -92,39 +91,38 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
   """Finishes the OAuth flow."""
 
   def get(self):
-    with ndb_client.context():
-      # handle errors
-      state = self.request.get('state')
-      error = self.request.get('error')
-      desc = self.request.get('error_description')
-      if error:
-        msg = 'Error: %s: %s' % (error, desc)
-        logging.info(msg)
-        if error == 'access_denied':
-          return self.finish(None, state=state)
-        else:
-          raise exc.HTTPBadRequest(msg)
+    # handle errors
+    state = self.request.get('state')
+    error = self.request.get('error')
+    desc = self.request.get('error_description')
+    if error:
+      msg = 'Error: %s: %s' % (error, desc)
+      logging.info(msg)
+      if error == 'access_denied':
+        return self.finish(None, state=state)
+      else:
+        raise exc.HTTPBadRequest(msg)
 
-      # extract auth code and request access token
-      session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
-                              redirect_uri=self.request.path_url)
-      session.fetch_token(ACCESS_TOKEN_URL,
-                          client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-                          authorization_response=self.request.url)
+    # extract auth code and request access token
+    session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
+                            redirect_uri=self.request.path_url)
+    session.fetch_token(ACCESS_TOKEN_URL,
+                        client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
+                        authorization_response=self.request.url)
 
-      # get OpenID Connect user info
-      # https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
-      resp = session.get(OPENID_CONNECT_USERINFO)
-      try:
-        resp.raise_for_status()
-      except BaseException as e:
-        util.interpret_http_exception(e)
-        raise
+    # get OpenID Connect user info
+    # https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+    resp = session.get(OPENID_CONNECT_USERINFO)
+    try:
+      resp.raise_for_status()
+    except BaseException as e:
+      util.interpret_http_exception(e)
+      raise
 
-      user_json = json_loads(resp.text)
-      logging.info('Got one person', user_json)
+    user_json = json_loads(resp.text)
+    logging.info('Got one person', user_json)
 
-      user = GoogleUser(id=user_json['sub'], user_json=json_dumps(user_json),
-                        token_json=json_dumps(session.token))
-      user.put()
-      self.finish(user, state=state)
+    user = GoogleUser(id=user_json['sub'], user_json=json_dumps(user_json),
+                      token_json=json_dumps(session.token))
+    user.put()
+    self.finish(user, state=state)

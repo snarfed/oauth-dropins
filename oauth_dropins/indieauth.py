@@ -10,7 +10,6 @@ import logging
 import urllib.parse
 
 import appengine_config
-from appengine_config import ndb_client
 
 from google.cloud import ndb
 import mf2util
@@ -156,35 +155,34 @@ class CallbackHandler(handlers.CallbackHandler):
   """The callback handler from the IndieAuth request. POSTs back to the
   auth endpoint to verify the authentication code."""
   def get(self):
-    with ndb_client.context():
-      code = util.get_required_param(self, 'code')
-      state = util.decode_oauth_state(util.get_required_param(self, 'state'))
+    code = util.get_required_param(self, 'code')
+    state = util.decode_oauth_state(util.get_required_param(self, 'state'))
 
-      endpoint = state.get('endpoint')
-      me = state.get('me')
-      if not endpoint or not me:
-        raise exc.HTTPBadRequest("invalid state parameter")
+    endpoint = state.get('endpoint')
+    me = state.get('me')
+    if not endpoint or not me:
+      raise exc.HTTPBadRequest("invalid state parameter")
 
-      state = state.get('state') or ''
-      validate_resp = util.requests_post(endpoint, data={
-        'me': me,
-        'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
-        'code': code,
-        'redirect_uri': self.request.path_url,
-        'state': state,
-      })
+    state = state.get('state') or ''
+    validate_resp = util.requests_post(endpoint, data={
+      'me': me,
+      'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
+      'code': code,
+      'redirect_uri': self.request.path_url,
+      'state': state,
+    })
 
-      if validate_resp.status_code // 100 == 2:
-        data = util.sniff_json_or_form_encoded(validate_resp.text)
-        if data.get('me'):
-          verified = data.get('me')
-          user_json = build_user_json(verified)
-          indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
-          indie_auth.put()
-          self.finish(indie_auth, state=state)
-        else:
-          raise exc.HTTPBadRequest(
-            'Verification response missing required "me" field')
+    if validate_resp.status_code // 100 == 2:
+      data = util.sniff_json_or_form_encoded(validate_resp.text)
+      if data.get('me'):
+        verified = data.get('me')
+        user_json = build_user_json(verified)
+        indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
+        indie_auth.put()
+        self.finish(indie_auth, state=state)
       else:
-        raise exc.HTTPBadRequest('IndieAuth verification failed: %s %s' %
-                                 (validate_resp.status_code, validate_resp.text))
+        raise exc.HTTPBadRequest(
+          'Verification response missing required "me" field')
+    else:
+      raise exc.HTTPBadRequest('IndieAuth verification failed: %s %s' %
+                               (validate_resp.status_code, validate_resp.text))

@@ -155,42 +155,41 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    with ndb_client.context():
-      if CallbackHandler.handle_error(self):
-        return
+    if CallbackHandler.handle_error(self):
+      return
 
-      auth_code = util.get_required_param(self, 'code')
-      url = GET_ACCESS_TOKEN_URL % {
-        'auth_code': auth_code,
-        'client_id': appengine_config.FACEBOOK_APP_ID,
-        'client_secret': appengine_config.FACEBOOK_APP_SECRET,
-        'redirect_uri': urllib.parse.quote_plus(self.request.path_url),
-        }
-      try:
-        resp = json_loads(util.urlopen(url).read())
-      except urllib.error.HTTPError as e:
-        logging.error(e.read())
-        raise
+    auth_code = util.get_required_param(self, 'code')
+    url = GET_ACCESS_TOKEN_URL % {
+      'auth_code': auth_code,
+      'client_id': appengine_config.FACEBOOK_APP_ID,
+      'client_secret': appengine_config.FACEBOOK_APP_SECRET,
+      'redirect_uri': urllib.parse.quote_plus(self.request.path_url),
+      }
+    try:
+      resp = json_loads(util.urlopen(url).read())
+    except urllib.error.HTTPError as e:
+      logging.error(e.read())
+      raise
 
-      logging.debug('Access token response: %s', resp)
-      access_token = resp['access_token']
+    logging.debug('Access token response: %s', resp)
+    access_token = resp['access_token']
 
-      user = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
-      logging.debug('User info response: %s', user)
-      user_id = json_loads(user)['id']
+    user = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
+    logging.debug('User info response: %s', user)
+    user_id = json_loads(user)['id']
 
-      pages = json_dumps(json_loads(models.BaseAuth.urlopen_access_token(
-        API_PAGES_URL, access_token).read()).get('data'))
-      logging.debug('Pages response: %s', pages)
+    pages = json_dumps(json_loads(models.BaseAuth.urlopen_access_token(
+      API_PAGES_URL, access_token).read()).get('data'))
+    logging.debug('Pages response: %s', pages)
 
-      auth = FacebookAuth(id=user_id,
-                          type='user',
-                          user_json=user,
-                          pages_json=pages,
-                          auth_code=auth_code,
-                          access_token_str=access_token)
-      auth.put()
-      self.finish(auth, state=self.request.get('state'))
+    auth = FacebookAuth(id=user_id,
+                        type='user',
+                        user_json=user,
+                        pages_json=pages,
+                        auth_code=auth_code,
+                        access_token_str=access_token)
+    auth.put()
+    self.finish(auth, state=self.request.get('state'))
 
   @staticmethod
   def handle_error(handler):

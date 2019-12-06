@@ -12,7 +12,6 @@ import logging
 import urllib.parse
 
 import appengine_config
-from appengine_config import ndb_client
 
 from google.cloud import ndb
 from webob import exc
@@ -135,48 +134,47 @@ class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and stores it.
   """
   def get(self):
-    with ndb_client.context():
-      # handle errors
-      error = self.request.get('error')
-      desc = self.request.get('error_description')
-      if error:
-        # https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin/consumer/context#application-is-rejected
-        if error in ('user_cancelled_login', 'user_cancelled_authorize'):
-          logging.info('User declined: %s', self.request.get('error_description'))
-          self.finish(None, state=self.request.get('state'))
-          return
-        else:
-          msg = 'Error: %s: %s' % (error, desc)
-          logging.info(msg)
-          raise exc.HTTPBadRequest(msg)
-
-      # extract auth code and request access token
-      auth_code = util.get_required_param(self, 'code')
-      data = {
-        'grant_type': 'authorization_code',
-        'code': auth_code,
-        'client_id': appengine_config.LINKEDIN_CLIENT_ID,
-        'client_secret': appengine_config.LINKEDIN_CLIENT_SECRET,
-        # redirect_uri here must be the same in the oauth code request!
-        # (the value here doesn't actually matter since it's requested server side.)
-        'redirect_uri': self.request.path_url,
-        }
-
-      resp = util.requests_post(ACCESS_TOKEN_URL, data=data)
-      resp.raise_for_status()
-      resp = json_loads(resp.text)
-
-      logging.debug('Access token response: %s', resp)
-      if resp.get('serviceErrorCode'):
-        msg = 'Error: %s' % resp
+    # handle errors
+    error = self.request.get('error')
+    desc = self.request.get('error_description')
+    if error:
+      # https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin/consumer/context#application-is-rejected
+      if error in ('user_cancelled_login', 'user_cancelled_authorize'):
+        logging.info('User declined: %s', self.request.get('error_description'))
+        self.finish(None, state=self.request.get('state'))
+        return
+      else:
+        msg = 'Error: %s: %s' % (error, desc)
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
-      access_token = resp['access_token']
-      resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()
-      logging.debug('Profile response: %s', resp)
-      auth = LinkedInAuth(id=resp['id'], access_token_str=access_token,
-                          user_json=json_dumps(resp))
-      auth.put()
+    # extract auth code and request access token
+    auth_code = util.get_required_param(self, 'code')
+    data = {
+      'grant_type': 'authorization_code',
+      'code': auth_code,
+      'client_id': appengine_config.LINKEDIN_CLIENT_ID,
+      'client_secret': appengine_config.LINKEDIN_CLIENT_SECRET,
+      # redirect_uri here must be the same in the oauth code request!
+      # (the value here doesn't actually matter since it's requested server side.)
+      'redirect_uri': self.request.path_url,
+      }
 
-      self.finish(auth, state=self.request.get('state'))
+    resp = util.requests_post(ACCESS_TOKEN_URL, data=data)
+    resp.raise_for_status()
+    resp = json_loads(resp.text)
+
+    logging.debug('Access token response: %s', resp)
+    if resp.get('serviceErrorCode'):
+      msg = 'Error: %s' % resp
+      logging.info(msg)
+      raise exc.HTTPBadRequest(msg)
+
+    access_token = resp['access_token']
+    resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()
+    logging.debug('Profile response: %s', resp)
+    auth = LinkedInAuth(id=resp['id'], access_token_str=access_token,
+                        user_json=json_dumps(resp))
+    auth.put()
+
+    self.finish(auth, state=self.request.get('state'))

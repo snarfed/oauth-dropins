@@ -20,7 +20,6 @@ import logging
 import urllib.parse
 
 import appengine_config
-from appengine_config import ndb_client
 
 from google.cloud import ndb
 from webob import exc
@@ -130,49 +129,48 @@ class CallbackHandler(handlers.CallbackHandler):
   """
 
   def get(self):
-    with ndb_client.context():
-      # handle errors
-      error = self.request.get('error')
-      if error:
-        if error == 'access_denied':
-          logging.info('User declined')
-          self.finish(None, state=self.request.get('state'))
-          return
-        else:
-          raise exc.HTTPBadRequest('Error: %s' % error)
+    # handle errors
+    error = self.request.get('error')
+    if error:
+      if error == 'access_denied':
+        logging.info('User declined')
+        self.finish(None, state=self.request.get('state'))
+        return
+      else:
+        raise exc.HTTPBadRequest('Error: %s' % error)
 
-      # extract auth code and request access token
-      auth_code = util.get_required_param(self, 'code')
-      data = {
-        'code': auth_code,
-        'client_id': appengine_config.MEDIUM_CLIENT_ID,
-        'client_secret': appengine_config.MEDIUM_CLIENT_SECRET,
-        # redirect_uri here must be the same in the oauth code request!
-        # (the value here doesn't actually matter since it's requested server side.)
-        'redirect_uri': self.request.path_url,
-        'grant_type': 'authorization_code',
-      }
-      resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data,
-                                headers={'User-Agent': USER_AGENT})
-      resp.raise_for_status()
-      logging.debug('Access token response: %s', resp.text)
+    # extract auth code and request access token
+    auth_code = util.get_required_param(self, 'code')
+    data = {
+      'code': auth_code,
+      'client_id': appengine_config.MEDIUM_CLIENT_ID,
+      'client_secret': appengine_config.MEDIUM_CLIENT_SECRET,
+      # redirect_uri here must be the same in the oauth code request!
+      # (the value here doesn't actually matter since it's requested server side.)
+      'redirect_uri': self.request.path_url,
+      'grant_type': 'authorization_code',
+    }
+    resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data,
+                              headers={'User-Agent': USER_AGENT})
+    resp.raise_for_status()
+    logging.debug('Access token response: %s', resp.text)
 
-      try:
-        resp = json_loads(resp.text)
-      except:
-        logging.exception('Could not decode JSON')
-        raise
+    try:
+      resp = json_loads(resp.text)
+    except:
+      logging.exception('Could not decode JSON')
+      raise
 
-      errors = resp.get('errors') or resp.get('error')
-      if errors:
-        logging.info('Errors: %s', errors)
-        raise exc.HTTPBadRequest(errors[0].get('message'))
+    errors = resp.get('errors') or resp.get('error')
+    if errors:
+      logging.info('Errors: %s', errors)
+      raise exc.HTTPBadRequest(errors[0].get('message'))
 
-      # TODO: handle refresh token
-      access_token = resp['access_token']
-      user_json = MediumAuth(access_token_str=access_token).get(API_USER_URL).text
-      id = json_loads(user_json)['data']['id']
-      auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
-      auth.put()
+    # TODO: handle refresh token
+    access_token = resp['access_token']
+    user_json = MediumAuth(access_token_str=access_token).get(API_USER_URL).text
+    id = json_loads(user_json)['data']['id']
+    auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
+    auth.put()
 
-      self.finish(auth, state=self.request.get('state'))
+    self.finish(auth, state=self.request.get('state'))

@@ -18,7 +18,6 @@ import logging
 import urllib.parse
 import webapp2
 
-from .appengine_config import ndb_client
 from .webutil import handlers
 from .webutil import util
 
@@ -113,11 +112,10 @@ class StartHandler(BaseHandler):
       scopes.add(self.scope)
     self.scope = self.SCOPE_SEPARATOR.join(util.trim_nulls(scopes))
 
-    with ndb_client.context():
-      # str() is since WSGI middleware chokes on unicode redirect URLs :/ eg:
-      # InvalidResponseError: header values must be str, got 'unicode' (u'...') for 'Location'
-      # https://console.cloud.google.com/errors/CPafw-Gq18CrnwE
-      url = str(self.redirect_url(state=self.request.get('state')))
+    # str() is since WSGI middleware chokes on unicode redirect URLs :/ eg:
+    # InvalidResponseError: header values must be str, got 'unicode' (u'...') for 'Location'
+    # https://console.cloud.google.com/errors/CPafw-Gq18CrnwE
+    url = str(self.redirect_url(state=self.request.get('state')))
 
     logging.info('Starting OAuth flow: redirecting to %s', url)
     self.redirect(url)

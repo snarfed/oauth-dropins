@@ -10,7 +10,6 @@ import logging
 import urllib.parse
 
 import appengine_config
-from appengine_config import ndb_client
 from google.cloud import ndb
 import jinja2
 import requests
@@ -63,8 +62,7 @@ class FrontPageHandler(handlers.TemplateHandler):
     vars = dict(self.request.params)
     key = vars.get('auth_entity')
     if key:
-      with ndb_client.context():
-        vars['entity'] = ndb.Key(urlsafe=key).get()
+      vars['entity'] = ndb.Key(urlsafe=key).get()
 
     vars.update({
       site + '_html': module.StartHandler.button_html(
@@ -91,6 +89,6 @@ for site, module in SITES.items():
     ('/%s/oauth_callback' % site, module.CallbackHandler.to('/')),
   ))
 
-application = webapp2.WSGIApplication([
+application = handlers.ndb_context_middleware(webapp2.WSGIApplication([
     ('/', FrontPageHandler),
-  ] + routes, debug=appengine_config.DEBUG)
+  ] + routes, debug=appengine_config.DEBUG), client=appengine_config.ndb_client)

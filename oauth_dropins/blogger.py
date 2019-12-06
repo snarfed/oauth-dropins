@@ -21,7 +21,6 @@ import logging
 import re
 
 import appengine_config
-from appengine_config import ndb_client
 
 from gdata.blogger.client import BloggerClient
 from google.cloud import ndb
@@ -118,71 +117,70 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
     r'.*(?:blogger\.com/(?:feeds|profile)|(?:plus|profiles)\.google\.com)/([0-9]+)(?:/blogs)')
 
   def get(self):
-    with ndb_client.context():
-      # handle errors
-      state = self.request.get('state')
-      error = self.request.get('error')
-      desc = self.request.get('error_description')
-      if error:
-        msg = 'Error: %s: %s' % (error, desc)
-        logging.info(msg)
-        if error == 'access_denied':
-          return self.finish(None, state=state)
-        else:
-          raise exc.HTTPBadRequest(msg)
+    # handle errors
+    state = self.request.get('state')
+    error = self.request.get('error')
+    desc = self.request.get('error_description')
+    if error:
+      msg = 'Error: %s: %s' % (error, desc)
+      logging.info(msg)
+      if error == 'access_denied':
+        return self.finish(None, state=state)
+      else:
+        raise exc.HTTPBadRequest(msg)
 
-      # extract auth code and request access token
-      session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
-                              redirect_uri=self.request.path_url)
-      session.fetch_token(ACCESS_TOKEN_URL,
-                          client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
-                          authorization_response=self.request.url)
+    # extract auth code and request access token
+    session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
+                            redirect_uri=self.request.path_url)
+    session.fetch_token(ACCESS_TOKEN_URL,
+                        client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
+                        authorization_response=self.request.url)
 
-      blogger = BloggerClient()
-      try:
-        blogs = blogger.get_blogs(access_token=session.access_token)
-      except BaseException as e:
-        # this api call often returns 401 Unauthorized for users who aren't
-        # signed up for blogger and/or don't have any blogs.
-        util.interpret_http_exception(e)
-        return
+    blogger = BloggerClient()
+    try:
+      blogs = blogger.get_blogs(access_token=session.access_token)
+    except BaseException as e:
+      # this api call often returns 401 Unauthorized for users who aren't
+      # signed up for blogger and/or don't have any blogs.
+      util.interpret_http_exception(e)
+      return
 
-      for id in ([a.uri.text for a in blogs.author if a.uri] +
-                 [l.href for l in blogs.link if l]):
-        if not id:
-          continue
-        match = self.AUTHOR_URI_RE.match(id)
-        if match:
-          id = match.group(1)
-        else:
-          logging.warning("Couldn't parse %s , using entire value as id", id)
-        break
+    for id in ([a.uri.text for a in blogs.author if a.uri] +
+               [l.href for l in blogs.link if l]):
+      if not id:
+        continue
+      match = self.AUTHOR_URI_RE.match(id)
+      if match:
+        id = match.group(1)
+      else:
+        logging.warning("Couldn't parse %s , using entire value as id", id)
+      break
 
-      blog_ids = []
-      blog_titles = []
-      blog_hostnames = []
-      for blog in blogs.entry:
-        blog_ids.append(blog.get_blog_id() or blog.get_blog_name())
-        blog_titles.append(blog.title.text)
-        blog_hostnames.append(util.domain_from_link(blog.GetHtmlLink().href)
-                              if blog.GetHtmlLink() else None)
+    blog_ids = []
+    blog_titles = []
+    blog_hostnames = []
+    for blog in blogs.entry:
+      blog_ids.append(blog.get_blog_id() or blog.get_blog_name())
+      blog_titles.append(blog.title.text)
+      blog_hostnames.append(util.domain_from_link(blog.GetHtmlLink().href)
+                            if blog.GetHtmlLink() else None)
 
-      # extract profile picture URL
-      picture_url = None
-      for author in blogs.author:
-        for child in author.children:
-          if child.tag.split(':')[-1] == 'image':
-            picture_url = child.get_attributes('src')[0].value
-            break
+    # extract profile picture URL
+    picture_url = None
+    for author in blogs.author:
+      for child in author.children:
+        if child.tag.split(':')[-1] == 'image':
+          picture_url = child.get_attributes('src')[0].value
+          break
 
-      user = BloggerUser(id=id,
-                         name=author.name.text,
-                         picture_url=picture_url,
-                         creds_json=json_dumps(session.token),
-                         user_atom=str(author),
-                         blogs_atom=str(blogs),
-                         blog_ids=blog_ids,
-                         blog_titles=blog_titles,
-                         blog_hostnames=blog_hostnames)
-      user.put()
-      self.finish(user, state=state)
+    user = BloggerUser(id=id,
+                       name=author.name.text,
+                       picture_url=picture_url,
+                       creds_json=json_dumps(session.token),
+                       user_atom=str(author),
+                       blogs_atom=str(blogs),
+                       blog_ids=blog_ids,
+                       blog_titles=blog_titles,
+                       blog_hostnames=blog_hostnames)
+    user.put()
+    self.finish(user, state=state)

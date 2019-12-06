@@ -12,7 +12,6 @@ from future.utils import native_str
 import logging
 
 import appengine_config
-from .appengine_config import ndb_client
 
 from google.cloud import ndb
 import tweepy
@@ -162,38 +161,37 @@ class CallbackHandler(handlers.CallbackHandler):
   handle_exception = handle_exception
 
   def get(self):
-    with ndb_client.context():
-      # https://dev.twitter.com/docs/application-permission-model
-      if self.request.get('denied'):
-        self.finish(None, state=self.request.get('state'))
-        return
+    # https://dev.twitter.com/docs/application-permission-model
+    if self.request.get('denied'):
+      self.finish(None, state=self.request.get('state'))
+      return
 
-      oauth_token = self.request.get('oauth_token', None)
-      oauth_verifier = self.request.get('oauth_verifier', None)
-      if oauth_token is None:
-        raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
+    oauth_token = self.request.get('oauth_token', None)
+    oauth_verifier = self.request.get('oauth_verifier', None)
+    if oauth_token is None:
+      raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
 
-      # Lookup the request token
-      request_token = models.OAuthRequestToken.get_by_id(oauth_token)
-      if request_token is None:
-        raise exc.HTTPBadRequest('Invalid oauth_token: %s' % oauth_token)
+    # Lookup the request token
+    request_token = models.OAuthRequestToken.get_by_id(oauth_token)
+    if request_token is None:
+      raise exc.HTTPBadRequest('Invalid oauth_token: %s' % oauth_token)
 
-      # Rebuild the auth handler
-      auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                                 appengine_config.TWITTER_APP_SECRET)
-      auth.request_token = {'oauth_token': request_token.key.string_id(),
-                            'oauth_token_secret': request_token.token_secret}
+    # Rebuild the auth handler
+    auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
+                               appengine_config.TWITTER_APP_SECRET)
+    auth.request_token = {'oauth_token': request_token.key.string_id(),
+                          'oauth_token_secret': request_token.token_secret}
 
-      # Fetch the access token
-      access_token_key, access_token_secret = auth.get_access_token(oauth_verifier)
-      user_json = twitter_auth.signed_urlopen(API_ACCOUNT_URL,
-                                              access_token_key,
-                                              access_token_secret).read()
-      username = json_loads(user_json)['screen_name']
+    # Fetch the access token
+    access_token_key, access_token_secret = auth.get_access_token(oauth_verifier)
+    user_json = twitter_auth.signed_urlopen(API_ACCOUNT_URL,
+                                            access_token_key,
+                                            access_token_secret).read()
+    username = json_loads(user_json)['screen_name']
 
-      auth = TwitterAuth(id=username,
-                         token_key=access_token_key,
-                         token_secret=access_token_secret,
-                         user_json=user_json)
-      auth.put()
-      self.finish(auth, state=self.request.get('state'))
+    auth = TwitterAuth(id=username,
+                       token_key=access_token_key,
+                       token_secret=access_token_secret,
+                       user_json=user_json)
+    auth.put()
+    self.finish(auth, state=self.request.get('state'))
