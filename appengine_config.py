@@ -7,6 +7,10 @@ warnings.filterwarnings('ignore', module='bs4',
 warnings.filterwarnings('ignore',
                         message='URLFetch does not support granular timeout')
 
+# Use lxml for BeautifulSoup explicitly.
+from .webutil import util
+util.beautifulsoup_parser = 'lxml'
+
 # NDB client
 # https://googleapis.dev/python/python-ndb/latest/
 # TODO: make thread local?
