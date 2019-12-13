@@ -9,11 +9,6 @@ application = webapp2.WSGIApplication([
   ...
   ]
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-from past.builtins import basestring
-
 import logging
 import urllib.parse
 import webapp2
@@ -58,7 +53,7 @@ class BaseHandler(webapp2.RequestHandler):
     if not extra:
       return cls.DEFAULT_SCOPE
 
-    if not isinstance(extra, basestring):
+    if not isinstance(extra, str):
       extra = cls.SCOPE_SEPARATOR.join(extra)
 
     return cls.SCOPE_SEPARATOR.join(util.trim_nulls((cls.DEFAULT_SCOPE, extra)))
@@ -203,7 +198,7 @@ class CallbackHandler(BaseHandler):
       params = [('auth_entity', auth_entity.key.urlsafe().decode()),
                 ('state', state)]
       token = auth_entity.access_token()
-      if isinstance(token, basestring):
+      if isinstance(token, str):
         params.append(('access_token', token))
       elif token:
         params += [('access_token_key', token[0]),

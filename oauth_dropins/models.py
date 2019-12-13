@@ -1,9 +1,5 @@
 """Base datastore model class for an authenticated account.
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 from google.cloud import ndb
 
 import appengine_config

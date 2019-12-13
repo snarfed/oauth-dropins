@@ -4,10 +4,6 @@ API docs:
 https://www.linkedin.com/developers/
 https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-in-with-linkedin
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 import logging
 import urllib.parse
 

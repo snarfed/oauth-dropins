@@ -12,10 +12,6 @@ to map an arbitrary host to localhost in your /etc/hosts, e.g.:
 You can then test on your local machine by running dev_appserver and opening
 http://my.dev.com:8080/ instead of http://localhost:8080/ .
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 import logging
 import urllib.parse
 

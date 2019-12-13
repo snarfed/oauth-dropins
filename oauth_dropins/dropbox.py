@@ -4,10 +4,6 @@ Standard OAuth 2.0 flow. Docs:
 https://www.dropbox.com/developers/core/docs
 https://www.dropbox.com/developers/reference/oauthguide
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 import logging
 import urllib.parse, urllib.request
 

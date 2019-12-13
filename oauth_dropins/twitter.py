@@ -4,11 +4,6 @@ TODO: port to
 http://code.google.com/p/oauth/source/browse/#svn%2Fcode%2Fpython . tweepy is
 just a wrapper around that anyway.
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-from future.utils import native_str
-
 import logging
 
 import appengine_config
@@ -131,7 +126,7 @@ class StartHandler(handlers.StartHandler):
       "your app's root directory.")
     auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                appengine_config.TWITTER_APP_SECRET,
-                               native_str(self.to_url(state=state)))
+                               self.to_url(state=state))
 
     # signin_with_twitter=True returns /authenticate instead of /authorize so
     # that Twitter doesn't prompt the user for approval if they've already

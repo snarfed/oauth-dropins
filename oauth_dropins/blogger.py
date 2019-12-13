@@ -13,10 +13,6 @@ http://blog.bossylobster.com/2012/12/bridging-oauth-20-objects-between-gdata.htm
 Support was added to gdata-python-client here:
 https://code.google.com/p/gdata-python-client/source/detail?r=ecb1d49b5fbe05c9bc6c8525e18812ccc02badc0
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 import logging
 import re
 

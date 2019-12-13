@@ -4,10 +4,6 @@ API docs:
 http://www.tumblr.com/docs/en/api/v2
 http://www.tumblr.com/oauth/apps
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 import logging
 
 import appengine_config

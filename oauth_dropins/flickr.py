@@ -6,11 +6,6 @@ Uses oauthlib directly to authenticate and sign requests with OAuth
 Note that when users decline Flickr's OAuth prompt by clicking the Cancel
 button, Flickr redirects them to its home page, *not* to us.
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-from future.utils import native_str
-
 import logging
 import oauthlib.oauth1
 import urllib.parse, urllib.request
@@ -97,7 +92,7 @@ class StartHandler(handlers.StartHandler):
       # Bridgy WordPress plugin's redirect URL when using Bridgy's registration
       # API (https://brid.gy/about#registration-api) looks like:
       # /wp-admin/admin.php?page=bridgy_options&service=flickr
-      callback_uri=native_str(self.to_url(state=urllib.parse.quote(state))))
+      callback_uri=self.to_url(state=urllib.parse.quote(state)))
 
     url, headers, data = client.sign(REQUEST_TOKEN_URL)
     resp = util.requests_get(url, headers=headers, data=data)

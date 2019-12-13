@@ -11,10 +11,6 @@ app. So they have an API for registering apps, per instance:
 https://docs.joinmastodon.org/api/authentication/
 Surprising, and unusual, but makes sense.
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 import logging
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 

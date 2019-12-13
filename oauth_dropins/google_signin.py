@@ -6,10 +6,6 @@ requests-oauthlib docs:
   https://requests-oauthlib.readthedocs.io/
   https://requests-oauthlib.readthedocs.io/en/latest/examples/google.html
 """
-from __future__ import absolute_import, unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-
 import logging
 
 import appengine_config

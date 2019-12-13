@@ -5,10 +5,6 @@ import warnings
 warnings.filterwarnings('ignore', module='bs4',
                         message='No parser was explicitly specified')
 
-import logging
-logging.getLogger().setLevel(logging.DEBUG)
-logging.getLogger('google.cloud').setLevel(logging.INFO)
-
 # Use lxml for BeautifulSoup explicitly.
 from oauth_dropins.webutil import util
 util.beautifulsoup_parser = 'lxml'

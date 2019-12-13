@@ -276,18 +276,16 @@ Changelog
 ### 3.0 - unreleased
 
 _Breaking changes:_
-* Add support for the [App Engine Standard Python 3 runtime](https://cloud.google.com/appengine/docs/standard/python3/) and drops support for the [Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). See this [list of differences](https://cloud.google.com/appengine/docs/standard/python3/python-differences) for more details.
+* _Python 2 is no longer supported!_ Including the [App Engine Standard Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). On the plus side, the [App Engine Standard Python 3 runtime](https://cloud.google.com/appengine/docs/standard/python3/) is now supported! See this [list of differences](https://cloud.google.com/appengine/docs/standard/python3/python-differences) for more details.
 * Blogger:
   * Drop `http()` method (which returned an `httplib2.Http`).
 * Google:
   * Replace `GoogleAuth` with the new `GoogleUser` NDB model class, which [doesn't depend on oauth2client](https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html).
   * Drop `http()` method (which returned an `httplib2.Http`).
-* Drop `webutil.handlers.memcache_response()` since the Python 3 runtime doesn't include memcache.
-* Drop `webutil.handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`, since the Python 3 runtime doesn't include `webapp2` built in.
-
-### 2.3 - unreleased
-_Breaking changes:_
-* Remove `cache` and `fail_cache_time_secs` kwargs from `webutil.util.follow_redirects()`. Caching is now built in. You can bypass the cache with `follow_redirects.__wrapped__()`. [Details.](https://cachetools.readthedocs.io/en/stable/#cachetools.cached)
+* `webutil`:
+  * Drop `handlers.memcache_response()` since the Python 3 runtime doesn't include memcache.
+  * Drop `handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`, since the Python 3 runtime doesn't include `webapp2` built in.
+  * Remove `cache` and `fail_cache_time_secs` kwargs from `util.follow_redirects()`. Caching is now built in. You can bypass the cache with `follow_redirects.__wrapped__()`. [Details.](https://cachetools.readthedocs.io/en/stable/#cachetools.cached)
 
 Non-breaking changes:
 * Google:

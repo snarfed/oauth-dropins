@@ -2,15 +2,15 @@
 
 Reads app keys and secrets from local files into constants.
 """
-from __future__ import absolute_import
-from builtins import open
-
 import os
 
 from .webutil.appengine_config import *
 
-# quiet down oauth1 log messages
+# App level logs. All of our own, less from libraries that are chatty on DEBUG.
+# https://cloud.google.com/appengine/docs/standard/python3/writing-application-logs
 import logging
+logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger('google.cloud').setLevel(logging.INFO)
 logging.getLogger('oauthlib').setLevel(logging.INFO)
 logging.getLogger('requests_oauthlib').setLevel(logging.INFO)
 
