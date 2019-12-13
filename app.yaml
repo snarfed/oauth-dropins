@@ -1,7 +1,6 @@
 # https://cloud.google.com/appengine/docs/standard/python3/config/appref
 
 # application: oauth-dropins
-# version: 1
 default_expiration: 1h
 runtime: python37
 entrypoint: gunicorn -b :$PORT app:application

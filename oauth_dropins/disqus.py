@@ -123,13 +123,13 @@ class CallbackHandler(handlers.CallbackHandler):
         'code': auth_code,
     }
 
-    resp = util.urlopen(GET_ACCESS_TOKEN_URL,
-                        data=urllib.parse.urlencode(data)).read()
+    resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
+    resp.raise_for_status()
     try:
-      data = json_loads(resp)
+      data = json_loads(resp.text)
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
-      raise exc.HttpBadRequest('Bad Disqus response to access token request')
+      raise exc.HTTPBadRequest('Bad Disqus response to access token request')
 
     access_token = data['access_token']
     user_id = data['user_id']
@@ -145,7 +145,7 @@ class CallbackHandler(handlers.CallbackHandler):
       user_data = json_loads(resp)['response']
     except (ValueError, TypeError):
       logging.exception('Bad response:\n%s', resp)
-      raise exc.HttpBadRequest('Bad Disqus response to user details request')
+      raise exc.HTTPBadRequest('Bad Disqus response to user details request')
 
     auth.user_json = json_dumps(user_data)
     logging.info('created disqus auth %s', auth)
