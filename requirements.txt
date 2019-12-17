@@ -1,4 +1,5 @@
 -e git+https://github.com/dvska/gdata-python3.git#egg=gdata
+google-cloud-logging~=1.14
 gunicorn~=20.0
 mox3~=0.28
 
