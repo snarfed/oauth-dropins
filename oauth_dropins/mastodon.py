@@ -213,7 +213,7 @@ class StartHandler(handlers.StartHandler):
     try:
       resp = util.requests_get(urljoin(instance, INSTANCE_API))
     except requests.RequestException as e:
-      logging.info('Error', exc_info=True)
+      logging.info('Error', stack_info=True)
       resp = None
 
     is_json = resp and resp.headers.get('Content-Type', '').strip().startswith(

@@ -144,7 +144,7 @@ class CallbackHandler(handlers.CallbackHandler):
     try:
       data = json_loads(resp)
     except (ValueError, TypeError):
-      logging.exception('Bad response:\n%s', resp)
+      logging.error('Bad response:\n%s', resp, stack_info=True)
       raise exc.HttpBadRequest('Bad Dropbox response to access token request')
 
     logging.info('Storing new Dropbox account: %s', data['uid'])

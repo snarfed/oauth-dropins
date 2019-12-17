@@ -42,7 +42,7 @@ def handle_discovery_errors(handler, e, debug):
   Used to catch Mastodon and IndieAuth connection failures, etc.
   """
   if isinstance(e, (ValueError, requests.RequestException, exc.HTTPException)):
-    logging.warning('', exc_info=True)
+    logging.warning('', stack_info=True)
     return handler.redirect('/?' + urllib.parse.urlencode({'error': str(e)}))
 
   raise

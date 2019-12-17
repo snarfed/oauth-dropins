@@ -69,7 +69,7 @@ def handle_exception(self, e, debug):
   """Exception handler that handles Tweepy errors.
   """
   if isinstance(e, tumblpy.TumblpyError):
-      logging.exception('OAuth error')
+      logging.error('OAuth error', stack_info=True)
       raise exc.HTTPBadRequest(e)
   else:
     return webutil_handlers.handle_exception(self, e, debug)

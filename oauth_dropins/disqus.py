@@ -124,7 +124,7 @@ class CallbackHandler(handlers.CallbackHandler):
     try:
       data = json_loads(resp.text)
     except (ValueError, TypeError):
-      logging.exception('Bad response:\n%s', resp)
+      logging.error('Bad response:\n%s', resp, stack_info=True)
       raise exc.HTTPBadRequest('Bad Disqus response to access token request')
 
     access_token = data['access_token']
@@ -140,7 +140,7 @@ class CallbackHandler(handlers.CallbackHandler):
     try:
       user_data = json_loads(resp)['response']
     except (ValueError, TypeError):
-      logging.exception('Bad response:\n%s', resp)
+      logging.error('Bad response:\n%s', resp, stack_info=True)
       raise exc.HTTPBadRequest('Bad Disqus response to user details request')
 
     auth.user_json = json_dumps(user_data)

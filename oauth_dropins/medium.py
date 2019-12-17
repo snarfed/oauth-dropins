@@ -154,7 +154,7 @@ class CallbackHandler(handlers.CallbackHandler):
     try:
       resp = json_loads(resp.text)
     except:
-      logging.exception('Could not decode JSON')
+      logging.error('Could not decode JSON', stack_info=True)
       raise
 
     errors = resp.get('errors') or resp.get('error')
