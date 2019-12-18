@@ -75,7 +75,7 @@ class StartHandler(Scopes, handlers.StartHandler):
     session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
                             redirect_uri=self.to_url())
     auth_url, state = session.authorization_url(
-      AUTH_CODE_URL,
+      AUTH_CODE_URL, state=state,
       # ask for a refresh token so we can get an access token offline
       access_type='offline', prompt='consent',
       # https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth

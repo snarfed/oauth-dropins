@@ -278,9 +278,9 @@ Changelog
 _Breaking changes:_
 * _Python 2 is no longer supported!_ Including the [App Engine Standard Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). On the plus side, the [App Engine Standard Python 3 runtime](https://cloud.google.com/appengine/docs/standard/python3/) is now supported! See this [list of differences](https://cloud.google.com/appengine/docs/standard/python3/python-differences) for more details.
 * Blogger:
-  * Drop `http()` method (which returned an `httplib2.Http`).
+  * Login is now based on [Google Sign-In](https://developers.google.com/identity/). The `api_from_creds()`, `creds()`, and `http()` methods have been removed. Use the remaining `api()` method to get a `BloggerClient`, or `access_token()` to make API calls manually.
 * Google:
-  * Replace `GoogleAuth` with the new `GoogleUser` NDB model class, which [doesn't depend on oauth2client](https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html).
+  * Replace `GoogleAuth` with the new `GoogleUser` NDB model class, which [doesn't depend on the deprecated oauth2client](https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html).
   * Drop `http()` method (which returned an `httplib2.Http`).
 * `webutil`:
   * Drop `handlers.memcache_response()` since the Python 3 runtime doesn't include memcache.
@@ -288,8 +288,8 @@ _Breaking changes:_
   * Remove `cache` and `fail_cache_time_secs` kwargs from `util.follow_redirects()`. Caching is now built in. You can bypass the cache with `follow_redirects.__wrapped__()`. [Details.](https://cachetools.readthedocs.io/en/stable/#cachetools.cached)
 
 Non-breaking changes:
-* Google:
-  * The `GoogleAuth` NDB model class is deprecated, since it depends on [oauth2client](https://github.com/googleapis/oauth2client), [which is also deprecated](https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html). `GoogleAuth` will be replaced in 3.0 with a new `GoogleUser` NDB model class.
+* Blogger, Google:
+  * The `state` query parameter now works!
 * Python 2 App Engine features in `webutil` are deprecated:
   * `handlers.memcache_response()`
   * `handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`.
