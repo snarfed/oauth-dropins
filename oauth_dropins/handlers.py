@@ -128,8 +128,8 @@ class StartHandler(BaseHandler):
 
   @classmethod
   def button_html(cls, to_path, form_classes='', form_method='post',
-                  form_extra='', image_prefix='', input_style='', scopes='',
-                  outer_classes=''):
+                  form_extra='', image_prefix='', image_file=None,
+                  input_style='', scopes='', outer_classes=''):
     """Returns an HTML string with a login form and button for this site.
 
     Args:
@@ -143,14 +143,17 @@ class StartHandler(BaseHandler):
       scopes: string, optional, OAuth scopes to override site's default(s)
       image_prefix: string, optional, prefix to add to the beginning of image
         URL path, eg '/oauth_dropins/'
+      image_file: string, optional, image filename. defaults to [cls.NAME].png
       input_style: string, optional, inline style to apply to the button <input>
 
     Returns: string
     """
+    if image_file is None:
+      image_file = '%s_2x.png' % cls.NAME
     vars = locals()
     vars.update({
       'label': cls.LABEL,
-      'image': urllib.parse.urljoin(image_prefix, '%s_2x.png' % cls.NAME),
+      'image': urllib.parse.urljoin(image_prefix, image_file),
     })
     html = """\
 <form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s">
