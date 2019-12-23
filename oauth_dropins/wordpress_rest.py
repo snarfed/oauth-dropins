@@ -19,8 +19,6 @@ http://my.dev.com:8080/ instead of http://localhost:8080/ .
 import logging
 import urllib.parse, urllib.request
 
-import appengine_config
-
 from google.cloud import ndb
 from webob import exc
 
@@ -29,6 +27,8 @@ from .models import BaseAuth
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
+WORDPRESS_CLIENT_ID = util.read('wordpress.com_client_id')
+WORDPRESS_CLIENT_SECRET = util.read('wordpress.com_client_secret')
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
@@ -95,13 +95,11 @@ class StartHandler(handlers.StartHandler):
   LABEL = 'WordPress.com'
 
   def redirect_url(self, state=None):
-    assert (appengine_config.WORDPRESS_CLIENT_ID and
-            appengine_config.WORDPRESS_CLIENT_SECRET), (
-      "Please fill in the wordpress.com_client_id and "
-      "wordpress.com_client_secret files in your app's root directory.")
+    assert WORDPRESS_CLIENT_ID and WORDPRESS_CLIENT_SECRET, \
+      "Please fill in the wordpress.com_client_id and wordpress.com_client_secret files in your app's root directory."
     # TODO: CSRF protection
     return GET_AUTH_CODE_URL % {
-      'client_id': appengine_config.WORDPRESS_CLIENT_ID,
+      'client_id': WORDPRESS_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       'state': urllib.parse.quote_plus(state if state else ''),
       }
@@ -133,8 +131,8 @@ class CallbackHandler(handlers.CallbackHandler):
     auth_code = util.get_required_param(self, 'code')
     data = {
       'code': auth_code,
-      'client_id': appengine_config.WORDPRESS_CLIENT_ID,
-      'client_secret': appengine_config.WORDPRESS_CLIENT_SECRET,
+      'client_id': WORDPRESS_CLIENT_ID,
+      'client_secret': WORDPRESS_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': self.request.path_url,

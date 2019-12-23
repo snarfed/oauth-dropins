@@ -8,8 +8,6 @@ requests-oauthlib docs:
 """
 import logging
 
-import appengine_config
-
 from google.cloud import ndb
 from requests_oauthlib import OAuth2Session
 
@@ -18,9 +16,10 @@ from .webutil import handlers as webutil_handlers
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
+GOOGLE_CLIENT_ID = util.read('google_client_id')
+GOOGLE_CLIENT_SECRET = util.read('google_client_secret')
 AUTH_CODE_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 ACCESS_TOKEN_URL = 'https://www.googleapis.com/oauth2/v4/token'
-
 # Discovered on 1/30/2019 from:
 #   https://accounts.google.com/.well-known/openid-configuration
 # Background: https://developers.google.com/identity/protocols/OpenIDConnect#discovery
@@ -68,11 +67,10 @@ class StartHandler(Scopes, handlers.StartHandler):
   handle_exception = webutil_handlers.handle_exception
 
   def redirect_url(self, state=None):
-    assert (appengine_config.GOOGLE_CLIENT_ID and
-            appengine_config.GOOGLE_CLIENT_SECRET), \
+    assert GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, \
             "Please fill in the google_client_id and google_client_secret files in your app's root directory."
 
-    session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
+    session = OAuth2Session(GOOGLE_CLIENT_ID, scope=self.scope,
                             redirect_uri=self.to_url())
     auth_url, state = session.authorization_url(
       AUTH_CODE_URL, state=state,
@@ -100,10 +98,10 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
         raise exc.HTTPBadRequest(msg)
 
     # extract auth code and request access token
-    session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
+    session = OAuth2Session(GOOGLE_CLIENT_ID, scope=self.scope,
                             redirect_uri=self.request.path_url)
     session.fetch_token(ACCESS_TOKEN_URL,
-                        client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
+                        client_secret=GOOGLE_CLIENT_SECRET,
                         authorization_response=self.request.url)
 
     # get OpenID Connect user info

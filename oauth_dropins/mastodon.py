@@ -14,14 +14,13 @@ Surprising, and unusual, but makes sense.
 import logging
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 
-import appengine_config
 from google.cloud import ndb
 import requests
 from webob import exc
 
 from . import handlers
 from .models import BaseAuth
-from .webutil import util
+from .webutil import appengine_info, util
 from .webutil.util import json_dumps, json_loads
 
 # https://docs.joinmastodon.org/api/permissions/
@@ -175,7 +174,7 @@ class StartHandler(handlers.StartHandler):
   NAME = 'mastodon'
   LABEL = 'Mastodon'
   APP_NAME = 'oauth-dropins demo'
-  APP_URL = appengine_config.HOST_URL
+  APP_URL = appengine_info.HOST_URL
   DEFAULT_SCOPE = 'read:accounts'
   REDIRECT_PATHS = ()
   SCOPE_SEPARATOR = ' '
@@ -235,7 +234,7 @@ class StartHandler(handlers.StartHandler):
 
     query = MastodonApp.query(MastodonApp.instance == instance,
                             MastodonApp.app_url == self.APP_URL)
-    if appengine_config.DEBUG:
+    if appengine_info.DEBUG:
       # disambiguate different apps in dev_appserver, since their APP_URL will
       # always be localhost
       query = query.filter(MastodonApp.app_name == self.APP_NAME)

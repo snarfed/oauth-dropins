@@ -7,8 +7,6 @@ https://www.dropbox.com/developers/reference/oauthguide
 import logging
 import urllib.parse, urllib.request
 
-import appengine_config
-
 from google.cloud import ndb
 from webob import exc
 
@@ -16,6 +14,8 @@ from . import handlers, models
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
+DROPBOX_APP_KEY = util.read('dropbox_app_key')
+DROPBOX_APP_SECRET = util.read('dropbox_app_secret')
 GET_AUTH_CODE_URL = '&'.join((
   'https://www.dropbox.com/1/oauth2/authorize?'
   'response_type=code',
@@ -23,7 +23,6 @@ GET_AUTH_CODE_URL = '&'.join((
   'redirect_uri=%(redirect_uri)s',
   'state=%(state)s',
 ))
-
 GET_ACCESS_TOKEN_URL = '&'.join((
   'https://api.dropbox.com/1/oauth2/token?',
   'grant_type=authorization_code',
@@ -82,14 +81,13 @@ class StartHandler(handlers.StartHandler):
   LABEL = 'Dropbox'
 
   def redirect_url(self, state=None):
-    assert (appengine_config.DROPBOX_APP_KEY and
-            appengine_config.DROPBOX_APP_SECRET), (
+    assert DROPBOX_APP_KEY and DROPBOX_APP_SECRET, (
       "Please fill in the dropbox_app_key and dropbox_app_secret files in "
       "your app's root directory.")
 
     csrf_key = DropboxCsrf(state=state).put()
     return GET_AUTH_CODE_URL % {
-      'client_id': appengine_config.DROPBOX_APP_KEY,
+      'client_id': DROPBOX_APP_KEY,
       'redirect_uri': urllib.parse.quote_plus(self.to_url(state=state)),
       'state': '%s|%s' % (state, csrf_key.id()),
     }
@@ -130,8 +128,8 @@ class CallbackHandler(handlers.CallbackHandler):
 
     # request an access token
     data = {
-      'client_id': appengine_config.DROPBOX_APP_KEY,
-      'client_secret': appengine_config.DROPBOX_APP_SECRET,
+      'client_id': DROPBOX_APP_KEY,
+      'client_secret': DROPBOX_APP_SECRET,
       'code': util.get_required_param(self, 'code'),
       'redirect_uri': self.request.path_url,
     }

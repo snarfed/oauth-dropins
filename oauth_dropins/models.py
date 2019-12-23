@@ -2,9 +2,7 @@
 """
 from google.cloud import ndb
 
-import appengine_config
-from .webutil import models
-from .webutil import util
+from .webutil import models, util
 
 
 class BaseAuth(models.StringIdModel):

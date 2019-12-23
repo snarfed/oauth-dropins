@@ -6,14 +6,15 @@ import logging
 import re
 import urllib.error, urllib.parse, urllib.request
 
-from . import appengine_config
-
 import oauthlib.oauth1
 import requests_oauthlib
 import requests
 
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
+
+FLICKR_APP_KEY = util.read('flickr_app_key')
+FLICKR_APP_SECRET = util.read('flickr_app_secret')
 
 
 def signed_urlopen(url, token_key, token_secret, **kwargs):
@@ -30,8 +31,8 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
     the file-like object that is the result of :func:`urllib.request.urlopen`
   """
   auth = oauthlib.oauth1.Client(
-    appengine_config.FLICKR_APP_KEY,
-    client_secret=appengine_config.FLICKR_APP_SECRET,
+    FLICKR_APP_KEY,
+    client_secret=FLICKR_APP_SECRET,
     resource_owner_key=token_key,
     resource_owner_secret=token_secret)
   uri, headers, body = auth.sign(url, **kwargs)
@@ -114,8 +115,8 @@ def upload(params, file, token_key, token_secret):
   """
   upload_url = 'https://up.flickr.com/services/upload'
   auth = requests_oauthlib.OAuth1(
-      client_key=appengine_config.FLICKR_APP_KEY,
-      client_secret=appengine_config.FLICKR_APP_SECRET,
+      client_key=FLICKR_APP_KEY,
+      client_secret=FLICKR_APP_SECRET,
       resource_owner_key=token_key,
       resource_owner_secret=token_secret,
       signature_type=oauthlib.oauth1.SIGNATURE_TYPE_BODY)

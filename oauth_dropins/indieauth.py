@@ -5,8 +5,6 @@ https://indieauth.com/developers
 import logging
 import urllib.parse
 
-import appengine_config
-
 from google.cloud import ndb
 import mf2util
 import requests
@@ -16,6 +14,7 @@ from . import handlers, models
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
+INDIEAUTH_CLIENT_ID = util.read('indieauth_client_id')
 INDIEAUTH_URL = 'https://indieauth.com/auth'
 
 
@@ -111,7 +110,7 @@ class StartHandler(handlers.StartHandler):
   LABEL = 'IndieAuth'
 
   def redirect_url(self, state=None, me=None):
-    assert appengine_config.INDIEAUTH_CLIENT_ID, (
+    assert INDIEAUTH_CLIENT_ID, (
       "Please fill in the indieauth_client_id in your app's root directory.")
 
     # TODO: unify with mastodon?
@@ -126,7 +125,7 @@ class StartHandler(handlers.StartHandler):
 
     url = endpoint + '?' + urllib.parse.urlencode({
       'me': me,
-      'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
+      'client_id': INDIEAUTH_CLIENT_ID,
       'redirect_uri': redirect_uri,
       'state': util.encode_oauth_state({
         'endpoint': endpoint,
@@ -162,7 +161,7 @@ class CallbackHandler(handlers.CallbackHandler):
     state = state.get('state') or ''
     validate_resp = util.requests_post(endpoint, data={
       'me': me,
-      'client_id': appengine_config.INDIEAUTH_CLIENT_ID,
+      'client_id': INDIEAUTH_CLIENT_ID,
       'code': code,
       'redirect_uri': self.request.path_url,
       'state': state,

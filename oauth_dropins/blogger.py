@@ -12,8 +12,6 @@ https://requests-oauthlib.readthedocs.io/
 import logging
 import re
 
-import appengine_config
-
 from gdata.blogger.client import BloggerClient
 from google.cloud import ndb
 from requests_oauthlib import OAuth2Session
@@ -92,11 +90,10 @@ class StartHandler(Scopes, handlers.StartHandler):
   handle_exception = webutil_handlers.handle_exception
 
   def redirect_url(self, state=None):
-    assert (appengine_config.GOOGLE_CLIENT_ID and
-            appengine_config.GOOGLE_CLIENT_SECRET), \
+    assert google_signin.GOOGLE_CLIENT_ID and google_signin.GOOGLE_CLIENT_SECRET, \
             "Please fill in the google_client_id and google_client_secret files in your app's root directory."
 
-    session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
+    session = OAuth2Session(google_signin.GOOGLE_CLIENT_ID, scope=self.scope,
                             redirect_uri=self.to_url())
     auth_url, state = session.authorization_url(
       AUTH_CODE_URL, state=state,
@@ -128,10 +125,10 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
         raise exc.HTTPBadRequest(msg)
 
     # extract auth code and request access token
-    session = OAuth2Session(appengine_config.GOOGLE_CLIENT_ID, scope=self.scope,
+    session = OAuth2Session(google_signin.GOOGLE_CLIENT_ID, scope=self.scope,
                             redirect_uri=self.request.path_url)
     session.fetch_token(ACCESS_TOKEN_URL,
-                        client_secret=appengine_config.GOOGLE_CLIENT_SECRET,
+                        client_secret=google_signin.GOOGLE_CLIENT_SECRET,
                         authorization_response=self.request.url)
 
     client = BloggerV2Auth(creds_json=json_dumps(session.token)).api()

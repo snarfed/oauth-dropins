@@ -7,16 +7,20 @@ https://developer.github.com/apps/building-oauth-apps/authorization-options-for-
 import logging
 import urllib.parse
 
-import appengine_config
-
 from google.cloud import ndb
 from webob import exc
 
 from . import handlers
 from .models import BaseAuth
-from .webutil import util
+from .webutil import appengine_info, util
 from .webutil.util import json_dumps, json_loads
 
+if appengine_info.DEBUG:
+  GITHUB_CLIENT_ID = util.read('github_client_id_local')
+  GITHUB_CLIENT_SECRET = util.read('github_client_secret_local')
+else:
+  GITHUB_CLIENT_ID = util.read('github_client_id')
+  GITHUB_CLIENT_SECRET = util.read('github_client_secret')
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
@@ -114,12 +118,10 @@ class StartHandler(handlers.StartHandler):
   DEFAULT_SCOPE = ''
 
   def redirect_url(self, state=None):
-    assert (appengine_config.GITHUB_CLIENT_ID and
-            appengine_config.GITHUB_CLIENT_SECRET), (
-      "Please fill in the github_client_id and "
-      "github_client_secret files in your app's root directory.")
+    assert GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET, \
+      "Please fill in the github_client_id and github_client_secret files in your app's root directory."
     return GET_AUTH_CODE_URL % {
-      'client_id': appengine_config.GITHUB_CLIENT_ID,
+      'client_id': GITHUB_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       # TODO: does GitHub require non-empty state?
       'state': urllib.parse.quote_plus(state if state else ''),
@@ -153,8 +155,8 @@ class CallbackHandler(handlers.CallbackHandler):
     auth_code = util.get_required_param(self, 'code')
     data = {
       'code': auth_code,
-      'client_id': appengine_config.GITHUB_CLIENT_ID,
-      'client_secret': appengine_config.GITHUB_CLIENT_SECRET,
+      'client_id': GITHUB_CLIENT_ID,
+      'client_secret': GITHUB_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': self.request.path_url,

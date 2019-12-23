@@ -8,8 +8,6 @@ TODO: unify this with instagram. see file docstring comment there.
 import logging
 import urllib.error, urllib.parse
 
-import appengine_config
-
 from google.cloud import ndb
 from webob import exc
 
@@ -18,7 +16,8 @@ from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
 API_BASE = 'https://graph.facebook.com/v4.0/'
-
+FACEBOOK_APP_ID = util.read('facebook_app_id')
+FACEBOOK_APP_SECRET = util.read('facebook_app_secret')
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#logindialog
@@ -130,11 +129,9 @@ class StartHandler(handlers.StartHandler):
 
   def redirect_url(self, state=None, app_id=None):
     if app_id is None:
-      assert (appengine_config.FACEBOOK_APP_ID and
-              appengine_config.FACEBOOK_APP_SECRET), (
-              "Please fill in the facebook_app_id and facebook_app_secret files"
-              " in your app's root directory.")
-      app_id = appengine_config.FACEBOOK_APP_ID
+      assert FACEBOOK_APP_ID and FACEBOOK_APP_SECRET, \
+              "Please fill in the facebook_app_id and facebook_app_secret files in your app's root directory."
+      app_id = FACEBOOK_APP_ID
 
     return GET_AUTH_CODE_URL % {
       'client_id': app_id,
@@ -157,8 +154,8 @@ class CallbackHandler(handlers.CallbackHandler):
     auth_code = util.get_required_param(self, 'code')
     url = GET_ACCESS_TOKEN_URL % {
       'auth_code': auth_code,
-      'client_id': appengine_config.FACEBOOK_APP_ID,
-      'client_secret': appengine_config.FACEBOOK_APP_SECRET,
+      'client_id': FACEBOOK_APP_ID,
+      'client_secret': FACEBOOK_APP_SECRET,
       'redirect_uri': urllib.parse.quote_plus(self.request.path_url),
       }
     try:

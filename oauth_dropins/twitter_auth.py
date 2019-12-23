@@ -7,12 +7,14 @@ Supports Python 3. Should not depend on App Engine API or SDK packages.
 """
 import urllib.request
 
-from . import appengine_config
 import requests
 import requests_oauthlib
 import tweepy
 
 from .webutil import util
+
+TWITTER_APP_KEY = util.read('twitter_app_key')
+TWITTER_APP_SECRET = util.read('twitter_app_secret')
 
 
 def auth_header(url, token_key, token_secret, method='GET'):
@@ -28,8 +30,8 @@ def auth_header(url, token_key, token_secret, method='GET'):
     dict: single element with key 'Authorization'
   """
   oauth1 = requests_oauthlib.OAuth1(
-    client_key=appengine_config.TWITTER_APP_KEY,
-    client_secret=appengine_config.TWITTER_APP_SECRET,
+    client_key=TWITTER_APP_KEY,
+    client_secret=TWITTER_APP_SECRET,
     resource_owner_key=token_key,
     resource_owner_secret=token_secret,
     )
@@ -64,12 +66,10 @@ def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
 def tweepy_auth(token_key, token_secret):
   """Returns a tweepy.OAuthHandler.
   """
-  assert (appengine_config.TWITTER_APP_KEY and
-          appengine_config.TWITTER_APP_SECRET), (
-    "Please fill in the twitter_app_key and twitter_app_secret files in "
-    "your app's root directory.")
-  handler = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                                appengine_config.TWITTER_APP_SECRET)
+  assert TWITTER_APP_KEY and TWITTER_APP_SECRET, \
+    "Please fill in the twitter_app_key and twitter_app_secret files in your app's root directory."
+  handler = tweepy.OAuthHandler(TWITTER_APP_KEY,
+                                TWITTER_APP_SECRET)
   handler.set_access_token(token_key, token_secret)
   return handler
 

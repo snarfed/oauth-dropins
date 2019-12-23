@@ -1,7 +1,7 @@
 <img src="https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny.png" alt="OAuth logo" width="125" /> oauth-dropins [![Circle CI](https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg)](https://circleci.com/gh/snarfed/oauth-dropins)
 =============
 
-Drop-in [OAuth](http://oauth.net/) for [Python App Engine](https://appengine.google.com/)!
+Drop-in Python [OAuth](http://oauth.net/) handlers for popular sites!
 
 * [About](#about)
 * [Quick start](#quick-start)
@@ -16,29 +16,18 @@ Drop-in [OAuth](http://oauth.net/) for [Python App Engine](https://appengine.goo
 About
 ---
 
-This is a collection of drop-in [Google App Engine](https://appengine.google.com/) Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
 
-* [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/)
-  Install with `pip install oauth-dropins`.
+* [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/) Install with `pip install oauth-dropins`.
 * [Click here for getting started docs.](#quick-start)
 * [Click here for reference docs.](https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html)
-* A demo app is deployed at
-[oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
+* A demo app is deployed at [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 
-Requires either the
-[App Engine Python SDK](https://developers.google.com/appengine/downloads)
-or the
-[Google Cloud SDK](https://cloud.google.com/sdk/gcloud/) (aka `gcloud`)
-with the `gcloud-appengine-python` and `gcloud-appengine-python-extras`
-[components](https://cloud.google.com/sdk/docs/components#additional_components). All
-other dependencies are handled by pip and enumerated in
-[requirements.txt](https://github.com/snarfed/oauth-dropins/blob/master/requirements.txt).
-We recommend that you install with pip in a
-[virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
-[App Engine details here.](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
+oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
-If you clone the repo directly or want to contribute, see
-[Development](#development) for setup instructions.
+[Versions 3.0](https://pypi.org/project/oauth-dropins/2.2/) and above support App Engine's [Python 3 runtimes](https://cloud.google.com/appengine/docs/python/), both [Standard](https://cloud.google.com/appengine/docs/standard/python3/) and [Flexible](https://cloud.google.com/appengine/docs/flexible/python/). If you're on the [Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/), use [version 2.2](https://pypi.org/project/oauth-dropins/2.2/).
+
+If you clone the repo directly or want to contribute, see [Development](#development) for setup instructions.
 
 This software is released into the public domain. See LICENSE for details.
 
@@ -48,36 +37,8 @@ Quick start
 
 Here's a full example of using the Facebook drop-in.
 
-1. Make sure you have either the
-  [App Engine Python SDK](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python)
-  version 1.9.15 or later (for
-  [vendor](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)
-  support) or the
-  [Google Cloud SDK](https://cloud.google.com/sdk/gcloud/) (aka `gcloud`)
-  installed and on your `$PYTHONPATH`, e.g.
-  `export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine`. oauth-dropins's
-  `setup.py` file needs it during installation.
-1. Install oauth-dropins into a virtualenv somewhere your App Engine project's
-directory, e.g. `local/`:
-
-    ```shell
-    source local/bin/activate
-    pip install oauth-dropins
-    ```
-
-1. Add this to the `appengine_config.py` file in your project's root directory
-([background](https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring)):
-
-    ```py
-    from google.appengine.ext import vendor
-    vendor.add('local')
-    from oauth_dropins.appengine_config import *
-    ```
-
-1. Put your [Facebook application's](https://developers.facebook.com/apps) ID
-  and secret in two plain text files in your app's root directory,
-  `facebook_app_id` and `facebook_app_secret`. (If you use git, you'll probably
-  also want to add them to your `.gitignore`.)
+1. Install oauth-dropins with `pip install oauth-dropins`.
+1. Put your [Facebook application's](https://developers.facebook.com/apps) ID and secret in two plain text files in your app's root directory, `facebook_app_id` and `facebook_app_secret`. (If you use git, you'll probably also want to add them to your `.gitignore`.)
 1. Create a `facebook_oauth.py` file with these contents:
 
     ```python
@@ -97,15 +58,9 @@ directory, e.g. `local/`:
       secure: always
     ```
 
-Voila! Send your users to `/facebook/start_oauth` when you want them to connect
-their Facebook account to your app, and when they're done, they'll be redirected
-to `/next?access_token=...` in your app.
+Voila! Send your users to `/facebook/start_oauth` when you want them to connect their Facebook account to your app, and when they're done, they'll be redirected to `/next?access_token=...` in your app.
 
-All of the sites provide the same API. To use a different one, just import the
-site module you want and follow the same steps. The filenames for app keys and
-secrets also differ by site;
-[`appengine_config.py`](https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/appengine_config.py)
-has the full list.
+All of the sites provide the same API. To use a different one, just import the site module you want and follow the same steps. The filenames for app keys and secrets also differ by site; [`appengine_config.py`](https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/oauth_dropins/appengine_config.py) has the full list.
 
 
 Usage details
@@ -276,7 +231,7 @@ Changelog
 ### 3.0 - unreleased
 
 _Breaking changes:_
-* _Python 2 is no longer supported!_ Including the [App Engine Standard Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). On the plus side, the [App Engine Standard Python 3 runtime](https://cloud.google.com/appengine/docs/standard/python3/) is now supported! See this [list of differences](https://cloud.google.com/appengine/docs/standard/python3/python-differences) for more details.
+* _Python 2 is no longer supported!_ Including the [App Engine Standard Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). On the plus side, the [Python 3 runtimes](https://cloud.google.com/appengine/docs/standard/python3/), both [Standard](https://cloud.google.com/appengine/docs/standard/python3/) and [Flexible](https://cloud.google.com/appengine/docs/flexible/python/), are now supported.
 * Blogger:
   * Login is now based on [Google Sign-In](https://developers.google.com/identity/). The `api_from_creds()`, `creds()`, and `http()` methods have been removed. Use the remaining `api()` method to get a `BloggerClient`, or `access_token()` to make API calls manually.
 * Google:

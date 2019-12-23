@@ -6,8 +6,6 @@ just a wrapper around that anyway.
 """
 import logging
 
-import appengine_config
-
 from google.cloud import ndb
 import tweepy
 from webob import exc
@@ -120,12 +118,10 @@ class StartHandler(handlers.StartHandler):
     return handler
 
   def redirect_url(self, state=None):
-    assert (appengine_config.TWITTER_APP_KEY and
-            appengine_config.TWITTER_APP_SECRET), (
-      "Please fill in the twitter_app_key and twitter_app_secret files in "
-      "your app's root directory.")
-    auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                               appengine_config.TWITTER_APP_SECRET,
+    assert twitter_auth.TWITTER_APP_KEY and twitter_auth.TWITTER_APP_SECRET, \
+      "Please fill in the twitter_app_key and twitter_app_secret files in your app's root directory."
+    auth = tweepy.OAuthHandler(twitter_auth.TWITTER_APP_KEY,
+                               twitter_auth.TWITTER_APP_SECRET,
                                self.to_url(state=state))
 
     # signin_with_twitter=True returns /authenticate instead of /authorize so
@@ -172,8 +168,8 @@ class CallbackHandler(handlers.CallbackHandler):
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % oauth_token)
 
     # Rebuild the auth handler
-    auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
-                               appengine_config.TWITTER_APP_SECRET)
+    auth = tweepy.OAuthHandler(twitter_auth.TWITTER_APP_KEY,
+                               twitter_auth.TWITTER_APP_SECRET)
     auth.request_token = {'oauth_token': request_token.key.string_id(),
                           'oauth_token_secret': request_token.token_secret}
 

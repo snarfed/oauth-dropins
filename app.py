@@ -5,7 +5,6 @@ import importlib
 import logging
 import urllib.parse
 
-import appengine_config
 from google.cloud import ndb
 import jinja2
 import requests
@@ -13,7 +12,7 @@ import webapp2
 from webob import exc
 
 from oauth_dropins import indieauth, mastodon
-from oauth_dropins.webutil import handlers
+from oauth_dropins.webutil import appengine_info, appengine_config, handlers
 
 SITES = {}  # maps module name to module
 for name in (
@@ -87,4 +86,4 @@ for site, module in SITES.items():
 
 application = handlers.ndb_context_middleware(webapp2.WSGIApplication([
     ('/', FrontPageHandler),
-  ] + routes, debug=appengine_config.DEBUG), client=appengine_config.ndb_client)
+  ] + routes, debug=appengine_info.DEBUG), client=appengine_config.ndb_client)

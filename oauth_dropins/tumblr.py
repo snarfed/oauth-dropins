@@ -6,8 +6,6 @@ http://www.tumblr.com/oauth/apps
 """
 import logging
 
-import appengine_config
-
 from google.cloud import ndb
 import tumblpy
 from webob import exc
@@ -16,6 +14,9 @@ from . import handlers, models
 from .webutil import handlers as webutil_handlers
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
+
+TUMBLR_APP_KEY = util.read('tumblr_app_key')
+TUMBLR_APP_SECRET = util.read('tumblr_app_secret')
 
 
 class TumblrAuth(models.BaseAuth):
@@ -56,12 +57,10 @@ class TumblrAuth(models.BaseAuth):
   def _api_from_token(key, secret):
     """Returns a tumblpy.Tumblpy.
     """
-    assert (appengine_config.TUMBLR_APP_KEY and
-            appengine_config.TUMBLR_APP_SECRET), (
-      "Please fill in the tumblr_app_key and tumblr_app_secret files in "
-      "your app's root directory.")
-    return tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
-                           app_secret=appengine_config.TUMBLR_APP_SECRET,
+    assert TUMBLR_APP_KEY and TUMBLR_APP_SECRET, \
+      "Please fill in the tumblr_app_key and tumblr_app_secret files in your app's root directory."
+    return tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,
+                           app_secret=TUMBLR_APP_SECRET,
                            oauth_token=key, oauth_token_secret=secret)
 
 
@@ -84,12 +83,10 @@ class StartHandler(handlers.StartHandler):
   handle_exception = handle_exception
 
   def redirect_url(self, state=None):
-    assert (appengine_config.TUMBLR_APP_KEY and
-            appengine_config.TUMBLR_APP_SECRET), (
-      "Please fill in the tumblr_app_key and tumblr_app_secret files in "
-      "your app's root directory.")
-    tp = tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
-                         app_secret=appengine_config.TUMBLR_APP_SECRET)
+    assert TUMBLR_APP_KEY and TUMBLR_APP_SECRET, \
+      "Please fill in the tumblr_app_key and tumblr_app_secret files in your app's root directory."
+    tp = tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,
+                         app_secret=TUMBLR_APP_SECRET)
     auth_props = tp.get_authentication_tokens(
       callback_url=self.request.host_url + self.to_path)
 
@@ -126,8 +123,8 @@ class CallbackHandler(handlers.CallbackHandler):
       raise exc.HTTPBadRequest('Invalid oauth_token: %s' % request_token_key)
 
     # generate and store the final token
-    tp = tumblpy.Tumblpy(app_key=appengine_config.TUMBLR_APP_KEY,
-                         app_secret=appengine_config.TUMBLR_APP_SECRET,
+    tp = tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,
+                         app_secret=TUMBLR_APP_SECRET,
                          oauth_token=request_token_key,
                          oauth_token_secret=request_token.token_secret)
     auth_token = tp.get_authorized_tokens(verifier)

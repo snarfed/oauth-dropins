@@ -9,9 +9,8 @@ is a POST instead of a GET.
 TODO: unify them.
 """
 import logging
+import os
 import urllib.parse
-
-import appengine_config
 
 from google.cloud import ndb
 from webob import exc
@@ -20,6 +19,10 @@ from . import facebook, handlers, models
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
+INSTAGRAM_CLIENT_ID = util.read('instagram_client_id')
+INSTAGRAM_CLIENT_SECRET = util.read('instagram_client_secret')
+INSTAGRAM_SESSIONID_COOKIE = (os.getenv('INSTAGRAM_SESSIONID_COOKIE') or
+                              util.read('instagram_sessionid_cookie'))
 # instagram api url templates. can't (easily) use urlencode() because i want to
 # keep the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
@@ -30,7 +33,6 @@ GET_AUTH_CODE_URL = '&'.join((
     'redirect_uri=%(redirect_uri)s',
     'response_type=code',
 ))
-
 GET_ACCESS_TOKEN_URL = 'https://api.instagram.com/oauth/access_token'
 
 
@@ -76,13 +78,12 @@ class StartHandler(handlers.StartHandler):
   DEFAULT_SCOPE = 'basic'
 
   def redirect_url(self, state=None):
-    assert (appengine_config.INSTAGRAM_CLIENT_ID and
-            appengine_config.INSTAGRAM_CLIENT_SECRET), (
+    assert INSTAGRAM_CLIENT_ID and INSTAGRAM_CLIENT_SECRET, (
       "Please fill in the instagram_client_id and instagram_client_secret "
       "files in your app's root directory.")
     # http://instagram.com/developer/authentication/
     return GET_AUTH_CODE_URL % {
-      'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
+      'client_id': INSTAGRAM_CLIENT_ID,
       # instagram uses + instead of , to separate scopes
       # http://instagram.com/developer/authentication/#scope
       'scope': self.scope.replace(',', '+'),
@@ -110,8 +111,8 @@ class CallbackHandler(handlers.CallbackHandler):
     # http://instagram.com/developer/authentication/
     auth_code = util.get_required_param(self, 'code')
     data = {
-      'client_id': appengine_config.INSTAGRAM_CLIENT_ID,
-      'client_secret': appengine_config.INSTAGRAM_CLIENT_SECRET,
+      'client_id': INSTAGRAM_CLIENT_ID,
+      'client_secret': INSTAGRAM_CLIENT_SECRET,
       'code': auth_code,
       'redirect_uri': self.request_url_with_state(),
       'grant_type': 'authorization_code',

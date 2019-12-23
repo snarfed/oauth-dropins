@@ -7,8 +7,6 @@ https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-
 import logging
 import urllib.parse
 
-import appengine_config
-
 from google.cloud import ndb
 from webob import exc
 
@@ -17,6 +15,8 @@ from .models import BaseAuth
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
+LINKEDIN_CLIENT_ID = util.read('linkedin_client_id')
+LINKEDIN_CLIENT_SECRET = util.read('linkedin_client_secret')
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 AUTH_CODE_URL = '&'.join((
@@ -29,7 +29,6 @@ AUTH_CODE_URL = '&'.join((
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
     ))
-
 ACCESS_TOKEN_URL = 'https://www.linkedin.com/oauth/v2/accessToken'
 API_PROFILE_URL = 'https://api.linkedin.com/v2/me'
 
@@ -107,12 +106,10 @@ class StartHandler(handlers.StartHandler):
 
   def redirect_url(self, state=None):
     # assert state, 'LinkedIn OAuth 2 requires state parameter'
-    assert (appengine_config.LINKEDIN_CLIENT_ID and
-            appengine_config.LINKEDIN_CLIENT_SECRET), (
-      "Please fill in the linkedin_client_id and "
-      "linkedin_client_secret files in your app's root directory.")
+    assert LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET, \
+      "Please fill in the linkedin_client_id and linkedin_client_secret files in your app's root directory."
     return AUTH_CODE_URL % {
-      'client_id': appengine_config.LINKEDIN_CLIENT_ID,
+      'client_id': LINKEDIN_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       'state': urllib.parse.quote_plus(state or ''),
       'scope': self.scope,
@@ -149,8 +146,8 @@ class CallbackHandler(handlers.CallbackHandler):
     data = {
       'grant_type': 'authorization_code',
       'code': auth_code,
-      'client_id': appengine_config.LINKEDIN_CLIENT_ID,
-      'client_secret': appengine_config.LINKEDIN_CLIENT_SECRET,
+      'client_id': LINKEDIN_CLIENT_ID,
+      'client_secret': LINKEDIN_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': self.request.path_url,

@@ -15,8 +15,6 @@ http://my.dev.com:8080/ instead of http://localhost:8080/ .
 import logging
 import urllib.parse
 
-import appengine_config
-
 from google.cloud import ndb
 from webob import exc
 
@@ -24,6 +22,9 @@ from . import handlers
 from .models import BaseAuth
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
+
+MEDIUM_CLIENT_ID = util.read('medium_client_id')
+MEDIUM_CLIENT_SECRET = util.read('medium_client_secret')
 
 # medium is behind cloudflare, which often blocks requests's user agent, so set
 # our own.
@@ -107,12 +108,10 @@ class StartHandler(handlers.StartHandler):
   DEFAULT_SCOPE = 'basicProfile'
 
   def redirect_url(self, state=None):
-    assert (appengine_config.MEDIUM_CLIENT_ID and
-            appengine_config.MEDIUM_CLIENT_SECRET), (
-      "Please fill in the medium_client_id and "
-      "medium_client_secret files in your app's root directory.")
+    assert MEDIUM_CLIENT_ID and MEDIUM_CLIENT_SECRET, \
+      "Please fill in the medium_client_id and medium_client_secret files in your app's root directory."
     return GET_AUTH_CODE_URL % {
-      'client_id': appengine_config.MEDIUM_CLIENT_ID,
+      'client_id': MEDIUM_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       # Medium requires non-empty state
       'state': urllib.parse.quote_plus(state if state else 'unused'),
@@ -139,8 +138,8 @@ class CallbackHandler(handlers.CallbackHandler):
     auth_code = util.get_required_param(self, 'code')
     data = {
       'code': auth_code,
-      'client_id': appengine_config.MEDIUM_CLIENT_ID,
-      'client_secret': appengine_config.MEDIUM_CLIENT_SECRET,
+      'client_id': MEDIUM_CLIENT_ID,
+      'client_secret': MEDIUM_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': self.request.path_url,

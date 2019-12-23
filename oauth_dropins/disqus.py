@@ -20,10 +20,12 @@ import urllib.parse
 from google.cloud import ndb
 from webob import exc
 
-from . import appengine_config, handlers, models
-from .webutil import util
+from . import handlers, models
+from .webutil import appengine_info, util
 from .webutil.util import json_dumps, json_loads
 
+DISQUS_CLIENT_ID = util.read('disqus_client_id')
+DISQUS_CLIENT_SECRET = util.read('disqus_client_secret')
 GET_AUTH_CODE_URL = (
     'https://disqus.com/api/oauth/2.0/authorize/?' +
     '&'.join((
@@ -32,9 +34,7 @@ GET_AUTH_CODE_URL = (
         'response_type=code',
         'redirect_uri=%(redirect_uri)s',
     )))
-
 GET_ACCESS_TOKEN_URL = 'https://disqus.com/api/oauth/2.0/access_token/'
-
 USER_DETAILS_URL = 'https://disqus.com/api/3.0/users/details.json?user=%d'
 
 
@@ -71,10 +71,8 @@ class DisqusAuth(models.BaseAuth):
     """
     # TODO does work for POST requests? key is always passed as a
     # query param, regardless of method.
-    return models.BaseAuth.urlopen_access_token(
-        url, self.access_token_str,
-        appengine_config.DISQUS_CLIENT_ID,
-        **kwargs)
+    return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
+                                                DISQUS_CLIENT_ID, **kwargs)
 
 
 class StartHandler(handlers.StartHandler):
@@ -88,15 +86,10 @@ class StartHandler(handlers.StartHandler):
   DEFAULT_SCOPE = 'read'
 
   def redirect_url(self, state=None):
-      assert (appengine_config.DISQUS_CLIENT_ID and
-              appengine_config.DISQUS_CLIENT_SECRET), (
-          "Please fill in the %s and %s files in your app's root directory." % (
-              ('disqus_client_id_local', 'disqus_client_secret_local')
-              if appengine_config.DEBUG else
-              ('disqus_client_id', 'disqus_client_secret')
-          ))
+      assert DISQUS_CLIENT_ID and DISQUS_CLIENT_SECRET, \
+          "Please fill in the disqus_client_id and disqus_client_secret files in your app's root directory."
       return GET_AUTH_CODE_URL % {
-        'client_id': appengine_config.DISQUS_CLIENT_ID,
+        'client_id': DISQUS_CLIENT_ID,
         'scope': self.scope,
         'redirect_uri': urllib.parse.quote_plus(self.to_url(state=state)),
       }
@@ -113,8 +106,8 @@ class CallbackHandler(handlers.CallbackHandler):
     auth_code = util.get_required_param(self, 'code')
     data = {
         'grant_type': 'authorization_code',
-        'client_id': appengine_config.DISQUS_CLIENT_ID,
-        'client_secret': appengine_config.DISQUS_CLIENT_SECRET,
+        'client_id': DISQUS_CLIENT_ID,
+        'client_secret': DISQUS_CLIENT_SECRET,
         'redirect_uri': self.request_url_with_state(),
         'code': auth_code,
     }
