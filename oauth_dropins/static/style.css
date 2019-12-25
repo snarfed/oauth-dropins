@@ -22,7 +22,7 @@ form input {
   margin-bottom: 1em;
 }
 
-input.shadow {
+input.shadow, img.shadow {
   -moz-box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
   -webkit-box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
   /* CSS3 */
