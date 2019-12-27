@@ -4,12 +4,11 @@ oauth-dropins
 About
 -----
 
-This is a collection of drop-in `Google App
-Engine <https://appengine.google.com/>`__ Python request handlers for
-the initial `OAuth <http://oauth.net/>`__ client flows for many popular
-sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub,
-Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr,
-Twitter, and WordPress.com.
+This is a collection of drop-in Python request handlers for the initial
+`OAuth <http://oauth.net/>`__ client flows for many popular sites,
+including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google,
+IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and
+WordPress.com.
 
 -  `Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__
    Install with ``pip install oauth-dropins``.
@@ -19,18 +18,21 @@ Twitter, and WordPress.com.
 -  A demo app is deployed at
    `oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
 
-Requires either the `App Engine Python
-SDK <https://developers.google.com/appengine/downloads>`__ or the
-`Google Cloud SDK <https://cloud.google.com/sdk/gcloud/>`__ (aka
-``gcloud``) with the ``gcloud-appengine-python`` and
-``gcloud-appengine-python-extras``
-`components <https://cloud.google.com/sdk/docs/components#additional_components>`__.
-All other dependencies are handled by pip and enumerated in
-`requirements.txt <https://github.com/snarfed/oauth-dropins/blob/master/requirements.txt>`__.
-We recommend that you install with pip in a
-`virtualenv <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`__.
-`App Engine details
-here. <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__
+oauth-dropins stores user credentials in `Google Cloud
+Datastore <https://cloud.google.com/datastore/>`__. It’s primarily
+designed for `Google App Engine <https://appengine.google.com/>`__, but
+it can be used in any Python web application, regardless of host or
+framework.
+
+`Versions 3.0 <https://pypi.org/project/oauth-dropins/2.2/>`__ and above
+support App Engine’s `Python 3
+runtimes <https://cloud.google.com/appengine/docs/python/>`__, both
+`Standard <https://cloud.google.com/appengine/docs/standard/python3/>`__
+and
+`Flexible <https://cloud.google.com/appengine/docs/flexible/python/>`__.
+If you’re on the `Python 2
+runtime <https://cloud.google.com/appengine/docs/standard/python/>`__,
+use `version 2.2 <https://pypi.org/project/oauth-dropins/2.2/>`__.
 
 If you clone the repo directly or want to contribute, see
 `Development <#development>`__ for setup instructions.
@@ -43,39 +45,13 @@ Quick start
 
 Here’s a full example of using the Facebook drop-in.
 
-1. Make sure you have either the `App Engine Python
-   SDK <https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python>`__
-   version 1.9.15 or later (for
-   `vendor <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__
-   support) or the `Google Cloud
-   SDK <https://cloud.google.com/sdk/gcloud/>`__ (aka ``gcloud``)
-   installed and on your ``$PYTHONPATH``, e.g.
-   ``export PYTHONPATH=$PYTHONPATH:/usr/local/google_appengine``.
-   oauth-dropins’s ``setup.py`` file needs it during installation.
-2. Install oauth-dropins into a virtualenv somewhere your App Engine
-   project’s directory, e.g. ``local/``:
-
-   .. code:: shell
-
-      source local/bin/activate
-      pip install oauth-dropins
-
-3. Add this to the ``appengine_config.py`` file in your project’s root
-   directory
-   (`background <https://cloud.google.com/appengine/docs/python/tools/libraries27#vendoring>`__):
-
-   .. code:: py
-
-      from google.appengine.ext import vendor
-      vendor.add('local')
-      from oauth_dropins.appengine_config import *
-
-4. Put your `Facebook
+1. Install oauth-dropins with ``pip install oauth-dropins``.
+2. Put your `Facebook
    application’s <https://developers.facebook.com/apps>`__ ID and secret
    in two plain text files in your app’s root directory,
    ``facebook_app_id`` and ``facebook_app_secret``. (If you use git,
    you’ll probably also want to add them to your ``.gitignore``.)
-5. Create a ``facebook_oauth.py`` file with these contents:
+3. Create a ``facebook_oauth.py`` file with these contents:
 
    .. code:: python
 
@@ -86,7 +62,7 @@ Here’s a full example of using the Facebook drop-in.
         ('/facebook/start_oauth', facebook.StartHandler.to('/facebook/oauth_callback')),
         ('/facebook/oauth_callback', facebook.CallbackHandler.to('/next'))]
 
-6. Add these lines to ``app.yaml``:
+4. Add these lines to ``app.yaml``:
 
    .. code:: yaml
 
@@ -101,7 +77,7 @@ they’ll be redirected to ``/next?access_token=...`` in your app.
 All of the sites provide the same API. To use a different one, just
 import the site module you want and follow the same steps. The filenames
 for app keys and secrets also differ by site;
-`appengine_config.py <https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/appengine_config.py>`__
+`appengine_config.py <https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/oauth_dropins/appengine_config.py>`__
 has the full list.
 
 Usage details
@@ -302,43 +278,40 @@ Changelog
 3.0 - unreleased
 ~~~~~~~~~~~~~~~~
 
-*Breaking changes:* \* Add support for the `App Engine Standard Python 3
-runtime <https://cloud.google.com/appengine/docs/standard/python3/>`__
-and drops support for the `Python 2
+*Breaking changes:* \* *Python 2 is no longer supported!* Including the
+`App Engine Standard Python 2
 runtime <https://cloud.google.com/appengine/docs/standard/python/>`__.
-See this `list of
-differences <https://cloud.google.com/appengine/docs/standard/python3/python-differences>`__
-for more details. \* Blogger: \* Drop ``http()`` method (which returned
-an ``httplib2.Http``). \* Google: \* Replace ``GoogleAuth`` with the new
-``GoogleUser`` NDB model class, which `doesn’t depend on
+On the plus side, the `Python 3
+runtimes <https://cloud.google.com/appengine/docs/standard/python3/>`__,
+both
+`Standard <https://cloud.google.com/appengine/docs/standard/python3/>`__
+and
+`Flexible <https://cloud.google.com/appengine/docs/flexible/python/>`__,
+are now supported. \* Blogger: \* Login is now based on `Google
+Sign-In <https://developers.google.com/identity/>`__. The
+``api_from_creds()``, ``creds()``, and ``http()`` methods have been
+removed. Use the remaining ``api()`` method to get a ``BloggerClient``,
+or ``access_token()`` to make API calls manually. \* Google: \* Replace
+``GoogleAuth`` with the new ``GoogleUser`` NDB model class, which
+`doesn’t depend on the deprecated
 oauth2client <https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html>`__.
-\* Drop ``http()`` method (which returned an ``httplib2.Http``). \* Drop
-``webutil.handlers.memcache_response()`` since the Python 3 runtime
-doesn’t include memcache. \* Drop ``webutil.handlers.TemplateHandler``
+\* Drop ``http()`` method (which returned an ``httplib2.Http``). \*
+``webutil``: \* Drop ``handlers.memcache_response()`` since the Python 3
+runtime doesn’t include memcache. \* Drop ``handlers.TemplateHandler``
 support for ``webapp2.template`` via ``USE_APPENGINE_WEBAPP``, since the
-Python 3 runtime doesn’t include ``webapp2`` built in.
-
-.. _unreleased-1:
-
-2.3 - unreleased
-~~~~~~~~~~~~~~~~
-
-*Breaking changes:* \* Remove ``cache`` and ``fail_cache_time_secs``
-kwargs from ``webutil.util.follow_redirects()``. Caching is now built
-in. You can bypass the cache with ``follow_redirects.__wrapped__()``.
+Python 3 runtime doesn’t include ``webapp2`` built in. \* Remove
+``cache`` and ``fail_cache_time_secs`` kwargs from
+``util.follow_redirects()``. Caching is now built in. You can bypass the
+cache with ``follow_redirects.__wrapped__()``.
 `Details. <https://cachetools.readthedocs.io/en/stable/#cachetools.cached>`__
 
-Non-breaking changes: \* Google: \* The ``GoogleAuth`` NDB model class
-is deprecated, since it depends on
-`oauth2client <https://github.com/googleapis/oauth2client>`__, `which is
-also
-deprecated <https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html>`__.
-``GoogleAuth`` will be replaced in 3.0 with a new ``GoogleUser`` NDB
-model class. \* Python 2 App Engine features in ``webutil`` are
+Non-breaking changes: \* Blogger, Google: \* The ``state`` query
+parameter now works! \* Python 2 App Engine features in ``webutil`` are
 deprecated: \* ``handlers.memcache_response()`` \*
 ``handlers.TemplateHandler`` support for ``webapp2.template`` via
 ``USE_APPENGINE_WEBAPP``. \* Add new ``outer_classes`` kwarg to
-``button_html()`` for the outer ``<div>``, eg as Bootstrap columns.
+``button_html()`` for the outer ``<div>``, eg as Bootstrap columns. \*
+Add new ``image_file`` kwarg to ``StartHandler.button_html()``
 
 2.2 - 2019-11-01
 ~~~~~~~~~~~~~~~~
@@ -539,7 +512,7 @@ SDK <https://cloud.google.com/sdk/>`__ with the
 ``gcloud-appengine-python`` and ``gcloud-appengine-python-extras``
 `components <https://cloud.google.com/sdk/docs/components#additional_components>`__.
 Once you have them, set up your environment by running these commands in
-the root directory:
+the repo root directory:
 
 .. code:: shell
 

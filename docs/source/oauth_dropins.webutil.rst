@@ -19,6 +19,14 @@ models
 ------
 .. automodule:: oauth_dropins.webutil.models
 
+logs
+----
+.. automodule:: oauth_dropins.webutil.logs
+
+instance_info
+-------------
+.. automodule:: oauth_dropins.webutil.instance_info
+
 testutil
 --------
 .. automodule:: oauth_dropins.webutil.testutil

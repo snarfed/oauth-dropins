@@ -347,7 +347,6 @@ git submodule update
 python3 -m venv local3
 source local3/bin/activate
 pip install -r requirements.txt
-python setup.py test
 ```
 
 Run the demo app locally [in dev_appserver.py](https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app#local-dev-server) ([so that static files work](https://groups.google.com/d/topic/google-appengine/BJDE8y2KISM/discussion)) with:
@@ -358,14 +357,14 @@ dev_appserver.py --log_level debug --enable_host_checking false \
   --application=oauth-dropins app.yaml
 ```
 
-Most dependencies are clean, but we've made patches to [gdata-python-client](https://github.com/snarfed/gdata-python-client) below that we haven't (yet) tried to push upstream. If we ever switch its submodule repo for, make sure the patches are included!
+Most dependencies are clean, but we've made patches to [gdata-python-client](https://github.com/snarfed/gdata-python-client), which is unmaintained but we still need for [Blogger's v2 API](https://developers.google.com/blogger/docs/2.0/developers_guide_protocol).
 
 * [snarfed/gdata-python-client@fabb622](https://github.com/snarfed/gdata-python-client/commit/fabb6227361612ac4fcb8bef4438719cb00eaa2b)
 * [snarfed/gdata-python-client@8453e33](https://github.com/snarfed/gdata-python-client/commit/8453e3388d152ac650e22d219fae36da56d9a85d)
 
-To deploy:
+To deploy to production:
 
-`gcloud -q app deploy oauth-dropins *.yaml`
+`gcloud -q beta app deploy --no-cache oauth-dropins *.yaml`
 
 The docs are built with [Sphinx](http://sphinx-doc.org/), including [apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html), [autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and [napoleon](http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration is in [`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py) To build them, first install Sphinx with `pip install sphinx`. (You may want to do this outside your virtualenv; if so, you'll need to reconfigure it to see system packages with `python3 -m venv --system-site-packages local3`.) Then, run [`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
 

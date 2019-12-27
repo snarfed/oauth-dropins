@@ -52,11 +52,11 @@ instagram
 .. automodule:: oauth_dropins.instagram
 
 linkedin
-------
+--------
 .. automodule:: oauth_dropins.linkedin
 
 mastodon
-------
+--------
 .. automodule:: oauth_dropins.mastodon
 
 medium
