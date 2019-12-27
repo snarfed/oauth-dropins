@@ -39,7 +39,7 @@ extensions = [
 # autodoc settings
 autoclass_content = 'class'
 autodoc_member_order = 'bysource'
-autodoc_default_flags = ['show-inheritance', 'members', 'special-members']
+autodoc_default_options = ['show-inheritance', 'members', 'special-members']
 
 # Napoleon settings
 # http://www.sphinx-doc.org/en/stable/ext/napoleon.html
@@ -70,7 +70,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'oauth-dropins'
-copyright = '2013-2019, Ryan Barrett'
+copyright = '2013-2020, Ryan Barrett'
 author = 'Ryan Barrett'
 
 # The version info for the project you're documenting, acts as replacement for
