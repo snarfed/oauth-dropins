@@ -34,12 +34,12 @@ GET_ACCESS_TOKEN_URL = 'https://secure.meetup.com/oauth2/access'
 GET_USER_INFO_URL = 'https://api.meetup.com/members/self/'
 
 
-def urlopen_bearer_token(url, access_token, **kwargs):
+def urlopen_bearer_token(url, access_token, data=None, **kwargs):
     """Wraps urlopen() and adds OAuth credentials to the request.
     """
     headers = {'Authorization': 'Bearer %s' % access_token}
     try:
-        return util.urlopen(urllib.request.Request(url, headers=headers), **kwargs)
+        return util.urlopen(urllib.request.Request(url, headers=headers, data=data), **kwargs)
     except BaseException as e:
         util.interpret_http_exception(e)
         raise
