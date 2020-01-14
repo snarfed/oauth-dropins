@@ -60,7 +60,7 @@ Here's a full example of using the Facebook drop-in.
 
 Voila! Send your users to `/facebook/start_oauth` when you want them to connect their Facebook account to your app, and when they're done, they'll be redirected to `/next?access_token=...` in your app.
 
-All of the sites provide the same API. To use a different one, just import the site module you want and follow the same steps. The filenames for app keys and secrets also differ by site; [`appengine_config.py`](https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/oauth_dropins/appengine_config.py) has the full list.
+All of the sites provide the same API. To use a different one, just import the site module you want and follow the same steps. The filenames for app keys and secrets also differ by site; see each silo's `.py` file for its filenames.
 
 
 Usage details
@@ -237,6 +237,8 @@ _Breaking changes:_
 * Google:
   * Replace `GoogleAuth` with the new `GoogleUser` NDB model class, which [doesn't depend on the deprecated oauth2client](https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html).
   * Drop `http()` method (which returned an `httplib2.Http`).
+* Mastodon:
+  * `StartHandler`: drop `APP_NAME`/`APP_URL` class attributes and `app_name`/`app_url` kwargs in the `to()` method and replace them with new `app_name()`/`app_url()` methods that subclasses should override, since they often depend on WSGI environment variables like `HTTP_HOST` and `SERVER_NAME` that are available during requests but not at runtime startup.
 * `webutil`:
   * Drop `handlers.memcache_response()` since the Python 3 runtime doesn't include memcache.
   * Drop `handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`, since the Python 3 runtime doesn't include `webapp2` built in.

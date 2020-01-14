@@ -163,9 +163,6 @@ class StartHandler(handlers.StartHandler):
   """Starts Mastodon auth. Requests an auth code and expects a redirect back.
 
   Attributes:
-    APP_NAME: string, user-visible name of this application. Displayed in Mastodon's
-      OAuth prompt.
-    APP_URL: string, this application's web site
     DEFAULT_SCOPE: string, default OAuth scope(s) to request
     REDIRECT_PATHS: sequence of string URL paths (on this host) to register as
       OAuth callback (aka redirect) URIs in the OAuth app
@@ -173,19 +170,27 @@ class StartHandler(handlers.StartHandler):
   """
   NAME = 'mastodon'
   LABEL = 'Mastodon'
-  APP_NAME = 'oauth-dropins demo'
-  APP_URL = appengine_info.HOST_URL
   DEFAULT_SCOPE = 'read:accounts'
   REDIRECT_PATHS = ()
   SCOPE_SEPARATOR = ' '
 
   @classmethod
-  def to(cls, path, app_name=None, app_url=None, **kwargs):
-    if app_name is not None:
-      cls.APP_NAME = app_name
-    if app_url is not None:
-      cls.APP_URL = app_url
+  def to(cls, path, **kwargs):
     return super(StartHandler, cls).to(path, **kwargs)
+
+  def app_name(self):
+    """Returns the user-visible name of this application.
+
+    To be overridden by subclasses. Displayed in Mastodon's OAuth prompt.
+    """
+    return 'oauth-dropins demo'
+
+  def app_url(self):
+    """Returns this application's web site.
+
+    To be overridden by subclasses. Displayed in Mastodon's OAuth prompt.
+    """
+    return self.request.host_url
 
   def redirect_url(self, state=None, instance=None):
     """Returns the local URL for Mastodon to redirect back to after OAuth prompt.
@@ -232,15 +237,17 @@ class StartHandler(handlers.StartHandler):
     parsed[2] = '/'  # path
     instance = urlunparse(parsed)
 
+    app_name = self.app_name()
+    app_url = self.app_url()
     query = MastodonApp.query(MastodonApp.instance == instance,
-                            MastodonApp.app_url == self.APP_URL)
+                              MastodonApp.app_url == app_url)
     if appengine_info.DEBUG:
-      # disambiguate different apps in dev_appserver, since their APP_URL will
+      # disambiguate different apps in dev_appserver, since their app_url will
       # always be localhost
-      query = query.filter(MastodonApp.app_name == self.APP_NAME)
+      query = query.filter(MastodonApp.app_name == app_name)
     app = query.get()
     if not app:
-      app = self._register_app(instance)
+      app = self._register_app(instance, app_name, app_url)
       app.instance_info = resp.text
       app.put()
 
@@ -254,18 +261,20 @@ class StartHandler(handlers.StartHandler):
       'scope': self.scope,
     })
 
-  def _register_app(self, instance):
+  def _register_app(self, instance, app_name, app_url):
     """Register a Mastodon API app on a specific instance.
 
     https://docs.joinmastodon.org/api/rest/apps/
 
     Args:
       instance: string
+      app_name: string
+      app_url: string
 
     Returns: MastodonApp
     """
-    logging.info("first time we've seen Mastodon instance %s with app %s! "
-                 "registering an API app.", instance, self.APP_URL)
+    logging.info("first time we've seen Mastodon instance %s with app %s %s! "
+                 "registering an API app.", instance, app_name, app_url)
 
     redirect_uris = set(urljoin(self.request.host_url, path)
                         for path in set(self.REDIRECT_PATHS))
@@ -274,13 +283,13 @@ class StartHandler(handlers.StartHandler):
     resp = util.requests_post(
       urljoin(instance, REGISTER_APP_API),
       data=urlencode({
-        'client_name': self.APP_NAME,
+        'client_name': app_name,
         # Mastodon uses Doorkeeper for OAuth, which allows registering
         # multiple redirect URIs, separated by newlines.
         # https://github.com/doorkeeper-gem/doorkeeper/pull/298
         # https://docs.joinmastodon.org/api/rest/apps/
         'redirect_uris': '\n'.join(redirect_uris),
-        'website': self.APP_URL,
+        'website': app_url,
         # https://docs.joinmastodon.org/api/permissions/
         'scopes': self.SCOPE_SEPARATOR.join(ALL_SCOPES),
       }))
@@ -288,8 +297,8 @@ class StartHandler(handlers.StartHandler):
 
     app_data = json_loads(resp.text)
     logging.info('Got %s', app_data)
-    app = MastodonApp(instance=instance, app_url=self.APP_URL,
-                      data=json_dumps(app_data))
+    app = MastodonApp(instance=instance, app_name=app_name,
+                      app_url=app_url, data=json_dumps(app_data))
     app.put()
     return app
 

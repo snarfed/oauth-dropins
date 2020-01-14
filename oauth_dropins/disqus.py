@@ -21,7 +21,7 @@ from google.cloud import ndb
 from webob import exc
 
 from . import handlers, models
-from .webutil import appengine_info, util
+from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
 DISQUS_CLIENT_ID = util.read('disqus_client_id')
