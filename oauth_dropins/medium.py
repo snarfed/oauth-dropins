@@ -77,7 +77,7 @@ class MediumAuth(BaseAuth):
       if data:
         return data.get('name') or data.get('username')
 
-    return self.key.string_id()
+    return self.key_id()
 
   def access_token(self):
     """Returns the OAuth access token string.

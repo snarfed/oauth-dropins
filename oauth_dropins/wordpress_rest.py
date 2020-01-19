@@ -69,7 +69,7 @@ class WordPressAuth(BaseAuth):
       user = json_loads(self.user_json)
       return user.get('display_name') or user.get('username')
     else:
-      return self.key.string_id()
+      return self.key_id()
 
   def access_token(self):
     """Returns the OAuth access token string.

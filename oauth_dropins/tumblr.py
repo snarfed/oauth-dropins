@@ -41,7 +41,7 @@ class TumblrAuth(models.BaseAuth):
   def user_display_name(self):
     """Returns the username.
     """
-    return self.key.string_id()
+    return self.key_id()
 
   def access_token(self):
     """Returns the OAuth access token as a (string key, string secret) tuple.

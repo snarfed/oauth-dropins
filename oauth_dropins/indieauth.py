@@ -95,7 +95,7 @@ class IndieAuth(models.BaseAuth):
 
   def user_display_name(self):
     """Returns the user's domain."""
-    return self.key.string_id()
+    return self.key_id()
 
   def access_token(self):
     """Return the access token, N/A for IndieAuth"""
