@@ -100,7 +100,7 @@ class StartHandler(handlers.StartHandler):
                 'client_id': MEETUP_CLIENT_ID,
                 'redirect_uri': urllib.parse.quote_plus(self.to_url()),
                 'scope': self.scope,
-                'state': '%s|%s' % (state, csrf_key.id()),
+                'state': '%s|%s' % (urllib.parse.quote_plus(state), csrf_key.id()),
                 }
 
     @classmethod
