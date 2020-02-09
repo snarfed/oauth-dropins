@@ -98,7 +98,7 @@ class StartHandler(handlers.StartHandler):
 
         return GET_AUTH_CODE_URL % {
                 'client_id': MEETUP_CLIENT_ID,
-                'redirect_uri': urllib.parse.quote_plus(self.to_url(state=state)),
+                'redirect_uri': urllib.parse.quote_plus(self.to_url()),
                 'scope': self.scope,
                 'state': '%s|%s' % (state, csrf_key.id()),
                 }
