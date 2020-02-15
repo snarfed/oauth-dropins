@@ -252,6 +252,7 @@ Non-breaking changes:
   * `handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`.
 * Add new `outer_classes` kwarg to `button_html()` for the outer `<div>`, eg as Bootstrap columns.
 * Add new `image_file` kwarg to `StartHandler.button_html()`
+* Add Meetup.com support
 
 ### 2.2 - 2019-11-01
 * Add LinkedIn and Mastodon!
