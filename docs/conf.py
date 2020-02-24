@@ -42,7 +42,6 @@ autodoc_member_order = 'bysource'
 autodoc_default_options = {
     'show-inheritance': True,
     'members': True,
-    'special-members': True,
 }
 
 # Napoleon settings
