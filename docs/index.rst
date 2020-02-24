@@ -76,9 +76,8 @@ they’ll be redirected to ``/next?access_token=...`` in your app.
 
 All of the sites provide the same API. To use a different one, just
 import the site module you want and follow the same steps. The filenames
-for app keys and secrets also differ by site;
-`appengine_config.py <https://github.com/snarfed/oauth-dropins/blob/master/oauth_dropins/oauth_dropins/appengine_config.py>`__
-has the full list.
+for app keys and secrets also differ by site; see each silo’s ``.py``
+file for its filenames.
 
 Usage details
 -------------
@@ -296,13 +295,19 @@ or ``access_token()`` to make API calls manually. \* Google: \* Replace
 `doesn’t depend on the deprecated
 oauth2client <https://google-auth.readthedocs.io/en/latest/oauth2client-deprecation.html>`__.
 \* Drop ``http()`` method (which returned an ``httplib2.Http``). \*
-``webutil``: \* Drop ``handlers.memcache_response()`` since the Python 3
-runtime doesn’t include memcache. \* Drop ``handlers.TemplateHandler``
-support for ``webapp2.template`` via ``USE_APPENGINE_WEBAPP``, since the
-Python 3 runtime doesn’t include ``webapp2`` built in. \* Remove
-``cache`` and ``fail_cache_time_secs`` kwargs from
-``util.follow_redirects()``. Caching is now built in. You can bypass the
-cache with ``follow_redirects.__wrapped__()``.
+Mastodon: \* ``StartHandler``: drop ``APP_NAME``/``APP_URL`` class
+attributes and ``app_name``/``app_url`` kwargs in the ``to()`` method
+and replace them with new ``app_name()``/``app_url()`` methods that
+subclasses should override, since they often depend on WSGI environment
+variables like ``HTTP_HOST`` and ``SERVER_NAME`` that are available
+during requests but not at runtime startup. \* ``webutil``: \* Drop
+``handlers.memcache_response()`` since the Python 3 runtime doesn’t
+include memcache. \* Drop ``handlers.TemplateHandler`` support for
+``webapp2.template`` via ``USE_APPENGINE_WEBAPP``, since the Python 3
+runtime doesn’t include ``webapp2`` built in. \* Remove ``cache`` and
+``fail_cache_time_secs`` kwargs from ``util.follow_redirects()``.
+Caching is now built in. You can bypass the cache with
+``follow_redirects.__wrapped__()``.
 `Details. <https://cachetools.readthedocs.io/en/stable/#cachetools.cached>`__
 
 Non-breaking changes: \* Blogger, Google: \* The ``state`` query
@@ -311,7 +316,8 @@ deprecated: \* ``handlers.memcache_response()`` \*
 ``handlers.TemplateHandler`` support for ``webapp2.template`` via
 ``USE_APPENGINE_WEBAPP``. \* Add new ``outer_classes`` kwarg to
 ``button_html()`` for the outer ``<div>``, eg as Bootstrap columns. \*
-Add new ``image_file`` kwarg to ``StartHandler.button_html()``
+Add new ``image_file`` kwarg to ``StartHandler.button_html()`` \* Add
+Meetup.com support
 
 2.2 - 2019-11-01
 ~~~~~~~~~~~~~~~~

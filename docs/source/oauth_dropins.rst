@@ -63,6 +63,10 @@ medium
 ------
 .. automodule:: oauth_dropins.medium
 
+meetup
+------
+.. automodule:: oauth_dropins.meetup
+
 models
 ------
 .. automodule:: oauth_dropins.models
