@@ -224,6 +224,14 @@ Troubleshooting/FAQ
   friend. If you really want `-t`, try removing the `-e` from the lines in
   `requirements.txt` that have it.
 
+1. If you get this error while running `dev_appserver.py`:
+
+    ```
+    RuntimeError: Cannot use the Cloud Datastore Emulator because the packaged grpcio is incompatible to this system. Please install grpcio using pip
+    ```
+
+  ...you can fix it by [installing `grpcio` into the Python 2 that you're running`dev_appserver` with](https://stackoverflow.com/a/59996186/186123). Usually this is just `sudo python2 -m pip install grpcio`.
+
 
 Changelog
 ---
