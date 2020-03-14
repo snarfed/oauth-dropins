@@ -240,6 +240,8 @@ Changelog
 
 _Breaking changes:_
 * _Python 2 is no longer supported!_ Including the [App Engine Standard Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). On the plus side, the [Python 3 runtimes](https://cloud.google.com/appengine/docs/standard/python3/), both [Standard](https://cloud.google.com/appengine/docs/standard/python3/) and [Flexible](https://cloud.google.com/appengine/docs/flexible/python/), are now supported.
+* Replace `handlers.memcache_response()`, which used Python 2 App Engine's memcache service, with `cache_response()`, which uses local runtime memory.
+* Remove the `handlers.TemplateHandler.USE_APPENGINE_WEBAPP` toggle to use Python 2 App Engine's `google.appengine.ext.webapp2.template` instead of Jinja.
 * Blogger:
   * Login is now based on [Google Sign-In](https://developers.google.com/identity/). The `api_from_creds()`, `creds()`, and `http()` methods have been removed. Use the remaining `api()` method to get a `BloggerClient`, or `access_token()` to make API calls manually.
 * Google:
@@ -256,9 +258,6 @@ Non-breaking changes:
 * Add Meetup support. (Thanks [Jamie Tanna](https://www.jvt.me/)!)
 * Blogger, Google:
   * The `state` query parameter now works!
-* Python 2 App Engine features in `webutil` are deprecated:
-  * `handlers.memcache_response()`
-  * `handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`.
 * Add new `outer_classes` kwarg to `button_html()` for the outer `<div>`, eg as Bootstrap columns.
 * Add new `image_file` kwarg to `StartHandler.button_html()`
 
