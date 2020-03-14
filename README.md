@@ -25,7 +25,7 @@ This is a collection of drop-in Python request handlers for the initial [OAuth](
 
 oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
-[Versions 3.0](https://pypi.org/project/oauth-dropins/2.2/) and above support App Engine's [Python 3 runtimes](https://cloud.google.com/appengine/docs/python/), both [Standard](https://cloud.google.com/appengine/docs/standard/python3/) and [Flexible](https://cloud.google.com/appengine/docs/flexible/python/). If you're on the [Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/), use [version 2.2](https://pypi.org/project/oauth-dropins/2.2/).
+[Versions 3.0](https://pypi.org/project/oauth-dropins/3.0/) and above support App Engine's [Python 3 runtimes](https://cloud.google.com/appengine/docs/python/), both [Standard](https://cloud.google.com/appengine/docs/standard/python3/) and [Flexible](https://cloud.google.com/appengine/docs/flexible/python/). If you're on the [Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/), use [version 2.2](https://pypi.org/project/oauth-dropins/2.2/).
 
 If you clone the repo directly or want to contribute, see [Development](#development) for setup instructions.
 
@@ -253,6 +253,7 @@ _Breaking changes:_
   * Remove `cache` and `fail_cache_time_secs` kwargs from `util.follow_redirects()`. Caching is now built in. You can bypass the cache with `follow_redirects.__wrapped__()`. [Details.](https://cachetools.readthedocs.io/en/stable/#cachetools.cached)
 
 Non-breaking changes:
+* Add Meetup support. (Thanks [Jamie Tanna](https://www.jvt.me/)!)
 * Blogger, Google:
   * The `state` query parameter now works!
 * Python 2 App Engine features in `webutil` are deprecated:
@@ -260,7 +261,6 @@ Non-breaking changes:
   * `handlers.TemplateHandler` support for `webapp2.template` via `USE_APPENGINE_WEBAPP`.
 * Add new `outer_classes` kwarg to `button_html()` for the outer `<div>`, eg as Bootstrap columns.
 * Add new `image_file` kwarg to `StartHandler.button_html()`
-* Add Meetup.com support
 
 ### 2.2 - 2019-11-01
 * Add LinkedIn and Mastodon!
@@ -353,6 +353,7 @@ Development
 First, fork and clone this repo. Then, you'll need the [Google Cloud SDK](https://cloud.google.com/sdk/) with the `gcloud-appengine-python` and `gcloud-appengine-python-extras` [components](https://cloud.google.com/sdk/docs/components#additional_components). Once you have them, set up your environment by running these commands in the repo root directory:
 
 ```shell
+gcloud config set project oauth-dropins
 git submodule init
 git submodule update
 python3 -m venv local3
@@ -445,16 +446,3 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 Related work
 ---
 * [Python Social Auth](http://psa.matiasaguirre.net/)
-
-
-TODO
----
-
-* Google and Blogger need some love:
-    * handle declines
-    * allow overriding `CallbackHandler.finish()`
-    * support `StartHandler.redirect_url()`
-    * allow more than one `CallbackHandler` per app
-* clean up app key/secret file handling. (standardize file names? put them in a subdir?)
-* implement CSRF protection for all sites
-* implement [Blogger's v3 API](https://developers.google.com/blogger/docs/3.0/getting_started)

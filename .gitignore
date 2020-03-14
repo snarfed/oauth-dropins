@@ -5,8 +5,7 @@
 /*.egg-info
 /l
 /l3
-/local/
-/local3/
+/local*/
 datastore.dat
 oauth_client_secret
 private_notes

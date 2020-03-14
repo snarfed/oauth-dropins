@@ -24,7 +24,7 @@ designed for `Google App Engine <https://appengine.google.com/>`__, but
 it can be used in any Python web application, regardless of host or
 framework.
 
-`Versions 3.0 <https://pypi.org/project/oauth-dropins/2.2/>`__ and above
+`Versions 3.0 <https://pypi.org/project/oauth-dropins/3.0/>`__ and above
 support App Engine’s `Python 3
 runtimes <https://cloud.google.com/appengine/docs/python/>`__, both
 `Standard <https://cloud.google.com/appengine/docs/standard/python3/>`__
@@ -46,11 +46,13 @@ Quick start
 Here’s a full example of using the Facebook drop-in.
 
 1. Install oauth-dropins with ``pip install oauth-dropins``.
+
 2. Put your `Facebook
    application’s <https://developers.facebook.com/apps>`__ ID and secret
    in two plain text files in your app’s root directory,
    ``facebook_app_id`` and ``facebook_app_secret``. (If you use git,
    you’ll probably also want to add them to your ``.gitignore``.)
+
 3. Create a ``facebook_oauth.py`` file with these contents:
 
    .. code:: python
@@ -191,7 +193,7 @@ Each site defines an App Engine datastore `ndb.Model
 class <https://developers.google.com/appengine/docs/python/datastore/entities#Python_Kinds_and_identifiers>`__
 that stores each user’s OAuth credentials and other useful information,
 like their name and profile URL. The class name is of the form SiteAuth,
-e.g. FacebookAuth. Here are the useful methods:
+e.g. FacebookAuth. Here are the useful methods:
 
 -  ``site_name()`` returns the human-readable string name of the site,
    e.g. “Facebook”.
@@ -208,8 +210,8 @@ The following methods are optional. Auth entity classes usually
 implement at least one of them, but not all.
 
 -  ``api()`` returns a site-specific API object. This is usually a third
-   party library dedicated to the site, e.g.
-   `Tweepy <https://github.com/tweepy/tweepy>`__ or
+   party library dedicated to the site,
+   e.g. `Tweepy <https://github.com/tweepy/tweepy>`__ or
    `python-instagram <https://github.com/Instagram/python-instagram>`__.
    See the site class’s docstring for details.
 
@@ -270,6 +272,17 @@ since they’ll prevent virtualenv from installing into the local
 ``-t`` to ``pip install``? Use the virtualenv instead, it’s your friend.
 If you really want ``-t``, try removing the ``-e`` from the lines in
 ``requirements.txt`` that have it.
+
+1. If you get this error while running ``dev_appserver.py``:
+
+   ::
+
+      RuntimeError: Cannot use the Cloud Datastore Emulator because the packaged grpcio is incompatible to this system. Please install grpcio using pip
+
+…you can fix it by `installing ``grpcio`` into the Python 2 that you’re
+running\ ``dev_appserver``
+with <https://stackoverflow.com/a/59996186/186123>`__. Usually this is
+just ``sudo python2 -m pip install grpcio``.
 
 Changelog
 ---------
@@ -522,6 +535,7 @@ the repo root directory:
 
 .. code:: shell
 
+   gcloud config set project oauth-dropins
    git submodule init
    git submodule update
    python3 -m venv local3
@@ -572,7 +586,7 @@ Here’s how to package, test, and ship a new release. (Note that this is
 too <https://github.com/snarfed/granary#release-instructions>`__.)
 
 1.  Run the unit tests.
-    ``sh  source local3/bin/activate.csha  gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &  sleep 2s  DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \    python3 -m unittest discover  kill %1  deactivate``
+    ``sh     source local3/bin/activate.csha     gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &     sleep 2s     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \       python3 -m unittest discover     kill %1     deactivate``
 2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``
@@ -582,44 +596,28 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
     ``./docs/build.sh``.
 4.  ``git commit -am 'release vX.Y'``
 5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
-    ``sh  python3 setup.py clean build sdist  setenv ver X.Y  source local3/bin/activate.csh  twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz``
+    ``sh     python3 setup.py clean build sdist     setenv ver X.Y     source local3/bin/activate.csh     twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz``
 6.  Install from test.pypi.org.
-    ``sh  python3 -m venv local3  source local3/bin/activate.csh  pip3 install --upgrade pip  # mf2py 1.1.2 on test.pypi.org is broken :(  pip3 install mf2py  pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins  deactivate``
+    ``sh     python3 -m venv local3     source local3/bin/activate.csh     pip3 install --upgrade pip     # mf2py 1.1.2 on test.pypi.org is broken :(     pip3 install mf2py     pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins     deactivate``
 7.  Smoke test that the code trivially loads and runs.
-    ``sh  source local3/bin/activate.csh  python3  # run test code below  deactivate``
+    ``sh     source local3/bin/activate.csh     python3     # run test code below     deactivate``
     Test code to paste into the interpreter:
-    ``py  from oauth_dropins.webutil import util  util.__file__  util.UrlCanonicalizer()('http://asdf.com')  # should print 'https://asdf.com/'  exit()``
+    ``py     from oauth_dropins.webutil import util     util.__file__     util.UrlCanonicalizer()('http://asdf.com')     # should print 'https://asdf.com/'     exit()``
 8.  Tag the release in git. In the tag message editor, delete the
     generated comments at bottom, leave the first line blank (to omit
     the release “title” in github), put ``### Notable changes`` on the
     second line, then copy and paste this version’s changelog contents
     below it.
-    ``sh  git tag -a v$ver --cleanup=verbatim  git push  git push --tags``
+    ``sh     git tag -a v$ver --cleanup=verbatim     git push     git push --tags``
 9.  `Click here to draft a new release on
     GitHub. <https://github.com/snarfed/oauth-dropins/releases/new>`__
     Enter ``vX.Y`` in the *Tag version* box. Leave *Release title*
     empty. Copy ``### Notable changes`` and the changelog contents into
     the description text box.
 10. Upload to `pypi.org <https://pypi.org/>`__!
-    ``sh  twine upload dist/oauth-dropins-$ver.tar.gz``
+    ``sh     twine upload dist/oauth-dropins-$ver.tar.gz``
 
 Related work
 ------------
 
 -  `Python Social Auth <http://psa.matiasaguirre.net/>`__
-
-TODO
-----
-
--  Google and Blogger need some love:
-
-   -  handle declines
-   -  allow overriding ``CallbackHandler.finish()``
-   -  support ``StartHandler.redirect_url()``
-   -  allow more than one ``CallbackHandler`` per app
-
--  clean up app key/secret file handling. (standardize file names? put
-   them in a subdir?)
--  implement CSRF protection for all sites
--  implement `Blogger’s v3
-   API <https://developers.google.com/blogger/docs/3.0/getting_started>`__
