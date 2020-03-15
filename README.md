@@ -10,7 +10,6 @@ Drop-in Python [OAuth](http://oauth.net/) handlers for popular sites!
 * [Changelog](#changelog)
 * [Development](#development)
 * [Release instructions](#release-instructions)
-* [TODO](#TODO)
 
 
 About
@@ -236,7 +235,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 3.0 - unreleased
+### 3.0 - 2020-03-14
 
 _Breaking changes:_
 * _Python 2 is no longer supported!_ Including the [App Engine Standard Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/). On the plus side, the [Python 3 runtimes](https://cloud.google.com/appengine/docs/standard/python3/), both [Standard](https://cloud.google.com/appengine/docs/standard/python3/) and [Flexible](https://cloud.google.com/appengine/docs/flexible/python/), are now supported.
@@ -386,7 +385,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 
 1. Run the unit tests.
     ```sh
-    source local3/bin/activate.csha
+    source local3/bin/activate.csh
     gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &
     sleep 2s
     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \
@@ -406,6 +405,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```
 1. Install from test.pypi.org.
     ```sh
+    cd /tmp
     python3 -m venv local3
     source local3/bin/activate.csh
     pip3 install --upgrade pip
