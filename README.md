@@ -388,7 +388,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. Run the unit tests.
     ```sh
     source local3/bin/activate.csh
-    gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &
+    CLOUDSDK_CORE_PROJECT=oauth-dropins gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &
     sleep 2s
     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \
       python3 -m unittest discover
