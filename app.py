@@ -29,6 +29,7 @@ for name in (
     'mastodon',
     'medium',
     'meetup',
+    'reddit',
     'tumblr',
     'twitter',
     'wordpress_rest',
