@@ -71,6 +71,10 @@ models
 ------
 .. automodule:: oauth_dropins.models
 
+reddit
+------
+.. automodule:: oauth_dropins.reddit
+
 tumblr
 ------
 .. automodule:: oauth_dropins.tumblr
