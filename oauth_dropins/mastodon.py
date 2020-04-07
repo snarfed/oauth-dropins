@@ -167,12 +167,14 @@ class StartHandler(handlers.StartHandler):
     REDIRECT_PATHS: sequence of string URL paths (on this host) to register as
       OAuth callback (aka redirect) URIs in the OAuth app
     SCOPE_SEPARATOR: string, used to separate multiple scopes
+    APP_CLASS: API app datastore class
   """
   NAME = 'mastodon'
   LABEL = 'Mastodon'
   DEFAULT_SCOPE = 'read:accounts'
   REDIRECT_PATHS = ()
   SCOPE_SEPARATOR = ' '
+  APP_CLASS = MastodonApp
 
   @classmethod
   def to(cls, path, **kwargs):
@@ -191,6 +193,10 @@ class StartHandler(handlers.StartHandler):
     To be overridden by subclasses. Displayed in Mastodon's OAuth prompt.
     """
     return self.request.host_url
+
+  @classmethod
+  def _version_ok(cls, version):
+    return 'Pixelfed' not in version
 
   def redirect_url(self, state=None, instance=None):
     """Returns the local URL for Mastodon to redirect back to after OAuth prompt.
@@ -225,9 +231,8 @@ class StartHandler(handlers.StartHandler):
     if is_json:
       logging.info(resp.text)
     if (not resp or not resp.ok or not is_json or
-        # Pixelfed (https://pixelfed.org/) pretends to be Mastodon but isn't
-        'Pixelfed' in resp.json().get('version')):
-      msg = "%s doesn't look like a Mastodon instance." % instance
+        not self._version_ok(resp.json().get('version'))):
+      msg = "%s doesn't look like a %s instance." % (instance, self.LABEL)
       logging.info(resp)
       logging.info(msg)
       raise ValueError(msg)
@@ -239,19 +244,19 @@ class StartHandler(handlers.StartHandler):
 
     app_name = self.app_name()
     app_url = self.app_url()
-    query = MastodonApp.query(MastodonApp.instance == instance,
-                              MastodonApp.app_url == app_url)
+    query = self.APP_CLASS.query(self.APP_CLASS.instance == instance,
+                                 self.APP_CLASS.app_url == app_url)
     if appengine_info.DEBUG:
       # disambiguate different apps in dev_appserver, since their app_url will
       # always be localhost
-      query = query.filter(MastodonApp.app_name == app_name)
+      query = query.filter(self.APP_CLASS.app_name == app_name)
     app = query.get()
     if not app:
       app = self._register_app(instance, app_name, app_url)
       app.instance_info = resp.text
       app.put()
 
-    logging.info('Starting OAuth for Mastodon instance %s', instance)
+    logging.info('Starting OAuth for %s instance %s', self.LABEL, instance)
     app_data = json_loads(app.data)
     return urljoin(instance, AUTH_CODE_API % {
       'client_id': app_data['client_id'],
@@ -271,10 +276,10 @@ class StartHandler(handlers.StartHandler):
       app_name: string
       app_url: string
 
-    Returns: MastodonApp
+    Returns: APP_CLASS
     """
-    logging.info("first time we've seen Mastodon instance %s with app %s %s! "
-                 "registering an API app.", instance, app_name, app_url)
+    logging.info("first time we've seen %s instance %s with app %s %s! "
+                 "registering an API app.", self.LABEL, instance, app_name, app_url)
 
     redirect_uris = set(urljoin(self.request.host_url, path)
                         for path in set(self.REDIRECT_PATHS))
@@ -292,29 +297,31 @@ class StartHandler(handlers.StartHandler):
         'website': app_url,
         # https://docs.joinmastodon.org/api/permissions/
         'scopes': self.SCOPE_SEPARATOR.join(ALL_SCOPES),
-      }))
+      }),
+      # Pixelfed requires this
+      headers={'Content-Type': 'application/x-www-form-urlencoded'})
     resp.raise_for_status()
 
     app_data = json_loads(resp.text)
     logging.info('Got %s', app_data)
-    app = MastodonApp(instance=instance, app_name=app_name,
-                      app_url=app_url, data=json_dumps(app_data))
+    app = self.APP_CLASS(instance=instance, app_name=app_name,
+                         app_url=app_url, data=json_dumps(app_data))
     app.put()
     return app
 
   @classmethod
   def button_html(cls, *args, **kwargs):
     kwargs['form_extra'] = kwargs.get('form_extra', '') + """
-<input type="url" name="instance" class="form-control" placeholder="Mastodon instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />"""
-    return super(cls, cls).button_html(
+<input type="url" name="instance" class="form-control" placeholder="%s instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />""" % cls.LABEL
+    return super(StartHandler, cls).button_html(
       *args, input_style='background-color: #EBEBEB; padding: 5px', **kwargs)
 
 
 class CallbackHandler(handlers.CallbackHandler):
   """The OAuth callback. Fetches an access token and stores it."""
-  def get(self):
-    app_key, state = _decode_state(util.get_required_param(self, 'state'))
+  AUTH_CLASS = MastodonAuth
 
+  def get(self):
     # handle errors
     error = self.request.get('error')
     desc = self.request.get('error_description')
@@ -323,6 +330,9 @@ class CallbackHandler(handlers.CallbackHandler):
       # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
       if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
         logging.info('User declined: %s', self.request.get('error_description'))
+        state = self.request.get('state')
+        if state:
+          _, state = _decode_state(state)
         self.finish(None, state=state)
         return
       else:
@@ -330,6 +340,7 @@ class CallbackHandler(handlers.CallbackHandler):
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
+    app_key, state = _decode_state(util.get_required_param(self, 'state'))
     app = ndb.Key(urlsafe=app_key).get()
     assert app
     app_data = json_loads(app.data)
@@ -345,8 +356,10 @@ class CallbackHandler(handlers.CallbackHandler):
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': self.request.path_url,
       }
-    resp = util.requests_post(urljoin(app.instance, ACCESS_TOKEN_API),
-                              data=urlencode(data))
+    resp = util.requests_post(
+      urljoin(app.instance, ACCESS_TOKEN_API), data=urlencode(data),
+      # Pixelfed requires this
+      headers={'Content-Type': 'application/x-www-form-urlencoded'})
     resp.raise_for_status()
     resp_json = resp.json()
     logging.debug('Access token response: %s', resp_json)
@@ -354,11 +367,11 @@ class CallbackHandler(handlers.CallbackHandler):
       raise exc.HTTPBadRequest(resp_json)
 
     access_token = resp_json['access_token']
-    user = MastodonAuth(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
+    user = self.AUTH_CLASS(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
     logging.debug('User: %s', user)
     address = '@%s@%s' % (user['username'], urlparse(app.instance).netloc)
-    auth = MastodonAuth(id=address, app=app.key, access_token_str=access_token,
-                        user_json=json_dumps(user))
+    auth = self.AUTH_CLASS(id=address, app=app.key, access_token_str=access_token,
+                           user_json=json_dumps(user))
     auth.put()
 
     self.finish(auth, state=state)

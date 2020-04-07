@@ -235,6 +235,11 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 3.1 - unreleased
+
+* Add [Pixelfed](https://pixelfed.org/) support! Heavily based on Mastodon.
+
+
 ### 3.0 - 2020-03-14
 
 _Breaking changes:_

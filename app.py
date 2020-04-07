@@ -11,7 +11,7 @@ import requests
 import webapp2
 from webob import exc
 
-from oauth_dropins import indieauth, mastodon
+from oauth_dropins import indieauth, mastodon, pixelfed
 from oauth_dropins.webutil import appengine_info, appengine_config, handlers
 
 SITES = {}  # maps module name to module
@@ -29,6 +29,7 @@ for name in (
     'mastodon',
     'medium',
     'meetup',
+    'pixelfed',
     'reddit',
     'tumblr',
     'twitter',
@@ -75,11 +76,15 @@ class IndieAuthStart(indieauth.StartHandler):
 class MastodonStart(mastodon.StartHandler):
   handle_exception = handle_discovery_errors
 
+class PixelfedStart(pixelfed.StartHandler):
+  handle_exception = handle_discovery_errors
+
 
 routes = []
 for site, module in SITES.items():
   starter = (IndieAuthStart if site == 'indieauth'
              else MastodonStart if site == 'mastodon'
+             else PixelfedStart if site == 'pixelfed'
              else module.StartHandler)
   routes.extend((
     ('/%s/start' % site, starter.to('/%s/oauth_callback' % site)),
