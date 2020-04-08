@@ -237,7 +237,8 @@ Changelog
 
 ### 3.1 - unreleased
 
-* Add [Pixelfed](https://pixelfed.org/) support! Heavily based on Mastodon.
+* Add [Pixelfed](https://pixelfed.org/) support, heavily based on Mastodon.
+* Add [Reddit](https://pixelfed.org/) support. Thanks [Will Stedden](https://bonkerfield.org/)!
 
 
 ### 3.0 - 2020-03-14
