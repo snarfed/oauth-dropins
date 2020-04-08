@@ -200,12 +200,15 @@ class CallbackHandler(BaseHandler):
     else:
       params = [('auth_entity', auth_entity.key.urlsafe().decode()),
                 ('state', state)]
-      token = auth_entity.access_token()
-      if isinstance(token, str):
-        params.append(('access_token', token))
-      elif token:
-        params += [('access_token_key', token[0]),
-                   ('access_token_secret', token[1])]
+      try:
+        token = auth_entity.access_token()
+        if isinstance(token, str):
+          params.append(('access_token', token))
+        elif token:
+          params += [('access_token_key', token[0]),
+                     ('access_token_secret', token[1])]
+      except NotImplementedError:
+        logging.info('access_token() not implemented')
 
     url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
