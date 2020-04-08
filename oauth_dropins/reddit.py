@@ -33,7 +33,7 @@ class RedditAuth(models.BaseAuth):
   see: https://stackoverflow.com/questions/28955541/how-to-get-access-token-reddit-api
   The datastore entity key name is the reddit username.
   """
-  # access token
+  # refresh token
   refresh_token = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
   
@@ -44,11 +44,6 @@ class RedditAuth(models.BaseAuth):
     """Returns the username.
     """
     return self.key_id()
-
-  def access_token(self):
-    """Returns the OAuth refresh token.
-    """
-    return self.refresh_token
 
 
 class StartHandler(handlers.StartHandler):
@@ -115,9 +110,9 @@ class CallbackHandler(handlers.CallbackHandler):
 
     refresh_token = reddit.auth.authorize(code)
     user = reddit.user.me()
-    # a short list of attributes to grab 
-    # looks like calling json_dumps on the object opens some kind of stream
+    # a short list of attributes to grab, for more info on attributes see:
     # https://github.com/praw-dev/praw/blob/master/praw/models/reddit/redditor.py#L41
+    # calling json_dumps on the user object opens some kind of stream
     attribute_list = ['name',
                       'comment_karma',
                       'created_utc',
