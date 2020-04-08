@@ -14,13 +14,17 @@ from webob import exc
 
 from . import handlers, models
 from .webutil import handlers as webutil_handlers
-from .webutil import util
+from .webutil import appengine_info, util
 from .webutil.util import json_dumps, json_loads
 
 from random import randint
 
-REDDIT_APP_KEY = util.read('reddit_app_key')
-REDDIT_APP_SECRET = util.read('reddit_app_secret')
+if appengine_info.DEBUG:
+  REDDIT_APP_KEY = util.read('reddit_app_key_local')
+  REDDIT_APP_SECRET = util.read('reddit_app_secret_local')
+else:
+  REDDIT_APP_KEY = util.read('reddit_app_key')
+  REDDIT_APP_SECRET = util.read('reddit_app_secret')
 
 class RedditAuth(models.BaseAuth):
   """An authenticated reddit user.
@@ -36,7 +40,7 @@ class RedditAuth(models.BaseAuth):
   # refresh token
   refresh_token = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
-  
+
   def site_name(self):
     return 'reddit'
 
@@ -62,7 +66,7 @@ class StartHandler(handlers.StartHandler):
                          client_secret=REDDIT_APP_SECRET,
                          redirect_uri=self.request.host_url + self.to_path,
                          user_agent='oauth-dropin reddit identity checker')
-    
+
     # store the state for later use in the callback handler
     models.OAuthRequestToken(id=state,
                              token_secret=state,
@@ -89,15 +93,15 @@ class CallbackHandler(handlers.CallbackHandler):
     to_path = st.get('to_path')
     code = self.request.get('code')
     if error or not state or not code:
-      if error in ('access_denied'): 
-        logging.info('User declined: %s', self.request.get('error_description')) 
-        self.finish(None, state=state) 
-        return 
-      else: 
-        msg = 'Error: %s' % (error) 
-        logging.info(msg) 
-        raise exc.HTTPBadRequest(msg) 
-      
+      if error in ('access_denied'):
+        logging.info('User declined: %s', self.request.get('error_description'))
+        self.finish(None, state=state)
+        return
+      else:
+        msg = 'Error: %s' % (error)
+        logging.info(msg)
+        raise exc.HTTPBadRequest(msg)
+
     # look up the stored state to check authenticity
     request_token = models.OAuthRequestToken.get_by_id(state)
     if request_token is None:
@@ -122,7 +126,7 @@ class CallbackHandler(handlers.CallbackHandler):
                       'icon_img']
     user_json = {a:getattr(user,a) for a in attribute_list}
     user_id = str(user)
-    
+
     auth = RedditAuth(id=user_id,
                       refresh_token=refresh_token,
                       user_json=json_dumps(user_json))
