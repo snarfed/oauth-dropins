@@ -41,6 +41,21 @@ class RedditAuth(models.BaseAuth):
   refresh_token = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
 
+  def api(self):
+    if self.refresh_token:
+      r = praw.Reddit(client_id=REDDIT_APP_KEY,
+                           client_secret=REDDIT_APP_SECRET,
+                           refresh_token=self.refresh_token,
+                           user_agent='oauth-dropin reddit api')
+      rt = reddit.auth.authorize(code)
+      if rt:
+        self.refresh_token = rt
+    else:
+      r = praw.Reddit(client_id=REDDIT_APP_KEY,
+                           client_secret=REDDIT_APP_SECRET,
+                           user_agent='oauth-dropin reddit api')
+    return r
+    
   def site_name(self):
     return 'reddit'
 
