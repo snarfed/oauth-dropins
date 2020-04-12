@@ -40,21 +40,6 @@ class RedditAuth(models.BaseAuth):
   # refresh token
   refresh_token = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
-
-  def api(self):
-    if self.refresh_token:
-      r = praw.Reddit(client_id=REDDIT_APP_KEY,
-                           client_secret=REDDIT_APP_SECRET,
-                           refresh_token=self.refresh_token,
-                           user_agent='oauth-dropin reddit api')
-      rt = reddit.auth.authorize(code)
-      if rt:
-        self.refresh_token = rt
-    else:
-      r = praw.Reddit(client_id=REDDIT_APP_KEY,
-                           client_secret=REDDIT_APP_SECRET,
-                           user_agent='oauth-dropin reddit api')
-    return r
     
   def site_name(self):
     return 'reddit'
@@ -80,14 +65,14 @@ class StartHandler(handlers.StartHandler):
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
                          redirect_uri=self.request.host_url + self.to_path,
-                         user_agent='oauth-dropin reddit identity checker')
+                         user_agent='oauth-dropin reddit api')
 
     # store the state for later use in the callback handler
     models.OAuthRequestToken(id=state,
                              token_secret=state,
                              state=state).put()
     st = util.encode_oauth_state({'state':state,'to_path':self.to_path})
-    return reddit.auth.url(['identity'], st, 'permanent')
+    return reddit.auth.url(['identity','read'], st, 'permanent')
 
   @classmethod
   def button_html(cls, *args, **kwargs):
@@ -125,7 +110,7 @@ class CallbackHandler(handlers.CallbackHandler):
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
                          redirect_uri=self.request.host_url + to_path,
-                         user_agent='oauth-dropin reddit identity checker')
+                         user_agent='oauth-dropin reddit api')
 
     refresh_token = reddit.auth.authorize(code)
     user = reddit.user.me()
@@ -147,3 +132,9 @@ class CallbackHandler(handlers.CallbackHandler):
                       user_json=json_dumps(user_json))
     auth.put()
     self.finish(auth, state=st)
+
+def get_reddit_api(refresh_token):
+  return praw.Reddit(client_id=REDDIT_APP_KEY,
+                     client_secret=REDDIT_APP_SECRET,
+                     refresh_token=refresh_token,
+                     user_agent='oauth-dropin reddit api')
