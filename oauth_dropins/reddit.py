@@ -40,7 +40,7 @@ class RedditAuth(models.BaseAuth):
   # refresh token
   refresh_token = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
-    
+
   def site_name(self):
     return 'reddit'
 
@@ -117,8 +117,7 @@ class CallbackHandler(handlers.CallbackHandler):
     # a short list of attributes to grab, for more info on attributes see:
     # https://github.com/praw-dev/praw/blob/master/praw/models/reddit/redditor.py#L41
     # calling json_dumps on the user object opens some kind of stream
-    attribute_list = ['name',
-                      'comment_karma',
+    attribute_list = ['comment_karma',
                       'created_utc',
                       'id',
                       'name',
