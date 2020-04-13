@@ -209,9 +209,12 @@ class CallbackHandler(BaseHandler):
                      ('access_token_secret', token[1])]
       except NotImplementedError:
         logging.info('access_token() not implemented')
-      token = auth_entity.refresh_token
-      params.append(('refresh_token', token))
-      
+      try:
+        token = auth_entity.refresh_token
+        params.append(('refresh_token', token))
+      except AttributeError:
+        logging.info('refresh_token not included')
+
     url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
     self.redirect(url)
