@@ -131,9 +131,3 @@ class CallbackHandler(handlers.CallbackHandler):
                       user_json=json_dumps(user_json))
     auth.put()
     self.finish(auth, state=st)
-
-def get_reddit_api(refresh_token):
-  return praw.Reddit(client_id=REDDIT_APP_KEY,
-                     client_secret=REDDIT_APP_SECRET,
-                     refresh_token=refresh_token,
-                     user_agent='oauth-dropin reddit api')
