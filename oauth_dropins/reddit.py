@@ -42,7 +42,7 @@ class RedditAuth(models.BaseAuth):
   user_json = ndb.TextProperty()
 
   def site_name(self):
-    return 'reddit'
+    return 'Reddit'
 
   def user_display_name(self):
     """Returns the username.
@@ -55,6 +55,7 @@ class StartHandler(handlers.StartHandler):
   """
   NAME = 'reddit'
   LABEL = 'Reddit'
+  DEFAULT_SCOPE = 'identity,read'
 
   def redirect_url(self, state=None):
     # if state is None the reddit API redirect breaks, set to random string
@@ -72,7 +73,7 @@ class StartHandler(handlers.StartHandler):
                              token_secret=state,
                              state=state).put()
     st = util.encode_oauth_state({'state':state,'to_path':self.to_path})
-    return reddit.auth.url(['identity','read'], st, 'permanent')
+    return reddit.auth.url(self.scope.split(self.SCOPE_SEPARATOR), st, 'permanent')
 
   @classmethod
   def button_html(cls, *args, **kwargs):
