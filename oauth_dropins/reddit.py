@@ -26,6 +26,7 @@ else:
   REDDIT_APP_KEY = util.read('reddit_app_key')
   REDDIT_APP_SECRET = util.read('reddit_app_secret')
 
+
 class RedditAuth(models.BaseAuth):
   """An authenticated reddit user.
 
@@ -72,7 +73,7 @@ class StartHandler(handlers.StartHandler):
     models.OAuthRequestToken(id=state,
                              token_secret=state,
                              state=state).put()
-    st = util.encode_oauth_state({'state':state,'to_path':self.to_path})
+    st = util.encode_oauth_state({'state':state,'to_path':self.to_path,'feature':'listen'})
     return reddit.auth.url(self.scope.split(self.SCOPE_SEPARATOR), st, 'permanent')
 
   @classmethod
@@ -114,21 +115,24 @@ class CallbackHandler(handlers.CallbackHandler):
                          user_agent='oauth-dropin reddit api')
 
     refresh_token = reddit.auth.authorize(code)
-    user = reddit.user.me()
-    # a short list of attributes to grab, for more info on attributes see:
-    # https://github.com/praw-dev/praw/blob/master/praw/models/reddit/redditor.py#L41
-    # calling json_dumps on the user object opens some kind of stream
-    attribute_list = ['comment_karma',
-                      'created_utc',
-                      'id',
-                      'name',
-                      'link_karma',
-                      'icon_img']
-    user_json = {a:getattr(user,a) for a in attribute_list}
-    user_id = str(user)
+    praw_user = reddit.user.me()
+    user_json = praw_to_user(praw_user)
+    user_id = user_json.get('name')
 
     auth = RedditAuth(id=user_id,
                       refresh_token=refresh_token,
                       user_json=json_dumps(user_json))
     auth.put()
     self.finish(auth, state=st)
+
+def praw_to_user(user):
+  # call fullname once to make request ot populate dict
+  user.fullname
+  attr_to_store = {
+    'name',
+    'subreddit',
+    'icon_img'
+    'id',
+    'created_utc'
+  }
+  return {k: v for k, v in user.__dict__.items() if k in attr_to_store}
