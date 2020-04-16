@@ -73,7 +73,7 @@ class StartHandler(handlers.StartHandler):
     models.OAuthRequestToken(id=state,
                              token_secret=state,
                              state=state).put()
-    st = util.encode_oauth_state({'state':state,'to_path':self.to_path,'feature':'listen'})
+    st = util.encode_oauth_state({'state':state,'to_path':self.to_path})
     return reddit.auth.url(self.scope.split(self.SCOPE_SEPARATOR), st, 'permanent')
 
   @classmethod
