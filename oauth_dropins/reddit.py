@@ -126,13 +126,10 @@ class CallbackHandler(handlers.CallbackHandler):
     self.finish(auth, state=st)
 
 def praw_to_user(user):
-  # call fullname once to make request ot populate dict
-  user.fullname
-  attr_to_store = {
-    'name',
-    'subreddit',
-    'icon_img'
-    'id',
-    'created_utc'
+  return {
+    'name': user.name,
+    'subreddit': user.subreddit,
+    'icon_img': user.icon_img,
+    'id': user.id,
+    'created_utc': user.created_utc
   }
-  return {k: v for k, v in user.__dict__.items() if k in attr_to_store}
