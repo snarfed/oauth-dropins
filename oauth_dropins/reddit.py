@@ -123,7 +123,7 @@ class CallbackHandler(handlers.CallbackHandler):
                       refresh_token=refresh_token,
                       user_json=json_dumps(user_json))
     auth.put()
-    self.finish(auth, state=st)
+    self.finish(auth, state=state)
 
 def praw_to_user(user):
   return {
