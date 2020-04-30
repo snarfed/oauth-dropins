@@ -102,7 +102,7 @@ class CallbackHandler(handlers.CallbackHandler):
         self.finish(None, state=state)
         return
       else:
-         msg = 'Error: %s' % (error)
+        msg = 'Error: %s' % (error)
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
