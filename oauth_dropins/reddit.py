@@ -128,6 +128,18 @@ class CallbackHandler(handlers.CallbackHandler):
     self.finish(auth, state=state)
 
 def praw_to_user(user):
+  """
+  Converts a PRAW user to a dict user.
+
+  Args:
+    user: :class:`praw.models.Redditor`
+
+  Returns: dict
+
+  Raises:
+    :class:`prawcore.exceptions.NotFound` if the user doesn't exist or has been
+    deleted
+  """
   return {
     'name': user.name,
     'subreddit': user.subreddit,
