@@ -102,7 +102,7 @@ class CallbackHandler(handlers.CallbackHandler):
         self.finish(None, state=state)
         return
       else:
-        msg = 'Error: %s' % (error)
+         msg = 'Error: %s' % (error)
         logging.info(msg)
         raise exc.HTTPBadRequest(msg)
 
@@ -134,15 +134,23 @@ def praw_to_user(user):
   Args:
     user: :class:`praw.models.Redditor`
 
+  Note 1: accessing redditor attributes lazily calls reddit API
+  Note 2: subreddit (optional) refers to a user profile (stored as a subreddit)
+
   Returns: dict
 
   Raises:
     :class:`prawcore.exceptions.NotFound` if the user doesn't exist or has been
     deleted
   """
+  subr = None
+  try:
+    subr = user.subreddit
+  except AttributeError:
+    logging.info(f'Redditor {user.name} subreddit does not exist')
   return {
     'name': user.name,
-    'subreddit': user.subreddit,
+    'subreddit': subr,
     'icon_img': user.icon_img,
     'id': user.id,
     'created_utc': user.created_utc
