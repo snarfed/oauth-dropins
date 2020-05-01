@@ -146,6 +146,7 @@ def praw_to_user(user):
   """
   if user.is_suspended:
     return {}
+  subr = user.subreddit
   return {
     'name': user.name,
     'subreddit': subr,
