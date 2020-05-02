@@ -147,12 +147,10 @@ def praw_to_user(user):
   """
   if getattr(user, 'is_suspended', False):
     return {}
-  if any([not hasattr(user,a) for a in ['name','subreddit','icon_img','id','created_utc']]):
-    return {}
   return {
-    'name': user.name,
-    'subreddit': user.subreddit,
-    'icon_img': user.icon_img,
-    'id': user.id,
-    'created_utc': user.created_utc
+    'name': getattr(user, 'name', None),
+    'subreddit': getattr(user, 'subreddit', None),
+    'icon_img': getattr(user, 'icon_img', None),
+    'id': getattr(user, 'id', None),
+    'created_utc': getattr(user, 'created_utc', None)
   }
