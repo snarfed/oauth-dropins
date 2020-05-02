@@ -149,7 +149,7 @@ def praw_to_user(user):
     return {}
   return {
     'name': user.name,
-    'subreddit': subr,
+    'subreddit': user.subreddit,
     'icon_img': user.icon_img,
     'id': user.id,
     'created_utc': user.created_utc
