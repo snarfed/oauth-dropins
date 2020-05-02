@@ -137,6 +137,7 @@ def praw_to_user(user):
   Note 1: accessing redditor attributes lazily calls reddit API
   Note 2: if user.is_suspended is True, other attributes will not exist
   Note 3: subreddit refers to a user profile (stored as a subreddit)
+  Ref: https://praw.readthedocs.io/en/latest/code_overview/models/redditor.html
 
   Returns: dict
 
@@ -144,7 +145,7 @@ def praw_to_user(user):
     :class:`prawcore.exceptions.NotFound` if the user doesn't exist or has been
     deleted
   """
-  if user.is_suspended:
+  if getattr(user, 'is_suspended', False):
     return {}
   return {
     'name': user.name,
