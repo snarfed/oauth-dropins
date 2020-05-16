@@ -127,6 +127,7 @@ class CallbackHandler(handlers.CallbackHandler):
     auth.put()
     self.finish(auth, state=state)
 
+
 def praw_to_user(user):
   """
   Converts a PRAW user to a dict user.
