@@ -287,6 +287,14 @@ just ``sudo python2 -m pip install grpcio``.
 Changelog
 ---------
 
+3.1 - unreleased
+~~~~~~~~~~~~~~~~
+
+-  Add `Pixelfed <https://pixelfed.org/>`__ support, heavily based on
+   Mastodon.
+-  Add `Reddit <https://pixelfed.org/>`__ support. Thanks `Will
+   Stedden <https://bonkerfield.org/>`__!
+
 3.0 - 2020-03-14
 ~~~~~~~~~~~~~~~~
 
