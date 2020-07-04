@@ -94,6 +94,11 @@ class StartHandler(handlers.StartHandler):
     resp = util.requests_get(url, headers=headers, data=data)
     parsed = urllib.parse.parse_qs(resp.text)
 
+    if parsed.get('error') or parsed.get('oauth_problem'):
+      msg = 'Error: %s' % resp.text
+      logging.info(msg)
+      raise exc.HTTPBadRequest(msg)
+
     resource_owner_key = parsed.get('oauth_token')[0]
     resource_owner_secret = parsed.get('oauth_token_secret')[0]
 
