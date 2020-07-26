@@ -200,9 +200,9 @@ Troubleshooting/FAQ
 
   You've probably hit [this virtualenv bug](https://github.com/pypa/virtualenv/issues/53): virtualenv doesn't support paths with spaces.
 
-  The easy fix is to recreate the virtualenv in a path without spaces. If you can't do that, then after creating the virtualenv, but before activating it, edit the activate, easy_install and pip files in `local3/bin/` to escape any spaces in the path.
+  The easy fix is to recreate the virtualenv in a path without spaces. If you can't do that, then after creating the virtualenv, but before activating it, edit the activate, easy_install and pip files in `local/bin/` to escape any spaces in the path.
 
-  For example, in `activate`, `VIRTUAL_ENV=".../has space/local"` becomes `VIRTUAL_ENV=".../has\ space/local"`, and in `pip` and `easy_install` the first line changes from `#!".../has space/local3/bin/python"` to `#!".../has\ space/local3/bin/python"`.
+  For example, in `activate`, `VIRTUAL_ENV=".../has space/local"` becomes `VIRTUAL_ENV=".../has\ space/local"`, and in `pip` and `easy_install` the first line changes from `#!".../has space/local/bin/python"` to `#!".../has\ space/local/bin/python"`.
 
   This should get virtualenv to install in the right place. If you do this wrong at first, you'll have installs in eg `/usr/local/lib/python3.7/site-packages` that you need to delete, since they'll prevent virtualenv from installing into the local `site-packages`.
 
@@ -362,8 +362,8 @@ First, fork and clone this repo. Then, you'll need the [Google Cloud SDK](https:
 gcloud config set project oauth-dropins
 git submodule init
 git submodule update
-python3 -m venv local3
-source local3/bin/activate
+python3 -m venv local
+source local/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -384,7 +384,7 @@ To deploy to production:
 
 `gcloud -q beta app deploy --no-cache oauth-dropins *.yaml`
 
-The docs are built with [Sphinx](http://sphinx-doc.org/), including [apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html), [autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and [napoleon](http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration is in [`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py) To build them, first install Sphinx with `pip install sphinx`. (You may want to do this outside your virtualenv; if so, you'll need to reconfigure it to see system packages with `python3 -m venv --system-site-packages local3`.) Then, run [`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
+The docs are built with [Sphinx](http://sphinx-doc.org/), including [apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html), [autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and [napoleon](http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration is in [`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py) To build them, first install Sphinx with `pip install sphinx`. (You may want to do this outside your virtualenv; if so, you'll need to reconfigure it to see system packages with `python3 -m venv --system-site-packages local`.) Then, run [`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
 
 
 Release instructions
@@ -393,8 +393,8 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 
 1. Run the unit tests.
     ```sh
-    source local3/bin/activate.csh
-    gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &
+    source local/bin/activate.csh
+    gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0 --host-port=localhost:8089 < /dev/null >& /dev/null &
     sleep 2s
     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \
       python3 -m unittest discover
@@ -408,14 +408,14 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```sh
     python3 setup.py clean build sdist
     setenv ver X.Y
-    source local3/bin/activate.csh
+    source local/bin/activate.csh
     twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz
     ```
 1. Install from test.pypi.org.
     ```sh
     cd /tmp
-    python3 -m venv local3
-    source local3/bin/activate.csh
+    python3 -m venv local
+    source local/bin/activate.csh
     pip3 install --upgrade pip
     # mf2py 1.1.2 on test.pypi.org is broken :(
     pip3 install mf2py
@@ -424,7 +424,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```
 1. Smoke test that the code trivially loads and runs.
     ```sh
-    source local3/bin/activate.csh
+    source local/bin/activate.csh
     python3
     # run test code below
     deactivate
