@@ -12,12 +12,16 @@ from google.cloud import ndb
 from webob import exc
 
 from . import handlers, models
-from .webutil import util
+from .webutil import appengine_info, util
 from .webutil.util import json_dumps, json_loads
 
 API_BASE = 'https://graph.facebook.com/v4.0/'
-FACEBOOK_APP_ID = util.read('facebook_app_id')
-FACEBOOK_APP_SECRET = util.read('facebook_app_secret')
+if appengine_info.DEBUG:
+  FACEBOOK_APP_ID = util.read('facebook_app_id_local')
+  FACEBOOK_APP_SECRET = util.read('facebook_app_secret_local')
+else:
+  FACEBOOK_APP_ID = util.read('facebook_app_id')
+  FACEBOOK_APP_SECRET = util.read('facebook_app_secret')
 # facebook api url templates. can't (easily) use urllib.urlencode() because i
 # want to keep the %(...)s placeholders as is and fill them in later in code.
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#logindialog
@@ -41,7 +45,7 @@ GET_ACCESS_TOKEN_URL = '&'.join((
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
     ))
-API_USER_URL = API_BASE + 'me?fields=id,about,cover,email,gender,link,location,name,public_key,timezone,updated_time,website'
+API_USER_URL = API_BASE + 'me?fields=id,email,name,picture'
 API_PAGE_URL = API_BASE + 'me?fields=id,about,cover,description,emails,general_info,is_published,link,location,name,personal_info,phone,username,website'
 API_PAGES_URL = API_BASE + 'me/accounts'
 
