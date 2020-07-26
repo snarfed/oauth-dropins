@@ -11,7 +11,7 @@ import requests
 import webapp2
 from webob import exc
 
-from oauth_dropins import indieauth, mastodon, pixelfed
+from oauth_dropins import google_signin, indieauth, mastodon, pixelfed
 from oauth_dropins.webutil import appengine_info, appengine_config, handlers
 
 SITES = {}  # maps module name to module
@@ -70,6 +70,9 @@ class FrontPageHandler(handlers.TemplateHandler):
     return vars
 
 
+class GoogleSigninStart(google_signin.StartHandler):
+  INCLUDE_GRANTED_SCOPES = False
+
 class IndieAuthStart(indieauth.StartHandler):
   handle_exception = handle_discovery_errors
 
@@ -82,7 +85,8 @@ class PixelfedStart(pixelfed.StartHandler):
 
 routes = []
 for site, module in SITES.items():
-  starter = (IndieAuthStart if site == 'indieauth'
+  starter = (GoogleSigninStart if site == 'google_signin'
+             else IndieAuthStart if site == 'indieauth'
              else MastodonStart if site == 'mastodon'
              else PixelfedStart if site == 'pixelfed'
              else module.StartHandler)

@@ -63,6 +63,8 @@ class StartHandler(Scopes, handlers.StartHandler):
   """Starts the OAuth flow."""
   NAME = 'google_signin'
   LABEL = 'Google'
+  """https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth"""
+  INCLUDE_GRANTED_SCOPES = True
 
   handle_exception = webutil_handlers.handle_exception
 
@@ -77,7 +79,7 @@ class StartHandler(Scopes, handlers.StartHandler):
       # ask for a refresh token so we can get an access token offline
       access_type='offline', prompt='consent',
       # https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth
-      include_granted_scopes='true')
+      include_granted_scopes=self.INCLUDE_GRANTED_SCOPES)
     return auth_url
 
 
