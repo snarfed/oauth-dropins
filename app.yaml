@@ -2,7 +2,7 @@
 
 # application: oauth-dropins
 default_expiration: 1h
-runtime: python37
+runtime: python38
 
 # https://cloud.google.com/appengine/docs/standard/python3/runtime#entrypoint_best_practices
 # https://docs.gunicorn.org/en/latest/settings.html#timeout
