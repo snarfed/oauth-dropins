@@ -237,6 +237,7 @@ Changelog
 
 ### 3.1 - unreleased
 
+* Add Python 3.8 support.
 * Add [Pixelfed](https://pixelfed.org/) support, heavily based on Mastodon.
 * Add [Reddit](https://pixelfed.org/) support. Thanks [Will Stedden](https://bonkerfield.org/)!
 
