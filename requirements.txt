@@ -7,7 +7,7 @@
 git+https://github.com/dvska/gdata-python3.git#egg=gdata
 google-cloud-logging~=1.15
 gunicorn~=20.0
-mox3~=0.28
+mox3~=1.1
 
 # this includes everything in setup.py's install_requires.
 # https://caremad.io/posts/2013/07/setup-vs-requirement/#developing-reusable-things-or-how-not-to-repeat-yourself
