@@ -237,7 +237,7 @@ Changelog
 
 ### 3.1 - unreleased
 
-* Add Python 3.8 support.
+* Add Python 3.8 support, drop 3.3 and 3.4. Python 3.5 is now the minimum required version.
 * Add [Pixelfed](https://pixelfed.org/) support, heavily based on Mastodon.
 * Add [Reddit](https://pixelfed.org/) support. Thanks [Will Stedden](https://bonkerfield.org/)!
 
