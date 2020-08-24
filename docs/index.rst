@@ -236,13 +236,13 @@ doesn’t support paths with spaces.
 The easy fix is to recreate the virtualenv in a path without spaces. If
 you can’t do that, then after creating the virtualenv, but before
 activating it, edit the activate, easy_install and pip files in
-``local3/bin/`` to escape any spaces in the path.
+``local/bin/`` to escape any spaces in the path.
 
 For example, in ``activate``, ``VIRTUAL_ENV=".../has space/local"``
 becomes ``VIRTUAL_ENV=".../has\ space/local"``, and in ``pip`` and
 ``easy_install`` the first line changes from
-``#!".../has space/local3/bin/python"`` to
-``#!".../has\ space/local3/bin/python"``.
+``#!".../has space/local/bin/python"`` to
+``#!".../has\ space/local/bin/python"``.
 
 This should get virtualenv to install in the right place. If you do this
 wrong at first, you’ll have installs in eg
@@ -290,6 +290,8 @@ Changelog
 3.1 - unreleased
 ~~~~~~~~~~~~~~~~
 
+-  Add Python 3.8 support, drop 3.3 and 3.4. Python 3.5 is now the
+   minimum required version.
 -  Add `Pixelfed <https://pixelfed.org/>`__ support, heavily based on
    Mastodon.
 -  Add `Reddit <https://pixelfed.org/>`__ support. Thanks `Will
@@ -572,8 +574,8 @@ the repo root directory:
    gcloud config set project oauth-dropins
    git submodule init
    git submodule update
-   python3 -m venv local3
-   source local3/bin/activate
+   python3 -m venv local
+   source local/bin/activate
    pip install -r requirements.txt
 
 Run the demo app locally `in
@@ -609,7 +611,7 @@ Configuration is in
 To build them, first install Sphinx with ``pip install sphinx``. (You
 may want to do this outside your virtualenv; if so, you’ll need to
 reconfigure it to see system packages with
-``python3 -m venv --system-site-packages local3``.) Then, run
+``python3 -m venv --system-site-packages local``.) Then, run
 `docs/build.sh <https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh>`__.
 
 Release instructions
@@ -620,7 +622,7 @@ Here’s how to package, test, and ship a new release. (Note that this is
 too <https://github.com/snarfed/granary#release-instructions>`__.)
 
 1.  Run the unit tests.
-    ``sh     source local3/bin/activate.csh     gcloud beta emulators datastore start --consistency=1.0 < /dev/null >& /dev/null &     sleep 2s     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \       python3 -m unittest discover     kill %1     deactivate``
+    ``sh     source local/bin/activate.csh     gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0 --host-port=localhost:8089 < /dev/null >& /dev/null &     sleep 2s     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \       python3 -m unittest discover     kill %1     deactivate``
 2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``
@@ -630,11 +632,11 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
     ``./docs/build.sh``.
 4.  ``git commit -am 'release vX.Y'``
 5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
-    ``sh     python3 setup.py clean build sdist     setenv ver X.Y     source local3/bin/activate.csh     twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz``
+    ``sh     python3 setup.py clean build sdist     setenv ver X.Y     source local/bin/activate.csh     twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz``
 6.  Install from test.pypi.org.
-    ``sh     cd /tmp     python3 -m venv local3     source local3/bin/activate.csh     pip3 install --upgrade pip     # mf2py 1.1.2 on test.pypi.org is broken :(     pip3 install mf2py     pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins     deactivate``
+    ``sh     cd /tmp     python3 -m venv local     source local/bin/activate.csh     pip3 install --upgrade pip     # mf2py 1.1.2 on test.pypi.org is broken :(     pip3 install mf2py     pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins     deactivate``
 7.  Smoke test that the code trivially loads and runs.
-    ``sh     source local3/bin/activate.csh     python3     # run test code below     deactivate``
+    ``sh     source local/bin/activate.csh     python3     # run test code below     deactivate``
     Test code to paste into the interpreter:
     ``py     from oauth_dropins.webutil import util     util.__file__     util.UrlCanonicalizer()('http://asdf.com')     # should print 'https://asdf.com/'     exit()``
 8.  Tag the release in git. In the tag message editor, delete the
