@@ -50,12 +50,21 @@ Click on a site to try it!</p>
 {{ blogger_html|safe }}
 {{ disqus_html|safe }}
 {{ dropbox_html|safe }}
-{{ facebook_html|safe }}
+<div class="col-md-3 col-sm-4 col-xs-6">
+  <a href="#" onclick="alert('Facebook is available in the library, but not here in the demo app. Sorry for the inconvenience!')">
+    <img class="shadow" src="/static/facebook_2x.png" height="50">
+  </a>
+</div>
 {{ flickr_html|safe }}
 {{ github_html|safe }}
 {{ google_signin_html|safe }}
 {{ indieauth_html|safe }}
-{{ instagram_html|safe }}
+<div class="col-md-3 col-sm-4 col-xs-6">
+  <a href="#" onclick="alert('Instagram is available in the library, but not here in the demo app. Sorry for the inconvenience!')">
+    <img class="shadow" src="/static/instagram_2x.png" height="50"
+         style="background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px">
+  </a>
+</div>
 {{ linkedin_html|safe }}
 {{ mastodon_html|safe }}
 {{ pixelfed_html|safe }}
