@@ -140,10 +140,14 @@ class CallbackHandler(handlers.CallbackHandler):
     }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
     logging.debug('Access token response: %s', resp.text)
-    # TODO: handle errors, same JSON schema/fields as above
 
     try:
       resp = json_loads(resp.text)
+      error = resp.get('error')
+      if error:
+        raise exc.HTTPBadRequest('Error: %s %s ' %
+                                 (error, resp.get('error_description', '')))
+
       blog_id = resp['blog_id']
       blog_url = resp['blog_url']
       blog_domain = util.domain_from_link(resp['blog_url'])
