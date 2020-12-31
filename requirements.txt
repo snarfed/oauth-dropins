@@ -5,7 +5,7 @@
 #
 # Use this to bust that cache: gcloud -q beta app deploy --no-cache ...
 git+https://github.com/dvska/gdata-python3.git#egg=gdata
-google-cloud-logging~=2.0.1
+google-cloud-logging~=1.15
 gunicorn~=20.0
 mox3~=1.1
 
