@@ -33,7 +33,7 @@ input.shadow, img.shadow {
   filter: progid:DXImageTransform.Microsoft.Shadow(Strength=2,Direction=135,Color='#666666');
 }
 
-input.shadow:hover {
+input.shadow:hover, img.shadow:hover {
   -moz-box-shadow: 2px 2px 4px rgba(0,0,0,0.8);
   -webkit-box-shadow: 2px 2px 4px rgba(0,0,0,0.8);
   /* CSS3 */
