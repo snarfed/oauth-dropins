@@ -222,6 +222,7 @@ class StartHandler(handlers.StartHandler):
     # actually a Mastodon instance)
     try:
       resp = util.requests_get(urljoin(instance, INSTANCE_API))
+      resp.raise_for_status()
     except requests.RequestException as e:
       logging.info('Error', stack_info=True)
       resp = None

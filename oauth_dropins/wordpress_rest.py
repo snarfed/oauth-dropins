@@ -139,10 +139,11 @@ class CallbackHandler(handlers.CallbackHandler):
       'grant_type': 'authorization_code',
     }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
+    resp.raise_for_status()
     logging.debug('Access token response: %s', resp.text)
 
     try:
-      resp = json_loads(resp.text)
+      resp = resp.json()
       error = resp.get('error')
       if error:
         raise exc.HTTPBadRequest('Error: %s %s ' %
@@ -153,7 +154,7 @@ class CallbackHandler(handlers.CallbackHandler):
       blog_domain = util.domain_from_link(resp['blog_url'])
       access_token = resp['access_token']
     except:
-      logging.error('Could not decode JSON', stack_info=True)
+      logging.error(f'Could not decode JSON: {resp.text}', stack_info=True)
       raise
 
     auth = WordPressAuth(id=blog_domain,

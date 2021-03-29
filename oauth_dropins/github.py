@@ -162,7 +162,9 @@ class CallbackHandler(handlers.CallbackHandler):
       'redirect_uri': self.request.path_url,
       }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL,
-                              data=urllib.parse.urlencode(data)).text
+                              data=urllib.parse.urlencode(data))
+    resp.raise_for_status()
+    resp = resp.text
     logging.debug('Access token response: %s', resp)
 
     resp = urllib.parse.parse_qs(resp)
