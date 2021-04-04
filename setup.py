@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='oauth-dropins',
-      version='3.0',
+      version='3.1',
       description='Drop-in App Engine OAuth client handlers for many popular sites.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',

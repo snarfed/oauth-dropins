@@ -287,7 +287,7 @@ just ``sudo python2 -m pip install grpcio``.
 Changelog
 ---------
 
-3.1 - unreleased
+3.1 - 2021-04-03
 ~~~~~~~~~~~~~~~~
 
 -  Add Python 3.8 support, drop 3.3 and 3.4. Python 3.5 is now the
@@ -296,6 +296,11 @@ Changelog
    Mastodon.
 -  Add `Reddit <https://pixelfed.org/>`__ support. Thanks `Will
    Stedden <https://bonkerfield.org/>`__!
+-  WordPress.com:
+
+   -  Handle errors from access token request.
+
+.. _section-1:
 
 3.0 - 2020-03-14
 ~~~~~~~~~~~~~~~~
@@ -366,7 +371,7 @@ Non-breaking changes:
    ``<div>``, eg as Bootstrap columns.
 -  Add new ``image_file`` kwarg to ``StartHandler.button_html()``
 
-.. _section-1:
+.. _section-2:
 
 2.2 - 2019-11-01
 ~~~~~~~~~~~~~~~~
@@ -388,7 +393,7 @@ Non-breaking changes:
    `ujson <https://github.com/esnme/ultrajson/>`__ (built into App
    Engine) to speed up JSON parsing and encoding.
 
-.. _section-2:
+.. _section-3:
 
 2.0 - 2019-02-25
 ~~~~~~~~~~~~~~~~
@@ -405,7 +410,7 @@ Non-breaking changes:
 -  webutil.logs: return HTTP 400 if ``start_time`` is before 2008-04-01
    (App Engine’s rough launch window).
 
-.. _section-3:
+.. _section-4:
 
 1.14 - 2018-11-12
 ~~~~~~~~~~~~~~~~~
@@ -418,7 +423,7 @@ Non-breaking changes:
    endpoint <https://developers.googleblog.com/2018/03/discontinuing-support-for-json-rpc-and.html>`__.
 -  Other minor internal updates.
 
-.. _section-4:
+.. _section-5:
 
 1.13 - 2018-08-08
 ~~~~~~~~~~~~~~~~~
@@ -427,14 +432,14 @@ Non-breaking changes:
    form-encoded
    (`snarfed/bridgy#809 <https://github.com/snarfed/bridgy/issues/809>`__).
 
-.. _section-5:
+.. _section-6:
 
 1.12 - 2018-03-24
 ~~~~~~~~~~~~~~~~~
 
 -  More Python 3 updates and bug fixes in webutil.util.
 
-.. _section-6:
+.. _section-7:
 
 1.11 - 2018-03-08
 ~~~~~~~~~~~~~~~~~
@@ -450,14 +455,14 @@ Non-breaking changes:
 -  Add Python 3 support to webutil.util!
 -  Add humanize dependency for webutil.logs.
 
-.. _section-7:
+.. _section-8:
 
 1.10 - 2017-12-10
 ~~~~~~~~~~~~~~~~~
 
 Mostly just internal changes to webutil to support granary v1.10.
 
-.. _section-8:
+.. _section-9:
 
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
@@ -468,7 +473,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 
    -  Handle punctuation in error messages.
 
-.. _section-9:
+.. _section-10:
 
 1.8 - 2017-08-29
 ~~~~~~~~~~~~~~~~
@@ -491,14 +496,14 @@ Mostly just internal changes to webutil to support granary v1.9.
       from ``me`` parameter, `which is going
       away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
 
-.. _section-10:
+.. _section-11:
 
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
 -  Updates to bundled webutil library, notably WideUnicode class.
 
-.. _section-11:
+.. _section-12:
 
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
@@ -507,21 +512,21 @@ Mostly just internal changes to webutil to support granary v1.9.
    `oauth-dropins.readthedocs.io <http://oauth-dropins.readthedocs.io/>`__.
 -  Fix Dropbox bug with fetching access token.
 
-.. _section-12:
+.. _section-13:
 
 1.5 - 2016-08-25
 ~~~~~~~~~~~~~~~~
 
 -  Add `Medium <https://medium.com/>`__.
 
-.. _section-13:
+.. _section-14:
 
 1.4 - 2016-06-27
 ~~~~~~~~~~~~~~~~
 
 -  Upgrade Facebook API from v2.2 to v2.6.
 
-.. _section-14:
+.. _section-15:
 
 1.3 - 2016-04-07
 ~~~~~~~~~~~~~~~~
@@ -530,7 +535,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  More consistent logging of HTTP requests.
 -  Set up Coveralls.
 
-.. _section-15:
+.. _section-16:
 
 1.2 - 2016-01-11
 ~~~~~~~~~~~~~~~~
@@ -544,7 +549,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Add developer setup and troubleshooting docs.
 -  Set up CircleCI.
 
-.. _section-16:
+.. _section-17:
 
 1.1 - 2015-09-06
 ~~~~~~~~~~~~~~~~
@@ -552,7 +557,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Flickr: split out flickr_auth.py file.
 -  Add a number of utility functions to webutil.
 
-.. _section-17:
+.. _section-18:
 
 1.0 - 2015-06-27
 ~~~~~~~~~~~~~~~~

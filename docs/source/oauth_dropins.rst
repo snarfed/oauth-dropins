@@ -7,9 +7,9 @@ Reference documentation.
     oauth_dropins
 
 
-blogger_v2
-----------
-.. automodule:: oauth_dropins.blogger_v2
+blogger
+-------
+.. automodule:: oauth_dropins.blogger
 
 disqus
 ------
@@ -70,6 +70,10 @@ meetup
 models
 ------
 .. automodule:: oauth_dropins.models
+
+pixelfed
+--------
+.. automodule:: oauth_dropins.pixelfed
 
 reddit
 ------
