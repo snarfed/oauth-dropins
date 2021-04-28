@@ -30,3 +30,7 @@ instance_info
 testutil
 --------
 .. automodule:: oauth_dropins.webutil.testutil
+
+webmention
+----------
+.. automodule:: oauth_dropins.webutil.webmention
