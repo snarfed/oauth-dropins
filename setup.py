@@ -38,6 +38,7 @@ setup(name='oauth-dropins',
       install_requires=[
           'beautifulsoup4~=4.8',
           'cachetools>=3.1,<5.0',
+          'domain2idna~=1.12',
           'gdata-python3~=3.0',
           'google-cloud-ndb~=1.2',
           'humanize>=3.1.0,<4.0',
