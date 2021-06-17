@@ -23,23 +23,24 @@ from .models import BaseAuth
 from .webutil import appengine_info, util
 from .webutil.util import json_dumps, json_loads
 
-# https://docs.joinmastodon.org/api/permissions/
+# https://docs.joinmastodon.org/api/oauth-scopes/
 ALL_SCOPES = (
   'read',
   'read:accounts',
   'read:blocks',
+  'read:bookmarks',
   'read:favourites',
   'read:filters',
   'read:follows',
   'read:lists',
   'read:mutes',
   'read:notifications',
-  'read:reports',
   'read:search',
   'read:statuses',
   'write',
   'write:accounts',
   'write:blocks',
+  'write:bookmarks',
   'write:favourites',
   'write:filters',
   'write:follows',
@@ -270,7 +271,7 @@ class StartHandler(handlers.StartHandler):
   def _register_app(self, instance, app_name, app_url):
     """Register a Mastodon API app on a specific instance.
 
-    https://docs.joinmastodon.org/api/rest/apps/
+    https://docs.joinmastodon.org/methods/apps/
 
     Args:
       instance: string
@@ -293,10 +294,10 @@ class StartHandler(handlers.StartHandler):
         # Mastodon uses Doorkeeper for OAuth, which allows registering
         # multiple redirect URIs, separated by newlines.
         # https://github.com/doorkeeper-gem/doorkeeper/pull/298
-        # https://docs.joinmastodon.org/api/rest/apps/
+        # https://docs.joinmastodon.org/methods/apps/
         'redirect_uris': '\n'.join(redirect_uris),
         'website': app_url,
-        # https://docs.joinmastodon.org/api/permissions/
+        # https://docs.joinmastodon.org/api/oauth-scopes/
         'scopes': self.SCOPE_SEPARATOR.join(ALL_SCOPES),
       }),
       # Pixelfed requires this
