@@ -148,9 +148,19 @@ def praw_to_user(user):
   """
   if getattr(user, 'is_suspended', False):
     return {}
+
+  subreddit = getattr(user, 'subreddit', None)
+  if subreddit:
+    subreddit = {
+      'id': getattr(subreddit, 'id', None),
+      'display_name': getattr(subreddit, 'display_name', None),
+      'name': getattr(subreddit, 'name', None),
+      'description': getattr(subreddit, 'public_description', None),
+    }
+
   return {
     'name': getattr(user, 'name', None),
-    'subreddit': getattr(user, 'subreddit', None),
+    'subreddit': subreddit,
     'icon_img': getattr(user, 'icon_img', None),
     'id': getattr(user, 'id', None),
     'created_utc': getattr(user, 'created_utc', None)
