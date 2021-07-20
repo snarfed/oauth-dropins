@@ -54,6 +54,7 @@ setup(name='oauth-dropins',
           'tweepy~=3.7',
           'ujson>=1.35,<5.0',
           'urllib3~=1.14',
+          'webapp2>=3.0.0b1',
       ],
       tests_require=['mox3>=0.28,<2.0'],
 )
