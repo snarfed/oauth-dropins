@@ -7,6 +7,7 @@
 /l3
 /local*/
 datastore.dat
+flask_secret_key
 oauth_client_secret
 private_notes
 dropbox_app_*

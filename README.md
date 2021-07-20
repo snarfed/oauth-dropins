@@ -235,6 +235,12 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 4.0 - unreleased
+
+_Breaking changes:_
+
+Ported all HTTP request handlers from [webapp2](https://github.com/GoogleCloudPlatform/webapp2/) to [Flask](https://flask.palletsprojects.com/). webapp2 had a good run, but it's no longer actively developed, and Flask is probably the most widely adopted standalone web framework in the Python community.
+
 ### 3.1 - 2021-04-03
 
 * Add Python 3.8 support, drop 3.3 and 3.4. Python 3.5 is now the minimum required version.
