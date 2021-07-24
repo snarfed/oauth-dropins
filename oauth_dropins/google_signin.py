@@ -8,11 +8,11 @@ requests-oauthlib docs:
 """
 import logging
 
+from flask import request
 from google.cloud import ndb
 from requests_oauthlib import OAuth2Session
 
-from . import handlers, models
-from .webutil import handlers as webutil_handlers
+from . import views, models
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
@@ -59,14 +59,12 @@ class Scopes(object):
   SCOPE_SEPARATOR = ' '
 
 
-class StartHandler(Scopes, handlers.StartHandler):
+class Start(Scopes, views.Start):
   """Starts the OAuth flow."""
   NAME = 'google_signin'
   LABEL = 'Google'
   """https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth"""
   INCLUDE_GRANTED_SCOPES = True
-
-  handle_exception = webutil_handlers.handle_exception
 
   def redirect_url(self, state=None):
     assert GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, \
@@ -83,28 +81,28 @@ class StartHandler(Scopes, handlers.StartHandler):
     return auth_url
 
 
-class CallbackHandler(Scopes, handlers.CallbackHandler):
+class Callback(Scopes, views.Callback):
   """Finishes the OAuth flow."""
 
-  def get(self):
+  def dispatch_request(self):
     # handle errors
-    state = self.request.get('state')
-    error = self.request.get('error')
-    desc = self.request.get('error_description')
+    state = request.values.get('state')
+    error = request.values.get('error')
+    desc = request.values.get('error_description')
     if error:
       msg = 'Error: %s: %s' % (error, desc)
       logging.info(msg)
       if error == 'access_denied':
         return self.finish(None, state=state)
       else:
-        raise exc.HTTPBadRequest(msg)
+        raise BadRequest(msg)
 
     # extract auth code and request access token
     session = OAuth2Session(GOOGLE_CLIENT_ID, scope=self.scope,
-                            redirect_uri=self.request.path_url)
+                            redirect_uri=request.base_url)
     session.fetch_token(ACCESS_TOKEN_URL,
                         client_secret=GOOGLE_CLIENT_SECRET,
-                        authorization_response=self.request.url)
+                        authorization_response=request.url)
 
     # get OpenID Connect user info
     # https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
@@ -121,4 +119,4 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
     user = GoogleUser(id=user_json['sub'], user_json=json_dumps(user_json),
                       token_json=json_dumps(session.token))
     user.put()
-    self.finish(user, state=state)
+    return self.finish(user, state=state)

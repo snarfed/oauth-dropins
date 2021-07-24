@@ -1,3 +1,4 @@
+
 """WordPress.com OAuth drop-in.
 
 API docs:
@@ -8,7 +9,7 @@ Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
 
 Also, wordpress.com doesn't let you use an oauth redirect URL with "local" or
-"localhost" anywhere in it. : / A common workaround is to map an arbitrary host
+"localhost" anywhere in it. A common workaround is to map an arbitrary host
 to localhost in your /etc/hosts, e.g.:
 
 127.0.0.1 my.dev.com
@@ -19,12 +20,13 @@ http://my.dev.com:8080/ instead of http://localhost:8080/ .
 import logging
 import urllib.parse, urllib.request
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers
+from . import views
 from .models import BaseAuth
-from .webutil import util
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 WORDPRESS_CLIENT_ID = util.read('wordpress.com_client_id')
@@ -88,7 +90,7 @@ class WordPressAuth(BaseAuth):
       raise
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts WordPress auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'wordpress.com'
@@ -110,32 +112,29 @@ class StartHandler(handlers.StartHandler):
       *args, input_style='background-color: #3499CD', **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
-  """The OAuth callback. Fetches an access token and stores it.
-  """
-
-  def get(self):
+class Callback(views.Callback):
+  """The OAuth callback. Fetches an access token and stores it."""
+  def dispatch_request(self):
     # handle errors
-    error = self.request.get('error')
+    error = request.values.get('error')
     if error:
       error_description = urllib.parse.unquote_plus(
-        self.request.get('error_description', ''))
+        request.values.get('error_description', ''))
       if error == 'access_denied':
         logging.info('User declined: %s', error_description)
-        self.finish(None, state=self.request.get('state'))
-        return
+        return self.finish(None, state=request.values.get('state'))
       else:
-        raise exc.HTTPBadRequest('Error: %s %s ' % (error, error_description))
+        raise BadRequest('Error: %s %s ' % (error, error_description))
 
     # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     data = {
       'code': auth_code,
       'client_id': WORDPRESS_CLIENT_ID,
       'client_secret': WORDPRESS_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
+      'redirect_uri': request.base_url,
       'grant_type': 'authorization_code',
     }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
@@ -146,7 +145,7 @@ class CallbackHandler(handlers.CallbackHandler):
       resp = resp.json()
       error = resp.get('error')
       if error:
-        raise exc.HTTPBadRequest('Error: %s %s ' %
+        raise BadRequest('Error: %s %s ' %
                                  (error, resp.get('error_description', '')))
 
       blog_id = resp['blog_id']
@@ -164,4 +163,4 @@ class CallbackHandler(handlers.CallbackHandler):
     auth.user_json = auth.urlopen(API_USER_URL).read()
     auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))

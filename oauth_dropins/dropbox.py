@@ -1,17 +1,18 @@
 """Dropbox OAuth drop-in.
 
 Standard OAuth 2.0 flow. Docs:
-https://www.dropbox.com/developers/core/docs
-https://www.dropbox.com/developers/reference/oauthguide
+https://www.dropbox.com/developers/documentation/http/overview
+https://www.dropbox.com/developers/documentation/http/documentation#authorization
 """
 import logging
 import urllib.parse, urllib.request
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers, models
-from .webutil import util
+from . import views, models
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 DROPBOX_APP_KEY = util.read('dropbox_app_key')
@@ -74,7 +75,7 @@ class DropboxCsrf(ndb.Model):
   state = ndb.TextProperty(required=False)
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts Dropbox auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'dropbox'
@@ -98,40 +99,39 @@ class StartHandler(handlers.StartHandler):
       *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
-  def get(self):
-    state = util.get_required_param(self, 'state')
+  def dispatch_request(self):
+    state = flask_util.get_required_param('state')
 
     # handle errors
-    error = self.request.get('error')
-    error_reason = urllib.parse.unquote_plus(self.request.get('error_reason', ''))
+    error = request.values.get('error')
+    error_reason = urllib.parse.unquote_plus(request.values.get('error_reason', ''))
 
     if error or error_reason:
       if error == 'access_denied':
         logging.info('User declined: %s', error_reason)
-        self.finish(None, state=state)
-        return
+        return self.finish(None, state=state)
       else:
-        raise exc.HTTPBadRequest(' '.join((error, error_reason)))
+        raise BadRequest(' '.join((error, error_reason)))
 
     # lookup the CSRF token
     try:
       csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
     except (ValueError, TypeError):
-      raise exc.HTTPBadRequest('Invalid state value %r' % state)
+      raise BadRequest('Invalid state value %r' % state)
 
     csrf = DropboxCsrf.get_by_id(csrf_id)
     if not csrf:
-      raise exc.HTTPBadRequest('No CSRF token for id %s' % csrf_id)
+      raise BadRequest('No CSRF token for id %s' % csrf_id)
 
     # request an access token
     data = {
       'client_id': DROPBOX_APP_KEY,
       'client_secret': DROPBOX_APP_SECRET,
-      'code': util.get_required_param(self, 'code'),
-      'redirect_uri': self.request.path_url,
+      'code': flask_util.get_required_param('code'),
+      'redirect_uri': request.base_url,
     }
     try:
       resp = util.urlopen(GET_ACCESS_TOKEN_URL % data, data=b'').read()
@@ -143,9 +143,9 @@ class CallbackHandler(handlers.CallbackHandler):
       data = json_loads(resp)
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, stack_info=True)
-      raise exc.HttpBadRequest('Bad Dropbox response to access token request')
+      raise BadRequest('Bad Dropbox response to access token request')
 
     logging.info('Storing new Dropbox account: %s', data['uid'])
     auth = DropboxAuth(id=data['uid'], access_token_str=data['access_token'])
     auth.put()
-    self.finish(auth, state=csrf.state)
+    return self.finish(auth, state=csrf.state)

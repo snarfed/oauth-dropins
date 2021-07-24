@@ -5,13 +5,14 @@ https://indieauth.com/developers
 import logging
 import urllib.parse
 
+from flask import request
 from google.cloud import ndb
 import mf2util
 import requests
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers, models
-from .webutil import util
+from . import models, views
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 INDIEAUTH_CLIENT_ID = util.read('indieauth_client_id')
@@ -33,7 +34,7 @@ def discover_authorization_endpoint(me, resp=None):
   try:
     resp = resp or util.requests_get(me)
   except (ValueError, requests.URLRequired, requests.TooManyRedirects) as e:
-    raise exc.HTTPBadRequest(str(e))
+    raise BadRequest(str(e))
 
   if resp.status_code // 100 != 2:
     logging.warning(
@@ -102,7 +103,7 @@ class IndieAuth(models.BaseAuth):
     return None
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts the IndieAuth flow. Requires the 'me' parameter with the
   user URL that we want to authenticate.
   """
@@ -115,7 +116,7 @@ class StartHandler(handlers.StartHandler):
 
     # TODO: unify with mastodon?
     if not me:
-      me = util.get_required_param(self, 'me')
+      me = flask_util.get_required_param('me')
     parsed = urllib.parse.urlparse(me)
     if not parsed.scheme:
       me = 'http://' + me
@@ -146,24 +147,24 @@ class StartHandler(handlers.StartHandler):
       **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
-  """The callback handler from the IndieAuth request. POSTs back to the
+class Callback(views.Callback):
+  """The callback view from the IndieAuth request. POSTs back to the
   auth endpoint to verify the authentication code."""
-  def get(self):
-    code = util.get_required_param(self, 'code')
-    state = util.decode_oauth_state(util.get_required_param(self, 'state'))
+  def dispatch_request(self):
+    code = flask_util.get_required_param('code')
+    state = util.decode_oauth_state(flask_util.get_required_param('state'))
 
     endpoint = state.get('endpoint')
     me = state.get('me')
     if not endpoint or not me:
-      raise exc.HTTPBadRequest("invalid state parameter")
+      raise BadRequest("invalid state parameter")
 
     state = state.get('state') or ''
     validate_resp = util.requests_post(endpoint, data={
       'me': me,
       'client_id': INDIEAUTH_CLIENT_ID,
       'code': code,
-      'redirect_uri': self.request.path_url,
+      'redirect_uri': request.base_url,
       'state': state,
     })
 
@@ -174,10 +175,10 @@ class CallbackHandler(handlers.CallbackHandler):
         user_json = build_user_json(verified)
         indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
         indie_auth.put()
-        self.finish(indie_auth, state=state)
+        return self.finish(indie_auth, state=state)
       else:
-        raise exc.HTTPBadRequest(
+        raise BadRequest(
           'Verification response missing required "me" field')
     else:
-      raise exc.HTTPBadRequest('IndieAuth verification failed: %s %s' %
+      raise BadRequest('IndieAuth verification failed: %s %s' %
                                (validate_resp.status_code, validate_resp.text))

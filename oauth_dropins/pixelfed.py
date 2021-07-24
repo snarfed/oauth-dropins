@@ -18,7 +18,7 @@ class PixelfedAuth(mastodon.MastodonAuth):
     return 'Pixelfed'
 
 
-class StartHandler(mastodon.StartHandler):
+class Start(mastodon.Start):
   """Starts Pixelfed auth. Requests an auth code and expects a redirect back."""
   NAME = 'pixelfed'
   LABEL = 'Pixelfed'
@@ -30,6 +30,6 @@ class StartHandler(mastodon.StartHandler):
     return 'Pixelfed' in version
 
 
-class CallbackHandler(mastodon.CallbackHandler):
+class Callback(mastodon.Callback):
   """The OAuth callback. Fetches an access token and stores it."""
   AUTH_CLASS = PixelfedAuth
