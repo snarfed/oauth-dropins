@@ -98,13 +98,11 @@ class Start(views.Start):
   NAME = 'twitter'
   LABEL = 'Twitter'
 
-  @classmethod
-  def to(cls, path, scopes=None, access_type=None):
+  def __init__(self, to_path, scopes=None, access_type=None):
+    super().__init__(to_path, scopes=scopes)
     assert access_type in (None, 'read', 'write'), \
         'access_type must be "read" or "write"; got %r' % access_type
-    view = super(Start, cls).to(path, scopes=scopes)
-    view.access_type = access_type
-    return view
+    self.access_type = access_type
 
   def redirect_url(self, state=None):
     assert twitter_auth.TWITTER_APP_KEY and twitter_auth.TWITTER_APP_SECRET, \

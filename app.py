@@ -54,9 +54,9 @@ google_signin.Start.INCLUDE_GRANTED_SCOPES = False
 for site, module in SITES.items():
   start = f'/{site}/start'
   callback = f'/{site}/oauth_callback'
-  app.add_url_rule(start, view_func=module.Start.to(callback).as_view(start),
+  app.add_url_rule(start, view_func=module.Start.as_view(start, callback),
                    methods=['POST'])
-  app.add_url_rule(callback, view_func=module.Callback.to('/').as_view(callback))
+  app.add_url_rule(callback, view_func=module.Callback.as_view(callback, '/'))
 
 
 @app.errorhandler(Exception)
