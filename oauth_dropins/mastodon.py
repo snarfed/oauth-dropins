@@ -178,10 +178,6 @@ class Start(views.Start):
   SCOPE_SEPARATOR = ' '
   APP_CLASS = MastodonApp
 
-  @classmethod
-  def to(cls, path, **kwargs):
-    return super(Start, cls).to(path, **kwargs)
-
   def app_name(self):
     """Returns the user-visible name of this application.
 

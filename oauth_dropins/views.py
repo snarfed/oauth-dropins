@@ -2,10 +2,14 @@
 
 Example usage:
 
-app.add_url_route('/oauth_start', facebook.Start.to('/oauth_callback'),
-                  methods=['POST'])
-app.add_url_route('/oauth_callback', facebook.Callback.to('/done'))
-app.add_url_route('/done', MyAuthenticatedView)
+app.add_url_rule(
+    '/oauth_start',
+    view_func=twitter.Start.as_view('fb-start', '/oauth_callback'),
+    methods=['POST'])
+
+app.add_url_rule(
+    '/oauth_callback',
+    view_func=twitter.Callback.as_view('fb-callback', '/next'))
 """
 import logging
 import urllib.parse
@@ -26,6 +30,7 @@ class BaseView(flask.views.View):
     LABEL: string, human-readable label, eg 'Blogger'
     NAME: string module name; usually same as `__name__.split('.')[-1]`
     to_path: the base redirect URL path for the OAuth callback
+    scope: OAuth scopes string, comma-separated
   """
   DEFAULT_SCOPE = ''
   SCOPE_SEPARATOR = ','
@@ -33,13 +38,13 @@ class BaseView(flask.views.View):
   NAME = None
 
   to_path = None
+  scope = None
 
-  @classmethod
-  def to(cls, path, scopes=None):
-    class To(cls):
-      to_path = path
-      scope = cls.make_scope_str(scopes)
-    return To
+  def __init__(self, to_path, scopes=None):
+    super().__init__()
+    assert to_path
+    self.to_path = to_path
+    self.scope = self.make_scope_str(scopes)
 
   @classmethod
   def make_scope_str(cls, extra):
@@ -93,10 +98,6 @@ class Start(BaseView):
   Alternatively, clients may call redirect_url() and HTTP 302 redirect to it
   manually, which will start the same OAuth flow.
   """
-
-  def __init__(self, *args, **kwargs):
-    assert self.to_path, 'No `to` URL. Did you forget to use the to() class method in your route?'
-    super(Start, self).__init__(*args, **kwargs)
 
   def dispatch_request(self):
     scopes = set(request.values.getlist('scope'))
@@ -192,8 +193,6 @@ class Callback(BaseView):
 
     Returns: :class:`werkzeug.wrappers.Response`
     """
-    assert self.to_path, 'No `to` URL. Did you forget to use the to() class method in your view mapping?'
-
     if auth_entity is None:
       params = [('declined', True)]
     else:
