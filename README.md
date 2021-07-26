@@ -1,7 +1,7 @@
 <img src="https://raw.github.com/snarfed/oauth-dropins/master/oauth_dropins/static/oauth_shiny.png" alt="OAuth logo" width="125" /> oauth-dropins [![Circle CI](https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg)](https://circleci.com/gh/snarfed/oauth-dropins)
 =============
 
-Drop-in Python [OAuth](http://oauth.net/) handlers for popular sites!
+Drop-in Python [OAuth](http://oauth.net/) for popular sites!
 
 * [About](#about)
 * [Quick start](#quick-start)
@@ -15,7 +15,7 @@ Drop-in Python [OAuth](http://oauth.net/) handlers for popular sites!
 About
 ---
 
-This is a collection of drop-in Python request handlers for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
 
 * [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/) Install with `pip install oauth-dropins`.
 * [Click here for getting started docs.](#quick-start)
@@ -34,160 +34,88 @@ This software is released into the public domain. See LICENSE for details.
 Quick start
 ---
 
-Here's a full example of using the Facebook drop-in.
+Here's a full example of using the GitHub drop-in.
 
 1. Install oauth-dropins with `pip install oauth-dropins`.
-1. Put your [Facebook application's](https://developers.facebook.com/apps) ID and secret in two plain text files in your app's root directory, `facebook_app_id` and `facebook_app_secret`. (If you use git, you'll probably also want to add them to your `.gitignore`.)
-1. Create a `facebook_oauth.py` file with these contents:
+1. Put your [GitHub OAuth application's](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app) ID and secret in two plain text files in your app's root directory, `github_client_id` and `github_client_secret`. (If you use git, you'll probably also want to add them to your `.gitignore`.)
+1. Create a `github_oauth.py` file with these contents:
 
     ```python
-    from oauth_dropins import facebook
-    import webapp2
+    from oauth_dropins import github
+    from app import app  # ...or wherever your Flask app is
     
-    application = webapp2.WSGIApplication([
-      ('/facebook/start_oauth', facebook.StartHandler.to('/facebook/oauth_callback')),
-      ('/facebook/oauth_callback', facebook.CallbackHandler.to('/next'))]
+    app.add_url_rule('/start',
+                     view_func=github.Start.as_view('start', '/callback'),
+                     methods=['POST'])
+    app.add_url_rule('/callback',
+                     view_func=github.Callback.as_view('callback', '/after'))
     ```
 
-1. Add these lines to `app.yaml`:
+Voila! Send your users to `/github/start` when you want them to connect their GitHub account to your app, and when they're done, they'll be redirected to `/after?access_token=...` in your app.
 
-    ```yaml
-    - url: /facebook/(start_oauth|oauth_callback)
-      script: facebook_oauth.application
-      secure: always
-    ```
-
-Voila! Send your users to `/facebook/start_oauth` when you want them to connect their Facebook account to your app, and when they're done, they'll be redirected to `/next?access_token=...` in your app.
-
-All of the sites provide the same API. To use a different one, just import the site module you want and follow the same steps. The filenames for app keys and secrets also differ by site; see each silo's `.py` file for its filenames.
+All of the sites provide the same API. To use a different one, just import the site module you want and follow the same steps. The filenames for app keys and secrets also differ by site; see each site's `.py` file for its filenames.
 
 
 Usage details
 ---
 
-There are three main parts to an OAuth drop-in: the initial redirect to the site
-itself, the redirect back to your app after the user approves or declines the
-request, and the datastore entity that stores the user's OAuth credentials and
-helps you use them. These are implemented by [`StartHandler`](#starthandler),
-[`CallbackHandler`](#callbackhandler), and [auth entities](#auth-entities),
-respectively.
-
-The request handlers are full [WSGI](http://wsgi.org/) applications and may be
-used in any Python web framework that supports WSGI
-([PEP 333](http://www.python.org/dev/peps/pep-0333/)). Internally, they're
-implemented with [Flask](https://flask.palletsprojects.com/).
+There are three main parts to an OAuth drop-in: the initial redirect to the site itself, the redirect back to your app after the user approves or declines the request, and the datastore entity that stores the user's OAuth credentials and helps you use them. These are implemented by [`Start`](#start) and [`Callback`](#callback), which are [Flask](https://flask.palletsprojects.com/) [View](https://flask.palletsprojects.com/en/2.0.x/api/#flask.views.View) classes, and [auth entities](#auth-entities), which are [Google Cloud Datastore](https://cloud.google.com/datastore/) [ndb models](https://googleapis.dev/python/python-ndb/latest/model.html).
 
 
-### `StartHandler`
+### `Start`
 
-This HTTP request handler class redirects you to an OAuth-enabled site so it can ask
-the user to grant your app permission. It has two useful methods:
+This view class redirects you to an OAuth-enabled site so it can ask the user to grant your app permission. It has two useful methods:
 
-- `to(callback_path, scopes=None)` is a factory method that returns a request
-  handler class you can use in a WSGI application. The argument should be the
-  path mapped to [`CallbackHandler`](#callbackhandler) in your application. This
-  also usually needs to match the callback URL in your app's configuration on
-  the destination site.
+- The constructor, `__init__(self, to_path, scopes=None)`. `to_path` is the OAuth callback, ie URL path on your site that the site's OAuth flow should redirect back to after it's done. This is handled by a [`Callback`](#callback) view in your application, which needs to handle the `to_path` route.
 
-  If you want to add OAuth scopes beyond the default one(s) needed for login,
-  you can pass them to the `scopes` kwarg as a string or sequence of strings, or
-  include them in the `scopes` query parameter in the POST request body. This is
-  currently supported with Facebook, Google, Blogger, and Instagram.
+  If you want to add OAuth scopes beyond the default one(s) needed for login, you can pass them to the `scopes` kwarg as a string or sequence of strings, or include them in the `scopes` query parameter in the POST request body. This is supported in most sites, but not all.
 
-  Some of the sites that use OAuth 1 support alternatives. For Twitter,
-  `StartHandler.to` takes an additional `access_type` kwarg that may be `read`
-  or `write`. It's passed through to Twitter
-  [`x_auth_access_type`](https://dev.twitter.com/docs/api/1/post/oauth/request_token).
-  For Flickr, the start handler accepts a `perms` POST query parameter that may
-  be `read`, `write` or `delete`; it's
-  [passed through to Flickr](https://www.flickr.com/services/api/auth.oauth.html#authorization)
-  unchanged. (Flickr claims it's optional, but
-  [sometimes breaks if it's not provided.](http://stackoverflow.com/questions/6517317/flickr-api-error-when-oauth))
+  Some OAuth 1 sites support alternatives to scopes. For Twitter, the `Start` constructor takes an additional `access_type` kwarg that may be `read` or `write`. It's passed through to Twitter [`x_auth_access_type`](https://dev.twitter.com/docs/api/1/post/oauth/request_token). For Flickr, `Start` accepts a `perms` POST query parameter that may be `read`, `write` or `delete`; it's [passed through to Flickr](https://www.flickr.com/services/api/auth.oauth.html#authorization) unchanged. (Flickr claims it's optional, but [sometimes breaks if it's not provided.](http://stackoverflow.com/questions/6517317/flickr-api-error-when-oauth))
 
-- `redirect_url(state=None)` returns the URL to redirect to at the destination
-  site to initiate the OAuth flow. `StartHandler` will redirect here
-  automatically if it's used in a WSGI application, but you can also instantiate
-  it and call this manually if you want to control that redirect yourself:
+- `redirect_url(state=None)` returns the URL to redirect to at the site to initiate the OAuth flow. `Start` will redirect here automatically if it's used in a WSGI application, but you can call this manually if you want to control that redirect yourself:
 
 ```python
-class MyHandler(webapp2.RequestHandler):
-  def get(self):
+class MyView(Start):
+  def dispatch_request(self):
     ...
-    handler_cls = facebook.StartHandler.to('/facebook/oauth_callback')
-    handler = handler_cls(self.request, self.response)
-    self.redirect(handler.redirect_url())
+    self.redirect(self.redirect_url())
 ```
 
-  However, this is *not* currently supported for Google and Blogger. Hopefully
-  that will be fixed in the future.
 
+### `Callback`
 
-### `CallbackHandler`
+This class handles the HTTP redirect back to your app after the user has granted or declined permission. It also has two useful methods:
 
-This class handles the HTTP redirect back to your app after the user has granted
-or declined permission. It also has two useful methods:
+- The constructor, `__init__(self, to_path, scopes=None)`. `to_path` is the URL path on your site that users should be redirected to after the callback view is done. It will include a `state` query parameter with the value provided to `Start`. It will also include an OAuth token in its query parameters, either `access_token` for OAuth 2.0 or `access_token_key` and `access_token_secret` for OAuth 1.1. It will also include an `auth_entity` query parameter with the string key of an [auth entity](#auth-entities) that has more data (and functionality) for the authenticated user. If the user declined the OAuth authorization request, the only query parameter besides `state` will be `declined=true`.
 
-- `to(callback_path)` is a factory method that returns a request handler class
-  you can use in a WSGI application, similar to [`StartHandler`](#starthandler).
-  The callback path is the path in your app that users should be redirected to
-  after the OAuth flow is complete. It will include a `state` query parameter
-  with the value provided by the `StartHandler`. It will also include an OAuth
-  token in its query parameters, either `access_token` for OAuth 2.0 or
-  `access_token_key` and `access_token_secret` for OAuth 1.1. It will also
-  include an `auth_entity` query parameter with the string key of an
-  [auth entity](#auth-entities) that has more data (and functionality) for the
-  authenticated user. If the user declined the OAuth authorization request, the
-  only query parameter besides `state` will be `declined=true`.
+- `finish(auth_entity, state=None)` is run in the initial callback request after the OAuth response has been processed. `auth_entity` is the newly created auth entity for this connection, or `None` if the user declined the OAuth authorization request.
 
-- `finish(auth_entity, state=None)` is run in the initial callback request after
-  the OAuth response has been processed. `auth_entity` is the newly created auth
-  entity for this connection, or `None` if the user declined the OAuth
-  authorization request.
-
-  By default, `finish` redirects to the path you specified in `to()`, but you
-  can subclass `CallbackHandler` and override it to run your own code inside the
-  OAuth callback instead of redirecting:
+  By default, `finish` redirects to `to_path`, but you can subclass `Callback` and override it to run your own code instead of redirecting:
 
 ```python
-class MyCallbackHandler(facebook.CallbackHandler):
+class MyCallback(github.Callback):
   def finish(self, auth_entity, state=None):
+    super().finish(auth_entity, state=state)  # ignore returned redirect
     self.response.write('Hi %s, thanks for connecting your %s account.' %
         (auth_entity.user_display_name(), auth_entity.site_name()))
 ```
 
-  However, this is *not* currently supported for Google and Blogger. Hopefully
-  that will be fixed in the future.
 
 ### Auth entities
 
-Each site defines an App Engine datastore
-[ndb.Model class](https://developers.google.com/appengine/docs/python/datastore/entities#Python_Kinds_and_identifiers)
-that stores each user's OAuth credentials and other useful information, like
-their name and profile URL. The class name is of the form <em>Site</em>Auth, e.g.
-FacebookAuth. Here are the useful methods:
+Each site defines an App Engine datastore [ndb.Model class](https://developers.google.com/appengine/docs/python/datastore/entities#Python_Kinds_and_identifiers) that stores each user's OAuth credentials and other useful information, like their name and profile URL. The class name is generally of the form <em>Site</em>Auth, e.g. `GitHubAuth`. Here are the useful methods:
 
-- `site_name()` returns the human-readable string name of the site, e.g.
-  "Facebook".
+- `site_name()` returns the human-readable string name of the site, e.g. "Facebook".
 
-- `user_display_name()` returns a human-readable string name for the user, e.g.
-  "Ryan Barrett". This is usually their first name, full name, or username.
+- `user_display_name()` returns a human-readable string name for the user, e.g. "Ryan Barrett". This is usually their first name, full name, or username.
 
-- `access_token()` returns the OAuth access token. For OAuth 2 sites, this is a
-  single string. For OAuth 1.1 sites (currently just Twitter, Tumblr, and Flickr),
-  this is a `(string key, string secret)` tuple.
+- `access_token()` returns the OAuth access token. For OAuth 2 sites, this is a single string. For OAuth 1.1 sites (currently just Twitter, Tumblr, and Flickr), this is a `(string key, string secret)` tuple.
 
-The following methods are optional. Auth entity classes usually implement at
-least one of them, but not all.
+The following methods are optional. Auth entity classes usually implement at least one of them, but not all.
 
-- `api()` returns a site-specific API object. This is usually a third party
-  library dedicated to the site, e.g. [Tweepy](https://github.com/tweepy/tweepy)
-  or [python-instagram](https://github.com/Instagram/python-instagram). See the
-  site class's docstring for details.
+- `api()` returns a site-specific API object. This is usually a third party library dedicated to the site, e.g. [Tweepy](https://github.com/tweepy/tweepy) or [python-instagram](https://github.com/Instagram/python-instagram). See the site class's docstring for details.
 
-- `urlopen(data=None, timeout=None)` wraps `urlopen()` and adds the
-  OAuth credentials to the request. Use this for making direct HTTP request to a
-  site's REST API. Some sites may provide `get()` instead, which wraps
-  `requests.get()`.
+- `urlopen(data=None, timeout=None)` wraps `urlopen()` and adds the OAuth credentials to the request. Use this for making direct HTTP request to a site's REST API. Some sites may provide `get()` instead, which wraps `requests.get()`.
 
 
 Troubleshooting/FAQ
@@ -218,10 +146,7 @@ Troubleshooting/FAQ
     InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
     ```
 
-  ...you may be hitting [Pip bug 1833](https://github.com/pypa/pip/issues/1833).
-  Are you passing `-t` to `pip install`? Use the virtualenv instead, it's your
-  friend. If you really want `-t`, try removing the `-e` from the lines in
-  `requirements.txt` that have it.
+  ...you may be hitting [Pip bug 1833](https://github.com/pypa/pip/issues/1833). Are you passing `-t` to `pip install`? Use the virtualenv instead, it's your friend. If you really want `-t`, try removing the `-e` from the lines in `requirements.txt` that have it.
 
 1. If you get this error while running `dev_appserver.py`:
 
@@ -239,13 +164,14 @@ Changelog
 
 _Breaking changes:_
 
-Ported all HTTP request handlers from [webapp2](https://github.com/GoogleCloudPlatform/webapp2/) to [Flask](https://flask.palletsprojects.com/). webapp2 had a good run, but it's no longer actively developed, and Flask is probably the most widely adopted standalone web framework in the Python community.
+Ported HTTP request handlers from [webapp2](https://github.com/GoogleCloudPlatform/webapp2/) to [Flask](https://flask.palletsprojects.com/). webapp2 had a good run, but it's no longer actively developed, and Flask is one of the most widely adopted standalone web framework in the Python community.
 
 Removed `to()` class methods. Instead, now pass redirect paths to Flask's `as_view()` function, eg:
 
 ```py
 app = Flask()
-app.add_url_route('/twitter', view_func=twitter.Start.as_view('/callback'), methods=['POST'])
+app.add_url_rule('/oauth_callback',
+                 view_func=twitter.Callback.as_view(callback', '/after'))
 ```
 
 Removed deprecated `blogger_v2` module alias.
@@ -393,11 +319,6 @@ dev_appserver.py --log_level debug --enable_host_checking false \
   --application=oauth-dropins app.yaml
 ```
 
-Most dependencies are clean, but we've made patches to [gdata-python-client](https://github.com/snarfed/gdata-python-client), which is unmaintained but we still need for [Blogger's v2 API](https://developers.google.com/blogger/docs/2.0/developers_guide_protocol).
-
-* [snarfed/gdata-python-client@fabb622](https://github.com/snarfed/gdata-python-client/commit/fabb6227361612ac4fcb8bef4438719cb00eaa2b)
-* [snarfed/gdata-python-client@8453e33](https://github.com/snarfed/gdata-python-client/commit/8453e3388d152ac650e22d219fae36da56d9a85d)
-
 To deploy to production:
 
 `gcloud -q beta app deploy --no-cache oauth-dropins *.yaml`
@@ -470,4 +391,5 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 
 Related work
 ---
-* [Python Social Auth](http://psa.matiasaguirre.net/)
+* [Python Social Auth](https://python-social-auth.readthedocs.io/en/latest/)
+* [Loginpass](https://github.com/authlib/loginpass)/[Authlib](https://authlib.org/)

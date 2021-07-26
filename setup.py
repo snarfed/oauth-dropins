@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 setup(name='oauth-dropins',
       version='3.1',
-      description='Drop-in App Engine OAuth client handlers for many popular sites.',
+      description='Drop-in OAuth Flask views for many popular sites.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
       url='https://github.com/snarfed/oauth-dropins',
