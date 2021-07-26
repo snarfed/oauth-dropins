@@ -2,14 +2,13 @@
 
 Example usage:
 
-app.add_url_rule(
-    '/oauth_start',
-    view_func=twitter.Start.as_view('fb-start', '/oauth_callback'),
-    methods=['POST'])
+app = Flask()
 
-app.add_url_rule(
-    '/oauth_callback',
-    view_func=twitter.Callback.as_view('fb-callback', '/next'))
+app.add_url_rule('/start',
+                 view_func=twitter.Start.as_view('start', '/callback'),
+                 methods=['POST'])
+app.add_url_rule('/callback',
+                 view_func=twitter.Callback.as_view('callback', '/after'))
 """
 import logging
 import urllib.parse
