@@ -7,12 +7,13 @@ https://docs.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/sign-
 import logging
 import urllib.parse
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers
+from . import views
 from .models import BaseAuth
-from .webutil import util
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 LINKEDIN_CLIENT_ID = util.read('linkedin_client_id')
@@ -97,7 +98,7 @@ class LinkedInAuth(BaseAuth):
     return resp
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts LinkedIn auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'linkedin'
@@ -123,26 +124,25 @@ class StartHandler(handlers.StartHandler):
       **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and stores it.
   """
-  def get(self):
+  def dispatch_request(self):
     # handle errors
-    error = self.request.get('error')
-    desc = self.request.get('error_description')
+    error = request.values.get('error')
+    desc = request.values.get('error_description')
     if error:
       # https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin/consumer/context#application-is-rejected
       if error in ('user_cancelled_login', 'user_cancelled_authorize'):
-        logging.info('User declined: %s', self.request.get('error_description'))
-        self.finish(None, state=self.request.get('state'))
-        return
+        logging.info('User declined: %s', request.values.get('error_description'))
+        return self.finish(None, state=request.values.get('state'))
       else:
         msg = 'Error: %s: %s' % (error, desc)
         logging.info(msg)
-        raise exc.HTTPBadRequest(msg)
+        raise BadRequest(msg)
 
     # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     data = {
       'grant_type': 'authorization_code',
       'code': auth_code,
@@ -150,7 +150,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'client_secret': LINKEDIN_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
+      'redirect_uri': request.base_url,
       }
 
     resp = util.requests_post(ACCESS_TOKEN_URL, data=data)
@@ -161,7 +161,7 @@ class CallbackHandler(handlers.CallbackHandler):
     if resp.get('serviceErrorCode'):
       msg = 'Error: %s' % resp
       logging.info(msg)
-      raise exc.HTTPBadRequest(msg)
+      raise BadRequest(msg)
 
     access_token = resp['access_token']
     resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()
@@ -170,4 +170,4 @@ class CallbackHandler(handlers.CallbackHandler):
                         user_json=json_dumps(resp))
     auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))

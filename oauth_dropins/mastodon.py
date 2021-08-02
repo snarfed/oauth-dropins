@@ -14,13 +14,14 @@ Surprising, and unusual, but makes sense.
 import logging
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 
+from flask import request
 from google.cloud import ndb
 import requests
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers
+from . import views
 from .models import BaseAuth
-from .webutil import appengine_info, util
+from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 # https://docs.joinmastodon.org/api/oauth-scopes/
@@ -78,7 +79,7 @@ ACCESS_TOKEN_API = '/oauth/token'
 def _encode_state(app, state):
   wrapped = json_dumps({
     'app_key': app.key.urlsafe().decode(),
-    'state': quote_plus(state),
+    'state': quote_plus(state) if state else '',
   })
   logging.debug('Encoding wrapper state: %r', wrapped)
   return wrapped
@@ -160,7 +161,7 @@ class MastodonAuth(BaseAuth):
     return resp
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts Mastodon auth. Requests an auth code and expects a redirect back.
 
   Attributes:
@@ -179,7 +180,7 @@ class StartHandler(handlers.StartHandler):
 
   @classmethod
   def to(cls, path, **kwargs):
-    return super(StartHandler, cls).to(path, **kwargs)
+    return super(Start, cls).to(path, **kwargs)
 
   def app_name(self):
     """Returns the user-visible name of this application.
@@ -193,7 +194,7 @@ class StartHandler(handlers.StartHandler):
 
     To be overridden by subclasses. Displayed in Mastodon's OAuth prompt.
     """
-    return self.request.host_url
+    return request.host_url
 
   @classmethod
   def _version_ok(cls, version):
@@ -213,7 +214,7 @@ class StartHandler(handlers.StartHandler):
     """
     # normalize instance to URL
     if not instance:
-      instance = util.get_required_param(self, 'instance')
+      instance = flask_util.get_required_param('instance')
     instance = instance.strip().split('@')[-1]  # handle addresses, eg user@host.com
     parsed = urlparse(instance)
     if not parsed.scheme:
@@ -283,7 +284,7 @@ class StartHandler(handlers.StartHandler):
     logging.info("first time we've seen %s instance %s with app %s %s! "
                  "registering an API app.", self.LABEL, instance, app_name, app_url)
 
-    redirect_uris = set(urljoin(self.request.host_url, path)
+    redirect_uris = set(urljoin(request.host_url, path)
                         for path in set(self.REDIRECT_PATHS))
     redirect_uris.add(self.to_url())
 
@@ -315,40 +316,39 @@ class StartHandler(handlers.StartHandler):
   def button_html(cls, *args, **kwargs):
     kwargs['form_extra'] = kwargs.get('form_extra', '') + """
 <input type="url" name="instance" class="form-control" placeholder="%s instance" scheme="https" required style="width: 150px; height: 50px; display:inline;" />""" % cls.LABEL
-    return super(StartHandler, cls).button_html(
+    return super(Start, cls).button_html(
       *args, input_style='background-color: #EBEBEB; padding: 5px', **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and stores it."""
   AUTH_CLASS = MastodonAuth
 
-  def get(self):
+  def dispatch_request(self):
     # handle errors
-    error = self.request.get('error')
-    desc = self.request.get('error_description')
+    error = request.values.get('error')
+    desc = request.values.get('error_description')
     if error:
       # user_cancelled_login and user_cancelled_authorize are non-standard.
       # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
       if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
-        logging.info('User declined: %s', self.request.get('error_description'))
-        state = self.request.get('state')
+        logging.info('User declined: %s', request.values.get('error_description'))
+        state = request.values.get('state')
         if state:
           _, state = _decode_state(state)
-        self.finish(None, state=state)
-        return
+        return self.finish(None, state=state)
       else:
         msg = 'Error: %s: %s' % (error, desc)
         logging.info(msg)
-        raise exc.HTTPBadRequest(msg)
+        raise BadRequest(msg)
 
-    app_key, state = _decode_state(util.get_required_param(self, 'state'))
+    app_key, state = _decode_state(flask_util.get_required_param('state'))
     app = ndb.Key(urlsafe=app_key).get()
     assert app
     app_data = json_loads(app.data)
 
     # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     data = {
       'grant_type': 'authorization_code',
       'code': auth_code,
@@ -356,7 +356,7 @@ class CallbackHandler(handlers.CallbackHandler):
       'client_secret': app_data['client_secret'],
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
+      'redirect_uri': request.base_url,
       }
     resp = util.requests_post(
       urljoin(app.instance, ACCESS_TOKEN_API), data=urlencode(data),
@@ -366,7 +366,7 @@ class CallbackHandler(handlers.CallbackHandler):
     resp_json = resp.json()
     logging.debug('Access token response: %s', resp_json)
     if resp_json.get('error'):
-      raise exc.HTTPBadRequest(resp_json)
+      raise BadRequest(resp_json)
 
     access_token = resp_json['access_token']
     user = self.AUTH_CLASS(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
@@ -376,4 +376,4 @@ class CallbackHandler(handlers.CallbackHandler):
                            user_json=json_dumps(user))
     auth.put()
 
-    self.finish(auth, state=state)
+    return self.finish(auth, state=state)

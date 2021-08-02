@@ -9,13 +9,14 @@ praw API docs:
 https://praw.readthedocs.io/en/v3.6.0/pages/oauth.html
 """
 import logging
+import urllib.parse
 
+from flask import request
 from google.cloud import ndb
 import praw
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers, models
-from .webutil import handlers as webutil_handlers
+from . import views, models
 from .webutil import appengine_info, util
 from .webutil.util import json_dumps, json_loads
 
@@ -53,7 +54,7 @@ class RedditAuth(models.BaseAuth):
     return self.key_id()
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts reddit auth. goes directly to redirect. passes to_path in "state"
   """
   NAME = 'reddit'
@@ -66,12 +67,13 @@ class StartHandler(handlers.StartHandler):
       state = str(randint(100000,999999))
     assert REDDIT_APP_KEY and REDDIT_APP_SECRET, \
       "Please fill in the reddit_app_key and reddit_app_secret files in your app's root directory."
+    url = urllib.parse.urljoin(request.host_url, self.to_path)
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
-                         redirect_uri=self.request.host_url + self.to_path,
+                         redirect_uri=url,
                          user_agent='oauth-dropin reddit api')
 
-    # store the state for later use in the callback handler
+    # store the state for later use in the callback view
     models.OAuthRequestToken(id=state,
                              token_secret=state,
                              state=state).put()
@@ -86,34 +88,34 @@ class StartHandler(handlers.StartHandler):
       **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """OAuth callback. Only ensures that identity access was granted.
   """
 
-  def get(self):
-    error = self.request.get('error')
-    st = util.decode_oauth_state(self.request.get('state'))
+  def dispatch_request(self):
+    error = request.values.get('error')
+    st = util.decode_oauth_state(request.values.get('state'))
     state = st.get('state')
     to_path = st.get('to_path')
-    code = self.request.get('code')
+    code = request.values.get('code')
     if error or not state or not code:
       if error in ('access_denied'):
-        logging.info('User declined: %s', self.request.get('error_description'))
-        self.finish(None, state=state)
-        return
+        logging.info('User declined: %s', request.values.get('error_description'))
+        return self.finish(None, state=state)
       else:
         msg = 'Error: %s' % (error)
         logging.info(msg)
-        raise exc.HTTPBadRequest(msg)
+        raise BadRequest(msg)
 
     # look up the stored state to check authenticity
     request_token = models.OAuthRequestToken.get_by_id(state)
     if request_token is None:
-      raise exc.HTTPBadRequest('Invalid oauth_token: %s' % request_token_key)
+      raise BadRequest('Invalid oauth_token: %s' % request_token_key)
 
+    url = urllib.parse.urljoin(request.host_url, to_path)
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
-                         redirect_uri=self.request.host_url + to_path,
+                         redirect_uri=url,
                          user_agent='oauth-dropin reddit api')
 
     refresh_token = reddit.auth.authorize(code)
@@ -125,7 +127,7 @@ class CallbackHandler(handlers.CallbackHandler):
                       refresh_token=refresh_token,
                       user_json=json_dumps(user_json))
     auth.put()
-    self.finish(auth, state=state)
+    return self.finish(auth, state=state)
 
 
 def praw_to_user(user):

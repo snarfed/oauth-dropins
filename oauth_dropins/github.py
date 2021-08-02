@@ -7,12 +7,13 @@ https://developer.github.com/apps/building-oauth-apps/authorization-options-for-
 import logging
 import urllib.parse
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers
+from . import views
 from .models import BaseAuth
-from .webutil import appengine_info, util
+from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 if appengine_info.DEBUG:
@@ -110,7 +111,7 @@ class GitHubAuth(BaseAuth):
     return resp
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts GitHub auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'github'
@@ -134,32 +135,31 @@ class StartHandler(handlers.StartHandler):
       *args, input_style='background-color: #444444', **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and stores it.
   """
-
-  def get(self):
+  def dispatch_request(self):
     # handle errors
-    error = self.request.get('error')
+    error = request.values.get('error')
     if error:
       if error == 'access_denied':
         logging.info('User declined')
-        self.finish(None, state=self.request.get('state'))
+        return self.finish(None, state=request.values.get('state'))
         return
       else:
-        msg = 'Error: %s: %s' % (error, self.request.get('error_description'))
+        msg = 'Error: %s: %s' % (error, request.values.get('error_description'))
         logging.info(msg)
-        raise exc.HTTPBadRequest(msg)
+        raise BadRequest(msg)
 
     # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     data = {
       'code': auth_code,
       'client_id': GITHUB_CLIENT_ID,
       'client_secret': GITHUB_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
+      'redirect_uri': request.base_url,
       }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL,
                               data=urllib.parse.urlencode(data))
@@ -173,7 +173,7 @@ class CallbackHandler(handlers.CallbackHandler):
     if error:
       msg = 'Error: %s: %s' % (error[0], resp.get('error_description'))
       logging.info(msg)
-      raise exc.HTTPBadRequest(msg)
+      raise BadRequest(msg)
 
     access_token = resp['access_token'][0]
     resp = GitHubAuth(access_token_str=access_token).post(
@@ -184,4 +184,4 @@ class CallbackHandler(handlers.CallbackHandler):
                       user_json=json_dumps(user_json))
     auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))

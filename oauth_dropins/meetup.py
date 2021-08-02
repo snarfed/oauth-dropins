@@ -6,12 +6,13 @@ https://www.meetup.com/meetup_api/
 import logging
 import urllib.parse
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers
+from . import views
 from .models import BaseAuth
-from .webutil import appengine_info, util
+from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_loads
 
 if appengine_info.DEBUG:
@@ -80,7 +81,7 @@ class MeetupCsrf(ndb.Model):
     state = ndb.TextProperty(required=False)
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
     """Starts Meetup.com auth. Requests an auth code and expects a redirect back.
     """
 
@@ -109,35 +110,34 @@ class StartHandler(handlers.StartHandler):
                 *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
     """The auth callback. Fetches an access token, stores it, and redirects home.
     """
-    def get(self):
+    def dispatch_request(self):
         # handle errors
-        error = self.request.get('error')
+        error = request.values.get('error')
         if error:
             if error == 'access_denied':
                 logging.info('User declined')
-                self.finish(None, state=self.request.get('state'))
-                return
+                return self.finish(None, state=request.values.get('state'))
             else:
-                msg = 'Error: %s: %s' % (error, self.request.get('error_description'))
+                msg = 'Error: %s: %s' % (error, request.values.get('error_description'))
                 logging.info(msg)
-                raise exc.HTTPBadRequest(msg)
+                raise BadRequest(msg)
 
-        state = util.get_required_param(self, 'state')
+        state = flask_util.get_required_param('state')
         # lookup the CSRF token
         try:
             csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
         except (ValueError, TypeError):
-            raise exc.HTTPBadRequest('Invalid state value %r' % state)
+            raise BadRequest('Invalid state value %r' % state)
 
         csrf = MeetupCsrf.get_by_id(csrf_id)
         if not csrf:
-            raise exc.HTTPBadRequest('No CSRF token for id %s' % csrf_id)
+            raise BadRequest('No CSRF token for id %s' % csrf_id)
 
         # extract auth code and request access token
-        auth_code = util.get_required_param(self, 'code')
+        auth_code = flask_util.get_required_param('code')
         data = {
             'code': auth_code,
             'client_id': MEETUP_CLIENT_ID,
@@ -145,7 +145,7 @@ class CallbackHandler(handlers.CallbackHandler):
             'grant_type': 'authorization_code',
             # redirect_uri here must be the same in the oauth code request!
             # (the value here doesn't actually matter since it's requested server side.)
-            'redirect_uri': self.request.path_url,
+            'redirect_uri': request.base_url,
             }
         # TODO: handle refresh tokens
         resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
@@ -157,13 +157,13 @@ class CallbackHandler(handlers.CallbackHandler):
             data = json_loads(resp.text)
         except (ValueError, TypeError):
             logging.error('Bad response:\n%s', resp, stack_info=True)
-            raise exc.HTTPBadRequest('Bad Disqus response to access token request')
+            raise BadRequest('Bad Disqus response to access token request')
 
         error = data.get('error')
         if error:
             msg = 'Error: %s: %s' % (error[0], data.get('error_description'))
             logging.info(msg)
-            raise exc.HTTPBadRequest(msg)
+            raise BadRequest(msg)
 
         access_token = data['access_token']
 
@@ -175,4 +175,4 @@ class CallbackHandler(handlers.CallbackHandler):
         logging.info('Storing new Meetup account for ID: %s', user_id)
         auth = MeetupAuth(id=user_id, access_token_str=access_token, user_json=user_json)
         auth.put()
-        self.finish(auth, state=csrf.state)
+        return self.finish(auth, state=csrf.state)

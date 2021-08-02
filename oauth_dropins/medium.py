@@ -15,12 +15,13 @@ http://my.dev.com:8080/ instead of http://localhost:8080/ .
 import logging
 import urllib.parse
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers
+from . import views
 from .models import BaseAuth
-from .webutil import util
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 MEDIUM_CLIENT_ID = util.read('medium_client_id')
@@ -100,7 +101,7 @@ class MediumAuth(BaseAuth):
     return resp
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts Medium auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'medium'
@@ -119,30 +120,29 @@ class StartHandler(handlers.StartHandler):
       }
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and stores it.
   """
 
-  def get(self):
+  def dispatch_request(self):
     # handle errors
-    error = self.request.get('error')
+    error = request.values.get('error')
     if error:
       if error == 'access_denied':
         logging.info('User declined')
-        self.finish(None, state=self.request.get('state'))
-        return
+        return self.finish(None, state=request.values.get('state'))
       else:
-        raise exc.HTTPBadRequest('Error: %s' % error)
+        raise BadRequest('Error: %s' % error)
 
     # extract auth code and request access token
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     data = {
       'code': auth_code,
       'client_id': MEDIUM_CLIENT_ID,
       'client_secret': MEDIUM_CLIENT_SECRET,
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
-      'redirect_uri': self.request.path_url,
+      'redirect_uri': request.base_url,
       'grant_type': 'authorization_code',
     }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data,
@@ -159,7 +159,7 @@ class CallbackHandler(handlers.CallbackHandler):
     errors = resp.get('errors') or resp.get('error')
     if errors:
       logging.info('Errors: %s', errors)
-      raise exc.HTTPBadRequest(errors[0].get('message'))
+      raise BadRequest(errors[0].get('message'))
 
     # TODO: handle refresh token
     access_token = resp['access_token']
@@ -168,4 +168,4 @@ class CallbackHandler(handlers.CallbackHandler):
     auth = MediumAuth(id=id, access_token_str=access_token, user_json=user_json)
     auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))

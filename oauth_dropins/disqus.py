@@ -17,11 +17,12 @@ TODO unify Disqus, Facebook, and Instagram
 import logging
 import urllib.parse
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers, models
-from .webutil import util
+from . import models, views
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 DISQUS_CLIENT_ID = util.read('disqus_client_id')
@@ -75,7 +76,7 @@ class DisqusAuth(models.BaseAuth):
                                                 DISQUS_CLIENT_ID, **kwargs)
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts Disqus auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'disqus'
@@ -95,20 +96,20 @@ class StartHandler(handlers.StartHandler):
       }
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
-  def get(self):
+  def dispatch_request(self):
     if self.handle_error():
       return
 
     # https://disqus.com/api/docs/auth/
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     data = {
         'grant_type': 'authorization_code',
         'client_id': DISQUS_CLIENT_ID,
         'client_secret': DISQUS_CLIENT_SECRET,
-        'redirect_uri': self.request_url_with_state(),
+        'redirect_uri': request_url_with_state(),
         'code': auth_code,
     }
 
@@ -118,7 +119,7 @@ class CallbackHandler(handlers.CallbackHandler):
       data = json_loads(resp.text)
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, stack_info=True)
-      raise exc.HTTPBadRequest('Bad Disqus response to access token request')
+      raise BadRequest('Bad Disqus response to access token request')
 
     access_token = data['access_token']
     user_id = data['user_id']
@@ -134,29 +135,29 @@ class CallbackHandler(handlers.CallbackHandler):
       user_data = json_loads(resp)['response']
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, stack_info=True)
-      raise exc.HTTPBadRequest('Bad Disqus response to user details request')
+      raise BadRequest('Bad Disqus response to user details request')
 
     auth.user_json = json_dumps(user_data)
     logging.info('created disqus auth %s', auth)
     auth.put()
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))
 
   def handle_error(handler):
     """Handles any error reported in the callback query parameters.
 
     Args:
-      handler: CallbackHandler
+      handler: Callback
 
     Returns:
       True if there was an error, False otherwise.
     """
-    error = handler.request.get('error')
+    error = request.values.get('error')
     if error:
       if error == 'access_denied':
         logging.info('User declined')
-        handler.finish(None, state=handler.request.get('state'))
+        handler.finish(None, state=request.values.get('state'))
         return True
       else:
-        raise exc.HTTPBadRequest(error)
+        raise BadRequest(error)
 
     return False

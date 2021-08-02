@@ -12,11 +12,12 @@ import logging
 import os
 import urllib.parse
 
+from flask import abort, request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import facebook, handlers, models
-from .webutil import util
+from . import facebook, views, models
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 INSTAGRAM_CLIENT_ID = util.read('instagram_client_id')
@@ -70,7 +71,7 @@ class InstagramAuth(models.BaseAuth):
                                                 **kwargs)
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts Instagram auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'instagram'
@@ -100,21 +101,21 @@ class StartHandler(handlers.StartHandler):
 
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
-
-  def get(self):
-    if facebook.CallbackHandler.handle_error(self):
-      return
+  def dispatch_request(self):
+    err = facebook.Callback.handle_error(self)
+    if err:
+      return err
 
     # http://instagram.com/developer/authentication/
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     data = {
       'client_id': INSTAGRAM_CLIENT_ID,
       'client_secret': INSTAGRAM_CLIENT_SECRET,
       'code': auth_code,
-      'redirect_uri': self.request_url_with_state(),
+      'redirect_uri': request_url_with_state(),
       'grant_type': 'authorization_code',
     }
 
@@ -129,11 +130,10 @@ class CallbackHandler(handlers.CallbackHandler):
       data = json_loads(resp.text)
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, stack_info=True)
-      raise exc.HttpBadRequest('Bad Instagram response to access token request')
+      raise BadRequest('Bad Instagram response to access token request')
 
     if 'error_type' in resp:
-      error_class = exc.status_map[data.get('code', 500)]
-      raise error_class(data.get('error_message'))
+      abort(502, f"{resp['error_type']} {data.get('code')} {data.get('error_message')}")
 
     access_token = data['access_token']
     username = data['user']['username']
@@ -143,4 +143,4 @@ class CallbackHandler(handlers.CallbackHandler):
                          access_token_str=access_token,
                          user_json=json_dumps(data['user']))
     auth.put()
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))

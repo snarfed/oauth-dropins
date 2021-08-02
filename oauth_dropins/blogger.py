@@ -12,12 +12,12 @@ https://requests-oauthlib.readthedocs.io/
 import logging
 import re
 
+from flask import request
 from gdata.blogger.client import BloggerClient
 from google.cloud import ndb
 from requests_oauthlib import OAuth2Session
 
-from . import google_signin, handlers, models
-from .webutil import handlers as webutil_handlers
+from . import google_signin, views, models
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
@@ -82,12 +82,10 @@ class Scopes(object):
   SCOPE_SEPARATOR = ' '
 
 
-class StartHandler(Scopes, handlers.StartHandler):
+class Start(Scopes, views.Start):
   """Connects a Blogger account. Authenticates via OAuth."""
   NAME = 'blogger'
   LABEL = 'Blogger'
-
-  handle_exception = webutil_handlers.handle_exception
 
   def redirect_url(self, state=None):
     assert google_signin.GOOGLE_CLIENT_ID and google_signin.GOOGLE_CLIENT_SECRET, \
@@ -104,32 +102,32 @@ class StartHandler(Scopes, handlers.StartHandler):
     return auth_url
 
 
-class CallbackHandler(Scopes, handlers.CallbackHandler):
+class Callback(Scopes, views.Callback):
   """Finishes the OAuth flow."""
 
   # extracts the Blogger id from a profile URL
   AUTHOR_URI_RE = re.compile(
     r'.*(?:blogger\.com/(?:feeds|profile)|(?:plus|profiles)\.google\.com)/([0-9]+)(?:/blogs)')
 
-  def get(self):
+  def dispatch_request(self):
     # handle errors
-    state = self.request.get('state')
-    error = self.request.get('error')
-    desc = self.request.get('error_description')
+    state = request.values.get('state')
+    error = request.values.get('error')
+    desc = request.values.get('error_description')
     if error:
       msg = 'Error: %s: %s' % (error, desc)
       logging.info(msg)
       if error == 'access_denied':
         return self.finish(None, state=state)
       else:
-        raise exc.HTTPBadRequest(msg)
+        raise BadRequest(msg)
 
     # extract auth code and request access token
     session = OAuth2Session(google_signin.GOOGLE_CLIENT_ID, scope=self.scope,
-                            redirect_uri=self.request.path_url)
+                            redirect_uri=request.base_url)
     session.fetch_token(ACCESS_TOKEN_URL,
                         client_secret=google_signin.GOOGLE_CLIENT_SECRET,
-                        authorization_response=self.request.url)
+                        authorization_response=request.url)
 
     client = BloggerV2Auth(creds_json=json_dumps(session.token)).api()
     try:
@@ -178,4 +176,4 @@ class CallbackHandler(Scopes, handlers.CallbackHandler):
                          blog_titles=blog_titles,
                          blog_hostnames=blog_hostnames)
     auth.put()
-    self.finish(auth, state=state)
+    return self.finish(auth, state=state)

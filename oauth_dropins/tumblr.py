@@ -5,13 +5,14 @@ http://www.tumblr.com/docs/en/api/v2
 http://www.tumblr.com/oauth/apps
 """
 import logging
+import urllib.parse
 
+from flask import request
 from google.cloud import ndb
 import tumblpy
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers, models
-from .webutil import handlers as webutil_handlers
+from . import views, models
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
@@ -64,23 +65,11 @@ class TumblrAuth(models.BaseAuth):
                            oauth_token=key, oauth_token_secret=secret)
 
 
-def handle_exception(self, e, debug):
-  """Exception handler that handles Tweepy errors.
-  """
-  if isinstance(e, tumblpy.TumblpyError):
-      logging.error('OAuth error', stack_info=True)
-      raise exc.HTTPBadRequest(e)
-  else:
-    return webutil_handlers.handle_exception(self, e, debug)
-
-
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts Tumblr auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'tumblr'
   LABEL = 'Tumblr'
-
-  handle_exception = handle_exception
 
   def redirect_url(self, state=None):
     assert TUMBLR_APP_KEY and TUMBLR_APP_SECRET, \
@@ -88,9 +77,9 @@ class StartHandler(handlers.StartHandler):
     tp = tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,
                          app_secret=TUMBLR_APP_SECRET)
     auth_props = tp.get_authentication_tokens(
-      callback_url=self.request.host_url + self.to_path)
+      callback_url=urllib.parse.urljoin(request.host_url, self.to_path))
 
-    # store the request token for later use in the callback handler
+    # store the request token for later use in the callback view
     models.OAuthRequestToken(id=auth_props['oauth_token'],
                              token_secret=auth_props['oauth_token_secret'],
                              state=state).put()
@@ -104,23 +93,20 @@ class StartHandler(handlers.StartHandler):
       **kwargs)
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """OAuth callback. Fetches the user's blogs and stores the credentials.
   """
-  handle_exception = handle_exception
-
-  def get(self):
-    verifier = self.request.get('oauth_verifier')
-    request_token_key = self.request.get('oauth_token')
+  def dispatch_request(self):
+    verifier = request.values.get('oauth_verifier')
+    request_token_key = request.values.get('oauth_token')
     if not verifier or not request_token_key:
       # user declined
-      self.finish(None)
-      return
+      return self.finish(None)
 
     # look up the request token
     request_token = models.OAuthRequestToken.get_by_id(request_token_key)
     if request_token is None:
-      raise exc.HTTPBadRequest('Invalid oauth_token: %s' % request_token_key)
+      raise BadRequest('Invalid oauth_token: %s' % request_token_key)
 
     # generate and store the final token
     tp = tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,
@@ -148,4 +134,4 @@ class CallbackHandler(handlers.CallbackHandler):
                       token_secret=auth_token_secret,
                       user_json=json_dumps(resp))
     auth.put()
-    self.finish(auth, state=request_token.state)
+    return self.finish(auth, state=request_token.state)

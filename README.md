@@ -75,7 +75,7 @@ respectively.
 The request handlers are full [WSGI](http://wsgi.org/) applications and may be
 used in any Python web framework that supports WSGI
 ([PEP 333](http://www.python.org/dev/peps/pep-0333/)). Internally, they're
-implemented with [webapp2](http://webapp-improved.appspot.com/).
+implemented with [Flask](https://flask.palletsprojects.com/).
 
 
 ### `StartHandler`
@@ -240,6 +240,15 @@ Changelog
 _Breaking changes:_
 
 Ported all HTTP request handlers from [webapp2](https://github.com/GoogleCloudPlatform/webapp2/) to [Flask](https://flask.palletsprojects.com/). webapp2 had a good run, but it's no longer actively developed, and Flask is probably the most widely adopted standalone web framework in the Python community.
+
+Removed `to()` class methods. Instead, now pass redirect paths to Flask's `as_view()` function, eg:
+
+```py
+app = Flask()
+app.add_url_route('/twitter', view_func=twitter.Start.as_view('/callback'), methods=['POST'])
+```
+
+Removed deprecated `blogger_v2` module alias.
 
 ### 3.1 - 2021-04-03
 

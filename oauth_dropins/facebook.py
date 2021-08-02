@@ -8,11 +8,12 @@ TODO: unify this with instagram. see file docstring comment there.
 import logging
 import urllib.error, urllib.parse
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers, models
-from .webutil import appengine_info, util
+from . import views, models
+from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 API_BASE = 'https://graph.facebook.com/v4.0/'
@@ -125,7 +126,7 @@ class FacebookAuth(models.BaseAuth):
       for page in json_loads(self.pages_json))
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts Facebook auth. Requests an auth code and expects a redirect back.
   """
   NAME = 'facebook'
@@ -147,20 +148,18 @@ class StartHandler(handlers.StartHandler):
     }
 
 
-class CallbackHandler(handlers.CallbackHandler):
-  """The auth callback. Fetches an access token, stores it, and redirects home.
-  """
-
-  def get(self):
-    if CallbackHandler.handle_error(self):
+class Callback(views.Callback):
+  """The auth callback. Fetches an access token, stores it, and redirects home."""
+  def dispatch_request(self):
+    if Callback.handle_error(self):
       return
 
-    auth_code = util.get_required_param(self, 'code')
+    auth_code = flask_util.get_required_param('code')
     url = GET_ACCESS_TOKEN_URL % {
       'auth_code': auth_code,
       'client_id': FACEBOOK_APP_ID,
       'client_secret': FACEBOOK_APP_SECRET,
-      'redirect_uri': urllib.parse.quote_plus(self.request.path_url),
+      'redirect_uri': urllib.parse.quote_plus(request.base_url),
       }
     try:
       resp = json_loads(util.urlopen(url).read())
@@ -186,29 +185,26 @@ class CallbackHandler(handlers.CallbackHandler):
                         auth_code=auth_code,
                         access_token_str=access_token)
     auth.put()
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))
 
   @staticmethod
   def handle_error(handler):
     """Handles any error reported in the callback query parameters.
 
     Args:
-      handler: CallbackHandler
+      handler: Callback
 
     Returns:
-      True if there was an error, False otherwise.
+      :class:`flask.Response` if there was an error, None otherwise.
     """
-    error = handler.request.get('error')
-    error_reason = handler.request.get('error_reason')
+    error = request.values.get('error')
+    error_reason = request.values.get('error_reason')
 
     if error or error_reason:
       error_description = urllib.parse.unquote_plus(
-        handler.request.get('error_description', ''))
+        request.values.get('error_description', ''))
       if error == 'access_denied' and error_reason == 'user_denied':
         logging.info('User declined: %s', error_description)
-        handler.finish(None, state=handler.request.get('state'))
-        return True
+        return handler.finish(None, state=request.values.get('state'))
       else:
-        raise exc.HTTPBadRequest(' '.join((error, error_reason, error_description)))
-
-    return False
+        raise BadRequest(' '.join((error, error_reason, error_description)))

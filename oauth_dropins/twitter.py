@@ -6,12 +6,12 @@ just a wrapper around that anyway.
 """
 import logging
 
+from flask import request
 from google.cloud import ndb
 import tweepy
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import handlers, models, twitter_auth
-from .webutil import handlers as webutil_handlers
+from . import models, twitter_auth, views
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
@@ -82,17 +82,8 @@ class TwitterAuth(models.BaseAuth):
     """
     return tweepy.API(twitter_auth.tweepy_auth(self.token_key, self.token_secret))
 
-def handle_exception(self, e, debug):
-  """Exception handler that handles Tweepy errors.
-  """
-  if isinstance(e, tweepy.TweepError):
-      logging.error('OAuth error', stack_info=True)
-      raise exc.HTTPBadRequest(e)
-  else:
-    return webutil_handlers.handle_exception(self, e, debug)
 
-
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts three-legged OAuth with Twitter.
 
   Fetches an OAuth request token, then redirects to Twitter's auth page to
@@ -107,15 +98,13 @@ class StartHandler(handlers.StartHandler):
   NAME = 'twitter'
   LABEL = 'Twitter'
 
-  handle_exception = handle_exception
-
   @classmethod
   def to(cls, path, scopes=None, access_type=None):
     assert access_type in (None, 'read', 'write'), \
         'access_type must be "read" or "write"; got %r' % access_type
-    handler = super(StartHandler, cls).to(path, scopes=scopes)
-    handler.access_type = access_type
-    return handler
+    view = super(Start, cls).to(path, scopes=scopes)
+    view.access_type = access_type
+    return view
 
   def redirect_url(self, state=None):
     assert twitter_auth.TWITTER_APP_KEY and twitter_auth.TWITTER_APP_SECRET, \
@@ -138,7 +127,7 @@ class StartHandler(handlers.StartHandler):
     auth_url = auth.get_authorization_url(
       signin_with_twitter=not self.access_type, access_type=self.access_type)
 
-    # store the request token for later use in the callback handler
+    # store the request token for later use in the callback view
     models.OAuthRequestToken(id=auth.request_token['oauth_token'],
                              token_secret=auth.request_token['oauth_token_secret']
                              ).put()
@@ -146,28 +135,26 @@ class StartHandler(handlers.StartHandler):
     return auth_url
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and redirects to the front page.
   """
-  handle_exception = handle_exception
-
-  def get(self):
+  def dispatch_request(self):
     # https://dev.twitter.com/docs/application-permission-model
-    if self.request.get('denied'):
-      self.finish(None, state=self.request.get('state'))
+    if request.values.get('denied'):
+      return self.finish(None, state=request.values.get('state'))
       return
 
-    oauth_token = self.request.get('oauth_token', None)
-    oauth_verifier = self.request.get('oauth_verifier', None)
+    oauth_token = request.values.get('oauth_token', None)
+    oauth_verifier = request.values.get('oauth_verifier', None)
     if oauth_token is None:
-      raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
+      raise BadRequest('Missing required query parameter oauth_token.')
 
     # Lookup the request token
     request_token = models.OAuthRequestToken.get_by_id(oauth_token)
     if request_token is None:
-      raise exc.HTTPBadRequest('Invalid oauth_token: %s' % oauth_token)
+      raise BadRequest('Invalid oauth_token: %s' % oauth_token)
 
-    # Rebuild the auth handler
+    # Rebuild the auth view
     auth = tweepy.OAuthHandler(twitter_auth.TWITTER_APP_KEY,
                                twitter_auth.TWITTER_APP_SECRET)
     auth.request_token = {'oauth_token': request_token.key.string_id(),
@@ -185,4 +172,4 @@ class CallbackHandler(handlers.CallbackHandler):
                        token_secret=access_token_secret,
                        user_json=user_json)
     auth.put()
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))

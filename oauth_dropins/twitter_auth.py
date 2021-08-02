@@ -56,20 +56,15 @@ def signed_urlopen(url, token_key, token_secret, headers=None, **kwargs):
     method = 'GET'
 
   headers.update(auth_header(url, token_key, token_secret, method=method))
-  try:
-    return util.urlopen(urllib.request.Request(url, headers=headers, **kwargs))
-  except BaseException as e:
-    util.interpret_http_exception(e)
-    raise
+  return util.urlopen(urllib.request.Request(url, headers=headers, **kwargs))
 
 
 def tweepy_auth(token_key, token_secret):
-  """Returns a tweepy.OAuthHandler.
+  """Returns a tweepy.OAuth.
   """
   assert TWITTER_APP_KEY and TWITTER_APP_SECRET, \
     "Please fill in the twitter_app_key and twitter_app_secret files in your app's root directory."
-  handler = tweepy.OAuthHandler(TWITTER_APP_KEY,
-                                TWITTER_APP_SECRET)
-  handler.set_access_token(token_key, token_secret)
-  return handler
+  view = tweepy.OAuth(TWITTER_APP_KEY, TWITTER_APP_SECRET)
+  view.set_access_token(token_key, token_secret)
+  return view
 

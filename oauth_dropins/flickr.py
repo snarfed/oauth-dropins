@@ -10,10 +10,11 @@ import logging
 import oauthlib.oauth1
 import urllib.parse, urllib.request
 
+from flask import request
 from google.cloud import ndb
-from webob import exc
+from werkzeug.exceptions import BadRequest
 
-from . import flickr_auth, handlers, models
+from . import flickr_auth, views, models
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
@@ -67,7 +68,7 @@ class FlickrAuth(models.BaseAuth):
       method, params, self.token_key, self.token_secret)
 
 
-class StartHandler(handlers.StartHandler):
+class Start(views.Start):
   """Starts three-legged OAuth with Flickr.
 
   Fetches an OAuth request token, then redirects to Flickr's auth page to
@@ -80,15 +81,18 @@ class StartHandler(handlers.StartHandler):
     assert flickr_auth.FLICKR_APP_KEY and flickr_auth.FLICKR_APP_SECRET, \
       "Please fill in the flickr_app_key and flickr_app_secret files in your app's root directory."
 
+    # double-URL-encode state because Flickr URL-decodes the redirect URL before
+    # redirecting to it, and JSON values may have ?s and &s. e.g. the Bridgy
+    # WordPress plugin's redirect URL when using Bridgy's registration API
+    # (https://brid.gy/about#registration-api) looks like:
+    # /wp-admin/admin.php?page=bridgy_options&service=flickr
+    if state:
+      state = urllib.parse.quote(state)
+
     client = oauthlib.oauth1.Client(
       flickr_auth.FLICKR_APP_KEY,
       client_secret=flickr_auth.FLICKR_APP_SECRET,
-      # double-URL-encode state because Flickr URL-decodes the redirect URL
-      # before redirecting to it, and JSON values may have ?s and &s. e.g. the
-      # Bridgy WordPress plugin's redirect URL when using Bridgy's registration
-      # API (https://brid.gy/about#registration-api) looks like:
-      # /wp-admin/admin.php?page=bridgy_options&service=flickr
-      callback_uri=self.to_url(state=urllib.parse.quote(state)))
+      callback_uri=self.to_url(state))
 
     url, headers, data = client.sign(REQUEST_TOKEN_URL)
     resp = util.requests_get(url, headers=headers, data=data)
@@ -97,7 +101,7 @@ class StartHandler(handlers.StartHandler):
     if parsed.get('error') or parsed.get('oauth_problem'):
       msg = 'Error: %s' % resp.text
       logging.info(msg)
-      raise exc.HTTPBadRequest(msg)
+      raise BadRequest(msg)
 
     resource_owner_key = parsed.get('oauth_token')[0]
     resource_owner_secret = parsed.get('oauth_token_secret')[0]
@@ -129,13 +133,13 @@ class StartHandler(handlers.StartHandler):
 
 
 
-class CallbackHandler(handlers.CallbackHandler):
+class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and redirects to the
   front page.
   """
-  def get(self):
-    oauth_token = self.request.get('oauth_token')
-    oauth_verifier = self.request.get('oauth_verifier')
+  def dispatch_request(self):
+    oauth_token = request.values.get('oauth_token')
+    oauth_verifier = request.values.get('oauth_verifier')
     request_token = models.OAuthRequestToken.get_by_id(oauth_token)
 
     client = oauthlib.oauth1.Client(
@@ -157,7 +161,7 @@ class CallbackHandler(handlers.CallbackHandler):
     user_nsid = parsed.get('user_nsid')[0]
 
     if access_token is None:
-      raise exc.HTTPBadRequest('Missing required query parameter oauth_token.')
+      raise BadRequest('Missing required query parameter oauth_token.')
 
     auth = FlickrAuth(id=user_nsid, token_key=access_token,
                       token_secret=access_secret)
@@ -166,4 +170,4 @@ class CallbackHandler(handlers.CallbackHandler):
     auth.user_json = json_dumps(user_json)
     auth.put()
 
-    self.finish(auth, state=self.request.get('state'))
+    return self.finish(auth, state=request.values.get('state'))

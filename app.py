@@ -1,18 +1,28 @@
 """Example oauth-dropins app. Serves the front page and discovery files.
 """
-from collections import defaultdict
 import importlib
 import logging
 import urllib.parse
 
+from flask import Flask, render_template, request
+import flask
 from google.cloud import ndb
-import jinja2
+from oauth_dropins.webutil import flask_util, util
 import requests
-import webapp2
-from webob import exc
+from werkzeug.exceptions import HTTPException
 
-from oauth_dropins import google_signin, indieauth, mastodon, pixelfed
-from oauth_dropins.webutil import appengine_info, appengine_config, handlers
+from oauth_dropins.webutil import appengine_info, appengine_config
+
+app = Flask('oauth-dropins')
+# app.template_folder = './templates'
+app.config.from_mapping(
+  ENV='development' if appengine_info.DEBUG else 'PRODUCTION',
+  SECRET_KEY=util.read('flask_secret_key'),
+  JSONIFY_PRETTYPRINT_REGULAR=True,
+)
+app.wsgi_app = flask_util.ndb_context_middleware(
+    app.wsgi_app, client=appengine_config.ndb_client)
+
 
 SITES = {}  # maps module name to module
 for name in (
@@ -35,66 +45,49 @@ for name in (
     'twitter',
     'wordpress_rest',
   ):
-  SITES[name] = importlib.import_module('oauth_dropins.%s' % name)
+  SITES[name] = importlib.import_module(f'oauth_dropins.{name}')
+
+from oauth_dropins import google_signin
+google_signin.Start.INCLUDE_GRANTED_SCOPES = False
 
 
-def handle_discovery_errors(handler, e, debug):
-  """A webapp2 exception handler that handles URL discovery errors.
+for site, module in SITES.items():
+  start = f'/{site}/start'
+  callback = f'/{site}/oauth_callback'
+  app.add_url_rule(start, view_func=module.Start.to(callback).as_view(start),
+                   methods=['POST'])
+  app.add_url_rule(callback, view_func=module.Callback.to('/').as_view(callback))
+
+
+@app.errorhandler(Exception)
+def handle_discovery_errors(e):
+  """A Flask exception handler that handles URL discovery errors.
 
   Used to catch Mastodon and IndieAuth connection failures, etc.
   """
-  if isinstance(e, (ValueError, requests.RequestException, exc.HTTPException)):
-    logging.warning('', stack_info=True)
-    return handler.redirect('/?' + urllib.parse.urlencode({'error': str(e)}))
+  if isinstance(e, HTTPException):
+    return e
 
-  raise
+  if isinstance(e, (ValueError, requests.RequestException)):
+    logging.warning('', exc_info=True)
+    return flask.redirect('/?' + urllib.parse.urlencode({'error': str(e)}))
 
-
-class FrontPageHandler(handlers.TemplateHandler):
-  """Renders and serves /, ie the front page.
-  """
-  def template_file(self):
-    return 'templates/index.html'
-
-  def template_vars(self, *args, **kwargs):
-    vars = dict(self.request.params)
-    key = vars.get('auth_entity')
-    if key:
-      vars['entity'] = ndb.Key(urlsafe=key).get()
-
-    vars.update({
-      site + '_html': module.StartHandler.button_html(
-        '/%s/start' % site, image_prefix='/static/',
-        outer_classes='col-md-3 col-sm-4 col-xs-6')
-      for site, module in SITES.items()})
-    return vars
+  raise e
 
 
-class GoogleSigninStart(google_signin.StartHandler):
-  INCLUDE_GRANTED_SCOPES = False
+@app.route('/')
+def home_page():
+  """Renders and serves the home page."""
+  vars = dict(request.args)
+  vars.update({
+    site + '_html': module.Start.button_html(
+      '/%s/start' % site, image_prefix='/static/',
+      outer_classes='col-md-3 col-sm-4 col-xs-6')
+    for site, module in SITES.items()
+  })
 
-class IndieAuthStart(indieauth.StartHandler):
-  handle_exception = handle_discovery_errors
+  key = request.args.get('auth_entity')
+  if key:
+    vars['entity'] = ndb.Key(urlsafe=key).get()
 
-class MastodonStart(mastodon.StartHandler):
-  handle_exception = handle_discovery_errors
-
-class PixelfedStart(pixelfed.StartHandler):
-  handle_exception = handle_discovery_errors
-
-
-routes = []
-for site, module in SITES.items():
-  starter = (GoogleSigninStart if site == 'google_signin'
-             else IndieAuthStart if site == 'indieauth'
-             else MastodonStart if site == 'mastodon'
-             else PixelfedStart if site == 'pixelfed'
-             else module.StartHandler)
-  routes.extend((
-    ('/%s/start' % site, starter.to('/%s/oauth_callback' % site)),
-    ('/%s/oauth_callback' % site, module.CallbackHandler.to('/')),
-  ))
-
-application = handlers.ndb_context_middleware(webapp2.WSGIApplication([
-    ('/', FrontPageHandler),
-  ] + routes, debug=appengine_info.DEBUG), client=appengine_config.ndb_client)
+  return render_template('index.html', **vars)
