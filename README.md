@@ -171,7 +171,7 @@ Removed `to()` class methods. Instead, now pass redirect paths to Flask's `as_vi
 ```py
 app = Flask()
 app.add_url_rule('/oauth_callback',
-                 view_func=twitter.Callback.as_view(callback', '/after'))
+                 view_func=twitter.Callback.as_view('callback', '/after'))
 ```
 
 Removed deprecated `blogger_v2` module alias.
