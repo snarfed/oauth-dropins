@@ -121,7 +121,7 @@ class FacebookAuth(models.BaseAuth):
     Returns:
       boolean: true if key represents this user or one of the user's pages.
     """
-    return super(FacebookAuth, self).is_authority_for(key) or any(
+    return super().is_authority_for(key) or any(
       key == self.for_page(page.get('id')).key
       for page in json_loads(self.pages_json))
 
