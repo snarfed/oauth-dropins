@@ -26,11 +26,16 @@ from werkzeug.exceptions import BadRequest
 
 from . import views
 from .models import BaseAuth
-from .webutil import flask_util, util
+from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
-WORDPRESS_CLIENT_ID = util.read('wordpress.com_client_id')
-WORDPRESS_CLIENT_SECRET = util.read('wordpress.com_client_secret')
+if appengine_info.DEBUG:
+  WORDPRESS_CLIENT_ID = util.read('wordpress.com_client_id_local')
+  WORDPRESS_CLIENT_SECRET = util.read('wordpress.com_client_secret_local')
+else:
+  WORDPRESS_CLIENT_ID = util.read('wordpress.com_client_id')
+  WORDPRESS_CLIENT_SECRET = util.read('wordpress.com_client_secret')
+
 # URL templates. Can't (easily) use urllib.urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
