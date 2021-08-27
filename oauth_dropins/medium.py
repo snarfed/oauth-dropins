@@ -135,7 +135,7 @@ class Callback(views.Callback):
         raise BadRequest('Error: %s' % error)
 
     # extract auth code and request access token
-    auth_code = flask_util.get_required_param('code')
+    auth_code = request.values['code']
     data = {
       'code': auth_code,
       'client_id': MEDIUM_CLIENT_ID,

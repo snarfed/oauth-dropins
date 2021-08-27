@@ -132,7 +132,7 @@ class Callback(views.Callback):
         raise BadRequest('Error: %s %s ' % (error, error_description))
 
     # extract auth code and request access token
-    auth_code = flask_util.get_required_param('code')
+    auth_code = request.values['code']
     data = {
       'code': auth_code,
       'client_id': WORDPRESS_CLIENT_ID,

@@ -125,7 +125,7 @@ class Callback(views.Callback):
                 logging.info(msg)
                 raise BadRequest(msg)
 
-        state = flask_util.get_required_param('state')
+        state = request.values['state']
         # lookup the CSRF token
         try:
             csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
@@ -137,7 +137,7 @@ class Callback(views.Callback):
             raise BadRequest('No CSRF token for id %s' % csrf_id)
 
         # extract auth code and request access token
-        auth_code = flask_util.get_required_param('code')
+        auth_code = request.values['code']
         data = {
             'code': auth_code,
             'client_id': MEETUP_CLIENT_ID,

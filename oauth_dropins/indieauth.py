@@ -116,7 +116,7 @@ class Start(views.Start):
 
     # TODO: unify with mastodon?
     if not me:
-      me = flask_util.get_required_param('me')
+      me = request.values['me']
     parsed = urllib.parse.urlparse(me)
     if not parsed.scheme:
       me = 'http://' + me
@@ -151,8 +151,8 @@ class Callback(views.Callback):
   """The callback view from the IndieAuth request. POSTs back to the
   auth endpoint to verify the authentication code."""
   def dispatch_request(self):
-    code = flask_util.get_required_param('code')
-    state = util.decode_oauth_state(flask_util.get_required_param('state'))
+    code = request.values['code']
+    state = util.decode_oauth_state(request.values['state'])
 
     endpoint = state.get('endpoint')
     me = state.get('me')

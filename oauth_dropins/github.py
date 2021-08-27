@@ -152,7 +152,7 @@ class Callback(views.Callback):
         raise BadRequest(msg)
 
     # extract auth code and request access token
-    auth_code = flask_util.get_required_param('code')
+    auth_code = request.values['code']
     data = {
       'code': auth_code,
       'client_id': GITHUB_CLIENT_ID,

@@ -110,7 +110,7 @@ class Callback(views.Callback):
       return err
 
     # http://instagram.com/developer/authentication/
-    auth_code = flask_util.get_required_param('code')
+    auth_code = request.values['code']
     data = {
       'client_id': INSTAGRAM_CLIENT_ID,
       'client_secret': INSTAGRAM_CLIENT_SECRET,

@@ -103,7 +103,7 @@ class Callback(views.Callback):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
   def dispatch_request(self):
-    state = flask_util.get_required_param('state')
+    state = request.values['state']
 
     # handle errors
     error = request.values.get('error')
@@ -130,7 +130,7 @@ class Callback(views.Callback):
     data = {
       'client_id': DROPBOX_APP_KEY,
       'client_secret': DROPBOX_APP_SECRET,
-      'code': flask_util.get_required_param('code'),
+      'code': request.values['code'],
       'redirect_uri': request.base_url,
     }
     try:

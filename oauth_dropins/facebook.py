@@ -154,7 +154,7 @@ class Callback(views.Callback):
     if Callback.handle_error(self):
       return
 
-    auth_code = flask_util.get_required_param('code')
+    auth_code = request.values['code']
     url = GET_ACCESS_TOKEN_URL % {
       'auth_code': auth_code,
       'client_id': FACEBOOK_APP_ID,

@@ -210,7 +210,7 @@ class Start(views.Start):
     """
     # normalize instance to URL
     if not instance:
-      instance = flask_util.get_required_param('instance')
+      instance = request.values['instance']
     instance = instance.strip().split('@')[-1]  # handle addresses, eg user@host.com
     parsed = urlparse(instance)
     if not parsed.scheme:
@@ -338,13 +338,13 @@ class Callback(views.Callback):
         logging.info(msg)
         raise BadRequest(msg)
 
-    app_key, state = _decode_state(flask_util.get_required_param('state'))
+    app_key, state = _decode_state(request.values['state'])
     app = ndb.Key(urlsafe=app_key).get()
     assert app
     app_data = json_loads(app.data)
 
     # extract auth code and request access token
-    auth_code = flask_util.get_required_param('code')
+    auth_code = request.values['code']
     data = {
       'grant_type': 'authorization_code',
       'code': auth_code,

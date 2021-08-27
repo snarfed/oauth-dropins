@@ -104,7 +104,7 @@ class Callback(views.Callback):
       return
 
     # https://disqus.com/api/docs/auth/
-    auth_code = flask_util.get_required_param('code')
+    auth_code = request.values['code']
     data = {
         'grant_type': 'authorization_code',
         'client_id': DISQUS_CLIENT_ID,
