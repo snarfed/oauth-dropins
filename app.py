@@ -14,12 +14,7 @@ from werkzeug.exceptions import HTTPException
 from oauth_dropins.webutil import appengine_info, appengine_config
 
 app = Flask('oauth-dropins')
-# app.template_folder = './templates'
-app.config.from_mapping(
-  ENV='development' if appengine_info.DEBUG else 'PRODUCTION',
-  SECRET_KEY=util.read('flask_secret_key'),
-  JSONIFY_PRETTYPRINT_REGULAR=True,
-)
+app.config.from_pyfile('config.py')
 app.wsgi_app = flask_util.ndb_context_middleware(
     app.wsgi_app, client=appengine_config.ndb_client)
 
