@@ -142,7 +142,7 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp)
     except (ValueError, TypeError):
-      logging.error('Bad response:\n%s', resp, stack_info=True)
+      logging.error('Bad response:\n%s', resp, exc_info=True)
       raise BadRequest('Bad Dropbox response to access token request')
 
     logging.info('Storing new Dropbox account: %s', data['uid'])

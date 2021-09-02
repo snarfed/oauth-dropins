@@ -222,7 +222,7 @@ class Start(views.Start):
       resp = util.requests_get(urljoin(instance, INSTANCE_API))
       resp.raise_for_status()
     except requests.RequestException as e:
-      logging.info('Error', stack_info=True)
+      logging.info('Error', exc_info=True)
       resp = None
 
     is_json = resp and resp.headers.get('Content-Type', '').strip().startswith(

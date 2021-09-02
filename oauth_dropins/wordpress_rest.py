@@ -158,7 +158,7 @@ class Callback(views.Callback):
       blog_domain = util.domain_from_link(resp['blog_url'])
       access_token = resp['access_token']
     except:
-      logging.error(f'Could not decode JSON: {resp.text}', stack_info=True)
+      logging.error(f'Could not decode JSON: {resp.text}', exc_info=True)
       raise
 
     auth = WordPressAuth(id=blog_domain,

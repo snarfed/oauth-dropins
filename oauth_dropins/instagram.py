@@ -129,7 +129,7 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp.text)
     except (ValueError, TypeError):
-      logging.error('Bad response:\n%s', resp, stack_info=True)
+      logging.error('Bad response:\n%s', resp, exc_info=True)
       raise BadRequest('Bad Instagram response to access token request')
 
     if 'error_type' in resp:
