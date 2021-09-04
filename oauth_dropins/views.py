@@ -13,13 +13,14 @@ app.add_url_rule('/callback',
 import logging
 import urllib.parse
 
-from flask import request
 import flask
+from flask import request
+from flask.views import View
 
 from .webutil import util
 
 
-class BaseView(flask.views.View):
+class BaseView(View):
   """Base view class. Provides the to() factory method.
 
   Attributes (some may be overridden by subclasses):
