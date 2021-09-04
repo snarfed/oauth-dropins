@@ -10,7 +10,6 @@ import urllib.error, urllib.parse
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import views, models
 from .webutil import appengine_info, flask_util, util
@@ -35,7 +34,7 @@ GET_AUTH_CODE_URL = '&'.join((
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
     'response_type=code',
-    ))
+))
 # https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#exchangecode
 GET_ACCESS_TOKEN_URL = '&'.join((
     API_BASE + 'oauth/access_token?'
@@ -45,7 +44,7 @@ GET_ACCESS_TOKEN_URL = '&'.join((
     'redirect_uri=%(redirect_uri)s',
     'client_secret=%(client_secret)s',
     'code=%(auth_code)s',
-    ))
+))
 API_USER_URL = API_BASE + 'me?fields=id,email,name,picture'
 API_PAGE_URL = API_BASE + 'me?fields=id,about,cover,description,emails,general_info,is_published,link,location,name,personal_info,phone,username,website'
 API_PAGES_URL = API_BASE + 'me/accounts'
@@ -135,7 +134,7 @@ class Start(views.Start):
   def redirect_url(self, state=None, app_id=None):
     if app_id is None:
       assert FACEBOOK_APP_ID and FACEBOOK_APP_SECRET, \
-              "Please fill in the facebook_app_id and facebook_app_secret files in your app's root directory."
+        "Please fill in the facebook_app_id and facebook_app_secret files in your app's root directory."
       app_id = FACEBOOK_APP_ID
 
     return GET_AUTH_CODE_URL % {
@@ -160,7 +159,7 @@ class Callback(views.Callback):
       'client_id': FACEBOOK_APP_ID,
       'client_secret': FACEBOOK_APP_SECRET,
       'redirect_uri': urllib.parse.quote_plus(request.base_url),
-      }
+    }
     try:
       resp = json_loads(util.urlopen(url).read())
     except urllib.error.HTTPError as e:
@@ -207,4 +206,4 @@ class Callback(views.Callback):
         logging.info('User declined: %s', error_description)
         return handler.finish(None, state=request.values.get('state'))
       else:
-        raise BadRequest(' '.join((error, error_reason, error_description)))
+        flask_util.error(' '.join((error, error_reason, error_description)))

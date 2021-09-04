@@ -9,10 +9,9 @@ import logging
 from flask import request
 from google.cloud import ndb
 import tweepy
-from werkzeug.exceptions import BadRequest
 
 from . import models, twitter_auth, views
-from .webutil import util
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
@@ -145,12 +144,12 @@ class Callback(views.Callback):
     oauth_token = request.values.get('oauth_token', None)
     oauth_verifier = request.values.get('oauth_verifier', None)
     if oauth_token is None:
-      raise BadRequest('Missing required query parameter oauth_token.')
+      flask_util.error('Missing required query parameter oauth_token.')
 
     # Lookup the request token
     request_token = models.OAuthRequestToken.get_by_id(oauth_token)
     if request_token is None:
-      raise BadRequest('Invalid oauth_token: %s' % oauth_token)
+      flask_util.error('Invalid oauth_token: %s' % oauth_token)
 
     # Rebuild the auth view
     auth = tweepy.OAuthHandler(twitter_auth.TWITTER_APP_KEY,

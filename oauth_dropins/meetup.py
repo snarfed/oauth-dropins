@@ -8,7 +8,6 @@ import urllib.parse
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import views
 from .models import BaseAuth
@@ -23,13 +22,12 @@ else:
     MEETUP_CLIENT_SECRET = util.read('meetup_client_secret')
 
 GET_AUTH_CODE_URL = '&'.join((
-    'https://secure.meetup.com/oauth2/authorize?'
-    'client_id=%(client_id)s',
+    'https://secure.meetup.com/oauth2/authorize?client_id=%(client_id)s',
     'response_type=code',
     'redirect_uri=%(redirect_uri)s',
     'scope=%(scope)s',
     'state=%(state)s',
-    ))
+))
 
 GET_ACCESS_TOKEN_URL = 'https://secure.meetup.com/oauth2/access'
 GET_USER_INFO_URL = 'https://api.meetup.com/members/self/'
@@ -91,23 +89,22 @@ class Start(views.Start):
 
     def redirect_url(self, state=None):
 
-        assert (MEETUP_CLIENT_ID and MEETUP_CLIENT_SECRET), (
-                "Please fill in the meetup_client_id and meetup_client_secret files in "
-                "your app's root directory.")
+        assert MEETUP_CLIENT_ID and MEETUP_CLIENT_SECRET, \
+            "Please fill in the meetup_client_id and meetup_client_secret files in your app's root directory."
 
         csrf_key = MeetupCsrf(state=state).put()
 
         return GET_AUTH_CODE_URL % {
-                'client_id': MEETUP_CLIENT_ID,
-                'redirect_uri': urllib.parse.quote_plus(self.to_url()),
-                'scope': self.scope,
-                'state': '%s|%s' % (urllib.parse.quote_plus(state), csrf_key.id()),
-                }
+            'client_id': MEETUP_CLIENT_ID,
+            'redirect_uri': urllib.parse.quote_plus(self.to_url()),
+            'scope': self.scope,
+            'state': '%s|%s' % (urllib.parse.quote_plus(state), csrf_key.id()),
+        }
 
     @classmethod
     def button_html(cls, *args, **kwargs):
         return super(cls, cls).button_html(
-                *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
+            *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
 
 
 class Callback(views.Callback):
@@ -121,20 +118,18 @@ class Callback(views.Callback):
                 logging.info('User declined')
                 return self.finish(None, state=request.values.get('state'))
             else:
-                msg = 'Error: %s: %s' % (error, request.values.get('error_description'))
-                logging.info(msg)
-                raise BadRequest(msg)
+                flask_util.error('Error: %s: %s' % (error, request.values.get('error_description')))
 
         state = request.values['state']
         # lookup the CSRF token
         try:
             csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
         except (ValueError, TypeError):
-            raise BadRequest('Invalid state value %r' % state)
+            flask_util.error('Invalid state value %r' % state)
 
         csrf = MeetupCsrf.get_by_id(csrf_id)
         if not csrf:
-            raise BadRequest('No CSRF token for id %s' % csrf_id)
+            flask_util.error('No CSRF token for id %s' % csrf_id)
 
         # extract auth code and request access token
         auth_code = request.values['code']
@@ -146,7 +141,7 @@ class Callback(views.Callback):
             # redirect_uri here must be the same in the oauth code request!
             # (the value here doesn't actually matter since it's requested server side.)
             'redirect_uri': request.base_url,
-            }
+        }
         # TODO: handle refresh tokens
         resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
         resp.raise_for_status()
@@ -157,13 +152,12 @@ class Callback(views.Callback):
             data = json_loads(resp.text)
         except (ValueError, TypeError):
             logging.error('Bad response:\n%s', resp, exc_info=True)
-            raise BadRequest('Bad Disqus response to access token request')
+            flask_util.error('Bad Disqus response to access token request')
 
         error = data.get('error')
         if error:
             msg = 'Error: %s: %s' % (error[0], data.get('error_description'))
-            logging.info(msg)
-            raise BadRequest(msg)
+            flask_util.error(msg)
 
         access_token = data['access_token']
 

@@ -9,7 +9,6 @@ import urllib.parse, urllib.request
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import views, models
 from .webutil import flask_util, util
@@ -114,17 +113,17 @@ class Callback(views.Callback):
         logging.info('User declined: %s', error_reason)
         return self.finish(None, state=state)
       else:
-        raise BadRequest(' '.join((error, error_reason)))
+        flask_util.error(' '.join((error, error_reason)))
 
     # lookup the CSRF token
     try:
       csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
     except (ValueError, TypeError):
-      raise BadRequest('Invalid state value %r' % state)
+      flask_util.error('Invalid state value %r' % state)
 
     csrf = DropboxCsrf.get_by_id(csrf_id)
     if not csrf:
-      raise BadRequest('No CSRF token for id %s' % csrf_id)
+      flask_util.error('No CSRF token for id %s' % csrf_id)
 
     # request an access token
     data = {
@@ -143,7 +142,7 @@ class Callback(views.Callback):
       data = json_loads(resp)
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, exc_info=True)
-      raise BadRequest('Bad Dropbox response to access token request')
+      flask_util.error('Bad Dropbox response to access token request')
 
     logging.info('Storing new Dropbox account: %s', data['uid'])
     auth = DropboxAuth(id=data['uid'], access_token_str=data['access_token'])

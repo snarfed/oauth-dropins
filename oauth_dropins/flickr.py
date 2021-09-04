@@ -12,10 +12,9 @@ import urllib.parse, urllib.request
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import flickr_auth, views, models
-from .webutil import util
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 REQUEST_TOKEN_URL = 'https://www.flickr.com/services/oauth/request_token'
@@ -99,9 +98,7 @@ class Start(views.Start):
     parsed = urllib.parse.parse_qs(resp.text)
 
     if parsed.get('error') or parsed.get('oauth_problem'):
-      msg = 'Error: %s' % resp.text
-      logging.info(msg)
-      raise BadRequest(msg)
+      flask_util.error(resp.text)
 
     resource_owner_key = parsed.get('oauth_token')[0]
     resource_owner_secret = parsed.get('oauth_token_secret')[0]
@@ -132,7 +129,6 @@ class Start(views.Start):
       *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
 
 
-
 class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and redirects to the
   front page.
@@ -161,7 +157,7 @@ class Callback(views.Callback):
     user_nsid = parsed.get('user_nsid')[0]
 
     if access_token is None:
-      raise BadRequest('Missing required query parameter oauth_token.')
+      flask_util.error('Missing required query parameter oauth_token.')
 
     auth = FlickrAuth(id=user_nsid, token_key=access_token,
                       token_secret=access_secret)

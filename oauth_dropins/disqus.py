@@ -19,7 +19,6 @@ import urllib.parse
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import models, views
 from .webutil import flask_util, util
@@ -109,7 +108,7 @@ class Callback(views.Callback):
         'grant_type': 'authorization_code',
         'client_id': DISQUS_CLIENT_ID,
         'client_secret': DISQUS_CLIENT_SECRET,
-        'redirect_uri': request_url_with_state(),
+        'redirect_uri': self.request_url_with_state(),
         'code': auth_code,
     }
 
@@ -119,7 +118,7 @@ class Callback(views.Callback):
       data = json_loads(resp.text)
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, exc_info=True)
-      raise BadRequest('Bad Disqus response to access token request')
+      flask_util.error('Bad Disqus response to access token request')
 
     access_token = data['access_token']
     user_id = data['user_id']
@@ -135,7 +134,7 @@ class Callback(views.Callback):
       user_data = json_loads(resp)['response']
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, exc_info=True)
-      raise BadRequest('Bad Disqus response to user details request')
+      flask_util.error('Bad Disqus response to user details request')
 
     auth.user_json = json_dumps(user_data)
     logging.info('created disqus auth %s', auth)
@@ -158,6 +157,6 @@ class Callback(views.Callback):
         handler.finish(None, state=request.values.get('state'))
         return True
       else:
-        raise BadRequest(error)
+        flask_util.error(error)
 
     return False

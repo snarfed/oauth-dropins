@@ -17,7 +17,6 @@ import urllib.parse
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import views
 from .models import BaseAuth
@@ -34,16 +33,16 @@ USER_AGENT = 'oauth-dropins (https://oauth-dropins.appspot.com/)'
 # URL templates. Can't (easily) use urlencode() because I want to keep the
 # %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
-    'https://medium.com/m/oauth/authorize?'
-    'client_id=%(client_id)s',
-    # https://github.com/Medium/medium-api-docs#user-content-21-browser-based-authentication
-    # basicProfile, listPublications, publishPost, uploadImage
-    'scope=%(scope)s',
-    # redirect_uri here must be the same in the access token request!
-    'redirect_uri=%(redirect_uri)s',
-    'state=%(state)s',
-    'response_type=code',
-    ))
+  'https://medium.com/m/oauth/authorize?'
+  'client_id=%(client_id)s',
+  # https://github.com/Medium/medium-api-docs#user-content-21-browser-based-authentication
+  # basicProfile, listPublications, publishPost, uploadImage
+  'scope=%(scope)s',
+  # redirect_uri here must be the same in the access token request!
+  'redirect_uri=%(redirect_uri)s',
+  'state=%(state)s',
+  'response_type=code',
+))
 
 API_BASE = 'https://api.medium.com/v1/'
 GET_ACCESS_TOKEN_URL = API_BASE + 'tokens'
@@ -117,7 +116,7 @@ class Start(views.Start):
       # Medium requires non-empty state
       'state': urllib.parse.quote_plus(state if state else 'unused'),
       'scope': self.scope,
-      }
+    }
 
 
 class Callback(views.Callback):
@@ -132,7 +131,7 @@ class Callback(views.Callback):
         logging.info('User declined')
         return self.finish(None, state=request.values.get('state'))
       else:
-        raise BadRequest('Error: %s' % error)
+        flask_util.error(error)
 
     # extract auth code and request access token
     auth_code = request.values['code']
@@ -159,7 +158,7 @@ class Callback(views.Callback):
     errors = resp.get('errors') or resp.get('error')
     if errors:
       logging.info('Errors: %s', errors)
-      raise BadRequest(errors[0].get('message'))
+      flask_util.error(errors[0].get('message'))
 
     # TODO: handle refresh token
     access_token = resp['access_token']

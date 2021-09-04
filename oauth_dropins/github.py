@@ -9,7 +9,6 @@ import urllib.parse
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import views
 from .models import BaseAuth
@@ -32,7 +31,7 @@ GET_AUTH_CODE_URL = '&'.join((
     # if provided, must be the same in the access token request, or a subpath!
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
-    ))
+))
 
 GET_ACCESS_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 
@@ -127,7 +126,7 @@ class Start(views.Start):
       # TODO: does GitHub require non-empty state?
       'state': urllib.parse.quote_plus(state if state else ''),
       'scope': self.scope,
-      }
+    }
 
   @classmethod
   def button_html(cls, *args, **kwargs):
@@ -147,9 +146,7 @@ class Callback(views.Callback):
         return self.finish(None, state=request.values.get('state'))
         return
       else:
-        msg = 'Error: %s: %s' % (error, request.values.get('error_description'))
-        logging.info(msg)
-        raise BadRequest(msg)
+        flask_util.error(f"{error} {request.values.get('error_description')}")
 
     # extract auth code and request access token
     auth_code = request.values['code']
@@ -160,7 +157,7 @@ class Callback(views.Callback):
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': request.base_url,
-      }
+    }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL,
                               data=urllib.parse.urlencode(data))
     resp.raise_for_status()
@@ -171,9 +168,7 @@ class Callback(views.Callback):
 
     error = resp.get('error')
     if error:
-      msg = 'Error: %s: %s' % (error[0], resp.get('error_description'))
-      logging.info(msg)
-      raise BadRequest(msg)
+      flask_util.error(f"{error[0]} {resp.get('error_description')}")
 
     access_token = resp['access_token'][0]
     resp = GitHubAuth(access_token_str=access_token).post(

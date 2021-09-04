@@ -14,7 +14,6 @@ import urllib.parse
 
 from flask import abort, request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import facebook, views, models
 from .webutil import flask_util, util
@@ -100,7 +99,6 @@ class Start(views.Start):
       **kwargs)
 
 
-
 class Callback(views.Callback):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
@@ -115,7 +113,7 @@ class Callback(views.Callback):
       'client_id': INSTAGRAM_CLIENT_ID,
       'client_secret': INSTAGRAM_CLIENT_SECRET,
       'code': auth_code,
-      'redirect_uri': request_url_with_state(),
+      'redirect_uri': self.request_url_with_state(),
       'grant_type': 'authorization_code',
     }
 
@@ -130,7 +128,7 @@ class Callback(views.Callback):
       data = json_loads(resp.text)
     except (ValueError, TypeError):
       logging.error('Bad response:\n%s', resp, exc_info=True)
-      raise BadRequest('Bad Instagram response to access token request')
+      flask_util.error('Bad Instagram response to access token request')
 
     if 'error_type' in resp:
       abort(502, f"{resp['error_type']} {data.get('code')} {data.get('error_message')}")

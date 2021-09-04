@@ -132,21 +132,21 @@ def upload(params, file, token_key, token_secret):
   logging.debug('upload response: %s, %s', resp, resp.text)
   resp.raise_for_status()
 
-  m = re.search('<rsp stat="(\w+)">', resp.text, re.DOTALL)
+  m = re.search(r'<rsp stat="(\w+)">', resp.text, re.DOTALL)
   if not m:
     raise BaseException(
       'Expected response with <rsp stat="...">. Got: %s' % resp.text)
 
   stat = m.group(1)
   if stat == 'fail':
-    m = re.search('<err code="(\d+)" msg="([^"]+)" />', resp.text, re.DOTALL)
+    m = re.search(r'<err code="(\d+)" msg="([^"]+)" />', resp.text, re.DOTALL)
     if not m:
       raise BaseException(
         'Expected response with <err code="..." msg=".." />. Got: %s'
         % resp.text)
     raise_for_failure(upload_url, int(m.group(1)), m.group(2))
 
-  m = re.search('<photoid>(\d+)</photoid>', resp.text, re.DOTALL)
+  m = re.search(r'<photoid>(\d+)</photoid>', resp.text, re.DOTALL)
   if not m:
     raise BaseException(
       'Expected response with <photoid>...</photoid>. Got: %s'

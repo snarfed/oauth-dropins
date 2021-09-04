@@ -34,7 +34,7 @@ def auth_header(url, token_key, token_secret, method='GET'):
     client_secret=TWITTER_APP_SECRET,
     resource_owner_key=token_key,
     resource_owner_secret=token_secret,
-    )
+  )
   req = requests.Request(method=method, url=url, auth=oauth1).prepare()
   return req.headers
 
@@ -67,4 +67,3 @@ def tweepy_auth(token_key, token_secret):
   view = tweepy.OAuth(TWITTER_APP_KEY, TWITTER_APP_SECRET)
   view.set_access_token(token_key, token_secret)
   return view
-

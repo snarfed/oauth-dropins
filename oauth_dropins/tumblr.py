@@ -10,10 +10,9 @@ import urllib.parse
 from flask import request
 from google.cloud import ndb
 import tumblpy
-from werkzeug.exceptions import BadRequest
 
 from . import views, models
-from .webutil import util
+from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 TUMBLR_APP_KEY = util.read('tumblr_app_key')
@@ -106,7 +105,7 @@ class Callback(views.Callback):
     # look up the request token
     request_token = models.OAuthRequestToken.get_by_id(request_token_key)
     if request_token is None:
-      raise BadRequest('Invalid oauth_token: %s' % request_token_key)
+      flask_util.error('Invalid oauth_token: %s' % request_token_key)
 
     # generate and store the final token
     tp = tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,

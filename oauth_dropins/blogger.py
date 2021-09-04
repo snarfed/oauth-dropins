@@ -18,6 +18,7 @@ from google.cloud import ndb
 from requests_oauthlib import OAuth2Session
 
 from . import google_signin, views, models
+from .webutil import flask_util
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
@@ -89,7 +90,7 @@ class Start(Scopes, views.Start):
 
   def redirect_url(self, state=None):
     assert google_signin.GOOGLE_CLIENT_ID and google_signin.GOOGLE_CLIENT_SECRET, \
-            "Please fill in the google_client_id and google_client_secret files in your app's root directory."
+      "Please fill in the google_client_id and google_client_secret files in your app's root directory."
 
     session = OAuth2Session(google_signin.GOOGLE_CLIENT_ID, scope=self.scope,
                             redirect_uri=self.to_url())
@@ -120,7 +121,7 @@ class Callback(Scopes, views.Callback):
       if error == 'access_denied':
         return self.finish(None, state=state)
       else:
-        raise BadRequest(msg)
+        flask_util.error(msg)
 
     # extract auth code and request access token
     session = OAuth2Session(google_signin.GOOGLE_CLIENT_ID, scope=self.scope,

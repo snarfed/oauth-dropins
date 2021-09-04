@@ -9,7 +9,6 @@ import urllib.parse
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import views
 from .models import BaseAuth
@@ -21,15 +20,15 @@ LINKEDIN_CLIENT_SECRET = util.read('linkedin_client_secret')
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 AUTH_CODE_URL = '&'.join((
-    'https://www.linkedin.com/oauth/v2/authorization?'
-    'response_type=code',
-    'client_id=%(client_id)s',
-    # https://docs.microsoft.com/en-us/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context#permissions
-    'scope=%(scope)s',
-    # must be the same in the access token request
-    'redirect_uri=%(redirect_uri)s',
-    'state=%(state)s',
-    ))
+  'https://www.linkedin.com/oauth/v2/authorization?'
+  'response_type=code',
+  'client_id=%(client_id)s',
+  # https://docs.microsoft.com/en-us/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context#permissions
+  'scope=%(scope)s',
+  # must be the same in the access token request
+  'redirect_uri=%(redirect_uri)s',
+  'state=%(state)s',
+))
 ACCESS_TOKEN_URL = 'https://www.linkedin.com/oauth/v2/accessToken'
 API_PROFILE_URL = 'https://api.linkedin.com/v2/me'
 
@@ -114,7 +113,7 @@ class Start(views.Start):
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       'state': urllib.parse.quote_plus(state or ''),
       'scope': self.scope,
-      }
+    }
 
   @classmethod
   def button_html(cls, *args, **kwargs):
@@ -137,9 +136,7 @@ class Callback(views.Callback):
         logging.info('User declined: %s', request.values.get('error_description'))
         return self.finish(None, state=request.values.get('state'))
       else:
-        msg = 'Error: %s: %s' % (error, desc)
-        logging.info(msg)
-        raise BadRequest(msg)
+        flask_util.error(f'{error} {desc}')
 
     # extract auth code and request access token
     auth_code = request.values['code']
@@ -151,7 +148,7 @@ class Callback(views.Callback):
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': request.base_url,
-      }
+    }
 
     resp = util.requests_post(ACCESS_TOKEN_URL, data=data)
     resp.raise_for_status()
@@ -159,9 +156,7 @@ class Callback(views.Callback):
 
     logging.debug('Access token response: %s', resp)
     if resp.get('serviceErrorCode'):
-      msg = 'Error: %s' % resp
-      logging.info(msg)
-      raise BadRequest(msg)
+      flask_util.error(resp)
 
     access_token = resp['access_token']
     resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()

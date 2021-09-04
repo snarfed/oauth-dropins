@@ -16,7 +16,6 @@ import urllib.parse
 from flask import request
 import flask
 
-from .webutil import flask_util
 from .webutil import util
 
 

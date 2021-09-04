@@ -14,10 +14,9 @@ import urllib.parse
 from flask import request
 from google.cloud import ndb
 import praw
-from werkzeug.exceptions import BadRequest
 
 from . import views, models
-from .webutil import appengine_info, util
+from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 from random import randint
@@ -64,7 +63,7 @@ class Start(views.Start):
   def redirect_url(self, state=None):
     # if state is None the reddit API redirect breaks, set to random string
     if not state:
-      state = str(randint(100000,999999))
+      state = str(randint(100000, 999999))
     assert REDDIT_APP_KEY and REDDIT_APP_SECRET, \
       "Please fill in the reddit_app_key and reddit_app_secret files in your app's root directory."
     url = urllib.parse.urljoin(request.host_url, self.to_path)
@@ -77,7 +76,7 @@ class Start(views.Start):
     models.OAuthRequestToken(id=state,
                              token_secret=state,
                              state=state).put()
-    st = util.encode_oauth_state({'state':state,'to_path':self.to_path})
+    st = util.encode_oauth_state({'state': state, 'to_path': self.to_path})
     return reddit.auth.url(self.scope.split(self.SCOPE_SEPARATOR), st, 'permanent')
 
   @classmethod
@@ -103,14 +102,12 @@ class Callback(views.Callback):
         logging.info('User declined: %s', request.values.get('error_description'))
         return self.finish(None, state=state)
       else:
-        msg = 'Error: %s' % (error)
-        logging.info(msg)
-        raise BadRequest(msg)
+        flask_util.error(error)
 
     # look up the stored state to check authenticity
     request_token = models.OAuthRequestToken.get_by_id(state)
     if request_token is None:
-      raise BadRequest('Invalid oauth_token: %s' % request_token_key)
+      flask_util.error('Invalid oauth_token: %s' % state)
 
     url = urllib.parse.urljoin(request.host_url, to_path)
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,

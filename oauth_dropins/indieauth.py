@@ -9,7 +9,6 @@ from flask import request
 from google.cloud import ndb
 import mf2util
 import requests
-from werkzeug.exceptions import BadRequest
 
 from . import models, views
 from .webutil import flask_util, util
@@ -34,7 +33,7 @@ def discover_authorization_endpoint(me, resp=None):
   try:
     resp = resp or util.requests_get(me)
   except (ValueError, requests.URLRequired, requests.TooManyRedirects) as e:
-    raise BadRequest(str(e))
+    flask_util.error(str(e))
 
   if resp.status_code // 100 != 2:
     logging.warning(
@@ -157,7 +156,7 @@ class Callback(views.Callback):
     endpoint = state.get('endpoint')
     me = state.get('me')
     if not endpoint or not me:
-      raise BadRequest("invalid state parameter")
+      flask_util.error("invalid state parameter")
 
     state = state.get('state') or ''
     validate_resp = util.requests_post(endpoint, data={
@@ -177,8 +176,7 @@ class Callback(views.Callback):
         indie_auth.put()
         return self.finish(indie_auth, state=state)
       else:
-        raise BadRequest(
-          'Verification response missing required "me" field')
+        flask_util.error('Verification response missing required "me" field')
     else:
-      raise BadRequest('IndieAuth verification failed: %s %s' %
-                               (validate_resp.status_code, validate_resp.text))
+      flask_util.error('IndieAuth verification failed: %s %s' %
+                       (validate_resp.status_code, validate_resp.text))

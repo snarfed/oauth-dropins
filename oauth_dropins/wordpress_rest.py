@@ -22,7 +22,6 @@ import urllib.parse, urllib.request
 
 from flask import request
 from google.cloud import ndb
-from werkzeug.exceptions import BadRequest
 
 from . import views
 from .models import BaseAuth
@@ -46,7 +45,7 @@ GET_AUTH_CODE_URL = '&'.join((
     'redirect_uri=%(redirect_uri)s',
     'state=%(state)s',
     'response_type=code',
-    ))
+))
 GET_ACCESS_TOKEN_URL = 'https://public-api.wordpress.com/oauth2/token'
 API_USER_URL = 'https://public-api.wordpress.com/rest/v1/me?pretty=true'
 
@@ -109,7 +108,7 @@ class Start(views.Start):
       'client_id': WORDPRESS_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       'state': urllib.parse.quote_plus(state if state else ''),
-      }
+    }
 
   @classmethod
   def button_html(cls, *args, **kwargs):
@@ -129,7 +128,7 @@ class Callback(views.Callback):
         logging.info('User declined: %s', error_description)
         return self.finish(None, state=request.values.get('state'))
       else:
-        raise BadRequest('Error: %s %s ' % (error, error_description))
+        flask_util.error('%s %s ' % (error, error_description))
 
     # extract auth code and request access token
     auth_code = request.values['code']
@@ -150,8 +149,7 @@ class Callback(views.Callback):
       resp = resp.json()
       error = resp.get('error')
       if error:
-        raise BadRequest('Error: %s %s ' %
-                                 (error, resp.get('error_description', '')))
+        flask_util.error('%s %s ' % (error, resp.get('error_description')))
 
       blog_id = resp['blog_id']
       blog_url = resp['blog_url']

@@ -17,7 +17,6 @@ from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlu
 from flask import request
 from google.cloud import ndb
 import requests
-from werkzeug.exceptions import BadRequest
 
 from . import views
 from .models import BaseAuth
@@ -62,16 +61,16 @@ VERIFY_API = '/api/v1/accounts/verify_credentials'
 # URL templates. Can't (easily) use urlencode() because I want to keep
 # the %(...)s placeholders as is and fill them in later in code.
 AUTH_CODE_API = '&'.join((
-    '/oauth/authorize?'
-    'response_type=code',
-    'client_id=%(client_id)s',
-    'client_secret=%(client_secret)s',
-    # https://docs.microsoft.com/en-us/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context#permissions
-    'scope=%(scope)s',
-    # must be the same in the access token request
-    'redirect_uri=%(redirect_uri)s',
-    'state=%(state)s',
-    ))
+  '/oauth/authorize?'
+  'response_type=code',
+  'client_id=%(client_id)s',
+  'client_secret=%(client_secret)s',
+  # https://docs.microsoft.com/en-us/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context#permissions
+  'scope=%(scope)s',
+  # must be the same in the access token request
+  'redirect_uri=%(redirect_uri)s',
+  'state=%(state)s',
+))
 
 ACCESS_TOKEN_API = '/oauth/token'
 
@@ -221,7 +220,7 @@ class Start(views.Start):
     try:
       resp = util.requests_get(urljoin(instance, INSTANCE_API))
       resp.raise_for_status()
-    except requests.RequestException as e:
+    except requests.RequestException:
       logging.info('Error', exc_info=True)
       resp = None
 
@@ -334,9 +333,7 @@ class Callback(views.Callback):
           _, state = _decode_state(state)
         return self.finish(None, state=state)
       else:
-        msg = 'Error: %s: %s' % (error, desc)
-        logging.info(msg)
-        raise BadRequest(msg)
+        flask_util.error(f'{error} {desc}')
 
     app_key, state = _decode_state(request.values['state'])
     app = ndb.Key(urlsafe=app_key).get()
@@ -353,7 +350,7 @@ class Callback(views.Callback):
       # redirect_uri here must be the same in the oauth code request!
       # (the value here doesn't actually matter since it's requested server side.)
       'redirect_uri': request.base_url,
-      }
+    }
     resp = util.requests_post(
       urljoin(app.instance, ACCESS_TOKEN_API), data=urlencode(data),
       # Pixelfed requires this
@@ -362,7 +359,7 @@ class Callback(views.Callback):
     resp_json = resp.json()
     logging.debug('Access token response: %s', resp_json)
     if resp_json.get('error'):
-      raise BadRequest(resp_json)
+      flask_util.error(resp_json)
 
     access_token = resp_json['access_token']
     user = self.AUTH_CLASS(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
