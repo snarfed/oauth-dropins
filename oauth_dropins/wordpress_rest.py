@@ -71,11 +71,11 @@ class WordPressAuth(BaseAuth):
   def user_display_name(self):
     """Returns the blog hostname.
     """
-    if self.user_json:
-      user = json_loads(self.user_json)
-      return user.get('display_name') or user.get('username')
-    else:
+    if not self.user_json:
       return self.key_id()
+
+    user = json_loads(self.user_json)
+    return user.get('display_name') or user.get('username')
 
   def access_token(self):
     """Returns the OAuth access token string.
@@ -107,7 +107,7 @@ class Start(views.Start):
     return GET_AUTH_CODE_URL % {
       'client_id': WORDPRESS_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
-      'state': urllib.parse.quote_plus(state if state else ''),
+      'state': urllib.parse.quote_plus(state or ''),
     }
 
   @classmethod

@@ -279,8 +279,8 @@ class Start(views.Start):
     logging.info("first time we've seen %s instance %s with app %s %s! "
                  "registering an API app.", self.LABEL, instance, app_name, app_url)
 
-    redirect_uris = set(urljoin(request.host_url, path)
-                        for path in set(self.REDIRECT_PATHS))
+    redirect_uris = {urljoin(request.host_url, path)
+                     for path in set(self.REDIRECT_PATHS)}
     redirect_uris.add(self.to_url())
 
     resp = util.requests_post(

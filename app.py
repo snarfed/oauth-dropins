@@ -19,8 +19,7 @@ app.wsgi_app = flask_util.ndb_context_middleware(
     app.wsgi_app, client=appengine_config.ndb_client)
 
 
-SITES = {}  # maps module name to module
-for name in (
+SITES = {name: importlib.import_module(f'oauth_dropins.{name}') for name in (
     'blogger',
     'disqus',
     'dropbox',
@@ -39,9 +38,7 @@ for name in (
     'tumblr',
     'twitter',
     'wordpress_rest',
-  ):
-  SITES[name] = importlib.import_module(f'oauth_dropins.{name}')
-
+  )}
 from oauth_dropins import google_signin
 google_signin.Start.INCLUDE_GRANTED_SCOPES = False
 

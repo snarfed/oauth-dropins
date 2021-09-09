@@ -114,7 +114,7 @@ class Start(views.Start):
       'client_id': MEDIUM_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       # Medium requires non-empty state
-      'state': urllib.parse.quote_plus(state if state else 'unused'),
+      'state': urllib.parse.quote_plus(state or 'unused'),
       'scope': self.scope,
     }
 

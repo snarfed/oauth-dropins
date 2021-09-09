@@ -124,7 +124,7 @@ class Start(views.Start):
       'client_id': GITHUB_CLIENT_ID,
       'redirect_uri': urllib.parse.quote_plus(self.to_url()),
       # TODO: does GitHub require non-empty state?
-      'state': urllib.parse.quote_plus(state if state else ''),
+      'state': urllib.parse.quote_plus(state or ''),
       'scope': self.scope,
     }
 
@@ -144,7 +144,6 @@ class Callback(views.Callback):
       if error == 'access_denied':
         logging.info('User declined')
         return self.finish(None, state=request.values.get('state'))
-        return
       else:
         flask_util.error(f"{error} {request.values.get('error_description')}")
 
