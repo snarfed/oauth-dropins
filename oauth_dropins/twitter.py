@@ -139,8 +139,6 @@ class Callback(views.Callback):
     # https://dev.twitter.com/docs/application-permission-model
     if request.values.get('denied'):
       return self.finish(None, state=request.values.get('state'))
-      return
-
     oauth_token = request.values.get('oauth_token', None)
     oauth_verifier = request.values.get('oauth_verifier', None)
     if oauth_token is None:

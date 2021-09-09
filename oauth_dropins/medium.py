@@ -111,11 +111,10 @@ class Start(views.Start):
     assert MEDIUM_CLIENT_ID and MEDIUM_CLIENT_SECRET, \
       "Please fill in the medium_client_id and medium_client_secret files in your app's root directory."
     return GET_AUTH_CODE_URL % {
-      'client_id': MEDIUM_CLIENT_ID,
-      'redirect_uri': urllib.parse.quote_plus(self.to_url()),
-      # Medium requires non-empty state
-      'state': urllib.parse.quote_plus(state if state else 'unused'),
-      'scope': self.scope,
+        'client_id': MEDIUM_CLIENT_ID,
+        'redirect_uri': urllib.parse.quote_plus(self.to_url()),
+        'state': urllib.parse.quote_plus(state or 'unused'),
+        'scope': self.scope,
     }
 
 

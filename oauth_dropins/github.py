@@ -121,11 +121,10 @@ class Start(views.Start):
     assert GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET, \
       "Please fill in the github_client_id and github_client_secret files in your app's root directory."
     return GET_AUTH_CODE_URL % {
-      'client_id': GITHUB_CLIENT_ID,
-      'redirect_uri': urllib.parse.quote_plus(self.to_url()),
-      # TODO: does GitHub require non-empty state?
-      'state': urllib.parse.quote_plus(state if state else ''),
-      'scope': self.scope,
+        'client_id': GITHUB_CLIENT_ID,
+        'redirect_uri': urllib.parse.quote_plus(self.to_url()),
+        'state': urllib.parse.quote_plus(state or ''),
+        'scope': self.scope,
     }
 
   @classmethod
@@ -144,7 +143,6 @@ class Callback(views.Callback):
       if error == 'access_denied':
         logging.info('User declined')
         return self.finish(None, state=request.values.get('state'))
-        return
       else:
         flask_util.error(f"{error} {request.values.get('error_description')}")
 
