@@ -160,21 +160,25 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 4.0 - unreleased
+### 4.0 - 2021-09-15
 
 _Breaking changes:_
 
-Ported HTTP request handlers from [webapp2](https://github.com/GoogleCloudPlatform/webapp2/) to [Flask](https://flask.palletsprojects.com/). webapp2 had a good run, but it's no longer actively developed, and Flask is one of the most widely adopted standalone web framework in the Python community.
+* Migrate from [webapp2](https://github.com/GoogleCloudPlatform/webapp2/) to [Flask](https://flask.palletsprojects.com/). webapp2 had a good run, but it's no longer actively developed, and Flask is one of the most widely adopted standalone web framework in the Python community.
+* Remove `to()` class methods. Instead, now pass redirect paths to Flask's `as_view()` function, eg:
+    
+    ```py
+    app = Flask()
+    app.add_url_rule('/start', view_func=twitter.Callback.as_view('start', '/oauth_callback'))
+    ```
+* Remove deprecated `blogger_v2` module alias.
+* `webutil`: migrate webapp2 HTTP request handlers in the `handlers` module - `XrdOrJrdHandler`, `HostMetaHandler`, and `HostMetaXrdsHandler` - to Flask views in a new `flask_util` module.
 
-Removed `to()` class methods. Instead, now pass redirect paths to Flask's `as_view()` function, eg:
+_Non-breaking changes:_
 
-```py
-app = Flask()
-app.add_url_rule('/oauth_callback',
-                 view_func=twitter.Callback.as_view('callback', '/after'))
-```
+* `webutil`: implement [Webmention](https://webmention.net/) protocol in new `webmention` module.
+* `webutil`: add misc Flask utilities and helpers in new `flask_util` module.
 
-Removed deprecated `blogger_v2` module alias.
 
 ### 3.1 - 2021-04-03
 

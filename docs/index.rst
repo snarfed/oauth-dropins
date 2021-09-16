@@ -268,27 +268,40 @@ just ``sudo python2 -m pip install grpcio``.
 Changelog
 ---------
 
-4.0 - unreleased
+4.0 - 2021-09-15
 ~~~~~~~~~~~~~~~~
 
 *Breaking changes:*
 
-Ported HTTP request handlers from
-`webapp2 <https://github.com/GoogleCloudPlatform/webapp2/>`__ to
-`Flask <https://flask.palletsprojects.com/>`__. webapp2 had a good run,
-but it’s no longer actively developed, and Flask is one of the most
-widely adopted standalone web framework in the Python community.
+-  Migrate from
+   `webapp2 <https://github.com/GoogleCloudPlatform/webapp2/>`__ to
+   `Flask <https://flask.palletsprojects.com/>`__. webapp2 had a good
+   run, but it’s no longer actively developed, and Flask is one of the
+   most widely adopted standalone web framework in the Python community.
 
-Removed ``to()`` class methods. Instead, now pass redirect paths to
-Flask’s ``as_view()`` function, eg:
+-  Remove ``to()`` class methods. Instead, now pass redirect paths to
+   Flask’s ``as_view()`` function, eg:
 
-.. code:: py
+   .. code:: py
 
-   app = Flask()
-   app.add_url_rule('/oauth_callback',
-                    view_func=twitter.Callback.as_view(callback', '/after'))
+      app = Flask()
+      app.add_url_rule('/start', view_func=twitter.Callback.as_view('start', '/oauth_callback'))
 
-Removed deprecated ``blogger_v2`` module alias.
+-  Remove deprecated ``blogger_v2`` module alias.
+
+-  ``webutil``: migrate webapp2 HTTP request handlers in the
+   ``handlers`` module - ``XrdOrJrdHandler``, ``HostMetaHandler``, and
+   ``HostMetaXrdsHandler`` - to Flask views in a new ``flask_util``
+   module.
+
+*Non-breaking changes:*
+
+-  ``webutil``: implement `Webmention <https://webmention.net/>`__
+   protocol in new ``webmention`` module.
+-  ``webutil``: add misc Flask utilities and helpers in new
+   ``flask_util`` module.
+
+.. _section-1:
 
 3.1 - 2021-04-03
 ~~~~~~~~~~~~~~~~
@@ -303,7 +316,7 @@ Removed deprecated ``blogger_v2`` module alias.
 
    -  Handle errors from access token request.
 
-.. _section-1:
+.. _section-2:
 
 3.0 - 2020-03-14
 ~~~~~~~~~~~~~~~~
@@ -374,7 +387,7 @@ Non-breaking changes:
    ``<div>``, eg as Bootstrap columns.
 -  Add new ``image_file`` kwarg to ``StartHandler.button_html()``
 
-.. _section-2:
+.. _section-3:
 
 2.2 - 2019-11-01
 ~~~~~~~~~~~~~~~~
@@ -396,7 +409,7 @@ Non-breaking changes:
    `ujson <https://github.com/esnme/ultrajson/>`__ (built into App
    Engine) to speed up JSON parsing and encoding.
 
-.. _section-3:
+.. _section-4:
 
 2.0 - 2019-02-25
 ~~~~~~~~~~~~~~~~
@@ -413,7 +426,7 @@ Non-breaking changes:
 -  webutil.logs: return HTTP 400 if ``start_time`` is before 2008-04-01
    (App Engine’s rough launch window).
 
-.. _section-4:
+.. _section-5:
 
 1.14 - 2018-11-12
 ~~~~~~~~~~~~~~~~~
@@ -426,7 +439,7 @@ Non-breaking changes:
    endpoint <https://developers.googleblog.com/2018/03/discontinuing-support-for-json-rpc-and.html>`__.
 -  Other minor internal updates.
 
-.. _section-5:
+.. _section-6:
 
 1.13 - 2018-08-08
 ~~~~~~~~~~~~~~~~~
@@ -435,14 +448,14 @@ Non-breaking changes:
    form-encoded
    (`snarfed/bridgy#809 <https://github.com/snarfed/bridgy/issues/809>`__).
 
-.. _section-6:
+.. _section-7:
 
 1.12 - 2018-03-24
 ~~~~~~~~~~~~~~~~~
 
 -  More Python 3 updates and bug fixes in webutil.util.
 
-.. _section-7:
+.. _section-8:
 
 1.11 - 2018-03-08
 ~~~~~~~~~~~~~~~~~
@@ -458,14 +471,14 @@ Non-breaking changes:
 -  Add Python 3 support to webutil.util!
 -  Add humanize dependency for webutil.logs.
 
-.. _section-8:
+.. _section-9:
 
 1.10 - 2017-12-10
 ~~~~~~~~~~~~~~~~~
 
 Mostly just internal changes to webutil to support granary v1.10.
 
-.. _section-9:
+.. _section-10:
 
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
@@ -476,7 +489,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 
    -  Handle punctuation in error messages.
 
-.. _section-10:
+.. _section-11:
 
 1.8 - 2017-08-29
 ~~~~~~~~~~~~~~~~
@@ -499,14 +512,14 @@ Mostly just internal changes to webutil to support granary v1.9.
       from ``me`` parameter, `which is going
       away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
 
-.. _section-11:
+.. _section-12:
 
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
 -  Updates to bundled webutil library, notably WideUnicode class.
 
-.. _section-12:
+.. _section-13:
 
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
@@ -515,21 +528,21 @@ Mostly just internal changes to webutil to support granary v1.9.
    `oauth-dropins.readthedocs.io <http://oauth-dropins.readthedocs.io/>`__.
 -  Fix Dropbox bug with fetching access token.
 
-.. _section-13:
+.. _section-14:
 
 1.5 - 2016-08-25
 ~~~~~~~~~~~~~~~~
 
 -  Add `Medium <https://medium.com/>`__.
 
-.. _section-14:
+.. _section-15:
 
 1.4 - 2016-06-27
 ~~~~~~~~~~~~~~~~
 
 -  Upgrade Facebook API from v2.2 to v2.6.
 
-.. _section-15:
+.. _section-16:
 
 1.3 - 2016-04-07
 ~~~~~~~~~~~~~~~~
@@ -538,7 +551,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  More consistent logging of HTTP requests.
 -  Set up Coveralls.
 
-.. _section-16:
+.. _section-17:
 
 1.2 - 2016-01-11
 ~~~~~~~~~~~~~~~~
@@ -552,7 +565,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Add developer setup and troubleshooting docs.
 -  Set up CircleCI.
 
-.. _section-17:
+.. _section-18:
 
 1.1 - 2015-09-06
 ~~~~~~~~~~~~~~~~
@@ -560,7 +573,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 -  Flickr: split out flickr_auth.py file.
 -  Add a number of utility functions to webutil.
 
-.. _section-18:
+.. _section-19:
 
 1.0 - 2015-06-27
 ~~~~~~~~~~~~~~~~

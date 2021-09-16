@@ -39,10 +39,6 @@ google_signin
 -------------
 .. automodule:: oauth_dropins.google_signin
 
-handlers
---------
-.. automodule:: oauth_dropins.handlers
-
 indieauth
 ---------
 .. automodule:: oauth_dropins.indieauth
@@ -90,6 +86,10 @@ twitter
 twitter_auth
 ------------
 .. automodule:: oauth_dropins.twitter_auth
+
+views
+-----
+.. automodule:: oauth_dropins.views
 
 wordpress_rest
 --------------
