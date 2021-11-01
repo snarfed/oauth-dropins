@@ -254,17 +254,6 @@ since they’ll prevent virtualenv from installing into the local
 If you really want ``-t``, try removing the ``-e`` from the lines in
 ``requirements.txt`` that have it.
 
-1. If you get this error while running ``dev_appserver.py``:
-
-   ::
-
-      RuntimeError: Cannot use the Cloud Datastore Emulator because the packaged grpcio is incompatible to this system. Please install grpcio using pip
-
-…you can fix it by `installing ``grpcio`` into the Python 2 that you’re
-running\ ``dev_appserver``
-with <https://stackoverflow.com/a/59996186/186123>`__. Usually this is
-just ``sudo python2 -m pip install grpcio``.
-
 Changelog
 ---------
 
@@ -277,7 +266,8 @@ Changelog
    `webapp2 <https://github.com/GoogleCloudPlatform/webapp2/>`__ to
    `Flask <https://flask.palletsprojects.com/>`__. webapp2 had a good
    run, but it’s no longer actively developed, and Flask is one of the
-   most widely adopted standalone web framework in the Python community.
+   most widely adopted standalone web frameworks in the Python
+   community.
 
 -  Remove ``to()`` class methods. Instead, now pass redirect paths to
    Flask’s ``as_view()`` function, eg:
@@ -599,17 +589,14 @@ the repo root directory:
    source local/bin/activate
    pip install -r requirements.txt
 
-Run the demo app locally `in
-dev_appserver.py <https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app#local-dev-server>`__
-(`so that static files
-work <https://groups.google.com/d/topic/google-appengine/BJDE8y2KISM/discussion>`__)
-with:
+Run the demo app locally in
+`app_server <https://github.com/XeoN-GHMB/app_server>`__ (`which
+also serves the static file
+handlers <https://groups.google.com/d/topic/google-appengine/BJDE8y2KISM/discussion>`__):
 
 .. code:: shell
 
-   dev_appserver.py --log_level debug --enable_host_checking false \
-     --support_datastore_emulator --datastore_emulator_port=8089 \
-     --application=oauth-dropins app.yaml
+   app_server -A oauth-dropins .
 
 To deploy to production:
 
