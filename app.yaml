@@ -22,6 +22,10 @@ handlers:
   static_files: oauth_dropins/static/favicon.ico
   upload: oauth_dropins/static/favicon.ico
 
+- url: /.well-known/security.txt
+  static_files: oauth_dropins/static/security.txt
+  upload: oauth_dropins/static/security.txt
+
 - url: .*
   script: auto
   secure: always
