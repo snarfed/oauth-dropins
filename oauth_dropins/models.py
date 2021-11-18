@@ -105,14 +105,6 @@ class BaseAuth(models.StringIdModel):
       util.interpret_http_exception(e)
       raise
 
-  def http(self):
-    """Returns an httplib2.Http that adds OAuth credentials to requests.
-
-    Use this for making direct HTTP REST request to a site's API. Not guaranteed
-    to be implemented by all sites.
-    """
-    raise NotImplementedError()
-
 
 class OAuthRequestToken(models.StringIdModel):
   """Datastore model class for an OAuth 1.1 request token.
