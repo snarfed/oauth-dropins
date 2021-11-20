@@ -307,6 +307,25 @@ source local/bin/activate
 pip install -r requirements.txt
 ```
 
+Run the unit tests:
+
+```sh
+source local/bin/activate.csh
+gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0 --host-port=localhost:8089 < /dev/null >& /dev/null &
+sleep 2s
+DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \
+  python3 -m unittest discover
+kill %1
+deactivate
+```
+
+Run mypy to check type annotations:
+
+```sh
+source local/bin/activate.csh
+mypy --config-file=oauth_dropins/webutil/mypy.ini oauth_dropins/
+```
+
 Run the demo app locally in [`app_server`](https://github.com/XeoN-GHMB/app_server) ([which also serves the static file handlers](https://groups.google.com/d/topic/google-appengine/BJDE8y2KISM/discussion)):
 
 ```shell
@@ -324,16 +343,7 @@ Release instructions
 ---
 Here's how to package, test, and ship a new release. (Note that this is [largely duplicated in granary's readme too](https://github.com/snarfed/granary#release-instructions).)
 
-1. Run the unit tests.
-    ```sh
-    source local/bin/activate.csh
-    gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0 --host-port=localhost:8089 < /dev/null >& /dev/null &
-    sleep 2s
-    DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \
-      python3 -m unittest discover
-    kill %1
-    deactivate
-    ```
+1. [Run the unit tests.](#development)
 1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`.
 1. `git commit -am 'release vX.Y'`
