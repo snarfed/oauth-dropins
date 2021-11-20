@@ -112,8 +112,8 @@ class Start(views.Start):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
-    return super(cls, cls).button_html(
-      *args, input_style='background-color: #3499CD', **kwargs)
+    kwargs.setdefault('input_style', 'background-color: #3499CD')
+    return super(cls, cls).button_html(*args, **kwargs)
 
 
 class Callback(views.Callback):

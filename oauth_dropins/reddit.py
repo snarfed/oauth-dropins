@@ -9,6 +9,7 @@ praw API docs:
 https://praw.readthedocs.io/en/v3.6.0/pages/oauth.html
 """
 import logging
+from typing import Optional
 import urllib.parse
 
 from flask import request
@@ -60,7 +61,9 @@ class Start(views.Start):
   LABEL = 'Reddit'
   DEFAULT_SCOPE = 'identity,read'
 
-  def redirect_url(self, state=None):
+  def redirect_url(self, state: Optional[str] = None) -> str:
+    assert self.scope
+
     # if state is None the reddit API redirect breaks, set to random string
     if not state:
       state = str(randint(100000, 999999))
@@ -81,10 +84,8 @@ class Start(views.Start):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
-    return super(cls, cls).button_html(
-      *args,
-      input_style='background-color: #CEE3F8; padding: 10px',
-      **kwargs)
+    kwargs.setdefault('input_style', 'background-color: #CEE3F8; padding: 10px')
+    return super(cls, cls).button_html(*args, **kwargs)
 
 
 class Callback(views.Callback):
@@ -92,13 +93,13 @@ class Callback(views.Callback):
   """
 
   def dispatch_request(self):
-    error = request.values.get('error')
+    error = request.values.get('error') or ''
     st = util.decode_oauth_state(request.values.get('state'))
     state = st.get('state')
     to_path = st.get('to_path')
     code = request.values.get('code')
     if error or not state or not code:
-      if error in ('access_denied'):
+      if error == 'access_denied':
         logging.info('User declined: %s', request.values.get('error_description'))
         return self.finish(None, state=state)
       else:

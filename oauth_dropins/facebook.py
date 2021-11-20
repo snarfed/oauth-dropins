@@ -196,8 +196,8 @@ class Callback(views.Callback):
     Returns:
       :class:`flask.Response` if there was an error, None otherwise.
     """
-    error = request.values.get('error')
-    error_reason = request.values.get('error_reason')
+    error = request.values.get('error', '')
+    error_reason = request.values.get('error_reason', '')
 
     if error or error_reason:
       error_description = urllib.parse.unquote_plus(

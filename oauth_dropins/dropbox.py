@@ -94,8 +94,8 @@ class Start(views.Start):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
-    return super(cls, cls).button_html(
-      *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
+    kwargs.setdefault('input_style', 'background-color: #EEEEEE; padding: 10px')
+    return super(cls, cls).button_html(*args, **kwargs)
 
 
 class Callback(views.Callback):
@@ -105,7 +105,7 @@ class Callback(views.Callback):
     state = request.values['state']
 
     # handle errors
-    error = request.values.get('error')
+    error = request.values.get('error', '')
     error_reason = urllib.parse.unquote_plus(request.values.get('error_reason', ''))
 
     if error or error_reason:

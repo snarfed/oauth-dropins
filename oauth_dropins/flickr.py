@@ -100,8 +100,8 @@ class Start(views.Start):
     if parsed.get('error') or parsed.get('oauth_problem'):
       flask_util.error(resp.text)
 
-    resource_owner_key = parsed.get('oauth_token')[0]
-    resource_owner_secret = parsed.get('oauth_token_secret')[0]
+    resource_owner_key = parsed['oauth_token'][0]
+    resource_owner_secret = parsed['oauth_token_secret'][0]
 
     models.OAuthRequestToken(
       id=resource_owner_key,
@@ -125,8 +125,8 @@ class Start(views.Start):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
-    return super(cls, cls).button_html(
-      *args, input_style='background-color: #EEEEEE; padding: 10px', **kwargs)
+    kwargs.setdefault('input_style', 'background-color: #EEEEEE; padding: 10px')
+    return super(cls, cls).button_html(*args, **kwargs)
 
 
 class Callback(views.Callback):
@@ -151,13 +151,14 @@ class Callback(views.Callback):
     except BaseException as e:
       util.interpret_http_exception(e)
       raise
-    parsed = dict(urllib.parse.parse_qs(resp.read().decode()))
-    access_token = parsed.get('oauth_token')[0]
-    access_secret = parsed.get('oauth_token_secret')[0]
-    user_nsid = parsed.get('user_nsid')[0]
 
-    if access_token is None:
-      flask_util.error('Missing required query parameter oauth_token.')
+    parsed = dict(urllib.parse.parse_qs(resp.read().decode()))
+    try:
+      access_token = parsed['oauth_token'][0]
+      access_secret = parsed['oauth_token_secret'][0]
+      user_nsid = parsed['user_nsid'][0]
+    except KeyError:
+      flask_util.error('Missing required query parameter oauth_token or oauth_token_secret or user_nsid.')
 
     auth = FlickrAuth(id=user_nsid, token_key=access_token,
                       token_secret=access_secret)

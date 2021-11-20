@@ -1,5 +1,7 @@
 """Base datastore model class for an authenticated account.
 """
+import urllib.response
+
 from google.cloud import ndb
 
 from .webutil import models, util
@@ -22,23 +24,23 @@ class BaseAuth(models.StringIdModel):
   # A site-specific API object. Initialized on demand.
   _api_obj = None
 
-  def __init__(self, *args, id=None, **kwargs):
+  def __init__(self, *args, id: str = None, **kwargs):
     """Constructor. Escapes the key string id if it starts with `__`."""
     if id and id.startswith('__'):
       id = '\\' + id
     super().__init__(*args, id=id, **kwargs)
 
-  def key_id(self):
+  def key_id(self) -> str:
     """Returns the key's unescaped string id."""
     id = self.key.id()
     return id[1:] if id[0] == '\\' else id
 
-  def site_name(self):
+  def site_name(self) -> str:
     """Returns the string name of the site, e.g. 'Facebook'.
     """
     raise NotImplementedError()
 
-  def user_display_name(self):
+  def user_display_name(self) -> str:
     """Returns a string user identifier, e.g. 'Ryan Barrett' or 'snarfed'.
     """
     raise NotImplementedError()
@@ -53,7 +55,7 @@ class BaseAuth(models.StringIdModel):
       self._api_obj = self._api()
     return self._api_obj
 
-  def access_token(self):
+  def access_token(self) -> str:
     """Returns the OAuth access token.
 
     This is a string for OAuth 2 sites or a (string key, string secret) tuple
@@ -61,18 +63,18 @@ class BaseAuth(models.StringIdModel):
     """
     raise NotImplementedError()
 
-  def urlopen(self, url, **kwargs):
+  def urlopen(self, url: str, **kwargs) -> urllib.response.addinfourl:
     """Wraps urllib.request.urlopen() and adds OAuth credentials to the request.
 
     Use this for making direct HTTP REST request to a site's API. Not guaranteed
     to be implemented by all sites.
 
-    The arguments, return value (urllib.request.Response), and exceptions raised
+    The arguments, return value (urllib.response.addinfourl), and exceptions raised
     (urllib.error.URLError) are the same as urllib2.urlopen.
     """
     raise NotImplementedError()
 
-  def is_authority_for(self, key):
+  def is_authority_for(self, key: ndb.Key) -> bool:
     """When disabling or modifying an account, it's useful to re-auth the
     user to make sure they have have permission to modify that
     account. Typically this means the auth entity represents the exact
@@ -89,7 +91,8 @@ class BaseAuth(models.StringIdModel):
     return self.key == key
 
   @staticmethod
-  def urlopen_access_token(url, access_token, api_key=None, **kwargs):
+  def urlopen_access_token(url: str, access_token: str, api_key: str = None, **kwargs
+                           ) -> urllib.response.addinfourl:
     """Wraps urllib.request.urlopen() and adds an access_token query parameter.
 
     Kwargs are passed through to urlopen().

@@ -125,6 +125,7 @@ def upload(params, file, token_key, token_secret):
   faux_req = requests.Request(
     'POST', upload_url, data=params, auth=auth).prepare()
   # parse the signed parameters back out of the body
+  assert isinstance(faux_req.body, bytes)
   data = urllib.parse.parse_qsl(faux_req.body.decode('utf-8'))
 
   # and use them in the real request

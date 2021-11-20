@@ -81,6 +81,8 @@ class Start(views.Start):
     assert INSTAGRAM_CLIENT_ID and INSTAGRAM_CLIENT_SECRET, (
       "Please fill in the instagram_client_id and instagram_client_secret "
       "files in your app's root directory.")
+    assert self.scope
+
     # http://instagram.com/developer/authentication/
     return GET_AUTH_CODE_URL % {
       'client_id': INSTAGRAM_CLIENT_ID,
@@ -93,10 +95,8 @@ class Start(views.Start):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
-    return super(cls, cls).button_html(
-      *args,
-      input_style='background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px',
-      **kwargs)
+    kwargs.setdefault('input_style', 'background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px')
+    return super(cls, cls).button_html(*args, **kwargs)
 
 
 class Callback(views.Callback):
@@ -109,7 +109,7 @@ class Callback(views.Callback):
 
     # http://instagram.com/developer/authentication/
     auth_code = request.values['code']
-    data = {
+    params = {
       'client_id': INSTAGRAM_CLIENT_ID,
       'client_secret': INSTAGRAM_CLIENT_SECRET,
       'code': auth_code,
@@ -118,7 +118,7 @@ class Callback(views.Callback):
     }
 
     try:
-      resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
+      resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=params)
       resp.raise_for_status()
     except BaseException as e:
       util.interpret_http_exception(e)

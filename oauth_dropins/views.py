@@ -11,12 +11,15 @@ app.add_url_rule('/callback',
                  view_func=twitter.Callback.as_view('callback', '/after'))
 """
 import logging
+from typing import Optional, Sequence, Union
 import urllib.parse
 
 import flask
 from flask import request
 from flask.views import View
+import werkzeug.wrappers
 
+from . import models
 from .webutil import util
 
 
@@ -46,7 +49,7 @@ class BaseView(View):
     self.scope = self.make_scope_str(scopes)
 
   @classmethod
-  def make_scope_str(cls, extra):
+  def make_scope_str(cls, extra: Union[str, Sequence[str], None]) -> str:
     """Returns an OAuth scopes query parameter value.
 
     Combines DEFAULT_SCOPE and extra.
@@ -62,7 +65,7 @@ class BaseView(View):
 
     return cls.SCOPE_SEPARATOR.join(util.trim_nulls((cls.DEFAULT_SCOPE, extra)))
 
-  def to_url(self, state=None):
+  def to_url(self, state: Optional[str] = None) -> str:
     """Returns a fully qualified callback URL based on to_path.
 
     Includes scheme, host, and optional state.
@@ -72,9 +75,10 @@ class BaseView(View):
       # unquote first or state will be double-quoted
       state = urllib.parse.unquote_plus(state)
       url = util.add_query_params(url, [('state', state)])
+
     return url
 
-  def request_url_with_state(self):
+  def request_url_with_state(self) -> str:
     """Returns the current request URL, with the state query param if provided.
     """
     state = request.values.get('state')
@@ -112,7 +116,7 @@ class Start(BaseView):
     logging.info('Starting OAuth flow: redirecting to %s', url)
     return flask.redirect(url)
 
-  def redirect_url(self, state=None):
+  def redirect_url(self, state: Optional[str] = None) -> str:
     """Returns the local URL for the OAuth service to redirect back to.
 
     oauth-dropin subclasses must implement this.
@@ -124,9 +128,10 @@ class Start(BaseView):
     raise NotImplementedError()
 
   @classmethod
-  def button_html(cls, to_path, form_classes='', form_method='post',
-                  form_extra='', image_prefix='', image_file=None,
-                  input_style='', scopes='', outer_classes=''):
+  def button_html(cls, to_path: str, form_classes: str = '',
+                  form_method: str = 'post', form_extra: str = '', image_prefix: str = '',
+                  image_file: Optional[str] = None, input_style: Optional[str] = '',
+                  scopes: str = '', outer_classes: str = '') -> str:
     """Returns an HTML string with a login form and button for this site.
 
     Args:
@@ -182,7 +187,9 @@ class Callback(BaseView):
   passed to finish() or as query parameters to the redirect URL.
   """
 
-  def finish(self, auth_entity, state=None):
+  def finish(self, auth_entity: Optional[models.BaseAuth],
+             state: Optional[str] = None
+             ) -> werkzeug.wrappers.Response:
     """Called when the OAuth flow is complete. Clients may override.
 
     Args:
@@ -193,10 +200,10 @@ class Callback(BaseView):
     Returns: :class:`werkzeug.wrappers.Response`
     """
     if auth_entity is None:
-      params = [('declined', True)]
+      params = [('declined', 'true')]
     else:
       params = [('auth_entity', auth_entity.key.urlsafe().decode()),
-                ('state', state)]
+                ('state', state or '')]
       try:
         token = auth_entity.access_token()
         if isinstance(token, str):
@@ -212,6 +219,7 @@ class Callback(BaseView):
       except AttributeError:
         logging.info('refresh_token not included')
 
+    assert self.to_path
     url = util.add_query_params(self.to_path, params)
     logging.info('Finishing OAuth flow: redirecting to %s', url)
     return flask.redirect(url)

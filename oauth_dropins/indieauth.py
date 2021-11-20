@@ -3,6 +3,7 @@
 https://indieauth.com/developers
 """
 import logging
+from typing import Optional
 import urllib.parse
 
 from flask import request
@@ -53,7 +54,7 @@ def discover_authorization_endpoint(me, resp=None):
   return INDIEAUTH_URL
 
 
-def build_user_json(me, resp=None):
+def build_user_json(me: str, resp: Optional[requests.Response] = None):
   """user_json contains an h-card, rel-me links, and "me"
 
   Args:
@@ -139,11 +140,9 @@ class Start(views.Start):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
-    return super(cls, cls).button_html(
-      *args,
-      input_style='background-color: #EBEBEB; padding: 5px',
-      form_extra='<input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />',
-      **kwargs)
+    kwargs.setdefault('input_style', 'background-color: #EBEBEB; padding: 5px')
+    kwargs.setdefault('form_extra', '<input type="url" name="me" class="form-control" placeholder="Your web site" required style="width: 150px; height: 50px; display:inline;" />')
+    return super(cls, cls).button_html(*args, **kwargs)
 
 
 class Callback(views.Callback):
@@ -169,14 +168,15 @@ class Callback(views.Callback):
 
     if validate_resp.status_code // 100 == 2:
       data = util.sniff_json_or_form_encoded(validate_resp.text)
-      if data.get('me'):
+      if isinstance(data, dict):
         verified = data.get('me')
-        user_json = build_user_json(verified)
-        indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
-        indie_auth.put()
-        return self.finish(indie_auth, state=state)
-      else:
-        flask_util.error('Verification response missing required "me" field')
+        if verified and isinstance(verified, str):
+          user_json = build_user_json(verified)
+          indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
+          indie_auth.put()
+          return self.finish(indie_auth, state=state)
+
+      flask_util.error('Verification response missing required "me" field')
     else:
       flask_util.error('IndieAuth verification failed: %s %s' %
                        (validate_resp.status_code, validate_resp.text))
