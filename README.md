@@ -152,6 +152,10 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 4.1 - unreleased
+
+* Drop Python 3.5 support. Python 3.6 is now the minimum required version.
+
 ### 4.0 - 2021-09-15
 
 _Breaking changes:_
