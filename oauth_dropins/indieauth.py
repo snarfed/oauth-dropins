@@ -178,5 +178,4 @@ class Callback(views.Callback):
       else:
         flask_util.error('Verification response missing required "me" field')
     else:
-      flask_util.error('IndieAuth verification failed: %s %s' %
-                       (validate_resp.status_code, validate_resp.text))
+      flask_util.error(f'IndieAuth verification failed: {validate_resp.status_code} {validate_resp.text}')

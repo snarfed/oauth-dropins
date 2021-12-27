@@ -62,7 +62,7 @@ class LinkedInAuth(BaseAuth):
           return loc.get('en_US') or loc.values()[0]
       return ''
 
-    return '%s %s' % (name('firstName'), name('lastName'))
+    return f"{name('firstName')} {name('lastName')}"
 
   def access_token(self):
     """Returns the OAuth access token string.

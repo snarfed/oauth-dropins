@@ -230,7 +230,7 @@ class Start(views.Start):
       logging.info(resp.text)
     if (not resp or not resp.ok or not is_json or
         not self._version_ok(resp.json().get('version'))):
-      msg = "%s doesn't look like a %s instance." % (instance, self.LABEL)
+      msg = f"{instance} doesn't look like a {self.LABEL} instance."
       logging.info(resp)
       logging.info(msg)
       raise ValueError(msg)
@@ -309,8 +309,8 @@ class Start(views.Start):
 
   @classmethod
   def button_html(cls, *args, **kwargs):
-    kwargs['form_extra'] = kwargs.get('form_extra', '') + """
-<input type="url" name="instance" class="form-control" placeholder="%s instance" scheme="https" required style="width: 135px; height: 50px; display:inline;" />""" % cls.LABEL
+    kwargs['form_extra'] = kwargs.get('form_extra', '') + f"""
+<input type="url" name="instance" class="form-control" placeholder="{cls.LABEL} instance" scheme="https" required style="width: 135px; height: 50px; display:inline;" />"""
     return super(Start, cls).button_html(
       *args, input_style='background-color: #EBEBEB; padding: 5px', **kwargs)
 
@@ -364,7 +364,7 @@ class Callback(views.Callback):
     access_token = resp_json['access_token']
     user = self.AUTH_CLASS(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
     logging.debug('User: %s', user)
-    address = '@%s@%s' % (user['username'], urlparse(app.instance).netloc)
+    address = f"@{user['username']}@{urlparse(app.instance).netloc}"
     auth = self.AUTH_CLASS(id=address, app=app.key, access_token_str=access_token,
                            user_json=json_dumps(user))
     auth.put()

@@ -60,7 +60,7 @@ class DropboxAuth(models.BaseAuth):
   def urlopen(self, url, **kwargs):
     """Wraps urlopen() and adds OAuth credentials to the request.
     """
-    headers = {'Authorization': 'Bearer %s' % self.access_token_str}
+    headers = {'Authorization': f'Bearer {self.access_token_str}'}
     try:
       return util.urlopen(urllib.request.Request(url, headers=headers), **kwargs)
     except BaseException as e:
@@ -89,7 +89,7 @@ class Start(views.Start):
     return GET_AUTH_CODE_URL % {
       'client_id': DROPBOX_APP_KEY,
       'redirect_uri': urllib.parse.quote_plus(self.to_url(state=state)),
-      'state': '%s|%s' % (state, csrf_key.id()),
+      'state': f'{state}|{csrf_key.id()}',
     }
 
   @classmethod
@@ -119,11 +119,11 @@ class Callback(views.Callback):
     try:
       csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
     except (ValueError, TypeError):
-      flask_util.error('Invalid state value %r' % state)
+      flask_util.error(f'Invalid state value {state!r}')
 
     csrf = DropboxCsrf.get_by_id(csrf_id)
     if not csrf:
-      flask_util.error('No CSRF token for id %s' % csrf_id)
+      flask_util.error(f'No CSRF token for id {csrf_id}')
 
     # request an access token
     data = {

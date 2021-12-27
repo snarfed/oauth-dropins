@@ -36,7 +36,7 @@ GET_USER_INFO_URL = 'https://api.meetup.com/members/self/'
 def urlopen_bearer_token(url, access_token, data=None, **kwargs):
     """Wraps urlopen() and adds OAuth credentials to the request.
     """
-    headers = {'Authorization': 'Bearer %s' % access_token}
+    headers = {'Authorization': f'Bearer {access_token}'}
     try:
         return util.urlopen(urllib.request.Request(url, headers=headers, data=data), **kwargs)
     except BaseException as e:
@@ -98,7 +98,7 @@ class Start(views.Start):
             'client_id': MEETUP_CLIENT_ID,
             'redirect_uri': urllib.parse.quote_plus(self.to_url()),
             'scope': self.scope,
-            'state': '%s|%s' % (urllib.parse.quote_plus(state), csrf_key.id()),
+            'state': f'{urllib.parse.quote_plus(state)}|{csrf_key.id()}',
         }
 
     @classmethod
@@ -118,18 +118,18 @@ class Callback(views.Callback):
                 logging.info('User declined')
                 return self.finish(None, state=request.values.get('state'))
             else:
-                flask_util.error('Error: %s: %s' % (error, request.values.get('error_description')))
+                flask_util.error(f"Error: {error}: {request.values.get('error_description')}")
 
         state = request.values['state']
         # lookup the CSRF token
         try:
             csrf_id = int(urllib.parse.unquote_plus(state).split('|')[-1])
         except (ValueError, TypeError):
-            flask_util.error('Invalid state value %r' % state)
+            flask_util.error(f'Invalid state value {state!r}')
 
         csrf = MeetupCsrf.get_by_id(csrf_id)
         if not csrf:
-            flask_util.error('No CSRF token for id %s' % csrf_id)
+            flask_util.error(f'No CSRF token for id {csrf_id}')
 
         # extract auth code and request access token
         auth_code = request.values['code']
@@ -156,7 +156,7 @@ class Callback(views.Callback):
 
         error = data.get('error')
         if error:
-            msg = 'Error: %s: %s' % (error[0], data.get('error_description'))
+            msg = f"Error: {error[0]}: {data.get('error_description')}"
             flask_util.error(msg)
 
         access_token = data['access_token']

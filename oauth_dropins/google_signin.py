@@ -90,7 +90,7 @@ class Callback(Scopes, views.Callback):
     error = request.values.get('error')
     desc = request.values.get('error_description')
     if error:
-      msg = 'Error: %s: %s' % (error, desc)
+      msg = f'Error: {error}: {desc}'
       logging.info(msg)
       if error == 'access_denied':
         return self.finish(None, state=state)

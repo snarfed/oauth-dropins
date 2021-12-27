@@ -107,7 +107,7 @@ class Callback(views.Callback):
     # look up the stored state to check authenticity
     request_token = models.OAuthRequestToken.get_by_id(state)
     if request_token is None:
-      flask_util.error('Invalid oauth_token: %s' % state)
+      flask_util.error(f'Invalid oauth_token: {state}')
 
     url = urllib.parse.urljoin(request.host_url, to_path)
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,

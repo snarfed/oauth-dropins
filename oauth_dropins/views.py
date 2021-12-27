@@ -146,24 +146,23 @@ class Start(BaseView):
     Returns: string
     """
     if image_file is None:
-      image_file = '%s_2x.png' % cls.NAME
+      image_file = f'{cls.NAME}_2x.png'
     vars = locals()
     vars.update({
       'label': cls.LABEL,
       'image': urllib.parse.urljoin(image_prefix, image_file),
     })
-    html = """\
-<form method="%(form_method)s" action="%(to_path)s" class="%(form_classes)s">
+    html = f"""<form method="{vars['form_method']}" action="{vars['to_path']}" class="{vars['form_classes']}">
   <nobr>
-    %(form_extra)s
-    <input type="image" height="50" title="%(label)s" class="shadow"
-           src="%(image)s" style="%(input_style)s" />
-    <input name="scope" type="hidden" value="%(scopes)s">
+    {vars['form_extra']}
+    <input type="image" height="50" title="{vars['label']}" class="shadow"
+           src="{vars['image']}" style="{vars['input_style']}" />
+    <input name="scope" type="hidden" value="{vars['scopes']}">
   </nobr>
 </form>
-""" % vars
+"""
     if outer_classes:
-      html = '<div class="%s">%s</div>' % (outer_classes, html)
+      html = f'<div class="{outer_classes}">{html}</div>'
     return html
 
 

@@ -105,7 +105,7 @@ class Callback(views.Callback):
     # look up the request token
     request_token = models.OAuthRequestToken.get_by_id(request_token_key)
     if request_token is None:
-      flask_util.error('Invalid oauth_token: %s' % request_token_key)
+      flask_util.error(f'Invalid oauth_token: {request_token_key}')
 
     # generate and store the final token
     tp = tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,

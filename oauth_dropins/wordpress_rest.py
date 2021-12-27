@@ -128,7 +128,7 @@ class Callback(views.Callback):
         logging.info('User declined: %s', error_description)
         return self.finish(None, state=request.values.get('state'))
       else:
-        flask_util.error('%s %s ' % (error, error_description))
+        flask_util.error(f'{error} {error_description} ')
 
     # extract auth code and request access token
     auth_code = request.values['code']
@@ -149,7 +149,7 @@ class Callback(views.Callback):
       resp = resp.json()
       error = resp.get('error')
       if error:
-        flask_util.error('%s %s ' % (error, resp.get('error_description')))
+        flask_util.error(f"{error} {resp.get('error_description')} ")
 
       blog_id = resp['blog_id']
       blog_url = resp['blog_url']

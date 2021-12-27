@@ -73,7 +73,7 @@ class BloggerV2Auth(models.BaseAuth):
     :meth:`gdata.client.GDClient.request`. Other similar classes include
     :class:`gdata.gauth.ClientLoginToken` and :class:`gdata.gauth.AuthSubToken`.
     """
-    http_request.headers['Authorization'] = 'Bearer %s' % self.access_token()
+    http_request.headers['Authorization'] = f'Bearer {self.access_token()}'
 
 
 class Scopes(object):
@@ -116,7 +116,7 @@ class Callback(Scopes, views.Callback):
     error = request.values.get('error')
     desc = request.values.get('error_description')
     if error:
-      msg = 'Error: %s: %s' % (error, desc)
+      msg = f'Error: {error}: {desc}'
       logging.info(msg)
       if error == 'access_denied':
         return self.finish(None, state=state)

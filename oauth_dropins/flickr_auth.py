@@ -48,7 +48,7 @@ def raise_for_failure(url, code, msg):
   # invalid auth token or API key -> unauthorized
   http_code = 401 if code in (98, 100) else 400
   raise urllib.error.HTTPError(
-    url, http_code, 'message=%s, flickr code=%d' % (msg, code), {}, None)
+    url, http_code, f'message={msg}, flickr code={int(code)}', {}, None)
 
 
 def call_api_method(method, params, token_key, token_secret):
@@ -135,21 +135,19 @@ def upload(params, file, token_key, token_secret):
   m = re.search(r'<rsp stat="(\w+)">', resp.text, re.DOTALL)
   if not m:
     raise BaseException(
-      'Expected response with <rsp stat="...">. Got: %s' % resp.text)
+      f'Expected response with <rsp stat="...">. Got: {resp.text}')
 
   stat = m.group(1)
   if stat == 'fail':
     m = re.search(r'<err code="(\d+)" msg="([^"]+)" />', resp.text, re.DOTALL)
     if not m:
       raise BaseException(
-        'Expected response with <err code="..." msg=".." />. Got: %s'
-        % resp.text)
+        f'Expected response with <err code="..." msg=".." />. Got: {resp.text}')
     raise_for_failure(upload_url, int(m.group(1)), m.group(2))
 
   m = re.search(r'<photoid>(\d+)</photoid>', resp.text, re.DOTALL)
   if not m:
     raise BaseException(
-      'Expected response with <photoid>...</photoid>. Got: %s'
-      % resp.text)
+      f'Expected response with <photoid>...</photoid>. Got: {resp.text}')
 
   return {'id': m.group(1)}

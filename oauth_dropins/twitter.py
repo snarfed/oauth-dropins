@@ -100,7 +100,7 @@ class Start(views.Start):
   def __init__(self, to_path, scopes=None, access_type=None):
     super().__init__(to_path, scopes=scopes)
     assert access_type in (None, 'read', 'write'), \
-        'access_type must be "read" or "write"; got %r' % access_type
+        f'access_type must be "read" or "write"; got {access_type!r}'
     self.access_type = access_type
 
   def redirect_url(self, state=None):
@@ -147,7 +147,7 @@ class Callback(views.Callback):
     # Lookup the request token
     request_token = models.OAuthRequestToken.get_by_id(oauth_token)
     if request_token is None:
-      flask_util.error('Invalid oauth_token: %s' % oauth_token)
+      flask_util.error(f'Invalid oauth_token: {oauth_token}')
 
     # Rebuild the auth view
     auth = tweepy.OAuthHandler(twitter_auth.TWITTER_APP_KEY,
