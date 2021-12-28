@@ -147,7 +147,7 @@ class Callback(views.Callback):
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data,
                               headers={'User-Agent': USER_AGENT})
     resp.raise_for_status()
-    logging.debug('Access token response: %s', resp.text)
+    logging.debug(f'Access token response: {resp.text}')
 
     try:
       resp = json_loads(resp.text)
@@ -157,7 +157,7 @@ class Callback(views.Callback):
 
     errors = resp.get('errors') or resp.get('error')
     if errors:
-      logging.info('Errors: %s', errors)
+      logging.info(f'Errors: {errors}')
       flask_util.error(errors[0].get('message'))
 
     # TODO: handle refresh token

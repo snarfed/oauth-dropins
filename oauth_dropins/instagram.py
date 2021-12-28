@@ -127,7 +127,7 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp.text)
     except (ValueError, TypeError):
-      logging.error('Bad response:\n%s', resp, exc_info=True)
+      logging.error(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Instagram response to access token request')
 
     if 'error_type' in resp:

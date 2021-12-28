@@ -81,7 +81,7 @@ def call_api_method(method, params, token_key, token_secret):
   try:
     body = json_loads(text)
   except BaseException:
-    logging.warning('Ignoring malformed flickr response: %s', text[:1000])
+    logging.warning(f'Ignoring malformed flickr response: {text[:1000]}')
     body = {}
 
   # Flickr returns HTTP success even for errors, so we have to fake it
@@ -129,7 +129,7 @@ def upload(params, file, token_key, token_secret):
 
   # and use them in the real request
   resp = util.requests_post(upload_url, data=data, files={'photo': file})
-  logging.debug('upload response: %s, %s', resp, resp.text)
+  logging.debug(f'upload response: {resp}, {resp.text}')
   resp.raise_for_status()
 
   m = re.search(r'<rsp stat="(\w+)">', resp.text, re.DOTALL)

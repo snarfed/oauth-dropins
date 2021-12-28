@@ -80,12 +80,12 @@ def _encode_state(app, state):
     'app_key': app.key.urlsafe().decode(),
     'state': quote_plus(state) if state else '',
   })
-  logging.debug('Encoding wrapper state: %r', wrapped)
+  logging.debug(f'Encoding wrapper state: {wrapped!r}')
   return wrapped
 
 
 def _decode_state(state):
-  logging.debug('Decoding wrapper state: %r', state)
+  logging.debug(f'Decoding wrapper state: {state!r}')
   decoded = json_loads(state)
   return decoded['app_key'], unquote(decoded['state'])
 
@@ -254,7 +254,7 @@ class Start(views.Start):
       app.instance_info = resp.text
       app.put()
 
-    logging.info('Starting OAuth for %s instance %s', self.LABEL, instance)
+    logging.info(f'Starting OAuth for {self.LABEL} instance {instance}')
     app_data = json_loads(app.data)
     return urljoin(instance, AUTH_CODE_API % {
       'client_id': app_data['client_id'],
@@ -276,8 +276,7 @@ class Start(views.Start):
 
     Returns: APP_CLASS
     """
-    logging.info("first time we've seen %s instance %s with app %s %s! "
-                 "registering an API app.", self.LABEL, instance, app_name, app_url)
+    logging.info(f"first time we've seen {self.LABEL} instance {instance} with app {app_name} {app_url}! registering an API app.")
 
     redirect_uris = {urljoin(request.host_url, path)
                      for path in set(self.REDIRECT_PATHS)}
@@ -301,7 +300,7 @@ class Start(views.Start):
     resp.raise_for_status()
 
     app_data = json_loads(resp.text)
-    logging.info('Got %s', app_data)
+    logging.info(f'Got {app_data}')
     app = self.APP_CLASS(instance=instance, app_name=app_name,
                          app_url=app_url, data=json_dumps(app_data))
     app.put()
@@ -327,7 +326,7 @@ class Callback(views.Callback):
       # user_cancelled_login and user_cancelled_authorize are non-standard.
       # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
       if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
-        logging.info('User declined: %s', request.values.get('error_description'))
+        logging.info(f"User declined: {request.values.get('error_description')}")
         state = request.values.get('state')
         if state:
           _, state = _decode_state(state)
@@ -357,13 +356,13 @@ class Callback(views.Callback):
       headers={'Content-Type': 'application/x-www-form-urlencoded'})
     resp.raise_for_status()
     resp_json = resp.json()
-    logging.debug('Access token response: %s', resp_json)
+    logging.debug(f'Access token response: {resp_json}')
     if resp_json.get('error'):
       flask_util.error(resp_json)
 
     access_token = resp_json['access_token']
     user = self.AUTH_CLASS(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
-    logging.debug('User: %s', user)
+    logging.debug(f'User: {user}')
     address = f"@{user['username']}@{urlparse(app.instance).netloc}"
     auth = self.AUTH_CLASS(id=address, app=app.key, access_token_str=access_token,
                            user_json=json_dumps(user))

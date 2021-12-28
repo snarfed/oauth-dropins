@@ -125,7 +125,7 @@ class Callback(views.Callback):
       error_description = urllib.parse.unquote_plus(
         request.values.get('error_description', ''))
       if error == 'access_denied':
-        logging.info('User declined: %s', error_description)
+        logging.info(f'User declined: {error_description}')
         return self.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(f'{error} {error_description} ')
@@ -143,7 +143,7 @@ class Callback(views.Callback):
     }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
     resp.raise_for_status()
-    logging.debug('Access token response: %s', resp.text)
+    logging.debug(f'Access token response: {resp.text}')
 
     try:
       resp = resp.json()

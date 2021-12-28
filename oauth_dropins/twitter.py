@@ -128,7 +128,7 @@ class Start(views.Start):
     models.OAuthRequestToken(id=auth.request_token['oauth_token'],
                              token_secret=auth.request_token['oauth_token_secret']
                              ).put()
-    logging.info('Generated request token, redirecting to Twitter: %s', auth_url)
+    logging.info(f'Generated request token, redirecting to Twitter: {auth_url}')
     return auth_url
 
 

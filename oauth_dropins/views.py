@@ -109,7 +109,7 @@ class Start(BaseView):
     # https://console.cloud.google.com/errors/CPafw-Gq18CrnwE
     url = str(self.redirect_url(state=request.values.get('state')))
 
-    logging.info('Starting OAuth flow: redirecting to %s', url)
+    logging.info(f'Starting OAuth flow: redirecting to {url}')
     return flask.redirect(url)
 
   def redirect_url(self, state=None):
@@ -212,5 +212,5 @@ class Callback(BaseView):
         logging.info('refresh_token not included')
 
     url = util.add_query_params(self.to_path, params)
-    logging.info('Finishing OAuth flow: redirecting to %s', url)
+    logging.info(f'Finishing OAuth flow: redirecting to {url}')
     return flask.redirect(url)

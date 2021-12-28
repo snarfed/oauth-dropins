@@ -125,7 +125,7 @@ class Callback(views.Callback):
     except BaseException as e:
       util.interpret_http_exception(e)
       raise
-    logging.debug('Got: %s', resp)
+    logging.debug(f'Got: {resp}')
     user = resp['user']
 
     auth = TumblrAuth(id=user['name'],

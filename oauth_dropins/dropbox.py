@@ -110,7 +110,7 @@ class Callback(views.Callback):
 
     if error or error_reason:
       if error == 'access_denied':
-        logging.info('User declined: %s', error_reason)
+        logging.info(f'User declined: {error_reason}')
         return self.finish(None, state=state)
       else:
         flask_util.error(' '.join((error, error_reason)))
@@ -141,10 +141,10 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp)
     except (ValueError, TypeError):
-      logging.error('Bad response:\n%s', resp, exc_info=True)
+      logging.error(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Dropbox response to access token request')
 
-    logging.info('Storing new Dropbox account: %s', data['uid'])
+    logging.info(f"Storing new Dropbox account: {data['uid']}")
     auth = DropboxAuth(id=data['uid'], access_token_str=data['access_token'])
     auth.put()
     return self.finish(auth, state=csrf.state)

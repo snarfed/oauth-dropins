@@ -161,7 +161,7 @@ class Callback(views.Callback):
                               data=urllib.parse.urlencode(data))
     resp.raise_for_status()
     resp = resp.text
-    logging.debug('Access token response: %s', resp)
+    logging.debug(f'Access token response: {resp}')
 
     resp = urllib.parse.parse_qs(resp)
 
@@ -172,7 +172,7 @@ class Callback(views.Callback):
     access_token = resp['access_token'][0]
     resp = GitHubAuth(access_token_str=access_token).post(
         API_GRAPHQL, json=GRAPHQL_USER).json()
-    logging.debug('GraphQL data.viewer response: %s', resp)
+    logging.debug(f'GraphQL data.viewer response: {resp}')
     user_json = resp['data']['viewer']
     auth = GitHubAuth(id=user_json['login'], access_token_str=access_token,
                       user_json=json_dumps(user_json))

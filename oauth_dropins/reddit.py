@@ -99,7 +99,7 @@ class Callback(views.Callback):
     code = request.values.get('code')
     if error or not state or not code:
       if error in ('access_denied'):
-        logging.info('User declined: %s', request.values.get('error_description'))
+        logging.info(f"User declined: {request.values.get('error_description')}")
         return self.finish(None, state=state)
       else:
         flask_util.error(error)

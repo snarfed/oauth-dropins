@@ -77,7 +77,7 @@ def build_user_json(me, resp=None):
   mf2 = util.parse_mf2(resp, resp.url)
   user_json['rel-me'] = mf2['rels'].get('me')
   user_json['h-card'] = mf2util.representative_hcard(mf2, me)
-  logging.debug('built user-json %r', user_json)
+  logging.debug(f'built user-json {user_json!r}')
   return util.trim_nulls(user_json)
 
 
@@ -134,7 +134,7 @@ class Start(views.Start):
       }),
     })
 
-    logging.info('Redirecting to IndieAuth: %s', url)
+    logging.info(f'Redirecting to IndieAuth: {url}')
     return url
 
   @classmethod

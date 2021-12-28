@@ -105,7 +105,7 @@ class FacebookAuth(models.BaseAuth):
         entity = FacebookAuth(id=id, type='page', pages_json=json_dumps([page]),
                               access_token_str=page.get('access_token'))
         entity.user_json = entity.urlopen(API_PAGE_URL).read()
-        logging.debug('Page object: %s', entity.user_json)
+        logging.debug(f'Page object: {entity.user_json}')
         return entity
 
     return None
@@ -166,16 +166,16 @@ class Callback(views.Callback):
       logging.error(e.read())
       raise
 
-    logging.debug('Access token response: %s', resp)
+    logging.debug(f'Access token response: {resp}')
     access_token = resp['access_token']
 
     user = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
-    logging.debug('User info response: %s', user)
+    logging.debug(f'User info response: {user}')
     user_id = json_loads(user)['id']
 
     pages = json_dumps(json_loads(models.BaseAuth.urlopen_access_token(
       API_PAGES_URL, access_token).read()).get('data'))
-    logging.debug('Pages response: %s', pages)
+    logging.debug(f'Pages response: {pages}')
 
     auth = FacebookAuth(id=user_id,
                         type='user',
@@ -203,7 +203,7 @@ class Callback(views.Callback):
       error_description = urllib.parse.unquote_plus(
         request.values.get('error_description', ''))
       if error == 'access_denied' and error_reason == 'user_denied':
-        logging.info('User declined: %s', error_description)
+        logging.info(f'User declined: {error_description}')
         return handler.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(' '.join((error, error_reason, error_description)))

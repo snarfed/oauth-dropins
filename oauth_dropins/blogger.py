@@ -147,7 +147,7 @@ class Callback(Scopes, views.Callback):
       if match:
         id = match.group(1)
       else:
-        logging.warning("Couldn't parse %s , using entire value as id", id)
+        logging.warning(f"Couldn't parse {id} , using entire value as id")
       break
 
     blog_ids = []
