@@ -155,6 +155,7 @@ Changelog
 ### 4.1 - unreleased
 
 * Drop Python 3.5 support. Python 3.6 is now the minimum required version.
+* Switch from app_server to `flask run` for local development.
 
 ### 4.0 - 2021-09-15
 
@@ -311,10 +312,10 @@ source local/bin/activate
 pip install -r requirements.txt
 ```
 
-Run the demo app locally in [`app_server`](https://github.com/XeoN-GHMB/app_server) ([which also serves the static file handlers](https://groups.google.com/d/topic/google-appengine/BJDE8y2KISM/discussion)):
+Run the demo app locally with [`flask run`](https://flask.palletsprojects.com/en/2.0.x/cli/#run-the-development-server):
 
 ```shell
-app_server -A oauth-dropins .
+env FLASK_ENV=development flask run -p 8080
 ```
 
 To deploy to production:

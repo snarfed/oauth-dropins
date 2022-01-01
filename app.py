@@ -6,6 +6,7 @@ import urllib.parse
 
 from flask import Flask, render_template, request
 import flask
+import flask_gae_static
 from google.cloud import ndb
 from oauth_dropins.webutil import flask_util, util
 import requests
@@ -17,6 +18,7 @@ app = Flask('oauth-dropins')
 app.config.from_pyfile('config.py')
 app.wsgi_app = flask_util.ndb_context_middleware(
     app.wsgi_app, client=appengine_config.ndb_client)
+flask_gae_static.init_app(app)
 
 
 SITES = {name: importlib.import_module(f'oauth_dropins.{name}') for name in (
