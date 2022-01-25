@@ -15,6 +15,8 @@ from . import views, models
 from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+MIN_APP_SCOPED_ID = 100000000000000
+
 API_BASE = 'https://graph.facebook.com/v4.0/'
 if appengine_info.DEBUG:
   FACEBOOK_APP_ID = util.read('facebook_app_id_local')
