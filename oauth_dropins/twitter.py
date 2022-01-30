@@ -106,9 +106,9 @@ class Start(views.Start):
   def redirect_url(self, state=None):
     assert twitter_auth.TWITTER_APP_KEY and twitter_auth.TWITTER_APP_SECRET, \
       "Please fill in the twitter_app_key and twitter_app_secret files in your app's root directory."
-    auth = tweepy.OAuthHandler(twitter_auth.TWITTER_APP_KEY,
-                               twitter_auth.TWITTER_APP_SECRET,
-                               self.to_url(state=state))
+    auth = tweepy.OAuth1UserHandler(twitter_auth.TWITTER_APP_KEY,
+                                    twitter_auth.TWITTER_APP_SECRET,
+                                    callback=self.to_url(state=state))
 
     # signin_with_twitter=True returns /authenticate instead of /authorize so
     # that Twitter doesn't prompt the user for approval if they've already
@@ -150,8 +150,8 @@ class Callback(views.Callback):
       flask_util.error(f'Invalid oauth_token: {oauth_token}')
 
     # Rebuild the auth view
-    auth = tweepy.OAuthHandler(twitter_auth.TWITTER_APP_KEY,
-                               twitter_auth.TWITTER_APP_SECRET)
+    auth = tweepy.OAuth1UserHandler(twitter_auth.TWITTER_APP_KEY,
+                                    twitter_auth.TWITTER_APP_SECRET)
     auth.request_token = {'oauth_token': request_token.key.string_id(),
                           'oauth_token_secret': request_token.token_secret}
 
