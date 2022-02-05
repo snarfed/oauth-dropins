@@ -1,0 +1,36 @@
+{% extends "!layout.html" %}
+
+{%- block navigation %}
+
+
+<div style="width: 300px; text-align: center; font-size: larger">
+
+<p>Drop-in Python OAuth client flows for Flask on Google Cloud.</p>
+
+<!---
+<p>
+<a href="https://circleci.com/gh/snarfed/oauth-dropins">
+  <img alt="Tests on Circle CI" src="https://circleci.com/gh/snarfed/oauth-dropins.svg?style=svg" />
+</a>
+
+<a href="https://coveralls.io/github/snarfed/oauth-dropins?branch=master">
+  <img alt="Coverage on Coveralls" src="https://coveralls.io/repos/github/snarfed/oauth-dropins/badge.svg?branch=master" />
+</a>
+</p>
+-->
+</div>
+
+<div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="{{ _('Navigation menu') }}">
+<div class="local-toc">
+  <ul>
+    <li><a href="{{ pathto('index') }}">Getting started</a></li>
+    <li><a href="{{ pathto('source/oauth_dropins') }}">oauth_dropins reference</a></li>
+    <li><a href="{{ pathto('source/oauth_dropins.webutil') }}">webutil reference</a></li>
+  </ul>
+  <hr style="margin: 1em">
+  {{ toc }}
+</div>
+</div>
+
+
+{%- endblock %}

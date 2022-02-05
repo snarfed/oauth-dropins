@@ -11,6 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import sphinx_rtd_theme
 import sys
 import os
 
@@ -37,6 +38,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     # 'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
+    'sphinx_rtd_theme',
 ]
 
 # autodoc settings
@@ -141,12 +143,15 @@ autosummary_generate = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+# https://sphinx-rtd-theme.readthedocs.io/en/stable/configuring.html
+html_theme_options = {
+    'collapse_navigation': False,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -160,7 +165,7 @@ html_theme = 'alabaster'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = '../oauth_dropins/static/oauth_shiny.png'
+html_logo = '../oauth_dropins/static/oauth_shiny_128.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -190,6 +195,15 @@ html_sidebars = {
   '**': ['description.html', 'localtoc.html', 'searchbox.html'],
 }
 
+# These folders are copied to the documentation's HTML output
+html_static_path = ['_static']
+
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+# https://docs.readthedocs.io/en/stable/guides/adding-custom-css.html
+html_css_files = [
+    'custom.css',
+]
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 #html_additional_pages = {}

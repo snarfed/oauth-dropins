@@ -1,8 +1,5 @@
 oauth-dropins
-=============
-
-About
------
+-------------
 
 This is a collection of drop-in Python
 `Flask <https://flask.palletsprojects.com/>`__ views for the initial
@@ -11,32 +8,21 @@ including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google,
 IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and
 WordPress.com.
 
--  `Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__
-   Install with ``pip install oauth-dropins``.
--  `Click here for getting started docs. <#quick-start>`__
--  `Click here for reference
-   docs. <https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html>`__
--  A demo app is deployed at
-   `oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
-
 oauth-dropins stores user credentials in `Google Cloud
 Datastore <https://cloud.google.com/datastore/>`__. It’s primarily
 designed for `Google App Engine <https://appengine.google.com/>`__, but
 it can be used in any Python web application, regardless of host or
 framework.
 
-`Versions 3.0 <https://pypi.org/project/oauth-dropins/3.0/>`__ and above
-support App Engine’s `Python 3
-runtimes <https://cloud.google.com/appengine/docs/python/>`__, both
-`Standard <https://cloud.google.com/appengine/docs/standard/python3/>`__
-and
-`Flexible <https://cloud.google.com/appengine/docs/flexible/python/>`__.
-If you’re on the `Python 2
-runtime <https://cloud.google.com/appengine/docs/standard/python/>`__,
-use `version 2.2 <https://pypi.org/project/oauth-dropins/2.2/>`__.
-
-If you clone the repo directly or want to contribute, see
-`Development <#development>`__ for setup instructions.
+-  `Available on PyPi. <https://pypi.python.org/pypi/oauth-dropins/>`__
+   Install with ``pip install oauth-dropins``.
+-  `Getting started docs. <#quick-start>`__
+-  `Reference
+   docs. <https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html>`__
+-  Demo app at
+   `oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
+-  `Source code on
+   GitHub. <https://github.com/snarfed/oauth-dropins/>`__
 
 This software is released into the public domain. See LICENSE for
 details.
@@ -662,6 +648,8 @@ too <https://github.com/snarfed/granary#release-instructions>`__.)
 Related work
 ------------
 
+-  `Loginpass <https://github.com/authlib/loginpass>`__/`Authlib <https://authlib.org/>`__
+-  `Authomatic <https://authomatic.github.io/authomatic/>`__
 -  `Python Social
    Auth <https://python-social-auth.readthedocs.io/en/latest/>`__
--  `Loginpass <https://github.com/authlib/loginpass>`__/`Authlib <https://authlib.org/>`__
+-  `Authl <https://authl.readthedocs.io/en/stable/>`__

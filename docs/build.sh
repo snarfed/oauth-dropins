@@ -20,11 +20,11 @@ cd `dirname $absfile`
 rm -f index.rst
 cat > index.rst <<EOF
 oauth-dropins
-=============
+-------------
 
 EOF
 
-tail -n +15 ../README.md \
+tail -n +17 ../README.md \
   | pandoc --from=markdown --to=rst \
   | sed -E 's/```/`/; s/`` </ </' \
   >> index.rst

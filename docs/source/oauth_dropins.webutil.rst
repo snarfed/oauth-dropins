@@ -1,11 +1,9 @@
-oauth_dropins.webutil
-=============================
+webutil
+-------
 
 Reference documentation.
 
-.. toctree::
-    oauth_dropins.webutil
-
+.. contents::
 
 flask_util
 ----------

@@ -17,16 +17,13 @@ About
 
 This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
 
-* [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/) Install with `pip install oauth-dropins`.
-* [Click here for getting started docs.](#quick-start)
-* [Click here for reference docs.](https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html)
-* A demo app is deployed at [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
-
 oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
-[Versions 3.0](https://pypi.org/project/oauth-dropins/3.0/) and above support App Engine's [Python 3 runtimes](https://cloud.google.com/appengine/docs/python/), both [Standard](https://cloud.google.com/appengine/docs/standard/python3/) and [Flexible](https://cloud.google.com/appengine/docs/flexible/python/). If you're on the [Python 2 runtime](https://cloud.google.com/appengine/docs/standard/python/), use [version 2.2](https://pypi.org/project/oauth-dropins/2.2/).
-
-If you clone the repo directly or want to contribute, see [Development](#development) for setup instructions.
+* [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/) Install with `pip install oauth-dropins`.
+* [Getting started docs.](#quick-start)
+* [Reference docs.](https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html)
+* Demo app at [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
+* [Source code on GitHub.](https://github.com/snarfed/oauth-dropins/)
 
 This software is released into the public domain. See LICENSE for details.
 
@@ -391,5 +388,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 
 Related work
 ---
-* [Python Social Auth](https://python-social-auth.readthedocs.io/en/latest/)
 * [Loginpass](https://github.com/authlib/loginpass)/[Authlib](https://authlib.org/)
+* [Authomatic](https://authomatic.github.io/authomatic/)
+* [Python Social Auth](https://python-social-auth.readthedocs.io/en/latest/)
+* [Authl](https://authl.readthedocs.io/en/stable/)

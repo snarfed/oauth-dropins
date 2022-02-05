@@ -1,11 +1,9 @@
 oauth_dropins
-=============
+-------------
 
 Reference documentation.
 
-.. toctree::
-    oauth_dropins
-
+.. contents::
 
 blogger
 -------
