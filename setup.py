@@ -1,8 +1,6 @@
 """setuptools setup module for oauth-dropins.
 
-Docs:
-https://packaging.python.org/en/latest/distributing.html
-http://pythonhosted.org/setuptools/setuptools.html
+Docs: https://setuptools.pypa.io/en/latest/userguide/
 
 Based on https://github.com/pypa/sampleproject/blob/master/setup.py
 """
@@ -59,4 +57,10 @@ setup(name='oauth-dropins',
           'webapp2>=3.0.0b1',
       ],
       tests_require=['mox3>=0.28,<2.0'],
+      extras_require={
+          'docs': [
+              'sphinx',
+              'sphinx-rtd-theme',
+          ],
+      },
 )
