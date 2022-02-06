@@ -78,7 +78,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'oauth-dropins'
-copyright = '2013-2020, Ryan Barrett'
+copyright = '2013-2022, Ryan Barrett'
 author = 'Ryan Barrett'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -175,7 +175,7 @@ html_favicon = '../oauth_dropins/static/oauth_16.png'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -194,9 +194,6 @@ html_static_path = []
 # html_sidebars = {
 #   '**': ['description.html', 'localtoc.html', 'searchbox.html'],
 # }
-
-# These folders are copied to the documentation's HTML output
-html_static_path = ['_static']
 
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
