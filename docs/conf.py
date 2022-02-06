@@ -191,9 +191,9 @@ html_static_path = []
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {
-  '**': ['description.html', 'localtoc.html', 'searchbox.html'],
-}
+# html_sidebars = {
+#   '**': ['description.html', 'localtoc.html', 'searchbox.html'],
+# }
 
 # These folders are copied to the documentation's HTML output
 html_static_path = ['_static']
