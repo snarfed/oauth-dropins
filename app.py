@@ -66,7 +66,7 @@ def handle_discovery_errors(e):
     logging.warning('', exc_info=True)
     return flask.redirect('/?' + urllib.parse.urlencode({'error': str(e)}))
 
-  raise e
+  return flask_util.handle_exception(e)
 
 
 @app.route('/')
