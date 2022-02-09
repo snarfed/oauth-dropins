@@ -1,0 +1,75 @@
+[tool.poetry]
+name = "oauth-dropins"
+version = "4.0"
+description = "Drop-in OAuth Flask views for many popular sites"
+authors = ["Ryan Barrett <oauth-dropins@ryanb.org>"]
+license = "Public domain"
+keywords = ["oauth", "flask"]
+classifiers = ["Development Status :: 5 - Production/Stable", "Intended Audience :: Developers", "Topic :: System :: Systems Administration :: Authentication/Directory", "Topic :: Software Development :: Libraries :: Python Modules", "Environment :: Web Environment", "License :: OSI Approved :: MIT License", "License :: Public Domain", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3.6", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9"]
+homepage = "https://github.com/snarfed/oauth-dropins"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+beautifulsoup4 = ">=4.0"
+cachetools = ">=3.1"
+domain2idna = ">=1.0"
+flask = ">=2.0"
+flask-caching = ">=1.0"
+flask-gae-static = [
+    {optional = false, version = "*"},
+    {optional = true, develop = true, path = "../flask-gae-static"},
+]
+# gdata-python3 = [
+#     {
+#         optional = false,
+#         develop = false,
+#         version = ">=3.0",
+#     },
+#     {
+#         optional = true,
+#         develop = true,
+#         url = "git+https://github.com/dvska/gdata-python3.git#egg=gdata",
+#     },
+# ]
+google-cloud-logging = ">=3.0"
+google-cloud-ndb = ">=1.0"
+gunicorn = {optional = true, version = ">=20.0"}
+humanize = ">=3.0"
+jinja2 = ">=3.0"
+mf2py = ">=1.1.2"
+mf2util = ">=0.5.0"
+mox3 = ">=0.28"
+oauthlib = ">=3.0"
+praw = {version = ">=7.3.0", python = ">=3.7,<4.0"}
+python-tumblpy = ">=1.1"
+requests = ">=2.0"
+requests-oauthlib = "*"
+sphinx = {optional = true, version = "*"}
+sphinx-rtd-theme = {optional = true, version = "*"}
+tweepy = ">=4.5"
+ujson = ">=5.0"
+webapp2 = "3.0.0b1"
+
+[tool.poetry.extras]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
+app = [
+    "flask-gae-static",
+    "gunicorn",
+]
+local = [
+    "flask-gae-static",
+]
+
+# [tool.poetry.dev-dependencies]
+# flask-gae-static = {path = "../flask-gae-static", develop = true}
+
+[build-system]
+# for the build_editable hook, for pip install -e .
+# https://github.com/python-poetry/poetry/issues/5056
+# TODO: change this to poetry-core>=1.1.0 once it's released
+requires = ["poetry-core @ git+https://github.com/python-poetry/poetry-core.git@master"]
+build-backend = "poetry.core.masonry.api"

@@ -298,6 +298,8 @@ Mostly just internal changes to webutil to support granary v1.9.
 
 Development
 ---
+Poetry STATE: it works, it's great, but I haven't found a way to easily toggle between PyPI and local filesystem (eg pip install -e) for my own packages. The develop = true flag and path = ... specifier works for pip install -e, but then I'd have to switch them back to normal for publishing, or for letting other people ramp up on the repo and contribute without needing to clone the other repos too.
+
 First, fork and clone this repo. Then, you'll need the [Google Cloud SDK](https://cloud.google.com/sdk/) with the `gcloud-appengine-python` and `gcloud-appengine-python-extras` [components](https://cloud.google.com/sdk/docs/components#additional_components). Once you have them, set up your environment by running these commands in the repo root directory:
 
 ```shell
