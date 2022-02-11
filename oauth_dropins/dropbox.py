@@ -14,6 +14,8 @@ from . import views, models
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 DROPBOX_APP_KEY = util.read('dropbox_app_key')
 DROPBOX_APP_SECRET = util.read('dropbox_app_secret')
 GET_AUTH_CODE_URL = '&'.join((
@@ -110,7 +112,7 @@ class Callback(views.Callback):
 
     if error or error_reason:
       if error == 'access_denied':
-        logging.info(f'User declined: {error_reason}')
+        logger.info(f'User declined: {error_reason}')
         return self.finish(None, state=state)
       else:
         flask_util.error(' '.join((error, error_reason)))
@@ -141,10 +143,10 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp)
     except (ValueError, TypeError):
-      logging.error(f'Bad response:\n{resp}', exc_info=True)
+      logger.error(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Dropbox response to access token request')
 
-    logging.info(f"Storing new Dropbox account: {data['uid']}")
+    logger.info(f"Storing new Dropbox account: {data['uid']}")
     auth = DropboxAuth(id=data['uid'], access_token_str=data['access_token'])
     auth.put()
     return self.finish(auth, state=csrf.state)

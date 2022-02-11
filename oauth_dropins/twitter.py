@@ -14,6 +14,8 @@ from . import models, twitter_auth, views
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
 
 
@@ -128,7 +130,7 @@ class Start(views.Start):
     models.OAuthRequestToken(id=auth.request_token['oauth_token'],
                              token_secret=auth.request_token['oauth_token_secret']
                              ).put()
-    logging.info(f'Generated request token, redirecting to Twitter: {auth_url}')
+    logger.info(f'Generated request token, redirecting to Twitter: {auth_url}')
     return auth_url
 
 

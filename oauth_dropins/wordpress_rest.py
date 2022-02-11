@@ -28,6 +28,8 @@ from .models import BaseAuth
 from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 if appengine_info.DEBUG:
   WORDPRESS_CLIENT_ID = util.read('wordpress.com_client_id_local')
   WORDPRESS_CLIENT_SECRET = util.read('wordpress.com_client_secret_local')
@@ -125,7 +127,7 @@ class Callback(views.Callback):
       error_description = urllib.parse.unquote_plus(
         request.values.get('error_description', ''))
       if error == 'access_denied':
-        logging.info(f'User declined: {error_description}')
+        logger.info(f'User declined: {error_description}')
         return self.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(f'{error} {error_description} ')
@@ -143,7 +145,7 @@ class Callback(views.Callback):
     }
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
     resp.raise_for_status()
-    logging.debug(f'Access token response: {resp.text}')
+    logger.debug(f'Access token response: {resp.text}')
 
     try:
       resp = resp.json()
@@ -156,7 +158,7 @@ class Callback(views.Callback):
       blog_domain = util.domain_from_link(resp['blog_url'])
       access_token = resp['access_token']
     except:
-      logging.error(f'Could not decode JSON: {resp.text}', exc_info=True)
+      logger.error(f'Could not decode JSON: {resp.text}', exc_info=True)
       raise
 
     auth = WordPressAuth(id=blog_domain,

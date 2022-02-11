@@ -15,6 +15,8 @@ from . import views, models
 from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 MIN_APP_SCOPED_ID = 100000000000000
 
 API_BASE = 'https://graph.facebook.com/v4.0/'
@@ -107,7 +109,7 @@ class FacebookAuth(models.BaseAuth):
         entity = FacebookAuth(id=id, type='page', pages_json=json_dumps([page]),
                               access_token_str=page.get('access_token'))
         entity.user_json = entity.urlopen(API_PAGE_URL).read()
-        logging.debug(f'Page object: {entity.user_json}')
+        logger.debug(f'Page object: {entity.user_json}')
         return entity
 
     return None
@@ -165,19 +167,19 @@ class Callback(views.Callback):
     try:
       resp = json_loads(util.urlopen(url).read())
     except urllib.error.HTTPError as e:
-      logging.error(e.read())
+      logger.error(e.read())
       raise
 
-    logging.debug(f'Access token response: {resp}')
+    logger.debug(f'Access token response: {resp}')
     access_token = resp['access_token']
 
     user = models.BaseAuth.urlopen_access_token(API_USER_URL, access_token).read()
-    logging.debug(f'User info response: {user}')
+    logger.debug(f'User info response: {user}')
     user_id = json_loads(user)['id']
 
     pages = json_dumps(json_loads(models.BaseAuth.urlopen_access_token(
       API_PAGES_URL, access_token).read()).get('data'))
-    logging.debug(f'Pages response: {pages}')
+    logger.debug(f'Pages response: {pages}')
 
     auth = FacebookAuth(id=user_id,
                         type='user',
@@ -205,7 +207,7 @@ class Callback(views.Callback):
       error_description = urllib.parse.unquote_plus(
         request.values.get('error_description', ''))
       if error == 'access_denied' and error_reason == 'user_denied':
-        logging.info(f'User declined: {error_description}')
+        logger.info(f'User declined: {error_description}')
         return handler.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(' '.join((error, error_reason, error_description)))

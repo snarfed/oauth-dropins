@@ -15,6 +15,8 @@ from .models import BaseAuth
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 LINKEDIN_CLIENT_ID = util.read('linkedin_client_id')
 LINKEDIN_CLIENT_SECRET = util.read('linkedin_client_secret')
 # URL templates. Can't (easily) use urlencode() because I want to keep
@@ -133,7 +135,7 @@ class Callback(views.Callback):
     if error:
       # https://docs.microsoft.com/en-us/linkedin/shared/authentication/authorization-code-flow?context=linkedin/consumer/context#application-is-rejected
       if error in ('user_cancelled_login', 'user_cancelled_authorize'):
-        logging.info(f"User declined: {request.values.get('error_description')}")
+        logger.info(f"User declined: {request.values.get('error_description')}")
         return self.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(f'{error} {desc}')
@@ -154,13 +156,13 @@ class Callback(views.Callback):
     resp.raise_for_status()
     resp = json_loads(resp.text)
 
-    logging.debug(f'Access token response: {resp}')
+    logger.debug(f'Access token response: {resp}')
     if resp.get('serviceErrorCode'):
       flask_util.error(resp)
 
     access_token = resp['access_token']
     resp = LinkedInAuth(access_token_str=access_token).get(API_PROFILE_URL).json()
-    logging.debug(f'Profile response: {resp}')
+    logger.debug(f'Profile response: {resp}')
     auth = LinkedInAuth(id=resp['id'], access_token_str=access_token,
                         user_json=json_dumps(resp))
     auth.put()

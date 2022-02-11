@@ -14,6 +14,8 @@ from . import models, views
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 INDIEAUTH_CLIENT_ID = util.read('indieauth_client_id')
 INDIEAUTH_URL = 'https://indieauth.com/auth'
 
@@ -36,7 +38,7 @@ def discover_authorization_endpoint(me, resp=None):
     flask_util.error(str(e))
 
   if resp.status_code // 100 != 2:
-    logging.warning(
+    logger.warning(
       'could not fetch user url "%s". got response code: %d',
       me, resp.status_code)
     return INDIEAUTH_URL
@@ -69,7 +71,7 @@ def build_user_json(me, resp=None):
 
   resp = resp or util.requests_get(me)
   if resp.status_code // 100 != 2:
-    logging.warning(
+    logger.warning(
       'could not fetch user url "%s". got response code: %d',
       me, resp.status_code)
     return user_json
@@ -77,7 +79,7 @@ def build_user_json(me, resp=None):
   mf2 = util.parse_mf2(resp, resp.url)
   user_json['rel-me'] = mf2['rels'].get('me')
   user_json['h-card'] = mf2util.representative_hcard(mf2, me)
-  logging.debug(f'built user-json {user_json!r}')
+  logger.debug(f'built user-json {user_json!r}')
   return util.trim_nulls(user_json)
 
 
@@ -134,7 +136,7 @@ class Start(views.Start):
       }),
     })
 
-    logging.info(f'Redirecting to IndieAuth: {url}')
+    logger.info(f'Redirecting to IndieAuth: {url}')
     return url
 
   @classmethod

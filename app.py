@@ -14,6 +14,8 @@ from werkzeug.exceptions import HTTPException
 
 from oauth_dropins.webutil import appengine_info, appengine_config
 
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 app.wsgi_app = flask_util.ndb_context_middleware(
@@ -63,7 +65,7 @@ def handle_discovery_errors(e):
     return e
 
   if isinstance(e, (ValueError, requests.RequestException)):
-    logging.warning('', exc_info=True)
+    logger.warning('', exc_info=True)
     return flask.redirect('/?' + urllib.parse.urlencode({'error': str(e)}))
 
   return flask_util.handle_exception(e)

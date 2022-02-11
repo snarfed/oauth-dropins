@@ -16,6 +16,8 @@ from . import views, models
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 GOOGLE_CLIENT_ID = util.read('google_client_id')
 GOOGLE_CLIENT_SECRET = util.read('google_client_secret')
 AUTH_CODE_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -91,7 +93,7 @@ class Callback(Scopes, views.Callback):
     desc = request.values.get('error_description')
     if error:
       msg = f'Error: {error}: {desc}'
-      logging.info(msg)
+      logger.info(msg)
       if error == 'access_denied':
         return self.finish(None, state=state)
       else:
@@ -114,7 +116,7 @@ class Callback(Scopes, views.Callback):
       raise
 
     user_json = json_loads(resp.text)
-    logging.info('Got one person', user_json)
+    logger.info('Got one person', user_json)
 
     user = GoogleUser(id=user_json['sub'], user_json=json_dumps(user_json),
                       token_json=json_dumps(session.token))

@@ -19,6 +19,8 @@ from . import facebook, views, models
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 INSTAGRAM_CLIENT_ID = util.read('instagram_client_id')
 INSTAGRAM_CLIENT_SECRET = util.read('instagram_client_secret')
 INSTAGRAM_SESSIONID_COOKIE = (os.getenv('INSTAGRAM_SESSIONID_COOKIE') or
@@ -127,7 +129,7 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp.text)
     except (ValueError, TypeError):
-      logging.error(f'Bad response:\n{resp}', exc_info=True)
+      logger.error(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Instagram response to access token request')
 
     if 'error_type' in resp:

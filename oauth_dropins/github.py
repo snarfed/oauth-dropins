@@ -15,6 +15,8 @@ from .models import BaseAuth
 from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 if appengine_info.DEBUG:
   GITHUB_CLIENT_ID = util.read('github_client_id_local')
   GITHUB_CLIENT_SECRET = util.read('github_client_secret_local')
@@ -142,7 +144,7 @@ class Callback(views.Callback):
     error = request.values.get('error')
     if error:
       if error == 'access_denied':
-        logging.info('User declined')
+        logger.info('User declined')
         return self.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(f"{error} {request.values.get('error_description')}")
@@ -161,7 +163,7 @@ class Callback(views.Callback):
                               data=urllib.parse.urlencode(data))
     resp.raise_for_status()
     resp = resp.text
-    logging.debug(f'Access token response: {resp}')
+    logger.debug(f'Access token response: {resp}')
 
     resp = urllib.parse.parse_qs(resp)
 
@@ -172,7 +174,7 @@ class Callback(views.Callback):
     access_token = resp['access_token'][0]
     resp = GitHubAuth(access_token_str=access_token).post(
         API_GRAPHQL, json=GRAPHQL_USER).json()
-    logging.debug(f'GraphQL data.viewer response: {resp}')
+    logger.debug(f'GraphQL data.viewer response: {resp}')
     user_json = resp['data']['viewer']
     auth = GitHubAuth(id=user_json['login'], access_token_str=access_token,
                       user_json=json_dumps(user_json))

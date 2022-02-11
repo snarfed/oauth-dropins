@@ -21,6 +21,8 @@ from .webutil.util import json_dumps, json_loads
 
 from random import randint
 
+logger = logging.getLogger(__name__)
+
 if appengine_info.DEBUG:
   REDDIT_APP_KEY = util.read('reddit_app_key_local')
   REDDIT_APP_SECRET = util.read('reddit_app_secret_local')
@@ -99,7 +101,7 @@ class Callback(views.Callback):
     code = request.values.get('code')
     if error or not state or not code:
       if error in ('access_denied'):
-        logging.info(f"User declined: {request.values.get('error_description')}")
+        logger.info(f"User declined: {request.values.get('error_description')}")
         return self.finish(None, state=state)
       else:
         flask_util.error(error)

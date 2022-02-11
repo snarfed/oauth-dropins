@@ -14,6 +14,8 @@ from .models import BaseAuth
 from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_loads
 
+logger = logging.getLogger(__name__)
+
 if appengine_info.DEBUG:
     MEETUP_CLIENT_ID = util.read('meetup_client_id_local')
     MEETUP_CLIENT_SECRET = util.read('meetup_client_secret_local')
@@ -115,7 +117,7 @@ class Callback(views.Callback):
         error = request.values.get('error')
         if error:
             if error == 'access_denied':
-                logging.info('User declined')
+                logger.info('User declined')
                 return self.finish(None, state=request.values.get('state'))
             else:
                 flask_util.error(f"Error: {error}: {request.values.get('error_description')}")
@@ -146,12 +148,12 @@ class Callback(views.Callback):
         resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
         resp.raise_for_status()
 
-        logging.debug(f'Access token response: {resp}')
+        logger.debug(f'Access token response: {resp}')
 
         try:
             data = json_loads(resp.text)
         except (ValueError, TypeError):
-            logging.error(f'Bad response:\n{resp}', exc_info=True)
+            logger.error(f'Bad response:\n{resp}', exc_info=True)
             flask_util.error('Bad Disqus response to access token request')
 
         error = data.get('error')
@@ -163,10 +165,10 @@ class Callback(views.Callback):
 
         user_json = urlopen_bearer_token(GET_USER_INFO_URL, access_token).read()
         user = json_loads(user_json)
-        logging.debug(f'User info response: {user}')
+        logger.debug(f'User info response: {user}')
         user_id = str(user['id'])
 
-        logging.info(f'Storing new Meetup account for ID: {user_id}')
+        logger.info(f'Storing new Meetup account for ID: {user_id}')
         auth = MeetupAuth(id=user_id, access_token_str=access_token, user_json=user_json)
         auth.put()
         return self.finish(auth, state=csrf.state)

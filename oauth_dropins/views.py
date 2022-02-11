@@ -19,6 +19,8 @@ from flask.views import View
 
 from .webutil import util
 
+logger = logging.getLogger(__name__)
+
 
 class BaseView(View):
   """Base view class. Provides the to() factory method.
@@ -109,7 +111,7 @@ class Start(BaseView):
     # https://console.cloud.google.com/errors/CPafw-Gq18CrnwE
     url = str(self.redirect_url(state=request.values.get('state')))
 
-    logging.info(f'Starting OAuth flow: redirecting to {url}')
+    logger.info(f'Starting OAuth flow: redirecting to {url}')
     return flask.redirect(url)
 
   def redirect_url(self, state=None):
@@ -204,13 +206,13 @@ class Callback(BaseView):
           params += [('access_token_key', token[0]),
                      ('access_token_secret', token[1])]
       except NotImplementedError:
-        logging.info('access_token() not implemented')
+        logger.info('access_token() not implemented')
       try:
         token = auth_entity.refresh_token
         params.append(('refresh_token', token))
       except AttributeError:
-        logging.info('refresh_token not included')
+        logger.info('refresh_token not included')
 
     url = util.add_query_params(self.to_path, params)
-    logging.info(f'Finishing OAuth flow: redirecting to {url}')
+    logger.info(f'Finishing OAuth flow: redirecting to {url}')
     return flask.redirect(url)

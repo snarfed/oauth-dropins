@@ -23,6 +23,8 @@ from .models import BaseAuth
 from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 # https://docs.joinmastodon.org/api/oauth-scopes/
 ALL_SCOPES = (
   'read',
@@ -80,12 +82,12 @@ def _encode_state(app, state):
     'app_key': app.key.urlsafe().decode(),
     'state': quote_plus(state) if state else '',
   })
-  logging.debug(f'Encoding wrapper state: {wrapped!r}')
+  logger.debug(f'Encoding wrapper state: {wrapped!r}')
   return wrapped
 
 
 def _decode_state(state):
-  logging.debug(f'Decoding wrapper state: {state!r}')
+  logger.debug(f'Decoding wrapper state: {state!r}')
   decoded = json_loads(state)
   return decoded['app_key'], unquote(decoded['state'])
 
@@ -221,18 +223,18 @@ class Start(views.Start):
       resp = util.requests_get(urljoin(instance, INSTANCE_API))
       resp.raise_for_status()
     except requests.RequestException:
-      logging.info('Error', exc_info=True)
+      logger.info('Error', exc_info=True)
       resp = None
 
     is_json = resp and resp.headers.get('Content-Type', '').strip().startswith(
       'application/json')
     if is_json:
-      logging.info(resp.text)
+      logger.info(resp.text)
     if (not resp or not resp.ok or not is_json or
         not self._version_ok(resp.json().get('version'))):
       msg = f"{instance} doesn't look like a {self.LABEL} instance."
-      logging.info(resp)
-      logging.info(msg)
+      logger.info(resp)
+      logger.info(msg)
       raise ValueError(msg)
 
     # if we got redirected, update instance URL
@@ -254,7 +256,7 @@ class Start(views.Start):
       app.instance_info = resp.text
       app.put()
 
-    logging.info(f'Starting OAuth for {self.LABEL} instance {instance}')
+    logger.info(f'Starting OAuth for {self.LABEL} instance {instance}')
     app_data = json_loads(app.data)
     return urljoin(instance, AUTH_CODE_API % {
       'client_id': app_data['client_id'],
@@ -276,7 +278,7 @@ class Start(views.Start):
 
     Returns: APP_CLASS
     """
-    logging.info(f"first time we've seen {self.LABEL} instance {instance} with app {app_name} {app_url}! registering an API app.")
+    logger.info(f"first time we've seen {self.LABEL} instance {instance} with app {app_name} {app_url}! registering an API app.")
 
     redirect_uris = {urljoin(request.host_url, path)
                      for path in set(self.REDIRECT_PATHS)}
@@ -300,7 +302,7 @@ class Start(views.Start):
     resp.raise_for_status()
 
     app_data = json_loads(resp.text)
-    logging.info(f'Got {app_data}')
+    logger.info(f'Got {app_data}')
     app = self.APP_CLASS(instance=instance, app_name=app_name,
                          app_url=app_url, data=json_dumps(app_data))
     app.put()
@@ -326,7 +328,7 @@ class Callback(views.Callback):
       # user_cancelled_login and user_cancelled_authorize are non-standard.
       # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
       if error in ('user_cancelled_login', 'user_cancelled_authorize', 'access_denied'):
-        logging.info(f"User declined: {request.values.get('error_description')}")
+        logger.info(f"User declined: {request.values.get('error_description')}")
         state = request.values.get('state')
         if state:
           _, state = _decode_state(state)
@@ -356,13 +358,13 @@ class Callback(views.Callback):
       headers={'Content-Type': 'application/x-www-form-urlencoded'})
     resp.raise_for_status()
     resp_json = resp.json()
-    logging.debug(f'Access token response: {resp_json}')
+    logger.debug(f'Access token response: {resp_json}')
     if resp_json.get('error'):
       flask_util.error(resp_json)
 
     access_token = resp_json['access_token']
     user = self.AUTH_CLASS(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
-    logging.debug(f'User: {user}')
+    logger.debug(f'User: {user}')
     address = f"@{user['username']}@{urlparse(app.instance).netloc}"
     auth = self.AUTH_CLASS(id=address, app=app.key, access_token_str=access_token,
                            user_json=json_dumps(user))

@@ -17,6 +17,8 @@ from . import flickr_auth, views, models
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 REQUEST_TOKEN_URL = 'https://www.flickr.com/services/oauth/request_token'
 AUTHORIZE_URL = 'https://www.flickr.com/services/oauth/authorize'
 AUTHENTICATE_URL = 'https://www.flickr.com/services/oauth/authenticate'
@@ -118,7 +120,7 @@ class Start(views.Start):
         'oauth_token': resource_owner_key
       })
 
-    logging.info(
+    logger.info(
       'Generated request token, redirect to Flickr authorization url: %s',
       auth_url)
     return auth_url

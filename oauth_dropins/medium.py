@@ -23,6 +23,8 @@ from .models import BaseAuth
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 MEDIUM_CLIENT_ID = util.read('medium_client_id')
 MEDIUM_CLIENT_SECRET = util.read('medium_client_secret')
 
@@ -128,7 +130,7 @@ class Callback(views.Callback):
     error = request.values.get('error')
     if error:
       if error == 'access_denied':
-        logging.info('User declined')
+        logger.info('User declined')
         return self.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(error)
@@ -147,17 +149,17 @@ class Callback(views.Callback):
     resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data,
                               headers={'User-Agent': USER_AGENT})
     resp.raise_for_status()
-    logging.debug(f'Access token response: {resp.text}')
+    logger.debug(f'Access token response: {resp.text}')
 
     try:
       resp = json_loads(resp.text)
     except:
-      logging.error('Could not decode JSON', exc_info=True)
+      logger.error('Could not decode JSON', exc_info=True)
       raise
 
     errors = resp.get('errors') or resp.get('error')
     if errors:
-      logging.info(f'Errors: {errors}')
+      logger.info(f'Errors: {errors}')
       flask_util.error(errors[0].get('message'))
 
     # TODO: handle refresh token

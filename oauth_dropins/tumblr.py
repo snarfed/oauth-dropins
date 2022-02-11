@@ -15,6 +15,8 @@ from . import views, models
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 TUMBLR_APP_KEY = util.read('tumblr_app_key')
 TUMBLR_APP_SECRET = util.read('tumblr_app_secret')
 
@@ -119,13 +121,13 @@ class Callback(views.Callback):
     # get the user's blogs
     # http://www.tumblr.com/docs/en/api/v2#user-methods
     tp = TumblrAuth._api_from_token(auth_token_key, auth_token_secret)
-    logging.debug('Fetching user/info')
+    logger.debug('Fetching user/info')
     try:
       resp = tp.post('user/info')
     except BaseException as e:
       util.interpret_http_exception(e)
       raise
-    logging.debug(f'Got: {resp}')
+    logger.debug(f'Got: {resp}')
     user = resp['user']
 
     auth = TumblrAuth(id=user['name'],

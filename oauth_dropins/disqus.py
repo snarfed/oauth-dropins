@@ -24,6 +24,8 @@ from . import models, views
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 DISQUS_CLIENT_ID = util.read('disqus_client_id')
 DISQUS_CLIENT_SECRET = util.read('disqus_client_secret')
 GET_AUTH_CODE_URL = (
@@ -117,7 +119,7 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp.text)
     except (ValueError, TypeError):
-      logging.error(f'Bad response:\n{resp}', exc_info=True)
+      logger.error(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Disqus response to access token request')
 
     access_token = data['access_token']
@@ -133,11 +135,11 @@ class Callback(views.Callback):
     try:
       user_data = json_loads(resp)['response']
     except (ValueError, TypeError):
-      logging.error(f'Bad response:\n{resp}', exc_info=True)
+      logger.error(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Disqus response to user details request')
 
     auth.user_json = json_dumps(user_data)
-    logging.info(f'created disqus auth {auth}')
+    logger.info(f'created disqus auth {auth}')
     auth.put()
     return self.finish(auth, state=request.values.get('state'))
 
@@ -153,7 +155,7 @@ class Callback(views.Callback):
     error = request.values.get('error')
     if error:
       if error == 'access_denied':
-        logging.info('User declined')
+        logger.info('User declined')
         handler.finish(None, state=request.values.get('state'))
         return True
       else:

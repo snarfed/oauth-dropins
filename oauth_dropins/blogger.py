@@ -22,6 +22,8 @@ from .webutil import flask_util
 from .webutil import util
 from .webutil.util import json_dumps, json_loads
 
+logger = logging.getLogger(__name__)
+
 AUTH_CODE_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 ACCESS_TOKEN_URL = 'https://www.googleapis.com/oauth2/v4/token'
 
@@ -117,7 +119,7 @@ class Callback(Scopes, views.Callback):
     desc = request.values.get('error_description')
     if error:
       msg = f'Error: {error}: {desc}'
-      logging.info(msg)
+      logger.info(msg)
       if error == 'access_denied':
         return self.finish(None, state=state)
       else:
@@ -147,7 +149,7 @@ class Callback(Scopes, views.Callback):
       if match:
         id = match.group(1)
       else:
-        logging.warning(f"Couldn't parse {id} , using entire value as id")
+        logger.warning(f"Couldn't parse {id} , using entire value as id")
       break
 
     blog_ids = []
