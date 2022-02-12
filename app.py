@@ -20,7 +20,8 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 app.wsgi_app = flask_util.ndb_context_middleware(
     app.wsgi_app, client=appengine_config.ndb_client)
-flask_gae_static.init_app(app)
+if appengine_info.DEBUG:
+  flask_gae_static.init_app(app)
 
 
 SITES = {name: importlib.import_module(f'oauth_dropins.{name}') for name in (
