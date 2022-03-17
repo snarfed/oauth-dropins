@@ -72,7 +72,7 @@ class Start(views.Start):
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
                          redirect_uri=url,
-                         user_agent='oauth-dropin reddit api')
+                         user_agent=util.user_agent)
 
     # store the state for later use in the callback view
     models.OAuthRequestToken(id=state,
@@ -115,7 +115,7 @@ class Callback(views.Callback):
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
                          redirect_uri=url,
-                         user_agent='oauth-dropin reddit api')
+                         user_agent=util.user_agent)
 
     refresh_token = reddit.auth.authorize(code)
     praw_user = reddit.user.me()

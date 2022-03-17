@@ -28,10 +28,6 @@ logger = logging.getLogger(__name__)
 MEDIUM_CLIENT_ID = util.read('medium_client_id')
 MEDIUM_CLIENT_SECRET = util.read('medium_client_secret')
 
-# medium is behind cloudflare, which often blocks requests's user agent, so set
-# our own.
-USER_AGENT = 'oauth-dropins (https://oauth-dropins.appspot.com/)'
-
 # URL templates. Can't (easily) use urlencode() because I want to keep the
 # %(...)s placeholders as is and fill them in later in code.
 GET_AUTH_CODE_URL = '&'.join((
@@ -91,7 +87,6 @@ class MediumAuth(BaseAuth):
     """
     headers = kwargs.setdefault('headers', {})
     headers['Authorization'] = 'Bearer ' + self.access_token_str
-    headers.setdefault('User-Agent', USER_AGENT)
 
     resp = util.requests_get(*args, **kwargs)
     try:
@@ -146,8 +141,7 @@ class Callback(views.Callback):
       'redirect_uri': request.base_url,
       'grant_type': 'authorization_code',
     }
-    resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data,
-                              headers={'User-Agent': USER_AGENT})
+    resp = util.requests_post(GET_ACCESS_TOKEN_URL, data=data)
     resp.raise_for_status()
     logger.debug(f'Access token response: {resp.text}')
 
