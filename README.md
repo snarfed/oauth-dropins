@@ -153,6 +153,7 @@ Changelog
 
 * Drop Python 3.5 support. Python 3.6 is now the minimum required version.
 * Switch from app_server to `flask run` for local development.
+* Add `webutil.util.set_user_agent` to set `User-Agent` header to be sent with all HTTP requests.
 
 ### 4.0 - 2021-09-15
 
