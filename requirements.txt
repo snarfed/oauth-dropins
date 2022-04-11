@@ -10,7 +10,7 @@
 
 git+https://github.com/dvska/gdata-python3.git#egg=gdata
 
-beautifulsoup4==4.11.0
+beautifulsoup4==4.11.1
 cachetools==4.2.4
 certifi==2021.10.8
 charset-normalizer==2.0.12
