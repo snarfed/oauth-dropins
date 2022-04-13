@@ -72,10 +72,12 @@ This view class redirects you to an OAuth-enabled site so it can ask the user to
 - `redirect_url(state=None)` returns the URL to redirect to at the site to initiate the OAuth flow. `Start` will redirect here automatically if it's used in a WSGI application, but you can call this manually if you want to control that redirect yourself:
 
 ```python
+import flask
+
 class MyView(Start):
   def dispatch_request(self):
     ...
-    self.redirect(self.redirect_url())
+    flask.redirect(self.redirect_url())
 ```
 
 
