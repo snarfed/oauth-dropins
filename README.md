@@ -151,6 +151,16 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 6.0 - unreleased
+
+_Breaking changes:_
+
+* Remove `webutil.handlers`, which was based on the largely unmaintained [`webapp2`](https://github.com/GoogleCloudPlatform/webapp2). All known clients have migrated to [Flask](https://palletsprojects.com/p/flask/) and `webutil.flask_util`.
+
+_Non-breaking changes:_
+
+* ...
+
 ### 5.0 - 2022-03-23
 
 _Breaking changes:_

@@ -112,10 +112,12 @@ user to grant your app permission. It has two useful methods:
 
 .. code:: python
 
+   import flask
+
    class MyView(Start):
      def dispatch_request(self):
        ...
-       self.redirect(self.redirect_url())
+       flask.redirect(self.redirect_url())
 
 ``Callback``
 ~~~~~~~~~~~~
@@ -242,6 +244,22 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 
 Changelog
 ---------
+
+6.0 - unreleased
+~~~~~~~~~~~~~~~~
+
+*Breaking changes:*
+
+-  Remove ``webutil.handlers``, which was based on the largely
+   unmaintained
+   `webapp2 <https://github.com/GoogleCloudPlatform/webapp2>`__. All
+   known clients have migrated to
+   `Flask <https://palletsprojects.com/p/flask/>`__ and
+   ``webutil.flask_util``.
+
+*Non-breaking changes:*
+
+-  …
 
 5.0 - 2022-03-23
 ~~~~~~~~~~~~~~~~
