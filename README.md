@@ -156,6 +156,7 @@ Changelog
 _Breaking changes:_
 
 * Remove `webutil.handlers`, which was based on the largely unmaintained [`webapp2`](https://github.com/GoogleCloudPlatform/webapp2). All known clients have migrated to [Flask](https://palletsprojects.com/p/flask/) and `webutil.flask_util`.
+* Drop Python 3.6 support. Python 3.7 is now the minimum required version.
 
 _Non-breaking changes:_
 
