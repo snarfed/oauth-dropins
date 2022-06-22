@@ -116,3 +116,12 @@ class OAuthRequestToken(models.StringIdModel):
   """
   token_secret = ndb.StringProperty(required=True)
   state = ndb.StringProperty(required=False)
+
+
+class PkceCode(models.StringIdModel):
+    """An OAuth2 PKCE code challenge and code verifier.
+
+    The key name is the state query param value.
+    """
+    verifier = ndb.StringProperty(required=True)
+    challenge = ndb.StringProperty(required=True)

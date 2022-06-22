@@ -256,6 +256,14 @@ Changelog
    known clients have migrated to
    `Flask <https://palletsprojects.com/p/flask/>`__ and
    ``webutil.flask_util``.
+-  `Migrate
+   Twitter <https://developer.twitter.com/en/docs/twitter-api/migrate/overview>`__
+   to the `v2
+   API <https://developer.twitter.com/en/docs/twitter-api/migrate/whats-new>`__
+   and `OAuth 2 with
+   PKCE <https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code>`__.
+-  Drop Python 3.6 support. Python 3.7 is now the minimum required
+   version.
 
 *Non-breaking changes:*
 

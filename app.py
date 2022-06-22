@@ -23,6 +23,8 @@ app.wsgi_app = flask_util.ndb_context_middleware(
 if appengine_info.DEBUG:
   flask_gae_static.init_app(app)
 
+logging.getLogger('requests_oauthlib').setLevel(logging.DEBUG)
+
 
 SITES = {name: importlib.import_module(f'oauth_dropins.{name}') for name in (
     'blogger',

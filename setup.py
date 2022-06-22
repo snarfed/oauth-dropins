@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='oauth-dropins',
-      version='5.0',
+      version='6.0',
       description='Drop-in OAuth Flask views for many popular sites.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
@@ -50,7 +50,6 @@ setup(name='oauth-dropins',
           'python-tumblpy>=1.1',
           'requests-oauthlib',
           'requests>=2.22',
-          'tweepy>=4.5',
           'ujson>=5.1',
           'urllib3>=1.14',
           'webapp2>=3.0.0b1',
