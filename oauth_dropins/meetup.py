@@ -100,7 +100,7 @@ class Start(views.Start):
             'client_id': MEETUP_CLIENT_ID,
             'redirect_uri': urllib.parse.quote_plus(self.to_url()),
             'scope': self.scope,
-            'state': f'{urllib.parse.quote_plus(state)}|{csrf_key.id()}',
+            'state': f'{urllib.parse.quote_plus(state or "")}|{csrf_key.id()}',
         }
 
     @classmethod
