@@ -1,129 +1,136 @@
-"""Twitter OAuth 2 drop-in.
+"""Twitter OAuth drop-in.
 
-https://developer.twitter.com/en/docs/authentication/oauth-2-0/user-access-token
-https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code
-https://developer.twitter.com/en/docs/authentication/api-reference/token
+TODO: port to
+http://code.google.com/p/oauth/source/browse/#svn%2Fcode%2Fpython . tweepy is
+just a wrapper around that anyway.
 """
 import logging
-import secrets
-import time
 
 from flask import request
 from google.cloud import ndb
-from requests.auth import HTTPBasicAuth
-from requests_oauthlib import OAuth2Session
-from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
+import tweepy
 
-from . import models, views
+from . import models, twitter_auth, views
 from .webutil import flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 
-TWITTER_CLIENT_ID = util.read('twitter_app_key')
-TWITTER_CLIENT_SECRET = util.read('twitter_app_secret')
-
-AUTH_CODE_URL = 'https://twitter.com/i/oauth2/authorize'
-ACCESS_TOKEN_URL = 'https://api.twitter.com/2/oauth2/token'
-API_ACCOUNT_URL = 'https://api.twitter.com/2/users/me'
-
-# https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code
-ALL_SCOPES = (
-  'block.read',
-  'block.write',
-  'bookmark.read',
-  'bookmark.write',
-  'follows.read',
-  'follows.write',
-  'like.read',
-  'like.write',
-  'list.read',
-  'list.write',
-  'mute.read',
-  'mute.write',
-  'offline.access',
-  'space.read',
-  'tweet.read',
-  'tweet.write',
-  'users.read',
-)
+API_ACCOUNT_URL = 'https://api.twitter.com/1.1/account/verify_credentials.json'
 
 
-class TwitterOAuth2(models.BaseAuth):
-  """An OAuth2-authenticated Twitter user.
+class TwitterAuth(models.BaseAuth):
+  """An authenticated Twitter user.
 
-  Provides methods that return information about this user and store OAuth 2 tokens
-  in the datastore. See models.BaseAuth for usage details.
+  Provides methods that return information about this user and make OAuth-signed
+  requests to the Twitter v1.1 API. Stores OAuth credentials in the datastore.
+  See models.BaseAuth for usage details.
 
-  The datastore entity key name is the Twitter username.
+  Twitter-specific details: implements api(), get(), and post(). api() returns a
+  tweepy.API; get() and post() wrap the corresponding requests methods. The
+  datastore entity key name is the Twitter username.
   """
-  # Fields: token_type, access_token, scope, expires_at, expires_in
-  token_json = ndb.TextProperty(required=True)
+  # access token
+  token_key = ndb.StringProperty(required=True)
+  token_secret = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty(required=True)
 
   def site_name(self):
     return 'Twitter'
 
   def user_display_name(self):
-    """Returns the username."""
+    """Returns the username.
+    """
     return self.key_id()
 
   def access_token(self):
-    """Returns the OAuth access token JSON."""
-    return json_loads(self.token_json)['access_token']
+    """Returns the OAuth access token as a (string key, string secret) tuple.
+    """
+    return (self.token_key, self.token_secret)
 
-  def session(self):
-    """Returns a :class:`requests_oauthlib.OAuth2Session`."""
-    token = json_loads(self.token_json)
+  def urlopen(self, url, **kwargs):
+    """Wraps urllib.request.urlopen() and adds an OAuth signature.
+    """
+    return twitter_auth.signed_urlopen(url, self.token_key, self.token_secret,
+                                       **kwargs)
 
-    if token.get('refresh_token') and token.get('expires_at'):
-      def update_token(token):
-        logging.info(f'Storing new access token {token}')
-        self.token = token
-        self.put()
+  def get(self, *args, **kwargs):
+    """Wraps requests.get() and adds an OAuth signature.
+    """
+    oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
+    resp = util.requests_get(*args, auth=oauth1, **kwargs)
+    try:
+      resp.raise_for_status()
+    except BaseException as e:
+      util.interpret_http_exception(e)
+      raise
+    return resp
 
-      kwargs = {
-        'auto_refresh_url': ACCESS_TOKEN_URL,
-        'auto_refresh_kwargs': {'client_id': TWITTER_CLIENT_ID},
-        'token_updater': update_token,
-      }
+  def post(self, *args, **kwargs):
+    """Wraps requests.post() and adds an OAuth signature.
+    """
+    oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
+    resp = util.requests_post(*args, auth=oauth1, **kwargs)
+    try:
+      resp.raise_for_status()
+    except BaseException as e:
+      util.interpret_http_exception(e)
+      raise
+    return resp
 
-    session = OAuth2Session(TWITTER_CLIENT_ID, token=token, **kwargs)
-    session.auth = HTTPBasicAuth(TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET)
-    return session
+  def api(self):
+    """Returns a tweepy.API.
+    """
+    return tweepy.API(twitter_auth.tweepy_auth(self.token_key, self.token_secret))
 
 
 class Start(views.Start):
   """Starts three-legged OAuth with Twitter.
 
-  Redirects to Twitter's auth prompt for user approval.
+  Fetches an OAuth request token, then redirects to Twitter's auth page to
+  request an access token.
+
+  Attributes:
+    access_type: optional, 'read' or 'write'. Passed through to Twitter as
+      x_auth_access_type. If the twitter app has read/write or read/write/dm
+      permissions, this lets you request a read-only token. Details:
+      https://dev.twitter.com/docs/api/1/post/oauth/request_token
   """
   NAME = 'twitter'
   LABEL = 'Twitter'
-  SCOPE_SEPARATOR = ' '
-  DEFAULT_SCOPE = 'tweet.read users.read'
+
+  def __init__(self, to_path, scopes=None, access_type=None):
+    super().__init__(to_path, scopes=scopes)
+    assert access_type in (None, 'read', 'write'), \
+        f'access_type must be "read" or "write"; got {access_type!r}'
+    self.access_type = access_type
 
   def redirect_url(self, state=None):
-    assert TWITTER_CLIENT_ID and TWITTER_CLIENT_SECRET, \
+    assert twitter_auth.TWITTER_APP_KEY and twitter_auth.TWITTER_APP_SECRET, \
       "Please fill in the twitter_app_key and twitter_app_secret files in your app's root directory."
+    auth = tweepy.OAuth1UserHandler(twitter_auth.TWITTER_APP_KEY,
+                                    twitter_auth.TWITTER_APP_SECRET,
+                                    callback=self.to_url(state=state))
 
-    if not state:
-      state = secrets.token_urlsafe(32)
-      logging.debug(f'No state provided; generated default random state {state}')
+    # signin_with_twitter=True returns /authenticate instead of /authorize so
+    # that Twitter doesn't prompt the user for approval if they've already
+    # approved. Background: https://dev.twitter.com/discussions/1253
+    #
+    # Requires "Allow this application to be used to Sign in with Twitter"
+    # to be checked in the app's settings on https://apps.twitter.com/
+    #
+    # Also, there's a Twitter API bug that makes /authenticate and
+    # x_auth_access_type not play nice with each other. Work around that by only
+    # using /authenticate if access_type isn't set.
+    # https://dev.twitter.com/discussions/21281
+    auth_url = auth.get_authorization_url(
+      signin_with_twitter=not self.access_type, access_type=self.access_type)
 
-    # generate and store PKCE code
-    verifier = secrets.token_urlsafe(64)
-    key = models.PkceCode(id=state, challenge=verifier, verifier=verifier).put()
-    logging.info(f'Storing PKCE code verifier {verifier}: {key}')
-
-    # redirect to Twitter auth URL
-    session = OAuth2Session(TWITTER_CLIENT_ID, scope=self.scope,
-                            redirect_uri=self.to_url())
-    auth_url, state = session.authorization_url(
-      AUTH_CODE_URL, state=state,
-      code_challenge=verifier,
-      code_challenge_method='plain')
-    logger.info(f'Redirecting to {auth_url}')
+    # store the request token for later use in the callback view
+    models.OAuthRequestToken(id=auth.request_token['oauth_token'],
+                             token_secret=auth.request_token['oauth_token_secret']
+                             ).put()
+    logger.info(f'Generated request token, redirecting to Twitter: {auth_url}')
     return auth_url
 
 
@@ -131,39 +138,35 @@ class Callback(views.Callback):
   """The OAuth callback. Fetches an access token and redirects to the front page.
   """
   def dispatch_request(self):
-    state = request.values.get('state')
-    error = request.values.get('error')
-    desc = request.values.get('error_description')
-    if error:
-      msg = f'Error: {error}: {desc}'
-      logger.info(msg)
-      if error == 'access_denied':
-        return self.finish(None, state=state)
-      else:
-        flask_util.error(msg)
+    # https://dev.twitter.com/docs/application-permission-model
+    if request.values.get('denied'):
+      return self.finish(None, state=request.values.get('state'))
+    oauth_token = request.values.get('oauth_token', None)
+    oauth_verifier = request.values.get('oauth_verifier', None)
+    if oauth_token is None:
+      flask_util.error('Missing required query parameter oauth_token.')
 
-    # look up PKCE code verifier
-    code = models.PkceCode.get_by_id(state)
-    if not code:
-      flask_util.error(f'state not found: {state}')
-    logging.info(f'Loaded PKCE code {code}')
+    # Lookup the request token
+    request_token = models.OAuthRequestToken.get_by_id(oauth_token)
+    if request_token is None:
+      flask_util.error(f'Invalid oauth_token: {oauth_token}')
 
-    session = OAuth2Session(TWITTER_CLIENT_ID, redirect_uri=request.base_url)
-    session.fetch_token(ACCESS_TOKEN_URL, code=request.values['code'],
-                        client_secret=TWITTER_CLIENT_SECRET,
-                        authorization_response=request.url,
-                        code_verifier=code.verifier)
-    logging.info(f'Got access token {session.token}')
+    # Rebuild the auth view
+    auth = tweepy.OAuth1UserHandler(twitter_auth.TWITTER_APP_KEY,
+                                    twitter_auth.TWITTER_APP_SECRET)
+    auth.request_token = {'oauth_token': request_token.key.string_id(),
+                          'oauth_token_secret': request_token.token_secret}
 
-    # Fetch user info
-    resp = util.requests_get(API_ACCOUNT_URL, session=session)
-    resp.raise_for_status()
-    user_json = resp.json()
-    logging.info(f'{user_json}')
-    username = user_json['data']['username']
+    # Fetch the access token
+    access_token_key, access_token_secret = auth.get_access_token(oauth_verifier)
+    user_json = twitter_auth.signed_urlopen(API_ACCOUNT_URL,
+                                            access_token_key,
+                                            access_token_secret).read()
+    username = json_loads(user_json)['screen_name']
 
-    auth = TwitterOAuth2(id=username, token_json=json_dumps(session.token),
-                         user_json=json_dumps(user_json))
+    auth = TwitterAuth(id=username,
+                       token_key=access_token_key,
+                       token_secret=access_token_secret,
+                       user_json=user_json)
     auth.put()
-
     return self.finish(auth, state=request.values.get('state'))

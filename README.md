@@ -156,12 +156,11 @@ Changelog
 _Breaking changes:_
 
 * Remove `webutil.handlers`, which was based on the largely unmaintained [`webapp2`](https://github.com/GoogleCloudPlatform/webapp2). All known clients have migrated to [Flask](https://palletsprojects.com/p/flask/) and `webutil.flask_util`.
-* [Migrate Twitter](https://developer.twitter.com/en/docs/twitter-api/migrate/overview) to the [v2 API](https://developer.twitter.com/en/docs/twitter-api/migrate/whats-new) and [OAuth 2 with PKCE](https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code).
 * Drop Python 3.6 support. Python 3.7 is now the minimum required version.
 
 _Non-breaking changes:_
 
-* ...
+* Add new `twitter_v2` module for Twitter's new [OAuth 2 with PKCE](https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code) support and [v2 API](https://developer.twitter.com/en/docs/twitter-api/migrate/whats-new).
 
 ### 5.0 - 2022-03-23
 

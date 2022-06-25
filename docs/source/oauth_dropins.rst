@@ -81,6 +81,14 @@ twitter
 -------
 .. automodule:: oauth_dropins.twitter
 
+twitter_auth
+------------
+.. automodule:: oauth_dropins.twitter_auth
+
+twitter_v2
+------------
+.. automodule:: oauth_dropins.twitter_v2
+
 views
 -----
 .. automodule:: oauth_dropins.views
