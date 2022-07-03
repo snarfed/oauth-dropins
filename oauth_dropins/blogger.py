@@ -8,6 +8,10 @@ http://gdata-python-client.googlecode.com/hg/pydocs/gdata.blogger.data.html
 
 Uses requests-oauthlib to auth via Google Sign-In's OAuth 2:
 https://requests-oauthlib.readthedocs.io/
+
+Known issues:
+* If the user approves the OAuth prompt but has no Blogger blogs, we redirect to
+  the callback with declined=True, which is wrong.
 """
 import logging
 import re
@@ -138,8 +142,10 @@ class Callback(Scopes, views.Callback):
     except BaseException as e:
       # this api call often returns 401 Unauthorized for users who aren't
       # signed up for blogger and/or don't have any blogs.
+      # TODO: propagate this info up. Right now this makes self.finish() add a
+      # declined=True query param to the callback, which is wrong.
       util.interpret_http_exception(e)
-      return
+      return self.finish(None, state=state)
 
     for id in ([a.uri.text for a in blogs.author if a.uri] +
                [l.href for l in blogs.link if l]):
