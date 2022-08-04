@@ -21,7 +21,7 @@ domain2idna==1.12.0
 ecdsa==0.18.0
 extras==1.0.0
 fixtures==4.0.1
-Flask==2.1.2
+Flask==2.2.1
 Flask-Caching==2.0.1
 flask-gae-static==0.2
 gdata==4.0.1
