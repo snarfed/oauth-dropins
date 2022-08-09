@@ -17,6 +17,7 @@ from oauth_dropins.webutil import appengine_info, appengine_config
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder=None)
+app.json.compact = False
 app.config.from_pyfile('config.py')
 app.wsgi_app = flask_util.ndb_context_middleware(
     app.wsgi_app, client=appengine_config.ndb_client)
