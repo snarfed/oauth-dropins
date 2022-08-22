@@ -65,7 +65,11 @@ Click on a site to try it!</p>
          style="background-color: #EEEEEE; padding: 5px; padding-top: 8px; padding-bottom: 2px">
   </a>
 </div>
-{{ linkedin_html|safe }}
+<div class="col-md-3 col-sm-4 col-xs-6">
+  <a href="#" onclick="alert('LinkedIn is available in the library, but not here in the demo app. Sorry for the inconvenience!')">
+    <img class="shadow" src="/static/linkedin_2x.png" height="50">
+  </a>
+</div>
 {{ mastodon_html|safe }}
 {{ pixelfed_html|safe }}
 {{ medium_html|safe }}
