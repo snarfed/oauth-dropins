@@ -114,7 +114,7 @@ class MastodonAuth(BaseAuth):
   Implements get() and post() but not urlopen() or api().
   """
   app = ndb.KeyProperty()
-  access_token_str = ndb.TextProperty(required=True)
+  access_token_str = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
 
   def site_name(self):
