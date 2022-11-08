@@ -305,7 +305,6 @@ class Start(views.Start):
     logger.info(f'Got {app_data}')
     app = self.APP_CLASS(instance=instance, app_name=app_name,
                          app_url=app_url, data=json_dumps(app_data))
-    app.put()
     return app
 
   @classmethod
