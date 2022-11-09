@@ -165,6 +165,7 @@ _Non-breaking changes:_
   * Fix bug when user approves the OAuth prompt but has no Blogger blogs. Instead of crashing, we now redirect to the callback with `declined=True`, which is still wrong, but less bad.
 * Mastodon:
   * Change `MastodonAuth.access_token_str` from ndb `TextProperty` to `StringProperty` so that it's indexed in the Datastore.
+  * When the callback gets an invalid `state` parameter, return HTTP 400 instead of raising `JSONDecodeError`.
 
 ### 5.0 - 2022-03-23
 

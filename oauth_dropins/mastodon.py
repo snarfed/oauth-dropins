@@ -21,7 +21,7 @@ import requests
 from . import views
 from .models import BaseAuth
 from .webutil import appengine_info, flask_util, util
-from .webutil.util import json_dumps, json_loads
+from .webutil.util import decode_oauth_state, encode_oauth_state, json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 
@@ -78,18 +78,17 @@ ACCESS_TOKEN_API = '/oauth/token'
 
 
 def _encode_state(app, state):
-  wrapped = json_dumps({
+  return encode_oauth_state({
     'app_key': app.key.urlsafe().decode(),
     'state': quote_plus(state) if state else '',
   })
-  logger.debug(f'Encoding wrapper state: {wrapped!r}')
-  return wrapped
 
 
 def _decode_state(state):
-  logger.debug(f'Decoding wrapper state: {state!r}')
-  decoded = json_loads(state)
-  return decoded['app_key'], unquote(decoded['state'])
+  obj = decode_oauth_state(state)
+  if not isinstance(obj, dict) or 'app_key' not in obj:
+    flask_util.error(f'Expected state parameter to be encoded dict with app_key; got {state}')
+  return obj['app_key'], unquote(obj.get('state') or '')
 
 
 class MastodonApp(ndb.Model):
@@ -191,7 +190,9 @@ class Start(views.Start):
 
     To be overridden by subclasses. Displayed in Mastodon's OAuth prompt.
     """
-    return request.host_url
+    # normalize trailing slash. oddly sometimes request.host_url has it,
+    # sometimes it doesn't.
+    return urljoin(request.host_url, '/')
 
   @classmethod
   def _version_ok(cls, version):
