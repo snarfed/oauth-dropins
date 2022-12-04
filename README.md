@@ -151,7 +151,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 6.0 - unreleased
+### 6.0 - 2022-12-03
 
 _Breaking changes:_
 
@@ -166,6 +166,7 @@ _Non-breaking changes:_
 * Mastodon:
   * Change `MastodonAuth.access_token_str` from ndb `TextProperty` to `StringProperty` so that it's indexed in the Datastore.
   * When the callback gets an invalid `state` parameter, return HTTP 400 instead of raising `JSONDecodeError`.
+* Misc webutil updates.
 
 ### 5.0 - 2022-03-23
 
