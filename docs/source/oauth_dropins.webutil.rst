@@ -28,6 +28,7 @@ testutil
 util
 ----
 .. automodule:: oauth_dropins.webutil.util
+  :members:
 
 webmention
 ----------

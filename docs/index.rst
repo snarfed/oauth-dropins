@@ -614,12 +614,17 @@ Mostly just internal changes to webutil to support granary v1.9.
 Development
 -----------
 
-First, fork and clone this repo. Then, you’ll need the `Google Cloud
-SDK <https://cloud.google.com/sdk/>`__ with the
-``gcloud-appengine-python`` and ``gcloud-appengine-python-extras``
-`components <https://cloud.google.com/sdk/docs/components#additional_components>`__.
-Once you have them, set up your environment by running these commands in
-the repo root directory:
+Pull requests are welcome! Feel free to `ping me in
+#indieweb-dev <https://indieweb.org/discuss>`__ with any questions.
+
+First, fork and clone this repo. Then, install the `Google Cloud
+SDK <https://cloud.google.com/sdk/>`__ and run
+``gcloud components install beta cloud-datastore-emulator`` to install
+the `datastore
+emulator <https://cloud.google.com/datastore/docs/tools/datastore-emulator>`__.
+Then, set up your environment by running these commands in the repo root
+directory. Once you have them, set up your environment by running these
+commands in the repo root directory:
 
 .. code:: shell
 
@@ -635,7 +640,7 @@ Run the demo app locally with
 
 .. code:: shell
 
-   gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0 --host-port=localhost:8089 < /dev/null >& /dev/null &
+   gcloud beta emulators datastore start --use-firestore-in-datastore-mode --no-store-on-disk --host-port=localhost:8089 --quiet < /dev/null >& /dev/null &
    GAE_ENV=localdev FLASK_ENV=development flask run -p 8080
 
 To deploy to production:
@@ -662,7 +667,7 @@ Here’s how to package, test, and ship a new release. (Note that this is
 too <https://github.com/snarfed/granary#release-instructions>`__.)
 
 1.  Run the unit tests.
-    ``sh     source local/bin/activate.csh     gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0 --host-port=localhost:8089 < /dev/null >& /dev/null &     sleep 2s     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \       python3 -m unittest discover     kill %1     deactivate``
+    ``sh     source local/bin/activate.csh     gcloud beta emulators datastore start --use-firestore-in-datastore-mode --no-store-on-disk --host-port=localhost:8089 < /dev/null >& /dev/null &     sleep 2s     DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \       python3 -m unittest discover     kill %1     deactivate``
 2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``

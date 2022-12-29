@@ -2,6 +2,8 @@
 #
 # oauth-dropins documentation Sphinx build configuration file.
 #
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+#
 # This file is execfile()d with the current directory set to its
 # containing dir.
 #
