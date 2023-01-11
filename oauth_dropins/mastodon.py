@@ -12,6 +12,7 @@ https://docs.joinmastodon.org/api/authentication/
 Surprising, and unusual, but makes sense.
 """
 import logging
+import threading
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 
 from flask import request
@@ -76,16 +77,26 @@ AUTH_CODE_API = '&'.join((
 
 ACCESS_TOKEN_API = '/oauth/token'
 
+# global, maps integer ids to state dict objects
+states = {}
+states_lock = threading.RLock()
+states_next = 0
+
 
 def _encode_state(app, state):
-  return encode_oauth_state({
-    'app_key': app.key.urlsafe().decode(),
-    'state': quote_plus(state) if state else '',
-  })
+  global states_next
 
+  with states_lock:
+    state_encoded = states[states_next] = encode_oauth_state({
+      'app_key': app.key.urlsafe().decode(),
+      'state': quote_plus(state) if state else '',
+    })
+    ret = str(states_next)
+    states_next += 1
+    return ret
 
 def _decode_state(state):
-  obj = decode_oauth_state(state)
+  obj = decode_oauth_state(states.pop(int(state)))
   if not isinstance(obj, dict) or 'app_key' not in obj:
     flask_util.error(f'Expected state parameter to be encoded dict with app_key; got {state}')
   return obj['app_key'], unquote(obj.get('state') or '')
