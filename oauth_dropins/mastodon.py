@@ -1,7 +1,7 @@
 """Mastodon OAuth drop-in.
 
 Mastodon is an ActivityPub implementation, but it also has a REST + OAuth 2 API
-independent of AP. Uh, ok, sure.
+independent of AP.
 
 API docs: https://docs.joinmastodon.org/api/
 
@@ -15,6 +15,7 @@ import logging
 import threading
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 
+from cachetools import TTLCache
 from flask import request
 from google.cloud import ndb
 import requests
@@ -77,26 +78,36 @@ AUTH_CODE_API = '&'.join((
 
 ACCESS_TOKEN_API = '/oauth/token'
 
-# global, maps integer ids to state dict objects
-states = {}
-states_lock = threading.RLock()
-states_next = 0
+# Mastodon + DoorKeeper choke on redirect URLs that are too long, which can
+# happen easily with big states. So, we store state in this cache, in memory,
+# and just put key integer ids in the OAuth state parameter.
+# https://github.com/snarfed/bridgy/issues/911
+# https://github.com/mastodon/mastodon/issues/12915
+_states = TTLCache(10000, 60 * 60)  # 1h expiration
+_states_lock = threading.RLock()
+_states_next = 0
 
 
-def _encode_state(app, state):
-  global states_next
+def _store_state(app, state):
+  global _states_next
 
-  with states_lock:
-    state_encoded = states[states_next] = encode_oauth_state({
+  with _states_lock:
+    state_encoded = _states[_states_next] = encode_oauth_state({
       'app_key': app.key.urlsafe().decode(),
       'state': quote_plus(state) if state else '',
     })
-    ret = str(states_next)
-    states_next += 1
+    ret = str(_states_next)
+    _states_next += 1
     return ret
 
-def _decode_state(state):
-  obj = decode_oauth_state(states.pop(int(state)))
+
+def _get_state(index):
+  with _states_lock:
+    state = _states.get(int(index))
+  if not state:
+    flask_util.error(f'State {state} not found')
+
+  obj = decode_oauth_state(state)
   if not isinstance(obj, dict) or 'app_key' not in obj:
     flask_util.error(f'Expected state parameter to be encoded dict with app_key; got {state}')
   return obj['app_key'], unquote(obj.get('state') or '')
@@ -274,7 +285,7 @@ class Start(views.Start):
       'client_id': app_data['client_id'],
       'client_secret': app_data['client_secret'],
       'redirect_uri': quote_plus(self.to_url()),
-      'state': _encode_state(app, state),
+      'state': _store_state(app, state),
       'scope': self.scope,
     })
 
@@ -342,12 +353,12 @@ class Callback(views.Callback):
         logger.info(f"User declined: {request.values.get('error_description')}")
         state = request.values.get('state')
         if state:
-          _, state = _decode_state(state)
+          _, state = _get_state(state)
         return self.finish(None, state=state)
       else:
         flask_util.error(f'{error} {desc}')
 
-    app_key, state = _decode_state(request.values['state'])
+    app_key, state = _get_state(request.values['state'])
     app = ndb.Key(urlsafe=app_key).get()
     assert app
     app_data = json_loads(app.data)
