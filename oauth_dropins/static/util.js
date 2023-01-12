@@ -26,3 +26,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
+
+/* Hide flashed messages in Flask. CSS transition in util.css fades them out slowly.
+ */
+window.onload = function () {
+  for (const p of document.getElementsByClassName('message')) {
+    window.setTimeout(function() {
+      p.style.opacity = 0;  // uses delayed transition
+    }, 5 /* ms; needed for transition after setting display to non-none */);
+
+    window.setTimeout(function() {
+      p.style.display = 'none';
+    }, (20 + 5) * 1000 /* ms; match transition duration + delay */);
+  }
+}
