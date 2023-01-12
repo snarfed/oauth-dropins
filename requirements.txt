@@ -9,7 +9,7 @@
 # Use this to bust that cache: gcloud -q beta app deploy --no-cache ...
 
 git+https://github.com/dvska/gdata-python3.git#egg=gdata
-git+https://github.com/snarfed/flask-caching.git@fix-97#egg=Flask-Caching
+git+https://github.com/pallets-eco/flask-caching.git#egg=Flask-Caching
 
 beautifulsoup4==4.11.1
 cachetools==5.2.1
