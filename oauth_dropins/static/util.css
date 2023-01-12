@@ -19,7 +19,7 @@
   transition: opacity 5s linear 20s;
 }
 
-input.shadow, img.shadow {
+.shadow, .profile, #screenshot {
   -moz-box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
   -webkit-box-shadow: 2px 2px 4px rgba(0,0,0,0.4);
   /* CSS3 */
@@ -30,7 +30,7 @@ input.shadow, img.shadow {
   filter: progid:DXImageTransform.Microsoft.Shadow(Strength=2,Direction=135,Color='#666666');
 }
 
-input.shadow:hover, img.shadow:hover {
+.shadow:hover, .profile:hover, #screenshot:hover {
   -moz-box-shadow: 2px 2px 4px rgba(0,0,0,0.8);
   -webkit-box-shadow: 2px 2px 4px rgba(0,0,0,0.8);
   /* CSS3 */
