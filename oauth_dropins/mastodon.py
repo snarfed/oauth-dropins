@@ -192,6 +192,9 @@ class Start(views.Start):
       OAuth callback (aka redirect) URIs in the OAuth app
     SCOPE_SEPARATOR: string, used to separate multiple scopes
     APP_CLASS: API app datastore class
+    EXPIRE_APPS_BEFORE: datetime, if the API client app was created before this,
+      it will be discarded and a new one will be created. Set to the last time
+      you changed something material about the client, eg redirect URLs or scopes.
   """
   NAME = 'mastodon'
   LABEL = 'Mastodon'
@@ -199,6 +202,8 @@ class Start(views.Start):
   REDIRECT_PATHS = ()
   SCOPE_SEPARATOR = ' '
   APP_CLASS = MastodonApp
+  # https://github.com/snarfed/bridgy/issues/1344
+  EXPIRE_APPS_BEFORE = None
 
   def app_name(self):
     """Returns the user-visible name of this application.
@@ -274,6 +279,11 @@ class Start(views.Start):
       # always be localhost
       query = query.filter(self.APP_CLASS.app_name == app_name)
     app = query.get()
+
+    if app and self.EXPIRE_APPS_BEFORE and app.created_at < self.EXPIRE_APPS_BEFORE:
+      logging.info(f'Creating new client app for {instance} because existing app {app.key} was created before EXPIRE_APPS_BEFORE {self.EXPIRE_APPS_BEFORE}')
+      app = None
+
     if not app:
       app = self._register_app(instance, app_name, app_url)
       app.instance_info = resp.text
