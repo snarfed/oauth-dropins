@@ -8,6 +8,7 @@ import urllib.parse
 from flask import request
 from google.cloud import ndb
 import mf2util
+import pkce
 import requests
 
 from . import models, views
@@ -21,7 +22,16 @@ INDIEAUTH_URL = 'https://indieauth.com/auth'
 
 
 def discover_authorization_endpoint(me, resp=None):
-  """Fetch a URL and look for authorization_endpoint Link header or
+  found = discover_endpoint(me, 'authorization_endpoint', resp)
+  if found == "":
+    return INDIEAUTH_URL
+  return found
+
+def discover_token_endpoint(me, resp=None):
+  return discover_endpoint(me, 'token_endpoint', resp)
+
+def discover_endpoint(me, rel_link, resp=None):
+  """Fetch a URL and look for the `rel_link` Link header or
   rel-value.
 
   Args:
@@ -30,7 +40,7 @@ def discover_authorization_endpoint(me, resp=None):
       been fetched
 
   Return:
-    string, the discovered indieauth URL or the default indieauth.com URL
+    string, the discovered `rel_link` or an empty string
   """
   try:
     resp = resp or util.requests_get(me)
@@ -41,19 +51,18 @@ def discover_authorization_endpoint(me, resp=None):
     logger.warning(
       'could not fetch user url "%s". got response code: %d',
       me, resp.status_code)
-    return INDIEAUTH_URL
-  # check authorization_endpoint header first
-  auth_endpoint = resp.links.get('authorization_endpoint', {}).get('url')
-  if auth_endpoint:
-    return auth_endpoint
+    return ""
+  # check endpoint header first
+  endpoint = resp.links.get(rel_link, {}).get('url')
+  if endpoint:
+    return endpoint
   # check the html content
   soup = util.parse_html(resp.text)
-  auth_link = soup.find('link', {'rel': 'authorization_endpoint'})
-  auth_endpoint = auth_link and auth_link.get('href')
-  if auth_endpoint:
-    return auth_endpoint
-  return INDIEAUTH_URL
-
+  link = soup.find('link', {'rel': rel_link})
+  endpoint = link and link.get('href')
+  if endpoint:
+    return endpoint
+  return ""
 
 def build_user_json(me, resp=None):
   """user_json contains an h-card, rel-me links, and "me"
@@ -124,17 +133,39 @@ class Start(views.Start):
 
     redirect_uri = self.to_url()
     endpoint = discover_authorization_endpoint(me)
+    token_endpoint = discover_token_endpoint(me)
+    url = ""
+    if token_endpoint:
+      code_verifier, code_challenge = pkce.generate_pkce_pair()
 
-    url = endpoint + '?' + urllib.parse.urlencode({
-      'me': me,
-      'client_id': INDIEAUTH_CLIENT_ID,
-      'redirect_uri': redirect_uri,
-      'state': util.encode_oauth_state({
-        'endpoint': endpoint,
+      url = endpoint + '?' + urllib.parse.urlencode({
         'me': me,
-        'state': state,
-      }),
-    })
+        'client_id': INDIEAUTH_CLIENT_ID,
+        'redirect_uri': redirect_uri,
+        'scope': 'profile',
+        'code_challenge': code_challenge,
+        'code_challenge_method': 'S256',
+        'response_type': 'code',
+        'state': util.encode_oauth_state({
+          'code_verifier': code_verifier,
+          'token_endpoint': token_endpoint,
+          'me': me,
+          'state': state,
+          }),
+        })
+    else:
+      endpoint = discover_authorization_endpoint(me)
+
+      url = endpoint + '?' + urllib.parse.urlencode({
+        'me': me,
+        'client_id': INDIEAUTH_CLIENT_ID,
+        'redirect_uri': redirect_uri,
+        'state': util.encode_oauth_state({
+          'endpoint': endpoint,
+          'me': me,
+          'state': state,
+          }),
+        })
 
     logger.info(f'Redirecting to IndieAuth: {url}')
     return url
@@ -149,25 +180,38 @@ class Start(views.Start):
 
 
 class Callback(views.Callback):
-  """The callback view from the IndieAuth request. POSTs back to the
-  auth endpoint to verify the authentication code."""
+  """The callback view from the IndieAuth request. Performs an Authorization
+  Code grant to verify the code."""
   def dispatch_request(self):
     code = request.values['code']
     state = util.decode_oauth_state(request.values['state'])
 
-    endpoint = state.get('endpoint')
+    token_endpoint = state.get('token_endpoint')
     me = state.get('me')
-    if not endpoint or not me:
-      flask_util.error("invalid state parameter")
+    if token_endpoint:
+      # TODO: validate that the `iss` matches the value that is retrieved from the IndieAuth Server Metadata https://indieauth.spec.indieweb.org/#indieauth-server-metadata
+      code_verifier = state.get('code_verifier') or ''
+      validate_resp = util.requests_post(token_endpoint, data={
+        'grant_type': 'authorization_code',
+        'client_id': INDIEAUTH_CLIENT_ID,
+        'code': code,
+        'redirect_uri': request.base_url,
+        'code_verifier': code_verifier,
+      })
+    else:
+      endpoint = state.get('endpoint')
+      me = state.get('me')
+      if not endpoint or not me:
+        flask_util.error("invalid state parameter")
 
-    state = state.get('state') or ''
-    validate_resp = util.requests_post(endpoint, data={
-      'me': me,
-      'client_id': INDIEAUTH_CLIENT_ID,
-      'code': code,
-      'redirect_uri': request.base_url,
-      'state': state,
-    })
+      state = state.get('state') or ''
+      validate_resp = util.requests_post(endpoint, data={
+        'me': me,
+        'client_id': INDIEAUTH_CLIENT_ID,
+        'code': code,
+        'redirect_uri': request.base_url,
+        'state': state,
+      })
 
     if validate_resp.status_code // 100 == 2:
       data = util.sniff_json_or_form_encoded(validate_resp.text)
