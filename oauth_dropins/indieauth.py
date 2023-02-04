@@ -191,6 +191,7 @@ class Callback(views.Callback):
     if token_endpoint:
       # TODO: validate that the `iss` matches the value that is retrieved from the IndieAuth Server Metadata https://indieauth.spec.indieweb.org/#indieauth-server-metadata
       code_verifier = state.get('code_verifier') or ''
+      state = state.get('state') or ''
       validate_resp = util.requests_post(token_endpoint, data={
         'grant_type': 'authorization_code',
         'client_id': INDIEAUTH_CLIENT_ID,
