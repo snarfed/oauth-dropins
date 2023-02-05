@@ -161,6 +161,8 @@ _Breaking changes:_
 _Non-breaking changes:_
 
 * Add new `twitter_v2` module for Twitter's new [OAuth 2 with PKCE](https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code) support and [v2 API](https://developer.twitter.com/en/docs/twitter-api/migrate/whats-new).
+* IndieAuth:
+  * Add support for [authorization endpoints](https://indieauth.spec.indieweb.org/#authorization-endpoint), along with existing [token endpoint](https://indieauth.spec.indieweb.org/#token-endpoint) support. Thanks [@jamietanna](https://www.jvt.me/)! ([#284](https://github.com/snarfed/oauth-dropins/pull/284))
 * Blogger:
   * Fix bug when user approves the OAuth prompt but has no Blogger blogs. Instead of crashing, we now redirect to the callback with `declined=True`, which is still wrong, but less bad.
 * Mastodon:

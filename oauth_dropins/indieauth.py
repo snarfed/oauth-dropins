@@ -21,56 +21,34 @@ INDIEAUTH_CLIENT_ID = util.read('indieauth_client_id')
 INDIEAUTH_URL = 'https://indieauth.com/auth'
 
 
-def discover_authorization_endpoint(me, resp=None):
-  found = discover_endpoint(me, 'authorization_endpoint', resp)
-  if found == "":
-    return INDIEAUTH_URL
-  return found
-
-def discover_token_endpoint(me, resp=None):
-  return discover_endpoint(me, 'token_endpoint', resp)
-
-def discover_endpoint(me, rel_link, resp=None):
-  """Fetch a URL and look for the `rel_link` Link header or
-  rel-value.
+def discover_endpoint(rel, resp):
+  """Fetch a URL and look for the `rel` Link header or HTML value.
 
   Args:
-    me: string, URL to fetch
-    resp: :class:`requests.Response` (optional), re-use response if it's already
-      been fetched
+    rel: string, rel name to look for
+    resp: :class:`requests.Response` to look in
 
   Return:
-    string, the discovered `rel_link` or an empty string
+    string, the discovered `rel` value, or None if no endpoint was discovered
   """
-  try:
-    resp = resp or util.requests_get(me)
-  except (ValueError, requests.URLRequired, requests.TooManyRedirects) as e:
-    flask_util.error(str(e))
-
-  if resp.status_code // 100 != 2:
-    logger.warning(
-      'could not fetch user url "%s". got response code: %d',
-      me, resp.status_code)
-    return ""
   # check endpoint header first
-  endpoint = resp.links.get(rel_link, {}).get('url')
+  endpoint = resp.links.get(rel, {}).get('url')
   if endpoint:
     return endpoint
+
   # check the html content
   soup = util.parse_html(resp.text)
-  link = soup.find('link', {'rel': rel_link})
-  endpoint = link and link.get('href')
-  if endpoint:
-    return endpoint
-  return ""
+  link = soup.find('link', {'rel': rel})
+  if link:
+    return link.get('href')
 
-def build_user_json(me, resp=None):
-  """user_json contains an h-card, rel-me links, and "me"
+
+def build_user_json(me):
+  """Returns a JSON dict with h-card, rel-me links, and me value.
 
   Args:
     me: string, URL of the user, returned by
-    resp: :class:`requests.Response` (optional), re-use response if it's already
-      been fetched
+    resp: :class:`requests.Response` to use
 
   Return:
     dict, with 'me', the URL for this person; 'h-card', the representative h-card
@@ -78,16 +56,16 @@ def build_user_json(me, resp=None):
   """
   user_json = {'me': me}
 
-  resp = resp or util.requests_get(me)
+  resp = util.requests_get(me)
   if resp.status_code // 100 != 2:
-    logger.warning(
-      'could not fetch user url "%s". got response code: %d',
-      me, resp.status_code)
+    logger.warning(f'could not fetch user url {me}, got response {resp.status_code}')
     return user_json
 
   mf2 = util.parse_mf2(resp, resp.url)
-  user_json['rel-me'] = mf2['rels'].get('me')
-  user_json['h-card'] = mf2util.representative_hcard(mf2, me)
+  user_json.update({
+    'rel-me': mf2['rels'].get('me'),
+    'h-card': mf2util.representative_hcard(mf2, me),
+  })
   logger.debug(f'built user-json {user_json!r}')
   return util.trim_nulls(user_json)
 
@@ -131,14 +109,27 @@ class Start(views.Start):
     if not parsed.scheme:
       me = 'http://' + me
 
+    # fetch user URL
     redirect_uri = self.to_url()
-    endpoint = discover_authorization_endpoint(me)
-    token_endpoint = discover_token_endpoint(me)
-    url = ""
+    try:
+      resp = util.requests_get(me)
+    except (ValueError, requests.URLRequired, requests.TooManyRedirects) as e:
+      flask_util.error(str(e))
+
+    # discover endpoints
+    if resp.ok:
+      token_endpoint = discover_endpoint('token_endpoint', resp)
+      auth_endpoint = (discover_endpoint('authorization_endpoint', resp) or
+                       INDIEAUTH_URL)
+    else:
+      logger.warning(f'could not fetch user url {me}, got response {resp.status_code}')
+      auth_endpoint = INDIEAUTH_URL
+      token_endpoint = None
+
+    # construct redirect URL
     if token_endpoint:
       code_verifier, code_challenge = pkce.generate_pkce_pair()
-
-      url = endpoint + '?' + urllib.parse.urlencode({
+      return auth_endpoint + '?' + urllib.parse.urlencode({
         'me': me,
         'client_id': INDIEAUTH_CLIENT_ID,
         'redirect_uri': redirect_uri,
@@ -154,21 +145,16 @@ class Start(views.Start):
           }),
         })
     else:
-      endpoint = discover_authorization_endpoint(me)
-
-      url = endpoint + '?' + urllib.parse.urlencode({
+      return auth_endpoint + '?' + urllib.parse.urlencode({
         'me': me,
         'client_id': INDIEAUTH_CLIENT_ID,
         'redirect_uri': redirect_uri,
         'state': util.encode_oauth_state({
-          'endpoint': endpoint,
+          'endpoint': auth_endpoint,
           'me': me,
           'state': state,
-          }),
-        })
-
-    logger.info(f'Redirecting to IndieAuth: {url}')
-    return url
+        }),
+      })
 
   @classmethod
   def button_html(cls, *args, **kwargs):
@@ -214,7 +200,7 @@ class Callback(views.Callback):
         'state': state,
       })
 
-    if validate_resp.status_code // 100 == 2:
+    if validate_resp.ok:
       data = util.sniff_json_or_form_encoded(validate_resp.text)
       if data.get('me'):
         verified = data.get('me')
