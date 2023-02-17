@@ -78,6 +78,8 @@ class IndieAuth(models.BaseAuth):
   details.
   """
   user_json = ndb.TextProperty(required=True)  # generally this has only 'me'
+  access_token_str = ndb.StringProperty(required=True)
+  refresh_token_str = ndb.StringProperty()
 
   def site_name(self):
     return 'IndieAuth'
@@ -88,7 +90,7 @@ class IndieAuth(models.BaseAuth):
 
   def access_token(self):
     """Return the access token, N/A for IndieAuth"""
-    return None
+    return self.access_token_str
 
 
 class Start(views.Start):
@@ -205,7 +207,11 @@ class Callback(views.Callback):
       if data.get('me'):
         verified = data.get('me')
         user_json = build_user_json(verified)
-        indie_auth = IndieAuth(id=verified, user_json=json_dumps(user_json))
+        indie_auth = IndieAuth(id=verified,
+                               user_json=json_dumps(user_json),
+                               access_token_str=data.get('access_token'),
+                               refresh_token_str=data.get('refresh_token'),
+                               )
         indie_auth.put()
         return self.finish(indie_auth, state=state)
       else:

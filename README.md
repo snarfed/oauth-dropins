@@ -151,6 +151,13 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 6.1 - unreleased
+
+_Non-breaking changes:_
+
+* IndieAuth:
+  * Store access token and refresh token in `IndieAuth` datastore entities.
+
 ### 6.0 - 2022-12-03
 
 _Breaking changes:_
