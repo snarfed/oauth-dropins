@@ -78,7 +78,7 @@ class IndieAuth(models.BaseAuth):
   details.
   """
   user_json = ndb.TextProperty(required=True)  # generally this has only 'me'
-  access_token_str = ndb.StringProperty(required=True)
+  access_token_str = ndb.StringProperty()
   refresh_token_str = ndb.StringProperty()
 
   def site_name(self):
