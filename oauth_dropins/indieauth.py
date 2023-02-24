@@ -74,8 +74,8 @@ class IndieAuth(models.BaseAuth):
   """An authenticated IndieAuth user.
 
   Provides methods that return information about this user. Stores credentials
-  in the datastore. Key is the domain name. See models.BaseAuth for usage
-  details.
+  in the datastore. Key is the authed `me` URL value. See models.BaseAuth for
+  usage details.
   """
   user_json = ndb.TextProperty(required=True)  # generally this has only 'me'
   access_token_str = ndb.StringProperty()
