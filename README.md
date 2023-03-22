@@ -151,7 +151,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 6.1 - unreleased
+### 6.1 - 2023-03-22
 
 _Non-breaking changes:_
 
