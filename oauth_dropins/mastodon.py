@@ -102,10 +102,13 @@ def _store_state(app, state):
 
 
 def _get_state(index):
+  if not util.is_int(index):
+    flask_util.error(f'State {index} not found')
+
   with _states_lock:
     state = _states.get(int(index))
   if not state:
-    flask_util.error(f'State {state} not found')
+    flask_util.error(f'State {index} not found')
 
   obj = decode_oauth_state(state)
   if not isinstance(obj, dict) or 'app_key' not in obj:
