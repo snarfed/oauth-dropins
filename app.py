@@ -29,6 +29,7 @@ logging.getLogger('requests_oauthlib').setLevel(logging.DEBUG)
 
 SITES = {name: importlib.import_module(f'oauth_dropins.{name}') for name in (
     'blogger',
+    'bluesky',
     'disqus',
     'dropbox',
     'facebook',
