@@ -34,6 +34,7 @@ setup(name='oauth-dropins',
       ],
       keywords='oauth appengine',
       install_requires=[
+          'atproto==0.0.17',
           'beautifulsoup4>=4.8',
           'cachetools>=3.1',
           'domain2idna>=1.12',
