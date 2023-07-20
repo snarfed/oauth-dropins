@@ -12,10 +12,8 @@ https://docs.joinmastodon.org/api/authentication/
 Surprising, and unusual, but makes sense.
 """
 import logging
-import threading
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 
-from cachetools import TTLCache
 from flask import request
 from google.cloud import ndb
 import requests
@@ -78,43 +76,6 @@ AUTH_CODE_API = '&'.join((
 
 ACCESS_TOKEN_API = '/oauth/token'
 
-# Mastodon + DoorKeeper choke on redirect URLs that are too long, which can
-# happen easily with big states. So, we store state in this cache, in memory,
-# and just put key integer ids in the OAuth state parameter.
-# https://github.com/snarfed/bridgy/issues/911
-# https://github.com/mastodon/mastodon/issues/12915
-_states = TTLCache(10000, 60 * 60)  # 1h expiration
-_states_lock = threading.RLock()
-_states_next = 0
-
-
-def _store_state(app, state):
-  global _states_next
-
-  with _states_lock:
-    state_encoded = _states[_states_next] = encode_oauth_state({
-      'app_key': app.key.urlsafe().decode(),
-      'state': quote_plus(state) if state else '',
-    })
-    ret = str(_states_next)
-    _states_next += 1
-    return ret
-
-
-def _get_state(index):
-  if not util.is_int(index):
-    flask_util.error(f'State {index} not found')
-
-  with _states_lock:
-    state = _states.get(int(index))
-  if not state:
-    flask_util.error(f'State {index} not found')
-
-  obj = decode_oauth_state(state)
-  if not isinstance(obj, dict) or 'app_key' not in obj:
-    flask_util.error(f'Expected state parameter to be encoded dict with app_key; got {state}')
-  return obj['app_key'], unquote(obj.get('state') or '')
-
 
 class MastodonApp(ndb.Model):
   """A Mastodon API OAuth2 app registered with a specific instance."""
@@ -126,7 +87,32 @@ class MastodonApp(ndb.Model):
   created_at = ndb.DateTimeProperty(auto_now_add=True, required=True)
 
 
+class MastodonLogin(ndb.Model):
+  """An in-progress Mastodon OAuth login. Ephemeral.
+
+  Stores the state query parameter across the three-way OAuth user login
+  process. Only needed as a workaround for a long-standing Mastodon/Doorkeeper
+  configuration bug:
+  https://github.com/snarfed/bridgy/issues/911
+  https://github.com/mastodon/mastodon/issues/12915
+  """
+  app = ndb.KeyProperty(required=True)
+  state = ndb.TextProperty(required=True)
+
+  @classmethod
+  def load(cls, id):
+    if not util.is_int(id):
+      flask_util.error(f'State {id} not found')
+
+    login = cls.get_by_id(int(id))
+    if not login:
+      flask_util.error(f'State {id} not found')
+
+    return login
+
+
 class MastodonAuth(BaseAuth):
+
   """An authenticated Mastodon user.
 
   Provides methods that return information about this user and make OAuth-signed
@@ -294,11 +280,12 @@ class Start(views.Start):
 
     logger.info(f'Starting OAuth for {self.LABEL} instance {instance}')
     app_data = json_loads(app.data)
+    login_id = MastodonLogin(app=app.key, state=state or '').put().id()
     return urljoin(instance, AUTH_CODE_API % {
       'client_id': app_data['client_id'],
       'client_secret': app_data['client_secret'],
       'redirect_uri': quote_plus(self.to_url()),
-      'state': _store_state(app, state),
+      'state': str(login_id),
       'scope': self.scope,
     })
 
@@ -366,13 +353,13 @@ class Callback(views.Callback):
         logger.info(f"User declined: {request.values.get('error_description')}")
         state = request.values.get('state')
         if state:
-          _, state = _get_state(state)
-        return self.finish(None, state=state)
+          login = MastodonLogin.load(state)
+        return self.finish(None, state=login.state)
       else:
         flask_util.error(f'{error} {desc}')
 
-    app_key, state = _get_state(request.values['state'])
-    app = ndb.Key(urlsafe=app_key).get()
+    login = MastodonLogin.load(request.values['state'])
+    app = login.app.get()
     assert app
     app_data = json_loads(app.data)
 
@@ -405,4 +392,4 @@ class Callback(views.Callback):
                            user_json=json_dumps(user))
     auth.put()
 
-    return self.finish(auth, state=state)
+    return self.finish(auth, state=login.state)
