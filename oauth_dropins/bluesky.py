@@ -54,10 +54,11 @@ class Callback(views.Callback):
 
     # get the did (portable user ID)
     try:
-      (_, profile) = BlueskyAuth._api_from_password(username, password)
+      (client, profile) = BlueskyAuth._api_from_password(username, password)
     except UnauthorizedError:
       return self.finish(None)
     user_json = json_dumps({
+      '$type': profile._type,
       'did': profile.did,
       'handle': profile.handle,
       'avatar': profile.avatar,
