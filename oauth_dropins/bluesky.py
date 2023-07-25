@@ -38,9 +38,9 @@ class BlueskyAuth(models.BaseAuth):
     return client
 
   @staticmethod
-  def _api_from_password(username, password):
+  def _api_from_password(handle, password):
     client = atproto.Client()
-    profile = client.login(username, password)
+    profile = client.login(handle, password)
     return (client, profile)
 
 
@@ -49,12 +49,13 @@ class Callback(views.Callback):
   OAuth callback stub.
   """
   def dispatch_request(self):
-    username = request.values.get('username')
-    password = request.values.get('password')
+    username = request.values['username']
+    password = request.values['password']
 
     # get the did (portable user ID)
     try:
-      (client, profile) = BlueskyAuth._api_from_password(username, password)
+      # TODO migrate this to lexrpc
+      (_, profile) = BlueskyAuth._api_from_password(username, password)
     except UnauthorizedError:
       return self.finish(None)
     user_json = json_dumps({
@@ -67,7 +68,7 @@ class Callback(views.Callback):
       'description': profile.description,
     })
     auth = BlueskyAuth(
-      id=profile.handle,
+      id=profile.did,
       did=profile.did,
       password=password,
       user_json=user_json,
