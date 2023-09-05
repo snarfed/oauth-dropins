@@ -157,6 +157,8 @@ _Non-breaking changes:_
 
 * IndieAuth:
   * Store access token and refresh token in `IndieAuth` datastore entities.
+* Flickr:
+  * Handle errors from initial OAuth 1.0 authorization request.
 
 ### 6.0 - 2022-12-03
 

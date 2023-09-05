@@ -97,27 +97,31 @@ class Start(views.Start):
 
     url, headers, data = client.sign(REQUEST_TOKEN_URL)
     resp = util.requests_get(url, headers=headers, data=data)
+    resp.raise_for_status()
     parsed = urllib.parse.parse_qs(resp.text)
+    logger.info(f'Got {parsed}')
 
     if parsed.get('error') or parsed.get('oauth_problem'):
       flask_util.error(resp.text)
 
-    resource_owner_key = parsed.get('oauth_token')[0]
-    resource_owner_secret = parsed.get('oauth_token_secret')[0]
+    resource_owner_key = parsed.get('oauth_token')
+    resource_owner_secret = parsed.get('oauth_token_secret')
+    if not resource_owner_key or not resource_owner_secret:
+      flask_util.error(f'Unexpected Flickr error: {resp.text}')
 
     models.OAuthRequestToken(
-      id=resource_owner_key,
-      token_secret=resource_owner_secret,
+      id=resource_owner_key[0],
+      token_secret=resource_owner_secret[0],
       state=state).put()
 
     if self.scope:
       auth_url = AUTHORIZE_URL + '?' + urllib.parse.urlencode({
         'perms': self.scope or 'read',
-        'oauth_token': resource_owner_key
+        'oauth_token': resource_owner_key[0],
       })
     else:
       auth_url = AUTHENTICATE_URL + '?' + urllib.parse.urlencode({
-        'oauth_token': resource_owner_key
+        'oauth_token': resource_owner_key[0],
       })
 
     logger.info(
