@@ -151,6 +151,10 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 6.2 - 2023-09-15
+
+Miscellaneous changes in `webutil`.
+
 ### 6.1 - 2023-03-22
 
 _Non-breaking changes:_
