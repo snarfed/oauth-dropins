@@ -25,7 +25,7 @@ jobs:
           command: |
             git submodule sync
             git submodule update --init
-            pip install -U pip
+            pip install -U pip flake8
             pip -V
             pip install -U -r requirements.txt
             pip install coverage coveralls
@@ -39,6 +39,11 @@ jobs:
             kill %1
             python3 -m coverage html -d /tmp/coverage_html
             if [ "$COVERALLS_REPO_TOKEN" != "" ]; then python3 -m coveralls || true; fi
+
+            # check for unintentionally overridden test methods
+            # https://flake8.pycqa.org/en/latest/user/error-codes.html#error-codes
+            # https://flake8.pycqa.org/en/latest/user/options.html#cmdoption-flake8-select
+            flake8 --select=F811 oauth_dropins/webutil/tests/test_*.py
 
       - save_cache:
           key: venv-8-{{ .Branch }}-{{ checksum "requirements.txt" }}-{{ checksum "setup.py" }}
