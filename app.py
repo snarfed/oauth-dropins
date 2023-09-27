@@ -21,7 +21,7 @@ app.json.compact = False
 app.config.from_pyfile('config.py')
 app.wsgi_app = flask_util.ndb_context_middleware(
     app.wsgi_app, client=appengine_config.ndb_client)
-if appengine_info.DEBUG:
+if appengine_info.DEBUG or appengine_info.LOCAL_SERVER:
   flask_gae_static.init_app(app)
 
 logging.getLogger('requests_oauthlib').setLevel(logging.DEBUG)
