@@ -1,9 +1,6 @@
 """Facebook OAuth drop-in.
 
 https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
-
-TODO: implement client state param
-TODO: unify this with instagram. see file docstring comment there.
 """
 import logging
 import urllib.error, urllib.parse
@@ -61,7 +58,7 @@ class FacebookAuth(models.BaseAuth):
   OAuth-signed requests to Facebook's HTTP-based APIs. Stores OAuth credentials
   in the datastore. See models.BaseAuth for usage details.
 
-  Facebook-specific details: implements urlopen() but not api(). The
+  Facebook-specific details: implements :meth:`urlopen` but not :meth:`api`. The
   key name is the user's or page's Facebook ID.
   """
   type = ndb.StringProperty(choices=('user', 'page'))
@@ -86,22 +83,23 @@ class FacebookAuth(models.BaseAuth):
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urlopen() and adds OAuth credentials to the request.
+    """Wraps :meth:`models.BaseAuth.urlopen` and adds OAuth credentials to the request.
     """
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
 
   def for_page(self, page_id):
-    """Returns a new, unsaved FacebookAuth entity for a page in pages_json.
+    """Returns a new, unsaved :class:`FacebookAuth` entity for a page in :attr:`pages_json`.
 
     The returned entity's properties will be populated with the page's data.
-    access_token will be the page access token, user_json will be the page
-    object, and pages_json will be a single-element list with the page.
+    access_token will be the page access token, :attr:`user_json` will be the
+    page object, and :attr:`pages_json` will be a single-element list with the
+    page.
 
-    If page_id is not in pages_json, returns None.
+    If ``page_id`` is not in :attr:`pages_json`, returns None.
 
     Args:
-      page_id: string, Facebook page id
+      page_id (str): Facebook page id
     """
     for page in json_loads(self.pages_json):
       id = page.get('id')
@@ -119,10 +117,10 @@ class FacebookAuth(models.BaseAuth):
     authority over.
 
     Args:
-      auth_entity_key: ndb.Key
+      auth_entity_key (google.cloud.ndb.key.Key)
 
     Returns:
-      boolean: true if key represents this user or one of the user's pages.
+      bool: True if key represents this user or one of the user's pages.
     """
     return super().is_authority_for(key) or any(
       key == self.for_page(page.get('id')).key
@@ -195,10 +193,10 @@ class Callback(views.Callback):
     """Handles any error reported in the callback query parameters.
 
     Args:
-      handler: Callback
+      handler (Callback)
 
     Returns:
-      :class:`flask.Response` if there was an error, None otherwise.
+      flask.Response: response if there was an error, otherwise None
     """
     error = request.values.get('error')
     error_reason = request.values.get('error_reason')

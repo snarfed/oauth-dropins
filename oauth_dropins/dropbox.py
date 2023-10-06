@@ -1,8 +1,9 @@
 """Dropbox OAuth drop-in.
 
 Standard OAuth 2.0 flow. Docs:
-https://www.dropbox.com/developers/documentation/http/overview
-https://www.dropbox.com/developers/documentation/http/documentation#authorization
+
+* https://www.dropbox.com/developers/documentation/http/overview
+* https://www.dropbox.com/developers/documentation/http/documentation#authorization
 """
 import logging
 import urllib.parse, urllib.request
@@ -40,9 +41,9 @@ class DropboxAuth(models.BaseAuth):
 
   Provides methods that return information about this user (or page) and make
   OAuth-signed requests to Dropbox's HTTP-based APIs. Stores OAuth credentials
-  in the datastore. See models.BaseAuth for usage details.
+  in the datastore. See :class:`models.BaseAuth` for usage details.
 
-  Implements urlopen() but not api().
+  Implements :meth:`urlopen` but not :meth:`api`.
   """
   access_token_str = ndb.StringProperty(required=True)
 

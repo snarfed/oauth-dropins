@@ -10,8 +10,9 @@ Uses requests-oauthlib to auth via Google Sign-In's OAuth 2:
 https://requests-oauthlib.readthedocs.io/
 
 Known issues:
+
 * If the user approves the OAuth prompt but has no Blogger blogs, we redirect to
-  the callback with declined=True, which is wrong.
+  the callback with ``declined=True``, which is wrong.
 """
 import logging
 import re
@@ -37,11 +38,11 @@ class BloggerV2Auth(models.BaseAuth):
 
   Provides methods that return information about this user (or page) and make
   OAuth-signed requests to the Blogger API. Stores OAuth credentials in the
-  datastore. See models.BaseAuth for usage details.
+  datastore. See :class:`models.BaseAuth` for usage details.
 
-  Blogger-specific details: implements api() but not urlopen(). api() returns a
-  :class:`gdata.blogger.client.BloggerClient`. The datastore entity key name is
-  the Blogger user id.
+  Blogger-specific details: implements :meth:`api` but not :meth:`urlopen`.
+  :meth:`api` returns a :class:`gdata.blogger.client.BloggerClient`. The
+  datastore entity key name is the Blogger user id.
   """
   name = ndb.StringProperty(required=True)
   creds_json = ndb.TextProperty(required=True)
@@ -58,33 +59,41 @@ class BloggerV2Auth(models.BaseAuth):
     return 'Blogger'
 
   def user_display_name(self):
-    """Returns the user's Blogger username.
+    """
+    Returns:
+      str: the user's Blogger username
     """
     return self.name
 
   def access_token(self):
-    """Returns the OAuth access token string.
+    """
+    Returns:
+      str: the OAuth access token string
     """
     return json_loads(self.creds_json)['access_token']
 
   def _api(self):
-    """Returns a gdata.blogger.client.BloggerClient.
+    """
+    Returns:
+      gdata.blogger.client.BloggerClient:
     """
     return BloggerClient(auth_token=self)
 
   def modify_request(self, http_request):
-    """Makes this class usable as an auth_token object in a gdata Client.
+    """Makes this class usable as an ``auth_token`` object in a gdata ``Client``.
 
     Background in :class:`gdata.client.GDClient` and
-    :meth:`gdata.client.GDClient.request`. Other similar classes include
-    :class:`gdata.gauth.ClientLoginToken` and :class:`gdata.gauth.AuthSubToken`.
+    :meth:`gdata.client.GDClient.request`\. Other similar classes include
+    :class:`gdata.gauth.ClientLoginToken` and :class:`gdata.gauth.AuthSubToken`\.
     """
     http_request.headers['Authorization'] = f'Bearer {self.access_token()}'
 
 
 class Scopes(object):
-  # https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
-  # (the scope for the v3 API is https://www.googleapis.com/auth/blogger)
+  """
+  https://developers.google.com/blogger/docs/2.0/developers_guide_protocol#OAuth2Authorizing
+  (the scope for the v3 API is ``https://www.googleapis.com/auth/blogger``)
+  """
   DEFAULT_SCOPE = 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/blogger openid'
   SCOPE_SEPARATOR = ' '
 

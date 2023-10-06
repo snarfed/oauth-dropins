@@ -299,7 +299,8 @@ class Start(views.Start):
       app_name: string
       app_url: string
 
-    Returns: APP_CLASS
+    Returns:
+      :class:`APP_CLASS`
     """
     logger.info(f"first time we've seen {self.LABEL} instance {instance} with app {app_name} {app_url}! registering an API app.")
 

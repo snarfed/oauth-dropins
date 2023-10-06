@@ -5,14 +5,14 @@ Disqus API docs: https://disqus.com/api/docs/
 This drop-in is even more similar to Instagram than Instagram is to
 Facebook. Differences:
 
-- urlopen must pass the api_key with each request (in addition to the
-  access_token)
+- urlopen must pass the ``api_key`` with each request (in addition to the
+  ``access_token``)
 - Response to access_token does not give much information about the user,
-  so we additionally fetch /user/details before saving
+  so we additionally fetch ``/user/details`` before saving
 - Deny appears to be broken on Disqus's side (clicking "No Thanks" has
   no effect), so we ignore that possibility for now.
 
-TODO unify Disqus, Facebook, and Instagram
+TODO: unify Disqus, Facebook, and Instagram
 """
 import logging
 import urllib.parse
@@ -43,12 +43,11 @@ USER_DETAILS_URL = 'https://disqus.com/api/3.0/users/details.json?user=%d'
 class DisqusAuth(models.BaseAuth):
   """An authenticated Disqus user.
 
-  Provides methods that return information about this user (or page)
-  and make OAuth-signed requests to Instagram's HTTP-based
-  APIs. Stores OAuth credentials in the datastore. See models.BaseAuth
-  for usage details.
+  Provides methods that return information about this user (or page) and make
+  OAuth-signed requests to Instagram's HTTP-based APIs. Stores OAuth credentials
+  in the datastore. See :class:`models.BaseAuth` for usage details.
 
-  Disqus-specific details: implements urlopen() but not api().
+  Disqus-specific details: implements :meth:`urlopen` but not :meth:`api`.
   The key name is the Disqus user id.
   """
   auth_code = ndb.StringProperty(required=True)
@@ -69,7 +68,7 @@ class DisqusAuth(models.BaseAuth):
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urlopen() and adds OAuth credentials to the request.
+    """Wraps :meth:`models.BaseAuth.urlopen` and adds OAuth credentials to the request.
     """
     # TODO does work for POST requests? key is always passed as a
     # query param, regardless of method.
@@ -147,10 +146,10 @@ class Callback(views.Callback):
     """Handles any error reported in the callback query parameters.
 
     Args:
-      handler: Callback
+      handler (Callback)
 
     Returns:
-      True if there was an error, False otherwise.
+      bool: True if there was an error, False otherwise
     """
     error = request.values.get('error')
     if error:

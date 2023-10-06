@@ -23,11 +23,11 @@ def signed_urlopen(url, token_key, token_secret, **kwargs):
   """Call :func:`urllib.request.urlopen`, signing the request with Flickr credentials.
 
   Args:
-    url (string): the url to open
-    token_key (string): user's access token
-    token_secret (string): the user's access token secret
-    timeout (Optional[int]): the request timeout, falls
-      back to HTTP_TIMEOUT if not specified
+    url (str): the url to open
+    token_key (str): user's access token
+    token_secret (str): the user's access token secret
+    timeout (int): the request timeout, optional, falls
+      back to :const:`webutil.util.HTTP_TIMEOUT` if not specified
 
   Returns:
     the file-like object that is the result of :func:`urllib.request.urlopen`
@@ -58,17 +58,17 @@ def call_api_method(method, params, token_key, token_secret):
 
   Flickr has one API endpoint, where different methods are called by name.
 
-  If the "stat" field contains "fail", then this method creates
+  If the ``stat`` field contains ``fail``, then this method creates
   an artificial HTTPError 400 or 401 depending on the type of failure.
 
   Args:
-    method (string): the API method name (e.g. ``flickr.photos.getInfo``)
+    method (str): the API method name (e.g. ``flickr.photos.getInfo``)
     params (dict): the parameters to send to the API method
-    token_key (string): the user's API access token
-    token_secret (string): the user's API access token secret
+    token_key (str): the user's API access token
+    token_secret (str): the user's API access token secret
 
   Return:
-    json object response from the API
+    dict: json object response from the API
   """
   full_params = {
     'nojsoncallback': 1,
@@ -105,15 +105,15 @@ def upload(params, file, token_key, token_secret):
   Args:
     params (dict): the parameters to send to the API method
     file (file-like object): the image or video to upload
-    token_key (string): the user's API access token
-    token_secret (string): the user's API access token secret
+    token_key (str): the user's API access token
+    token_secret (str): the user's API access token secret
 
   Return:
-    dict containing the photo id (as 'id')
+    dict: contains the photo id as ``id``
 
   Raises:
-    :class:`requests.HTTPError` on HTTP error or :class:`urllib.error.HTTPError` if
-    we get a stat='fail' response from Flickr.
+    requests.HTTPError: on HTTP error
+    urllib.error.HTTPError: if we get a ``stat=fail`` response from Flickr
   """
   upload_url = 'https://up.flickr.com/services/upload'
   auth = requests_oauthlib.OAuth1(

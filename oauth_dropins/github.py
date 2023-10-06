@@ -1,8 +1,9 @@
 """GitHub OAuth drop-in.
 
 API docs:
-https://developer.github.com/v4/
-https://developer.github.com/apps/building-oauth-apps/authorization-options-for-oauth-apps/#web-application-flow
+
+* https://developer.github.com/v4/
+* https://developer.github.com/apps/building-oauth-apps/authorization-options-for-oauth-apps/#web-application-flow
 """
 import logging
 import urllib.parse
@@ -62,10 +63,10 @@ class GitHubAuth(BaseAuth):
 
   Provides methods that return information about this user and make OAuth-signed
   requests to the GitHub REST API. Stores OAuth credentials in the datastore.
-  See models.BaseAuth for usage details.
+  See :class:`models.BaseAuth` for usage details.
 
-  GitHub-specific details: implements get() but not urlopen(), or api().
-  The key name is the username.
+  GitHub-specific details: implements :meth:`get` but not :meth:`urlopen`, or
+  :meth:`api`. The key name is the username.
   """
   access_token_str = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()
@@ -84,14 +85,14 @@ class GitHubAuth(BaseAuth):
     return self.access_token_str
 
   def get(self, *args, **kwargs):
-    """Wraps requests.get() and adds the Bearer token header.
+    """Wraps :func:`requests.get` and adds the Bearer token header.
 
     TODO: unify with medium.py.
     """
     return self._requests_call(util.requests_get, *args, **kwargs)
 
   def post(self, *args, **kwargs):
-    """Wraps requests.post() and adds the Bearer token header.
+    """Wraps :func:`requests.post` and adds the ``Bearer`` token header.
 
     TODO: unify with medium.py.
     """

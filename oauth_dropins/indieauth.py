@@ -22,14 +22,14 @@ INDIEAUTH_URL = 'https://indieauth.com/auth'
 
 
 def discover_endpoint(rel, resp):
-  """Fetch a URL and look for the `rel` Link header or HTML value.
+  """Fetch a URL and look for the ``rel`` Link header or HTML value.
 
   Args:
-    rel: string, rel name to look for
-    resp: :class:`requests.Response` to look in
+    rel (str): rel name to look for
+    resp (requests.Response): response to look in
 
   Return:
-    string, the discovered `rel` value, or None if no endpoint was discovered
+    str: discovered `rel` value, or None if no endpoint was discovered
   """
   # check endpoint header first
   endpoint = resp.links.get(rel, {}).get('url')
@@ -44,15 +44,16 @@ def discover_endpoint(rel, resp):
 
 
 def build_user_json(me):
-  """Returns a JSON dict with h-card, rel-me links, and me value.
+  """Returns a JSON dict with ``h-card``, ``rel-me`` links, and ``me`` value.
 
   Args:
-    me: string, URL of the user, returned by
-    resp: :class:`requests.Response` to use
+    me (str): URL of the user
+    resp (requests.Response): response to use
 
   Return:
-    dict, with 'me', the URL for this person; 'h-card', the representative h-card
-      for this page; 'rel-me', a list of rel-me URLs found at this page
+    dict: keys include ``me``, the URL for this person; ``h-card``, the
+    representative h-card for this page; ``rel-me``, a list of rel-me URLs
+    found at this page
   """
   user_json = {'me': me}
 
@@ -74,8 +75,8 @@ class IndieAuth(models.BaseAuth):
   """An authenticated IndieAuth user.
 
   Provides methods that return information about this user. Stores credentials
-  in the datastore. Key is the authed `me` URL value. See models.BaseAuth for
-  usage details.
+  in the datastore. Key is the authed ``me`` URL value. See
+  :class:`models.BaseAuth` for usage details.
   """
   user_json = ndb.TextProperty(required=True)  # generally this has only 'me'
   access_token_str = ndb.StringProperty()
@@ -94,7 +95,7 @@ class IndieAuth(models.BaseAuth):
 
 
 class Start(views.Start):
-  """Starts the IndieAuth flow. Requires the 'me' parameter with the
+  """Starts the IndieAuth flow. Requires the ``me`` parameter with the
   user URL that we want to authenticate.
   """
   NAME = 'indieauth'
@@ -169,7 +170,8 @@ class Start(views.Start):
 
 class Callback(views.Callback):
   """The callback view from the IndieAuth request. Performs an Authorization
-  Code grant to verify the code."""
+  Code grant to verify the code.
+  """
   def dispatch_request(self):
     code = request.values['code']
     state = util.decode_oauth_state(request.values['state'])

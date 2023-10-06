@@ -2,17 +2,18 @@
 """WordPress.com OAuth drop-in.
 
 API docs:
-https://developer.wordpress.com/docs/api/
-https://developer.wordpress.com/docs/oauth2/
+
+* https://developer.wordpress.com/docs/api/
+* https://developer.wordpress.com/docs/oauth2/
 
 Note that unlike Blogger and Tumblr, WordPress.com's OAuth tokens are *per
 blog*. It asks you which blog to use on its authorization page.
 
 Also, wordpress.com doesn't let you use an oauth redirect URL with "local" or
 "localhost" anywhere in it. A common workaround is to map an arbitrary host
-to localhost in your /etc/hosts, e.g.:
+to localhost in your /etc/hosts, e.g.::
 
-127.0.0.1 my.dev.com
+    127.0.0.1 my.dev.com
 
 You can then test on your local machine by running dev_appserver and opening
 http://my.dev.com:8080/ instead of http://localhost:8080/ .
@@ -59,8 +60,8 @@ class WordPressAuth(BaseAuth):
   OAuth-signed requests to the WordPress REST API. Stores OAuth credentials in
   the datastore. See models.BaseAuth for usage details.
 
-  WordPress-specific details: implements urlopen() but not api(). The key name
-  is the blog hostname.
+  WordPress-specific details: implements :meth:`urlopen` but not :meth:`api`.
+  The key name is the blog hostname.
   """
   blog_id = ndb.StringProperty(required=True)
   blog_url = ndb.StringProperty(required=True)
@@ -85,7 +86,7 @@ class WordPressAuth(BaseAuth):
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urllib.request.urlopen() and adds OAuth credentials to the request.
+    """Wraps :func:`urllib.request.urlopen` and adds OAuth credentials to the request.
     """
     kwargs.setdefault('headers', {})['authorization'] = \
         'Bearer ' + self.access_token_str

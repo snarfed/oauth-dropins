@@ -1,10 +1,13 @@
 """Google Sign-In OAuth drop-in.
 
 Google Sign-In API docs: https://developers.google.com/identity/protocols/OAuth2WebServer
+
 Python API client docs: https://developers.google.com/api-client-library/python/
+
 requests-oauthlib docs:
-  https://requests-oauthlib.readthedocs.io/
-  https://requests-oauthlib.readthedocs.io/en/latest/examples/google.html
+
+* https://requests-oauthlib.readthedocs.io/
+* https://requests-oauthlib.readthedocs.io/en/latest/examples/google.html
 """
 import logging
 
@@ -33,7 +36,7 @@ class GoogleUser(models.BaseAuth):
 
   Provides methods that return information about this user and make OAuth-signed
   requests to Google APIs. Stores OAuth credentials in the datastore. See
-  models.BaseAuth for usage details.
+  :class:`models.BaseAuth` for usage details.
 
   To make Google API calls: https://google-auth.readthedocs.io/
   """

@@ -12,8 +12,8 @@ class BaseAuth(models.StringIdModel):
   requests to the site's API(s). Stores OAuth credentials in the datastore.
 
   The key name is usually the user's username or id. If it starts with two
-  underscores (`__`), this class will prefix it with a `\` character, since that
-  prefix is not allowed in datastore key names:
+  underscores (``__``), this class will prefix it with a ``\`` character, since
+  that prefix is not allowed in datastore key names:
   https://cloud.google.com/datastore/docs/concepts/entities
 
   Many sites provide additional methods and store additional user information in
@@ -23,7 +23,7 @@ class BaseAuth(models.StringIdModel):
   _api_obj = None
 
   def __init__(self, *args, id=None, **kwargs):
-    """Constructor. Escapes the key string id if it starts with `__`."""
+    """Constructor. Escapes the key string id if it starts with ``__``."""
     if id and id.startswith('__'):
       id = '\\' + id
     super().__init__(*args, id=id, **kwargs)
@@ -34,12 +34,12 @@ class BaseAuth(models.StringIdModel):
     return id[1:] if id[0] == '\\' else id
 
   def site_name(self):
-    """Returns the string name of the site, e.g. 'Facebook'.
+    """Returns the string name of the site, e.g. ``Facebook``.
     """
     raise NotImplementedError()
 
   def user_display_name(self):
-    """Returns a string user identifier, e.g. 'Ryan Barrett' or 'snarfed'.
+    """Returns a string user identifier, e.g. ``Ryan Barrett`` or ``snarfed``.
     """
     raise NotImplementedError()
 
