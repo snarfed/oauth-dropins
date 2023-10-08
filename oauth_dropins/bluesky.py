@@ -59,12 +59,12 @@ class Callback(views.Callback):
     except UnauthorizedError:
       return self.finish(None)
     user_json = json_dumps({
-      '$type': profile._type,
+      '$type': profile.py_type,
       'did': profile.did,
       'handle': profile.handle,
       'avatar': profile.avatar,
       'banner': profile.banner,
-      'displayName': profile.displayName,
+      'displayName': profile.display_name,
       'description': profile.description,
     })
     auth = BlueskyAuth(
