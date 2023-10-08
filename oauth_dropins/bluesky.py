@@ -1,9 +1,19 @@
-from atproto.exceptions import UnauthorizedError
-from . import views, models
+"""Bluesky auth drop-in.
+
+Not actually OAuth yet, they currently use app passwords.
+https://atproto.com/specs/xrpc#app-passwords
+"""
+import logging
+
 from flask import request
 from google.cloud import ndb
-from .webutil.util import json_dumps
-import atproto
+from lexrpc import Client
+
+from . import views, models
+from .webutil import util
+
+logger = logging.getLogger(__name__)
+
 
 class Start(views.Start):
   """
@@ -12,11 +22,9 @@ class Start(views.Start):
   NAME = 'bluesky'
   LABEL = 'Bluesky'
 
-class BlueskyAuth(models.BaseAuth):
-  """
-  An authenticated Bluesky user.
-  """
 
+class BlueskyAuth(models.BaseAuth):
+  """An authenticated Bluesky user."""
   did = ndb.StringProperty(required=True)
   password = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty(required=True)
@@ -32,16 +40,31 @@ class BlueskyAuth(models.BaseAuth):
 
   def _api(self):
     """
-    Returns an atproto.Client.
+    Returns:
+      lexrpc.Client:
     """
-    (client, _) = BlueskyAuth._api_from_password(self.did, self.password)
-    return client
+    return self._api_from_password(self.did, self.password)
 
   @staticmethod
   def _api_from_password(handle, password):
-    client = atproto.Client()
-    profile = client.login(handle, password)
-    return (client, profile)
+    """
+    Args:
+      handle (str)
+      password (str)
+
+    Returns:
+      lexrpc.Client:
+    """
+    logger.info(f'Logging in with handle {handle}...')
+    client = Client('https://bsky.social', headers={'User-Agent': util.user_agent})
+    resp = client.com.atproto.server.createSession({
+        'identifier': handle,
+        'password': password,
+      })
+    logger.info(f'Got DID {resp["did"]}')
+
+    client.access_token = resp['accessJwt']
+    return client
 
 
 class Callback(views.Callback):
@@ -49,29 +72,25 @@ class Callback(views.Callback):
   OAuth callback stub.
   """
   def dispatch_request(self):
-    username = request.values['username']
+    handle = request.values['username']
     password = request.values['password']
 
     # get the did (portable user ID)
     try:
-      # TODO migrate this to lexrpc
-      (_, profile) = BlueskyAuth._api_from_password(username, password)
-    except UnauthorizedError:
+      client = BlueskyAuth._api_from_password(handle, password)
+    except ValueError as e:
+      logger.warning(f'Login failed: {e}')
       return self.finish(None)
-    user_json = json_dumps({
-      '$type': profile.py_type,
-      'did': profile.did,
-      'handle': profile.handle,
-      'avatar': profile.avatar,
-      'banner': profile.banner,
-      'displayName': profile.display_name,
-      'description': profile.description,
-    })
+
+    profile = {
+      '$type': 'app.bsky.actor.defs#profileViewDetailed',
+      **client.app.bsky.actor.getProfile(actor=handle)
+    }
     auth = BlueskyAuth(
-      id=profile.did,
-      did=profile.did,
+      id=profile['did'],
+      did=profile['did'],
       password=password,
-      user_json=user_json,
+      user_json=util.json_dumps(profile),
     )
     auth.put()
     return self.finish(auth)
