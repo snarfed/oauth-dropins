@@ -14,7 +14,7 @@ git+https://github.com/snarfed/mox3.git#egg=mox3
 attrs==23.1.0
 bases==0.2.1
 beautifulsoup4==4.12.2
-cachetools==5.3.1
+cachetools==5.3.2
 certifi==2023.7.22
 charset-normalizer==3.3.1
 click==8.1.7
