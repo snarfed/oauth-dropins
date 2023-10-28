@@ -11,6 +11,7 @@ from lexrpc import Client
 
 from . import views, models
 from .webutil import util
+from .webutil.models import JsonProperty
 
 logger = logging.getLogger(__name__)
 
@@ -24,26 +25,33 @@ class Start(views.Start):
 
 
 class BlueskyAuth(models.BaseAuth):
-  """An authenticated Bluesky user."""
-  did = ndb.StringProperty(required=True)
+  """An authenticated Bluesky user.
+
+  Key id is DID.
+  """
   password = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty(required=True)
+  session = JsonProperty()
 
   def site_name(self):
     return 'Bluesky'
 
   def access_token(self):
     """
-    Returns did and password as a tuple in place of an OAuth key id/secret pair.
+    Returns:
+      str:
     """
-    return (self.did, self.password)
+    if self.session:
+      return self.session.get('accessJwt')
 
   def _api(self):
     """
     Returns:
       lexrpc.Client:
     """
-    return self._api_from_password(self.did, self.password)
+    client = Client(headers={'User-Agent': util.user_agent})
+    client.session = self.session
+    return client
 
   @staticmethod
   def _api_from_password(handle, password):
@@ -56,14 +64,12 @@ class BlueskyAuth(models.BaseAuth):
       lexrpc.Client:
     """
     logger.info(f'Logging in with handle {handle}...')
-    client = Client('https://bsky.social', headers={'User-Agent': util.user_agent})
+    client = Client(headers={'User-Agent': util.user_agent})
     resp = client.com.atproto.server.createSession({
         'identifier': handle,
         'password': password,
       })
     logger.info(f'Got DID {resp["did"]}')
-
-    client.access_token = resp['accessJwt']
     return client
 
 
@@ -75,7 +81,7 @@ class Callback(views.Callback):
     handle = request.values['username']
     password = request.values['password']
 
-    # get the did (portable user ID)
+    # get the DID (portable user ID)
     try:
       client = BlueskyAuth._api_from_password(handle, password)
     except ValueError as e:
@@ -88,9 +94,9 @@ class Callback(views.Callback):
     }
     auth = BlueskyAuth(
       id=profile['did'],
-      did=profile['did'],
       password=password,
       user_json=util.json_dumps(profile),
+      session=client.session,
     )
     auth.put()
     return self.finish(auth)
