@@ -275,9 +275,16 @@ class Start(views.Start):
       query = query.filter(self.APP_CLASS.app_name == app_name)
     app = query.get()
 
-    if app and self.EXPIRE_APPS_BEFORE and app.created_at < self.EXPIRE_APPS_BEFORE:
-      logging.info(f'Creating new client app for {instance} because existing app {app.key} was created before EXPIRE_APPS_BEFORE {self.EXPIRE_APPS_BEFORE}')
-      app = None
+    if app:
+      if self.EXPIRE_APPS_BEFORE and app.created_at < self.EXPIRE_APPS_BEFORE:
+        logging.info(f'Creating new client app for {instance} because existing app {app.key} was created before EXPIRE_APPS_BEFORE {self.EXPIRE_APPS_BEFORE}')
+        app = None
+      elif MastodonAuth.query(MastodonAuth.app == app.key).get() == None:
+        # we haven't used this OAuth app to get an access token yet, and
+        # Mastodon garbage collects unused apps, so check that it still exists
+        # first. https://github.com/mastodon/mastodon/issues/27740
+        logging.info(f'Existing app {app.key.id()} got garbage collected! Creating new one.')
+        app = None
 
     if not app:
       app = self._register_app(instance, app_name, app_url)
