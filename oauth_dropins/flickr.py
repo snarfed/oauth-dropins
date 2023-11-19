@@ -34,6 +34,8 @@ class FlickrAuth(models.BaseAuth):
   the datastore. Key is the Flickr user ID. See models.BaseAuth for
   usage details.
   """
+  SCOPES_RESET = True
+
   # access token
   token_key = ndb.StringProperty(required=True)
   token_secret = ndb.StringProperty(required=True)

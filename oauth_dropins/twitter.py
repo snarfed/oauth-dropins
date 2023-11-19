@@ -30,6 +30,8 @@ class TwitterAuth(models.BaseAuth):
   tweepy.API; get() and post() wrap the corresponding requests methods. The
   datastore entity key name is the Twitter username.
   """
+  SCOPES_RESET = True
+
   # access token
   token_key = ndb.StringProperty(required=True)
   token_secret = ndb.StringProperty(required=True)

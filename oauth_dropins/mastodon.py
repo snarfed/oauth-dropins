@@ -112,7 +112,6 @@ class MastodonLogin(ndb.Model):
 
 
 class MastodonAuth(BaseAuth):
-
   """An authenticated Mastodon user.
 
   Provides methods that return information about this user and make OAuth-signed
@@ -121,8 +120,15 @@ class MastodonAuth(BaseAuth):
 
   Key name is the fully qualified actor address, ie @username@instance.tld.
 
+  Mastodon scopes are per access token, so :attr:`SCOPES_RESET` is True.
+
+  * https://github.com/snarfed/bridgy/issues/1015
+  * https://github.com/snarfed/bridgy/issues/1342
+
   Implements get() and post() but not urlopen() or api().
   """
+  SCOPES_RESET = True
+
   app = ndb.KeyProperty()
   access_token_str = ndb.StringProperty(required=True)
   user_json = ndb.TextProperty()

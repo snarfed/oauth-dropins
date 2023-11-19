@@ -18,7 +18,14 @@ class BaseAuth(models.StringIdModel):
 
   Many sites provide additional methods and store additional user information in
   a JSON property.
+
+  Attributes:
+    SCOPES_RESET (bool): True if scopes granted to a given user reset to the
+      just the most recent scopes requested, False if they accumulate across auth
+      flows. Currently unused, informational only.
   """
+  SCOPES_RESET = None
+
   # A site-specific API object. Initialized on demand.
   _api_obj = None
 
