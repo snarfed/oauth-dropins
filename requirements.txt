@@ -44,7 +44,7 @@ grpcio-status==1.59.3
 gunicorn==21.2.0
 h11==0.14.0
 html5lib==1.1
-humanize==4.8.0
+humanize==4.9.0
 idna==3.4
 idna==3.4
 itsdangerous==2.1.2
