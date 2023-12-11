@@ -40,7 +40,7 @@ google-cloud-ndb==2.2.2
 googleapis-common-protos==1.62.0
 grpc-google-iam-v1==0.12.7
 grpcio==1.60.0
-grpcio-status==1.59.3
+grpcio-status==1.60.0
 gunicorn==21.2.0
 h11==0.14.0
 html5lib==1.1
