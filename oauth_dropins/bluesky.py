@@ -23,6 +23,14 @@ class Start(views.Start):
   NAME = 'bluesky'
   LABEL = 'Bluesky'
 
+  @classmethod
+  def button_html(cls, *args, **kwargs):
+    return super(cls, cls).button_html(
+      *args,
+      image_file='bluesky_logotype.png',
+      input_style='background-color: #EEEEEE',
+      **kwargs)
+
 
 class BlueskyAuth(models.BaseAuth):
   """An authenticated Bluesky user.
