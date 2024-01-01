@@ -12,7 +12,7 @@ git+https://github.com/dvska/gdata-python3.git#egg=gdata
 git+https://github.com/snarfed/lexrpc.git#egg=lexrpc
 git+https://github.com/snarfed/mox3.git#egg=mox3
 
-attrs==23.1.0
+attrs==23.2.0
 bases==0.3.0
 beautifulsoup4==4.12.2
 cachetools==5.3.2
