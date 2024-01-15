@@ -340,9 +340,25 @@ class Start(views.Start):
 
     app_data = json_loads(resp.text)
     logger.info(f'Got {app_data}')
-    app = self.APP_CLASS(instance=instance, app_name=app_name,
-                         app_url=app_url, data=json_dumps(app_data))
-    return app
+
+    # generate a client_credential token (without expiration) to
+    # prevent Mastodon from garbage collecting this OAuth client
+    # https://github.com/mastodon/mastodon/issues/27740
+    data = {
+      'grant_type': 'client_credentials',
+      'client_id': app_data['client_id'],
+      'client_secret': app_data['client_secret'],
+    }
+    resp = util.requests_post(urljoin(instance, ACCESS_TOKEN_API),
+                              data=urlencode(data))
+    if resp.ok:
+      resp_json = resp.json()
+      logger.info(f'Got client_credential: {json_dumps(resp_json)}')
+      if token := resp_json.get('access_token'):
+        app_data['client_credentials_token'] = token
+
+    return self.APP_CLASS(instance=instance, app_name=app_name,
+                          app_url=app_url, data=json_dumps(app_data))
 
   @classmethod
   def button_html(cls, *args, **kwargs):
