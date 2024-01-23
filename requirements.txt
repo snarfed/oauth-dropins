@@ -12,6 +12,10 @@ git+https://github.com/dvska/gdata-python3.git#egg=gdata
 git+https://github.com/snarfed/lexrpc.git#egg=lexrpc
 git+https://github.com/snarfed/mox3.git#egg=mox3
 
+# required for mox3, not prod
+fixtures==4.1.0
+pbr==6.0.0
+
 attrs==23.2.0
 bases==0.3.0
 beautifulsoup4==4.12.3
@@ -21,11 +25,8 @@ charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
 dag-cbor==0.3.3
-Deprecated==1.2.14
 domain2idna==1.12.0
 ecdsa==0.18.0
-extras==1.0.0
-fixtures==4.1.0
 Flask==3.0.1
 Flask-Caching==2.1.0
 flask-gae-static==1.0
@@ -58,7 +59,6 @@ multiformats-config==0.3.1
 multiformats==0.3.1.post4
 oauthlib==3.2.2
 packaging==23.2
-pbr==6.0.0
 pkce==1.0.3
 praw==7.7.1
 prawcore==2.4.0
@@ -79,7 +79,6 @@ rsa==4.9
 simple-websocket==1.0.0
 six==1.16.0
 soupsieve==2.5
-testtools==2.7.1
 tlslite-ng==0.7.6
 tweepy==4.14.0
 typing-extensions==4.9.0
@@ -88,6 +87,5 @@ ujson==5.4.0
 update-checker==0.18.0
 urllib3==2.1.0
 webencodings==0.5.1
-WebOb==1.8.7
 websockets==12.0
 websocket-client==1.7.0
