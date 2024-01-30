@@ -88,13 +88,14 @@ class Callback(views.Callback):
   def dispatch_request(self):
     handle = request.values['username']
     password = request.values['password']
+    state = request.values.get('state')
 
     # get the DID (portable user ID)
     try:
       client = BlueskyAuth._api_from_password(handle, password)
     except ValueError as e:
       logger.warning(f'Login failed: {e}')
-      return self.finish(None)
+      return self.finish(None, state=state)
 
     profile = {
       '$type': 'app.bsky.actor.defs#profileViewDetailed',
@@ -107,4 +108,4 @@ class Callback(views.Callback):
       session=client.session,
     )
     auth.put()
-    return self.finish(auth)
+    return self.finish(auth, state=state)
