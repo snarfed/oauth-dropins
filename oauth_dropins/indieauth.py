@@ -107,7 +107,7 @@ class Start(views.Start):
 
     # TODO: unify with mastodon?
     if not me:
-      me = request.values['me']
+      me = request.values['me'].strip()
     parsed = urllib.parse.urlparse(me)
     if not parsed.scheme:
       me = 'http://' + me

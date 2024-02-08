@@ -86,8 +86,8 @@ class Callback(views.Callback):
   OAuth callback stub.
   """
   def dispatch_request(self):
-    handle = request.values['username']
-    password = request.values['password']
+    handle = request.values['username'].strip()
+    password = request.values['password'].strip()
     state = request.values.get('state')
 
     # get the DID (portable user ID)
