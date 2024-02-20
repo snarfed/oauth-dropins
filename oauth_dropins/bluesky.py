@@ -86,7 +86,7 @@ class Callback(views.Callback):
   OAuth callback stub.
   """
   def dispatch_request(self):
-    handle = request.values['username'].strip()
+    handle = request.values['username'].strip().lower().removeprefix('@')
     password = request.values['password'].strip()
     state = request.values.get('state')
 
