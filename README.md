@@ -156,6 +156,8 @@ Changelog
 * Bluesky:
   * Normalize handles to lower case, remove leading `@` ([bridgy#1667](https://github.com/snarfed/bridgy/issues/1667)).
 
+Miscellaneous changes in `webutil`.
+
 ### 6.2 - 2023-09-15
 
 Miscellaneous changes in `webutil`.
