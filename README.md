@@ -151,7 +151,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 6.3 - unreleased
+### 6.3 - 2024-03-15
 
 * Bluesky:
   * Normalize handles to lower case, remove leading `@` ([bridgy#1667](https://github.com/snarfed/bridgy/issues/1667)).
