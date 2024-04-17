@@ -30,12 +30,12 @@ jobs:
             pip install -U -r requirements.txt
             pip install coverage coveralls
 
-            gcloud components install --quiet cloud-firestore-emulator
+            sudo apt-get install google-cloud-cli-firestore-emulator
 
       - run:
           name: Run tests
           command: |
-            CLOUDSDK_CORE_PROJECT=brid-gy gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /tmp/firestore-emulator.log &
+            gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /tmp/firestore-emulator.log &
             sleep 5s
             python3 -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v -p 'test_*.py'
             kill %1
