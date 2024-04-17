@@ -30,9 +30,18 @@ jobs:
             pip install -U -r requirements.txt
             pip install coverage coveralls
 
+            # for firestore emulator
+            # google-cloud-sdk: https://cloud.google.com/sdk/docs/install#deb
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update
+            sudo apt-get install -y google-cloud-cli-firestore-emulator
+
       - run:
           name: Run tests
           command: |
+            CLOUDSDK_CORE_PROJECT=brid-gy gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /tmp/firestore-emulator.log &
+            sleep 5s
             python3 -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v -p 'test_*.py'
             kill %1
             python3 -m coverage html -d /tmp/coverage_html
