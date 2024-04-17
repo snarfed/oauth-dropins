@@ -347,7 +347,8 @@ Development
 ---
 Pull requests are welcome! Feel free to [ping me in #indieweb-dev](https://indieweb.org/discuss) with any questions.
 
-First, fork and clone this repo. Then, install the [Google Cloud SDK](https://cloud.google.com/sdk/) and run `gcloud components install beta cloud-datastore-emulator` to install the [datastore emulator](https://cloud.google.com/datastore/docs/tools/datastore-emulator). Then, set up your environment by running these commands in the repo root directory. Once you have them, set up your environment by running these commands in the repo root directory:
+First, fork and clone this repo. Then, install the [Google Cloud SDK](https://cloud.google.com/sdk/) and run `gcloud components install cloud-firestore-emulator` to install the [Firestore emulator](https://cloud.google.com/firestore/docs/emulator). Once you have them, set up your environment by running these commands in the repo root directory:
+
 
 ```shell
 gcloud config set project oauth-dropins
@@ -361,7 +362,7 @@ pip install -r requirements.txt
 Run the demo app locally with [`flask run`](https://flask.palletsprojects.com/en/2.0.x/cli/#run-the-development-server):
 
 ```shell
-gcloud beta emulators datastore start --use-firestore-in-datastore-mode --no-store-on-disk --host-port=localhost:8089 --quiet < /dev/null >& /dev/null &
+gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &
 GAE_ENV=localdev FLASK_ENV=development flask run -p 8080
 ```
 
@@ -379,10 +380,9 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. Run the unit tests.
     ```sh
     source local/bin/activate.csh
-    gcloud beta emulators datastore start --use-firestore-in-datastore-mode --no-store-on-disk --host-port=localhost:8089 < /dev/null >& /dev/null &
+    gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &
     sleep 2s
-    DATASTORE_EMULATOR_HOST=localhost:8081 DATASTORE_DATASET=oauth-dropins \
-      python3 -m unittest discover
+    python3 -m unittest discover
     kill %1
     deactivate
     ```

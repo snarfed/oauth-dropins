@@ -33,8 +33,6 @@ jobs:
       - run:
           name: Run tests
           command: |
-            CLOUDSDK_CORE_PROJECT=oauth-dropins gcloud beta emulators datastore start --no-store-on-disk --consistency=1.0 --host-port=localhost:8089 < /dev/null >& /dev/null &
-            sleep 5s
             python3 -m coverage run --include=oauth_dropins/webutil/handlers.py,oauth_dropins/webutil/models.py,oauth_dropins/webutil/util.py -m unittest discover -v -p 'test_*.py'
             kill %1
             python3 -m coverage html -d /tmp/coverage_html
