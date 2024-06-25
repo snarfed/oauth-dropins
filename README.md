@@ -151,6 +151,10 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 6.4 - 2024-06-24
+
+Misc webutil updaates.
+
 ### 6.3 - 2024-03-15
 
 * Bluesky:
@@ -382,7 +386,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     source local/bin/activate.csh
     gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &
     sleep 2s
-    python3 -m unittest discover
+    python -m unittest discover
     kill %1
     deactivate
     ```
@@ -391,7 +395,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. `git commit -am 'release vX.Y'`
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
     ```sh
-    python3 setup.py clean build sdist
+    python setup.py clean build sdist
     setenv ver X.Y
     source local/bin/activate.csh
     twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz
@@ -399,18 +403,18 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. Install from test.pypi.org.
     ```sh
     cd /tmp
-    python3 -m venv local
+    python -m venv local
     source local/bin/activate.csh
-    pip3 install --upgrade pip
+    pip install --upgrade pip
     # mf2py 1.1.2 on test.pypi.org is broken :(
-    pip3 install mf2py
-    pip3 install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
+    pip install mf2py
+    pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
     deactivate
     ```
 1. Smoke test that the code trivially loads and runs.
     ```sh
     source local/bin/activate.csh
-    python3
+    python
     # run test code below
     deactivate
     ```

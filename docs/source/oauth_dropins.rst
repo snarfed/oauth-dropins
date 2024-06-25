@@ -9,6 +9,10 @@ blogger
 -------
 .. automodule:: oauth_dropins.blogger
 
+bluesky
+-------
+.. automodule:: oauth_dropins.bluesky
+
 disqus
 ------
 .. automodule:: oauth_dropins.disqus
