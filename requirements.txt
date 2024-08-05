@@ -16,7 +16,7 @@ git+https://github.com/snarfed/mox3.git#egg=mox3
 fixtures==4.1.0
 pbr==6.0.0
 
-attrs==23.2.0
+attrs==24.1.0
 bases==0.3.0
 beautifulsoup4==4.12.3
 cachetools==5.4.0
