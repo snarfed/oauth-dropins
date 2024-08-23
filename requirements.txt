@@ -46,8 +46,8 @@ gunicorn==23.0.0
 h11==0.14.0
 html5lib==1.1
 humanize==4.10.0
-idna==3.7
-idna==3.7
+idna==3.8
+idna==3.8
 itsdangerous==2.2.0
 Jinja2==3.1.4
 jsonschema==4.23.0
