@@ -80,7 +80,7 @@ class BloggerV2Auth(models.BaseAuth):
     return BloggerClient(auth_token=self)
 
   def modify_request(self, http_request):
-    """Makes this class usable as an ``auth_token`` object in a gdata ``Client``.
+    r"""Makes this class usable as an ``auth_token`` object in a gdata ``Client``.
 
     Background in :class:`gdata.client.GDClient` and
     :meth:`gdata.client.GDClient.request`\. Other similar classes include
