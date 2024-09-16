@@ -6,7 +6,7 @@ from .webutil import models, util
 
 
 class BaseAuth(models.StringIdModel):
-  """Datastore base model class for an authenticated user.
+  r"""Datastore base model class for an authenticated user.
 
   Provides methods that return information about this user and make OAuth-signed
   requests to the site's API(s). Stores OAuth credentials in the datastore.
