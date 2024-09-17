@@ -151,6 +151,11 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 6.5 - unreleased
+
+* IndieAuth:
+  * Bug fix: handle relative URLs in `Link` headers. (Thanks [catgirlinspace](https://catgirlin.space/)!)
+
 ### 6.4 - 2024-06-24
 
 Misc webutil updaates.

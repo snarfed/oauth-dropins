@@ -34,7 +34,7 @@ def discover_endpoint(rel, resp):
   # check endpoint header first
   endpoint = resp.links.get(rel, {}).get('url')
   if endpoint:
-    return endpoint
+    return urllib.parse.urljoin(resp.url, endpoint)
 
   # check the html content
   soup = util.parse_html(resp.text)
