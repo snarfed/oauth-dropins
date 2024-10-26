@@ -255,7 +255,7 @@ class Start(views.Start):
       logger.info(resp.text)
     if (not resp or not resp.ok or not is_json or
         not self._version_ok(resp.json().get('version'))):
-      msg = f"{instance} doesn't look like a {self.LABEL} instance."
+      msg = f"Couldn't connect to {instance}, or it doesn't look like a {self.LABEL} instance."
       logger.info(resp)
       logger.info(msg)
       raise ValueError(msg)
