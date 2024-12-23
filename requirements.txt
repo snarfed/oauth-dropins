@@ -22,7 +22,7 @@ beautifulsoup4==4.12.3
 cachetools==5.5.0
 certifi==2024.12.14
 charset-normalizer==3.4.0
-click==8.1.7
+click==8.1.8
 colorama==0.4.6
 dag-cbor==0.3.3
 domain2idna==1.12.2
