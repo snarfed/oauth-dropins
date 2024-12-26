@@ -13,7 +13,7 @@ git+https://github.com/snarfed/lexrpc.git#egg=lexrpc
 git+https://github.com/snarfed/mox3.git#egg=mox3
 
 # required for mox3, not prod
-fixtures==4.1.0
+fixtures==4.2.2
 pbr==6.1.0
 
 attrs==24.3.0
