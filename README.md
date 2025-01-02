@@ -151,7 +151,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 6.5 - unreleased
+### 6.5 - 2025-01-01
 
 * IndieAuth:
   * Bug fix: handle relative URLs in `Link` headers. (Thanks [catgirlinspace](https://catgirlin.space/)!)
