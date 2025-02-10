@@ -2,7 +2,7 @@
 """
 import importlib
 import logging
-import urllib.parse
+from urllib.parse import urlencode, urlparse
 
 from flask import Flask, render_template, request
 import flask
@@ -12,9 +12,12 @@ from oauth_dropins.webutil import flask_util, util
 import requests
 from werkzeug.exceptions import HTTPException
 
+from oauth_dropins import bluesky
 from oauth_dropins.webutil import appengine_info, appengine_config
 
 logger = logging.getLogger(__name__)
+
+CACHE_CONTROL = {'Cache-Control': 'public, max-age=3600'}  # 1 hour
 
 app = Flask(__name__, static_folder=None)
 app.json.compact = False
@@ -54,12 +57,24 @@ from oauth_dropins import google_signin
 google_signin.Start.INCLUDE_GRANTED_SCOPES = False
 
 
+class BlueskyStart(bluesky.OAuthStart):
+  CLIENT_ID = bluesky._APP_CLIENT_METADATA['client_id']
+
+
 for site, module in SITES.items():
   start = f'/{site}/start'
   callback = f'/{site}/oauth_callback'
-  app.add_url_rule(start, view_func=module.Start.as_view(start, callback),
+
+  if site == 'bluesky':
+    start_cls = BlueskyStart
+    callback_cls = module.OAuthCallback
+  else:
+    start_cls = module.Start
+    callback_cls = module.Callback
+
+  app.add_url_rule(start, view_func=start_cls.as_view(start, callback),
                    methods=['POST'])
-  app.add_url_rule(callback, view_func=module.Callback.as_view(callback, '/'))
+  app.add_url_rule(callback, view_func=callback_cls.as_view(callback, '/'))
 
 
 @app.errorhandler(Exception)
@@ -73,7 +88,7 @@ def handle_discovery_errors(e):
 
   if isinstance(e, (ValueError, requests.RequestException)):
     logger.warning('', exc_info=True)
-    return flask.redirect('/?' + urllib.parse.urlencode({'error': str(e)}))
+    return flask.redirect('/?' + urlencode({'error': str(e)}))
 
   return flask_util.handle_exception(e)
 
@@ -94,3 +109,10 @@ def home_page():
     vars['entity'] = ndb.Key(urlsafe=key).get()
 
   return render_template('index.html', **vars)
+
+
+@app.get(urlparse(BlueskyStart.CLIENT_ID).path)
+# @flask_util.headers(CACHE_CONTROL)
+def bluesky_oauth_client_metadata():
+  """https://docs.bsky.app/docs/advanced-guides/oauth-client#client-and-server-metadata"""
+  return bluesky._APP_CLIENT_METADATA
