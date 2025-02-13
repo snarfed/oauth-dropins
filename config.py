@@ -12,3 +12,15 @@ else:
   ENV = 'production'
   CACHE_TYPE = 'SimpleCache'
   SECRET_KEY = util.read('flask_secret_key')
+
+
+# # turn on verbose HTTP request logging
+# # https://requests.readthedocs.io/en/latest/api/#:~:text=be%20handled%20by-,configuring%20logging
+# from http.client import HTTPConnection
+# HTTPConnection.debuglevel = 1
+
+# import logging
+# logging.getLogger().setLevel(logging.DEBUG)
+# requests_log = logging.getLogger('urllib3')
+# requests_log.setLevel(logging.DEBUG)
+# requests_log.propagate = True
