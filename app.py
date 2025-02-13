@@ -58,7 +58,16 @@ google_signin.Start.INCLUDE_GRANTED_SCOPES = False
 
 
 class BlueskyStart(bluesky.OAuthStart):
-  CLIENT_ID = bluesky._APP_CLIENT_METADATA['client_id']
+  CLIENT_METADATA = bluesky._APP_CLIENT_METADATA
+
+class BlueskyCallback(bluesky.OAuthCallback):
+  CLIENT_METADATA = bluesky._APP_CLIENT_METADATA
+
+  # # for development testing
+  # def dispatch_request(self):
+  #   return flask.redirect(
+  #     request.url.replace('https://oauth-dropins.appspot.com/',
+  #                         'http://localhost:8080/'))
 
 
 for site, module in SITES.items():
@@ -67,7 +76,7 @@ for site, module in SITES.items():
 
   if site == 'bluesky':
     start_cls = BlueskyStart
-    callback_cls = module.OAuthCallback
+    callback_cls = BlueskyCallback
   else:
     start_cls = module.Start
     callback_cls = module.Callback
@@ -111,7 +120,7 @@ def home_page():
   return render_template('index.html', **vars)
 
 
-@app.get(urlparse(BlueskyStart.CLIENT_ID).path)
+@app.get(urlparse(bluesky._APP_CLIENT_METADATA['client_id']).path)
 # @flask_util.headers(CACHE_CONTROL)
 def bluesky_oauth_client_metadata():
   """https://docs.bsky.app/docs/advanced-guides/oauth-client#client-and-server-metadata"""

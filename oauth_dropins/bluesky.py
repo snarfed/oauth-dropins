@@ -20,9 +20,15 @@ from flask import request
 from google.cloud import ndb
 from lexrpc import Client
 import requests
+from requests_oauth2client import (
+  AuthorizationRequestSerializer,
+  OAuth2Client,
+  OAuth2Error,
+  OAuth2AccessTokenAuth,
+)
 
 from . import views, models
-from .webutil import util
+from .webutil import flask_util, util
 from .webutil.models import JsonProperty
 
 logger = logging.getLogger(__name__)
@@ -34,9 +40,9 @@ PROTECTED_RESOURCE_PATH = '/.well-known/oauth-protected-resource'
 RESOURCE_METADATA_PATH = '/.well-known/oauth-authorization-server'
 CLIENT_METADATA_TEMPLATE = {
   # Clients must fill these in
-  'client_id': None,     # eg 'https://app.example.com/oauth/client-metadata.json'
-  'client_name': None,   # eg 'My Example App'
-  'client_uri': None,    # eg 'https://app.example.com'
+  'client_id': None,      # eg 'https://app.example.com/oauth/client-metadata.json'
+  'client_name': None,    # eg 'My Example App'
+  'client_uri': None,     # eg 'https://app.example.com'
   'redirect_uris': None,  # eg ['https://app.example.com/oauth/callback'],
 
   # standard
@@ -58,6 +64,31 @@ _APP_CLIENT_METADATA = {
   'client_uri': 'https://oauth-dropins.appspot.com/',
   'redirect_uris': ['https://oauth-dropins.appspot.com/bluesky/oauth_callback'],
 }
+
+
+class BlueskyLogin(ndb.Model):
+  """An in-progress Bluesky OAuth login. Ephemeral.
+
+  Stores a serialized :class:`requests_oauth2client.AuthorizationRequest` across
+  HTTP requests.
+  """  state = ndb.TextProperty()
+  authz_request = ndb.TextProperty(required=True)
+  """Serialized :class:`requests_oauth2client.AuthorizationRequest`.
+
+  Uses :meth:`requests_oauth2client.AuthorizationRequestSerializer.default_dumper` /
+  :meth:`requests_oauth2client.AuthorizationRequestSerializer.default_loader`.
+  """
+
+  @classmethod
+  def load(cls, id):
+    if not util.is_int(id):
+      flask_util.error(f'State {id} not found')
+
+    login = cls.get_by_id(int(id))
+    if not login:
+      flask_util.error(f'State {id} not found')
+
+    return login
 
 
 class BlueskyAuth(models.BaseAuth):
@@ -164,12 +195,11 @@ class OAuthStart(StartBase):
   """Starts the OAuth flow.
 
   Subclasses must populate:
-    * :attr:`CLIENT_ID`
     * :attr:`CLIENT_METADATA` (dict): client info metadata,
       https://docs.bsky.app/docs/advanced-guides/oauth-client#client-and-server-metadata
   """
-  CLIENT_ID = None
   CLIENT_METADATA = None
+  SCOPE = CLIENT_METADATA_TEMPLATE['scope']
 
   # available scopes as of Feb 2025:
   # atproto, transition:generic, transition:chat.bsky
@@ -193,7 +223,8 @@ class OAuthStart(StartBase):
       logger.warning(msg)
       raise ValueError(msg)
 
-    assert self.CLIENT_ID
+    assert self.CLIENT_METADATA
+    client_id = self.CLIENT_METADATA['client_id']
 
     if not handle:
       handle = request.form['handle']
@@ -226,62 +257,87 @@ class OAuthStart(StartBase):
     auth_server = resp.json()['authorization_servers'][0]
     logger.info(f'PDS {pds_url} has auth server {auth_server}')
 
-    resp = util.requests_get(urljoin(auth_server, RESOURCE_METADATA_PATH))
-    resp.raise_for_status()
-    par_endpoint = resp.json()['pushed_authorization_request_endpoint']
-    logger.info(f'pushed_authorization_request_endpoint is {par_endpoint}')
+    # generate authz URL, store session, redirect
+    client = OAuth2Client.from_discovery_endpoint(
+      urljoin(auth_server, RESOURCE_METADATA_PATH),
+      client_id=self.CLIENT_METADATA['client_id'],
+      redirect_uri='https://oauth-dropins.appspot.com/bluesky/oauth_callback',#self.to_url()
+      dpop_bound_access_tokens=True,
+    )
 
-    resp = util.requests_post(par_endpoint, data={
-      'client_id': self.CLIENT_ID,
-      'scopes': self.scope,
-      'redirect_uri': self.to_url(),
-      'state': state,
-      'login_hint': handle,
-    })
+    login_key = BlueskyLogin.allocate_ids(1)[0]
+    try:
+      authz_request = client.authorization_request(scope=self.SCOPE,
+                                                   state=login_key.id())
+      logger.warning(authz_request.state)
+      par_request = client.pushed_authorization_request(authz_request)
+    except OAuth2Error as e:
+      err(e)
 
-    session = OAuth2Session(self.CLIENT_ID, scope=self.scope,
-                            redirect_uri=self.to_url())
-    auth_url, state = session.authorization_url(
-      par_endpoint, state=state, include_granted_scopes='true',
-      # ask for a refresh token so we can get an access token offline
-      access_type='offline', prompt='consent')
+    serialized = AuthorizationRequestSerializer.default_dumper(authz_request)
+    BlueskyLogin(key=login_key, state=state, authz_request=serialized).put()
 
-    return auth_url
+    return par_request.uri
 
 
 class OAuthCallback(views.Callback):
-  """Finishes the OAuth flow."""
+  """Finishes the OAuth flow.
+
+  Subclasses must populate:
+    * :attr:`CLIENT_METADATA` (dict): client info metadata,
+      https://docs.bsky.app/docs/advanced-guides/oauth-client#client-and-server-metadata
+  """
+  CLIENT_METADATA = None
 
   def dispatch_request(self):
     # handle errors
-    state = request.values.get('state')
     error = request.values.get('error')
     desc = request.values.get('error_description')
     if error:
       msg = f'Error: {error}: {desc}'
       logger.info(msg)
       if error == 'access_denied':
-        return self.finish(None, state=state)
+        return self.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(msg)
 
-    # extract auth code and request access token
-    session = OAuth2Session(google_signin.GOOGLE_CLIENT_ID, scope=self.scope,
-                            redirect_uri=request.base_url)
-    session.fetch_token(ACCESS_TOKEN_URL,
-                        client_secret=google_signin.GOOGLE_CLIENT_SECRET,
-                        authorization_response=request.url)
+    login = BlueskyLogin.load(request.values['state'])
+    try:
+      # validate authz response
+      authz_request = AuthorizationRequestSerializer.default_loader(
+        login.authz_request)
+      authz_resp = authz_request.validate_callback(
+        # XXX TODO
+        request.url.replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'))
 
-    client = BloggerV2Auth(creds_json=json_dumps(session.token)).api()
-    # ...
-    auth = BloggerV2Auth(id=id,
-                         name=author.name.text,
-                         picture_url=picture_url,
-                         creds_json=json_dumps(session.token),
-                         user_atom=str(author),
-                         blogs_atom=str(blogs),
-                         blog_ids=blog_ids,
-                         blog_titles=blog_titles,
-                         blog_hostnames=blog_hostnames)
+      # get access token
+      client = OAuth2Client.from_discovery_endpoint(
+        # XXX TODO
+        urljoin('https://bsky.social', RESOURCE_METADATA_PATH),
+        client_id=self.CLIENT_METADATA['client_id'],
+        redirect_uri='https://oauth-dropins.appspot.com/bluesky/oauth_callback',#request.base_url,
+        dpop_bound_access_tokens=True,
+      )
+      token = client.authorization_code(authz_resp)
+    except OAuth2Error as e:
+      flask_util.error(e)
+
+    session = requests.Session()
+    session.auth = OAuth2AccessTokenAuth(client=client, token=token)
+
+    did = 'did:plc:fdme4gb7mu7zrie7peay7tst'
+    try:
+      resp = session.get(f'https://enoki.us-east.host.bsky.network/xrpc/app.bsky.actor.getProfile?actor={did}')
+      resp.raise_for_status()
+    except BaseException as e:
+      code, body = util.interpret_http_exception(e)
+      if code:
+        flask_util.error(f'{e.status_code}')
+      raise
+
+    auth = BlueskyAuth(id=did, session=session, user_json=util.json_dumps({
+      '$type': 'app.bsky.actor.defs#profileViewDetailed',
+      **resp.json(),
+    }))
     auth.put()
-    return self.finish(auth, state=state)
+    return self.finish(auth, state=login.state)
