@@ -51,6 +51,8 @@ setup(name='oauth-dropins',
           'pkce>=1.0.3',
           'praw>=7.3.0',
           'python-tumblpy>=1.1',
+          # WARNING: can't release until this is merged and released:
+          # https://github.com/guillp/requests_oauth2client/pull/120
           'requests-oauth2client>=1.6.0',
           'requests-oauthlib',
           'requests>=2.22',

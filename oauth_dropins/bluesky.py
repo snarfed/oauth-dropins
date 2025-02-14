@@ -256,7 +256,7 @@ def oauth_client_for_pds(view, pds_url):
   return OAuth2Client.from_discovery_endpoint(
     urljoin(auth_server, RESOURCE_METADATA_PATH),
     client_id=view.CLIENT_METADATA['client_id'],
-    redirect_uri=view.to_url().replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'),
+    redirect_uri=view.to_url(),
     dpop_bound_access_tokens=True,
   )
 
@@ -350,7 +350,7 @@ class OAuthCallback(views.Callback):
     try:
       authz_request = AuthorizationRequestSerializer.default_loader(
         login.authz_request)
-      authz_resp = authz_request.validate_callback(request.url.replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'))
+      authz_resp = authz_request.validate_callback(request.url)
       token = client.authorization_code(authz_resp, validate=True)
     except OAuth2Error as e:
       error(e)
