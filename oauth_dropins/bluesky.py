@@ -6,9 +6,8 @@ class:`OAuthStart` and :class:`OAuthCallback` for OAuth.
 https://atproto.com/specs/xrpc#:~:text=App,passwords
 https://docs.bsky.app/docs/advanced-guides/oauth-client
 https://atproto.com/specs/oauth
-
-OAuth 2 here is implemented from scratch :( since I couldn't find a Python
-library that implemented PAR (pushed authorization request).
+https://guillp.github.io/requests_oauth2client/
+https://github.com/guillp/requests_oauth2client?tab=readme-ov-file#using-dpop
 """
 import logging
 import os
@@ -30,6 +29,7 @@ from requests_oauth2client import (
 from . import views, models
 from .webutil import flask_util, util
 from .webutil.models import JsonProperty
+from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 
@@ -66,12 +66,19 @@ _APP_CLIENT_METADATA = {
 }
 
 
+def error(msg):
+  logger.warning(msg)
+  raise ValueError(msg)
+
+
 class BlueskyLogin(ndb.Model):
   """An in-progress Bluesky OAuth login. Ephemeral.
 
   Stores a serialized :class:`requests_oauth2client.AuthorizationRequest` across
   HTTP requests.
-  """  state = ndb.TextProperty()
+  """
+  state = ndb.TextProperty()
+  did = ndb.StringProperty(required=True)
   authz_request = ndb.TextProperty(required=True)
   """Serialized :class:`requests_oauth2client.AuthorizationRequest`.
 
@@ -82,11 +89,11 @@ class BlueskyLogin(ndb.Model):
   @classmethod
   def load(cls, id):
     if not util.is_int(id):
-      flask_util.error(f'State {id} not found')
+      error(f'State {id} not found')
 
     login = cls.get_by_id(int(id))
     if not login:
-      flask_util.error(f'State {id} not found')
+      error(f'State {id} not found')
 
     return login
 
@@ -96,7 +103,7 @@ class BlueskyAuth(models.BaseAuth):
 
   Key id is DID.
   """
-  password = ndb.StringProperty(required=True)
+  password = ndb.StringProperty()
   user_json = ndb.TextProperty(required=True)
   session = JsonProperty()
 
@@ -110,6 +117,13 @@ class BlueskyAuth(models.BaseAuth):
     """
     if self.session:
       return self.session.get('accessJwt')
+
+  def user_display_name(self):
+    """
+    Returns:
+      str:
+    """
+    return json_loads(self.user_json).get('handle')
 
   def _api(self):
     """
@@ -191,6 +205,62 @@ class PasswordCallback(views.Callback):
 Callback = PasswordCallback
 
 
+def pds_for_did(did):
+  """Resolves a DID document and extracts its PDS URL.
+
+  https://atproto.com/specs/did#did-documents
+
+  Args:
+    did (str)
+
+  Returns:
+    str: PDS URL
+
+  Raises:
+    ValueError: if the DID couldn't be resolved, or if its DID document has no
+    ATProto PDS endpoint
+  """
+  did_doc = arroba.did.resolve(did)
+  if not did_doc:
+    error(f"Couldn't resolve DID {did}")
+
+  # based on bridgy_fed.atproto.ATProto.pds_for
+  for service in did_doc.get('service', []):
+    if service.get('id') in ('#atproto_pds', f'{did}#atproto_pds'):
+      pds = service.get('serviceEndpoint')
+      logger.info(f'{did} has PDS {pds}')
+      return pds
+
+  error(f"{id}'s DID doc has no ATProto PDS")
+
+
+def oauth_client_for_pds(view, pds_url):
+  """Discovers a PDS's OAuth endpoints and creates a client.
+
+  Args:
+    view (OAuthStart or OAuthCallback)
+    pds_url (str)
+
+  Returns:
+    OAuth2Client:
+
+  Raises:
+    ValueError: if the DID couldn't be resolved, or if its DID document has no
+    ATProto PDS endpoint
+  """
+  resp = util.requests_get(urljoin(pds_url, PROTECTED_RESOURCE_PATH))
+  resp.raise_for_status()
+  auth_server = resp.json()['authorization_servers'][0]
+  logger.info(f'PDS {pds_url} has auth server {auth_server}')
+
+  return OAuth2Client.from_discovery_endpoint(
+    urljoin(auth_server, RESOURCE_METADATA_PATH),
+    client_id=view.CLIENT_METADATA['client_id'],
+    redirect_uri=view.to_url().replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'),
+    dpop_bound_access_tokens=True,
+  )
+
+
 class OAuthStart(StartBase):
   """Starts the OAuth flow.
 
@@ -219,10 +289,6 @@ class OAuthStart(StartBase):
     Raises:
       ValueError, RequestException: if handle isn't a valid domain
     """
-    def err(msg):
-      logger.warning(msg)
-      raise ValueError(msg)
-
     assert self.CLIENT_METADATA
     client_id = self.CLIENT_METADATA['client_id']
 
@@ -230,52 +296,27 @@ class OAuthStart(StartBase):
       handle = request.form['handle']
 
     if not re.fullmatch(util.DOMAIN_RE, handle):
-      err(f"{handle} doesn't look like a domain")
+      error(f"{handle} doesn't look like a domain")
 
     # resolve handle to DID doc and PDS base URL
     # https://atproto.com/specs/handle#handle-resolution
     did = arroba.did.resolve_handle(handle)
     if not did:
-      err(f"Couldn't resolve {handle} as a Bluesky handle")
+      error(f"Couldn't resolve {handle} as a Bluesky handle")
     logger.info(f'resolved {handle} to {did}')
 
-    did_doc = arroba.did.resolve(did)
-    if not did_doc:
-      err(f"Couldn't resolve DID {did}")
-
-    # based on bridgy_fed.atproto.ATProto.pds_for
-    for service in did_doc.get('service', []):
-      if service.get('id') in ('#atproto_pds', f'{did}#atproto_pds'):
-        pds_url = service.get('serviceEndpoint')
-        break
-    else:
-      err(f"{id}'s DID doc has no ATProto PDS")
-    logger.info(f'{did} has PDS URL {pds_url}')
-
-    resp = util.requests_get(urljoin(pds_url, PROTECTED_RESOURCE_PATH))
-    resp.raise_for_status()
-    auth_server = resp.json()['authorization_servers'][0]
-    logger.info(f'PDS {pds_url} has auth server {auth_server}')
-
     # generate authz URL, store session, redirect
-    client = OAuth2Client.from_discovery_endpoint(
-      urljoin(auth_server, RESOURCE_METADATA_PATH),
-      client_id=self.CLIENT_METADATA['client_id'],
-      redirect_uri='https://oauth-dropins.appspot.com/bluesky/oauth_callback',#self.to_url()
-      dpop_bound_access_tokens=True,
-    )
-
+    client = oauth_client_for_pds(self, pds_for_did(did))
     login_key = BlueskyLogin.allocate_ids(1)[0]
     try:
       authz_request = client.authorization_request(scope=self.SCOPE,
                                                    state=login_key.id())
-      logger.warning(authz_request.state)
       par_request = client.pushed_authorization_request(authz_request)
     except OAuth2Error as e:
-      err(e)
+      error(e)
 
     serialized = AuthorizationRequestSerializer.default_dumper(authz_request)
-    BlueskyLogin(key=login_key, state=state, authz_request=serialized).put()
+    BlueskyLogin(key=login_key, state=state, did=did, authz_request=serialized).put()
 
     return par_request.uri
 
@@ -291,53 +332,51 @@ class OAuthCallback(views.Callback):
 
   def dispatch_request(self):
     # handle errors
-    error = request.values.get('error')
+    err = request.values.get('error')
     desc = request.values.get('error_description')
-    if error:
-      msg = f'Error: {error}: {desc}'
+    if err:
+      msg = f'Error: {err}: {desc}'
       logger.info(msg)
-      if error == 'access_denied':
+      if err == 'access_denied':
         return self.finish(None, state=request.values.get('state'))
       else:
-        flask_util.error(msg)
+        error(msg)
 
     login = BlueskyLogin.load(request.values['state'])
+    pds_url = pds_for_did(login.did)
+    client = oauth_client_for_pds(self, pds_url)
+
+    # validate authz response, get access token
     try:
-      # validate authz response
       authz_request = AuthorizationRequestSerializer.default_loader(
         login.authz_request)
-      authz_resp = authz_request.validate_callback(
-        # XXX TODO
-        request.url.replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'))
-
-      # get access token
-      client = OAuth2Client.from_discovery_endpoint(
-        # XXX TODO
-        urljoin('https://bsky.social', RESOURCE_METADATA_PATH),
-        client_id=self.CLIENT_METADATA['client_id'],
-        redirect_uri='https://oauth-dropins.appspot.com/bluesky/oauth_callback',#request.base_url,
-        dpop_bound_access_tokens=True,
-      )
-      token = client.authorization_code(authz_resp)
+      authz_resp = authz_request.validate_callback(request.url.replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'))
+      token = client.authorization_code(authz_resp, validate=True)
     except OAuth2Error as e:
-      flask_util.error(e)
+      error(e)
 
+    if token.sub != login.did:
+      error(f'Started login with {login.did} but authenticated {token.sub}')
+
+    # https://docs.bsky.app/docs/advanced-guides/oauth-client#callback-and-access-token-request
     session = requests.Session()
     session.auth = OAuth2AccessTokenAuth(client=client, token=token)
 
-    did = 'did:plc:fdme4gb7mu7zrie7peay7tst'
+    # get user profile
     try:
-      resp = session.get(f'https://enoki.us-east.host.bsky.network/xrpc/app.bsky.actor.getProfile?actor={did}')
+      resp = session.get(urljoin(pds_url, f'/xrpc/app.bsky.actor.getProfile?actor={login.did}'))
       resp.raise_for_status()
     except BaseException as e:
       code, body = util.interpret_http_exception(e)
       if code:
-        flask_util.error(f'{e.status_code}')
+        error(f'{code} {body}')
       raise
 
-    auth = BlueskyAuth(id=did, session=session, user_json=util.json_dumps({
-      '$type': 'app.bsky.actor.defs#profileViewDetailed',
-      **resp.json(),
-    }))
+    auth = BlueskyAuth(id=login.did,
+                       session={'accessJwt': token.access_token},
+                       user_json=util.json_dumps({
+                         '$type': 'app.bsky.actor.defs#profileViewDetailed',
+                         **resp.json(),
+                       }))
     auth.put()
     return self.finish(auth, state=login.state)
