@@ -16,7 +16,7 @@ git+https://github.com/snarfed/mox3.git#egg=mox3
 git+https://github.com/snarfed/requests_oauth2client.git@authorization-request-serializer-dpop-key#egg=requests_oauth2client
 
 # required for mox3, not prod
-fixtures==4.2.3
+fixtures==4.2.4.post1
 pbr==6.1.1
 
 attrs==25.1.0
