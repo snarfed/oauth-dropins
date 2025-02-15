@@ -15,7 +15,7 @@ Drop-in Python [OAuth](http://oauth.net/) for popular sites!
 About
 ---
 
-This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
 
 oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
@@ -150,6 +150,10 @@ Troubleshooting/FAQ
 
 Changelog
 ---
+
+### 6.6 - unreleased
+
+* Add [Bluesky OAuth](https://docs.bsky.app/docs/advanced-guides/oauth-client)!
 
 ### 6.5 - 2025-01-01
 

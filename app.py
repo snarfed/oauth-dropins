@@ -63,12 +63,6 @@ class BlueskyStart(bluesky.OAuthStart):
 class BlueskyCallback(bluesky.OAuthCallback):
   CLIENT_METADATA = bluesky._APP_CLIENT_METADATA
 
-  # # for development testing
-  # def dispatch_request(self):
-  #   return flask.redirect(
-  #     request.url.replace('https://oauth-dropins.appspot.com/',
-  #                         'http://localhost:8080/'))
-
 
 for site, module in SITES.items():
   start = f'/{site}/start'

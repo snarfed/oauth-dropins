@@ -13,7 +13,7 @@ git+https://github.com/snarfed/arroba.git#egg=arroba
 git+https://github.com/snarfed/carbox.git#egg=carbox
 git+https://github.com/snarfed/lexrpc.git#egg=lexrpc
 git+https://github.com/snarfed/mox3.git#egg=mox3
-git+https://github.com/snarfed/requests_oauth2client.git@authorization-request-serializer-dpop-key#egg=requests_oauth2client
+git+https://github.com/snarfed/requests_oauth2client.git@dpop-token-serializer#egg=requests_oauth2client
 
 # required for mox3, not prod
 fixtures==4.2.4.post1

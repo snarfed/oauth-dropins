@@ -15,12 +15,14 @@ import re
 from urllib.parse import urljoin
 
 import arroba.did
-from flask import request
+from flask import redirect, request
 from google.cloud import ndb
 from lexrpc import Client
 import requests
 from requests_oauth2client import (
   AuthorizationRequestSerializer,
+  DPoPToken,
+  DPoPTokenSerializer,
   OAuth2Client,
   OAuth2Error,
   OAuth2AccessTokenAuth,
@@ -106,6 +108,7 @@ class BlueskyAuth(models.BaseAuth):
   password = ndb.StringProperty()
   user_json = ndb.TextProperty(required=True)
   session = JsonProperty()
+  dpop_token = ndb.TextProperty()
 
   def site_name(self):
     return 'Bluesky'
@@ -373,7 +376,7 @@ class OAuthCallback(views.Callback):
       raise
 
     auth = BlueskyAuth(id=login.did,
-                       session={'accessJwt': token.access_token},
+                       dpop_token=DPoPTokenSerializer.default_dumper(token),
                        user_json=util.json_dumps({
                          '$type': 'app.bsky.actor.defs#profileViewDetailed',
                          **resp.json(),
