@@ -345,7 +345,12 @@ class OAuthCallback(views.Callback):
       else:
         error(msg)
 
-    login = BlueskyLogin.load(request.values['state'])
+    try:
+      login = BlueskyLogin.load(request.values['state'])
+    except ValueError:
+      # temporary, for local development and testing
+      return redirect(request.url.replace('https://oauth-dropins.appspot.com/', 'http://localhost:8080/'))
+
     pds_url = pds_for_did(login.did)
     client = oauth_client_for_pds(self, pds_url)
 
