@@ -259,7 +259,7 @@ def oauth_client_for_pds(view, pds_url):
   return OAuth2Client.from_discovery_endpoint(
     urljoin(auth_server, RESOURCE_METADATA_PATH),
     client_id=view.CLIENT_METADATA['client_id'],
-    redirect_uri=view.to_url(),
+    redirect_uri=view.to_url().replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'),
     dpop_bound_access_tokens=True,
   )
 
@@ -358,7 +358,7 @@ class OAuthCallback(views.Callback):
     try:
       authz_request = AuthorizationRequestSerializer.default_loader(
         login.authz_request)
-      authz_resp = authz_request.validate_callback(request.url)
+      authz_resp = authz_request.validate_callback(request.url.replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'))
       token = client.authorization_code(authz_resp, validate=True)
     except OAuth2Error as e:
       error(e)
@@ -366,14 +366,12 @@ class OAuthCallback(views.Callback):
     if token.sub != login.did:
       error(f'Started login with {login.did} but authenticated {token.sub}')
 
-    # https://docs.bsky.app/docs/advanced-guides/oauth-client#callback-and-access-token-request
-    session = requests.Session()
-    session.auth = OAuth2AccessTokenAuth(client=client, token=token)
-
     # get user profile
+    # https://docs.bsky.app/docs/advanced-guides/oauth-client#callback-and-access-token-request
+    auth = OAuth2AccessTokenAuth(client=client, token=token)
+    pds_client = Client(pds_url, auth=auth)
     try:
-      resp = session.get(urljoin(pds_url, f'/xrpc/app.bsky.actor.getProfile?actor={login.did}'))
-      resp.raise_for_status()
+      profile = pds_client.app.bsky.actor.getProfile(actor=login.did)
     except BaseException as e:
       code, body = util.interpret_http_exception(e)
       if code:
@@ -382,9 +380,6 @@ class OAuthCallback(views.Callback):
 
     auth = BlueskyAuth(id=login.did,
                        dpop_token=DPoPTokenSerializer.default_dumper(token),
-                       user_json=util.json_dumps({
-                         '$type': 'app.bsky.actor.defs#profileViewDetailed',
-                         **resp.json(),
-                       }))
+                       user_json=util.json_dumps(profile))
     auth.put()
     return self.finish(auth, state=login.state)
