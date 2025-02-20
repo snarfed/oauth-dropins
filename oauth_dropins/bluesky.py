@@ -27,6 +27,7 @@ from requests_oauth2client import (
   OAuth2Error,
   OAuth2AccessTokenAuth,
 )
+from requests_oauth2client.flask.auth import FlaskSessionAuthMixin
 
 from . import views, models
 from .webutil import flask_util, util
@@ -67,10 +68,20 @@ _APP_CLIENT_METADATA = {
   'redirect_uris': ['https://oauth-dropins.appspot.com/bluesky/oauth_callback'],
 }
 
+FLASK_SESSION_KEY = 'oauth_dropins.bluesky.token'
+
 
 def error(msg):
   logger.warning(msg)
   raise ValueError(msg)
+
+
+class FlaskTokenAuth(FlaskSessionAuthMixin, OAuth2AccessTokenAuth):
+  """Stores the current token in the Flask session.
+
+  Subclass order matters here! FlaskSessionAuthMixin needs to be last so that it
+  can extract the ``serializer`` constructor kwarg first.
+  """
 
 
 class BlueskyLogin(ndb.Model):
@@ -368,7 +379,8 @@ class OAuthCallback(views.Callback):
 
     # get user profile
     # https://docs.bsky.app/docs/advanced-guides/oauth-client#callback-and-access-token-request
-    auth = OAuth2AccessTokenAuth(client=client, token=token)
+    auth = FlaskTokenAuth(session_key=FLASK_SESSION_KEY, client=client, token=token,
+                          serializer=DPoPTokenSerializer())
     pds_client = Client(pds_url, auth=auth)
     try:
       profile = pds_client.app.bsky.actor.getProfile(actor=login.did)
