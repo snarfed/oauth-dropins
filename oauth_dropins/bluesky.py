@@ -12,7 +12,7 @@ https://github.com/guillp/requests_oauth2client?tab=readme-ov-file#using-dpop
 import logging
 import os
 import re
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin, urlparse
 
 import arroba.did
 from flask import redirect, request
@@ -267,10 +267,20 @@ def oauth_client_for_pds(view, pds_url):
   auth_server = resp.json()['authorization_servers'][0]
   logger.info(f'PDS {pds_url} has auth server {auth_server}')
 
+  # OAuth special case for localhost client_id and redirect_uri
+  # https://atproto.com/specs/oauth#:~:text=Localhost%20Client%20Development
+  client_id = view.CLIENT_METADATA['client_id']
+  redirect_uri = view.CLIENT_METADATA['redirect_uris'][0]
+
+  if request.host.split(':')[0] in ('localhost', '127.0.0.1'):
+    redirect_uri = urljoin('http://127.0.0.1:8080', urlparse(redirect_uri).path)
+    scope = quote(CLIENT_METADATA_TEMPLATE['scope'])
+    client_id = f'http://localhost?redirect_uri={redirect_uri}&scope={scope}'
+
   return OAuth2Client.from_discovery_endpoint(
     urljoin(auth_server, RESOURCE_METADATA_PATH),
-    client_id=view.CLIENT_METADATA['client_id'],
-    redirect_uri=view.to_url().replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'),
+    client_id=client_id,
+    redirect_uri=redirect_uri,
     dpop_bound_access_tokens=True,
   )
 
@@ -356,12 +366,7 @@ class OAuthCallback(views.Callback):
       else:
         error(msg)
 
-    try:
-      login = BlueskyLogin.load(request.values['state'])
-    except ValueError:
-      # temporary, for local development and testing
-      return redirect(request.url.replace('https://oauth-dropins.appspot.com/', 'http://localhost:8080/'))
-
+    login = BlueskyLogin.load(request.values['state'])
     pds_url = pds_for_did(login.did)
     client = oauth_client_for_pds(self, pds_url)
 
@@ -369,7 +374,7 @@ class OAuthCallback(views.Callback):
     try:
       authz_request = AuthorizationRequestSerializer.default_loader(
         login.authz_request)
-      authz_resp = authz_request.validate_callback(request.url.replace('http://localhost:8080/', 'https://oauth-dropins.appspot.com/'))
+      authz_resp = authz_request.validate_callback(request.url)
       token = client.authorization_code(authz_resp, validate=True)
     except OAuth2Error as e:
       error(e)

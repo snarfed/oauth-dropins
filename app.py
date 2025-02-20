@@ -115,7 +115,7 @@ def home_page():
 
 
 @app.get(urlparse(bluesky._APP_CLIENT_METADATA['client_id']).path)
-# @flask_util.headers(CACHE_CONTROL)
+@flask_util.headers(CACHE_CONTROL)
 def bluesky_oauth_client_metadata():
   """https://docs.bsky.app/docs/advanced-guides/oauth-client#client-and-server-metadata"""
   return bluesky._APP_CLIENT_METADATA

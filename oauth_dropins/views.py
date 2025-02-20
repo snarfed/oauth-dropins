@@ -170,8 +170,9 @@ class Start(BaseView):
 class Callback(BaseView):
   """Base OAuth callback view.
 
-  Users can use :meth:`to` when using this view in a WSGI application to make it
-  redirect to a given URL path on completion. See the file docstr for details.
+  Users can use :meth:`to_url` when using this view in a WSGI application to
+  make it redirect to a given URL path on completion. See file docstring for
+  details.
 
   Alternatively, you can subclass it and implement :meth:`finish`, which will be
   called in the OAuth callback request directly, after the user has been
