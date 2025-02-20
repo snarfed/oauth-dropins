@@ -34,7 +34,11 @@ Click on a site to try it!</p>
 {% endif %}
 {% if entity %}
 <span style="color: green">
- Authenticated {{ entity.user_display_name() }} ({{ entity.key.id() }}) on {{ entity.site_name() }}.</span>
+  Authenticated {{ entity.user_display_name() }}
+  {% if entity.key.id() != entity.user_display_name() %}
+    ({{ entity.key.id() }})
+  {% endif %}
+  on {{ entity.site_name() }}.</span>
 <!--
 {% if access_token %}
   Access token {{ access_token }}.<br />
