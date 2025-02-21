@@ -106,6 +106,7 @@ class BlueskyAuth(models.BaseAuth):
   Key id is DID.
   """
   password = ndb.StringProperty()
+  pds_url = ndb.StringProperty()
   user_json = ndb.TextProperty(required=True)
   session = JsonProperty()
   dpop_token = ndb.TextProperty()
@@ -199,6 +200,8 @@ class PasswordCallback(views.Callback):
     auth = BlueskyAuth(
       id=profile['did'],
       password=password,
+      # TODO: resolve DID's PDS
+      pds_url = 'https://bsky.social',
       user_json=util.json_dumps(profile),
       session=client.session,
     )
@@ -384,6 +387,7 @@ class OAuthCallback(views.Callback):
       raise
 
     auth = BlueskyAuth(id=login.did,
+                       pds_url=pds_url,
                        dpop_token=DPoPTokenSerializer.default_dumper(token),
                        user_json=util.json_dumps(profile))
     auth.put()

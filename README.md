@@ -157,6 +157,7 @@ Changelog
 ### 6.6 - unreleased
 
 * Add [Bluesky OAuth](https://docs.bsky.app/docs/advanced-guides/oauth-client)!
+* Add new `pds_url` attribute to `BlueskyAuth`.
 * Store logins in the Flask session. Add new top-level `get_logins` and `logout` functions.
 
 ### 6.5 - 2025-01-01
