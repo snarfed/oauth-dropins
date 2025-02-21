@@ -12,11 +12,13 @@ Example usage::
 import logging
 import urllib.parse
 
-import flask
-from flask import request
+from flask import redirect, request, session
 from flask.views import View
+from google.cloud.ndb.key import Key
 
 from .webutil import util
+
+LOGINS_SESSION_KEY = 'oauth-dropins.logins'
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +112,7 @@ class Start(BaseView):
     url = str(self.redirect_url(state=request.values.get('state')))
 
     logger.info(f'Starting OAuth flow: redirecting to {url}')
-    return flask.redirect(url)
+    return redirect(url)
 
   def redirect_url(self, state=None):
     """Returns the local URL for the OAuth service to redirect back to.
@@ -207,12 +209,33 @@ class Callback(BaseView):
                      ('access_token_secret', token[1])]
       except NotImplementedError:
         logger.info('access_token() not implemented')
+
       try:
         token = auth_entity.refresh_token
         params.append(('refresh_token', token))
       except AttributeError:
         logger.info('refresh_token not included')
 
+      login = (auth_entity.__class__.__name__, auth_entity.key.id())
+      logins = session.setdefault(LOGINS_SESSION_KEY, [])
+      if login not in logins:
+        logins.append(login)
+      session.modified = True
+
     url = util.add_query_params(self.to_path, params)
     logger.info(f'Finishing OAuth flow: redirecting to {url}')
-    return flask.redirect(url)
+    return redirect(url)
+
+
+def get_logins():
+  """Returns all current logged in sessions, as auth entity keys.
+
+  Returns:
+    list of :class:`google.cloud.ndb.key.Key`: logged in auth entities
+  """
+  return [Key(kind, id) for kind, id in session.get(LOGINS_SESSION_KEY, [])]
+
+
+def logout():
+  """Clears all logins in the current Flask session."""
+  session.pop(LOGINS_SESSION_KEY, None)

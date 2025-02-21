@@ -1,1 +1,3 @@
-from oauth_dropins.webutil import util
+from .webutil import util
+
+from .views import get_logins, logout

@@ -111,6 +111,10 @@ def home_page():
   if key:
     vars['entity'] = ndb.Key(urlsafe=key).get()
 
+  from oauth_dropins import get_logins, logout
+  vars['get_logins'] = get_logins
+  vars['logout'] = logout
+
   return render_template('index.html', **vars)
 
 

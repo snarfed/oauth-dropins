@@ -117,6 +117,9 @@ The following methods are optional. Auth entity classes usually implement at lea
 - `urlopen(data=None, timeout=None)` wraps `urlopen()` and adds the OAuth credentials to the request. Use this for making direct HTTP request to a site's REST API. Some sites may provide `get()` instead, which wraps `requests.get()`.
 
 
+### Flask session
+
+
 Troubleshooting/FAQ
 ---
 1. If you get this error:
@@ -154,6 +157,7 @@ Changelog
 ### 6.6 - unreleased
 
 * Add [Bluesky OAuth](https://docs.bsky.app/docs/advanced-guides/oauth-client)!
+* Store logins in the Flask session. Add new top-level `get_logins` and `logout` functions.
 
 ### 6.5 - 2025-01-01
 
