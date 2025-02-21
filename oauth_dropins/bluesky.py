@@ -81,7 +81,16 @@ class FlaskTokenAuth(FlaskSessionAuthMixin, OAuth2AccessTokenAuth):
 
   Subclass order matters here! FlaskSessionAuthMixin needs to be last so that it
   can extract the ``serializer`` constructor kwarg first.
+
+  Args:
+    * client (OAuth2Client)
+    * token (BearerToken)
+    * session_key (str)
   """
+  def __init__(self, client=None, token=None, session_key=FLASK_SESSION_KEY,
+               **kwargs):
+    super().__init__(session_key=session_key, serializer=DPoPTokenSerializer(),
+                     client=client, token=token, **kwargs)
 
 
 class BlueskyLogin(ndb.Model):
@@ -178,7 +187,7 @@ class StartBase(views.Start):
   def button_html(cls, *args, **kwargs):
     kwargs['form_extra'] = kwargs.get('form_extra', '') + f"""
 <input name="handle" class="form-control" placeholder="{cls.LABEL} handle" required style="width: 135px; height: 50px; display:inline;" />"""
-    return super(cls, cls).button_html(
+    return super().button_html(
       *args,
       image_file='bluesky_logo.png',
       input_style='background-color: #EEEEEE',
@@ -384,8 +393,7 @@ class OAuthCallback(views.Callback):
 
     # get user profile
     # https://docs.bsky.app/docs/advanced-guides/oauth-client#callback-and-access-token-request
-    auth = FlaskTokenAuth(session_key=FLASK_SESSION_KEY, client=client, token=token,
-                          serializer=DPoPTokenSerializer())
+    auth = FlaskTokenAuth(client=client, token=token)
     pds_client = Client(pds_url, auth=auth)
     try:
       profile = pds_client.app.bsky.actor.getProfile(actor=login.did)
