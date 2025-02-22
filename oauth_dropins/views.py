@@ -222,8 +222,6 @@ class Callback(BaseView):
         logins.append(login)
       session.modified = True
 
-      util.d(auth_entity.user_json)
-
     url = util.add_query_params(self.to_path, params)
     logger.info(f'Finishing OAuth flow: redirecting to {url}')
     return redirect(url)
