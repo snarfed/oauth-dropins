@@ -78,7 +78,7 @@ class MediumAuth(BaseAuth):
 
   def image_url(self):
     """Returns the user's profile picture URL, if any."""
-    return json_loads(self.user_json).get('avatar')
+    return json_loads(self.user_json).get('imageUrl')
 
   def access_token(self):
     """Returns the OAuth access token string."""

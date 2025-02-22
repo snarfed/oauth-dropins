@@ -56,7 +56,6 @@ class DropboxAuth(models.BaseAuth):
 
   def image_url(self):
     """Returns the user's profile picture URL, if any."""
-    # TODO
     return None
 
   def access_token(self):
