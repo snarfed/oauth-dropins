@@ -72,22 +72,24 @@ class WordPressAuth(BaseAuth):
     return 'WordPress'
 
   def user_display_name(self):
-    """Returns the blog hostname.
-    """
+    """Returns the blog hostname."""
     if not self.user_json:
       return self.key_id()
 
     user = json_loads(self.user_json)
     return user.get('display_name') or user.get('username')
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    # TODO
+    return None
+
   def access_token(self):
-    """Returns the OAuth access token string.
-    """
+    """Returns the OAuth access token string."""
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps :func:`urllib.request.urlopen` and adds OAuth credentials to the request.
-    """
+    """Wraps :func:`urllib.request.urlopen` and adds OAuth credentials."""
     kwargs.setdefault('headers', {})['authorization'] = \
         'Bearer ' + self.access_token_str
     try:

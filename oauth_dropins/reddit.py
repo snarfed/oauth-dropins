@@ -50,9 +50,12 @@ class RedditAuth(models.BaseAuth):
     return 'Reddit'
 
   def user_display_name(self):
-    """Returns the username.
-    """
+    """Returns the username."""
     return self.key_id()
+
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return json_loads(self.user_json).get('icon_img')
 
 
 class Start(views.Start):

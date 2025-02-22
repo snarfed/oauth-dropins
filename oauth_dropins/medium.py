@@ -68,8 +68,7 @@ class MediumAuth(BaseAuth):
     return 'Medium'
 
   def user_display_name(self):
-    """Returns the user's full name or username.
-    """
+    """Returns the user's full name or username."""
     if self.user_json:
       data = json_loads(self.user_json).get('data')
       if data:
@@ -77,14 +76,16 @@ class MediumAuth(BaseAuth):
 
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return json_loads(self.user_json).get('avatar')
+
   def access_token(self):
-    """Returns the OAuth access token string.
-    """
+    """Returns the OAuth access token string."""
     return self.access_token_str
 
   def get(self, *args, **kwargs):
-    """Wraps requests.get() and adds the Bearer token header.
-    """
+    """Wraps requests.get() and adds the Bearer token header."""
     headers = kwargs.setdefault('headers', {})
     headers['Authorization'] = 'Bearer ' + self.access_token_str
 

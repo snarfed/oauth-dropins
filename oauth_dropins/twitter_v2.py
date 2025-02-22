@@ -68,6 +68,10 @@ class TwitterOAuth2(models.BaseAuth):
     """Returns the username."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return json_loads(self.user_json).get('avatar')
+
   def access_token(self):
     """Returns the OAuth access token JSON."""
     return json_loads(self.token_json)['access_token']

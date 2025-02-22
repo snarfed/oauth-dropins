@@ -65,6 +65,10 @@ class MeetupAuth(BaseAuth):
     """Returns the Meetup.com user id."""
     return json_loads(self.user_json)['name']
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return json_loads(self.user_json).get('avatar')
+
   def access_token(self):
     """Returns the OAuth access token string."""
     return self.access_token_str

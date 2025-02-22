@@ -45,13 +45,16 @@ class FlickrAuth(models.BaseAuth):
     return 'Flickr'
 
   def user_display_name(self):
-    """Returns the user id.
-    """
+    """Returns the user id."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    # no profile picture URL in user_json, must be in a different API call
+    return None
+
   def access_token(self):
-    """Returns the OAuth access token as a (string key, string secret) tuple.
-    """
+    """Returns the OAuth access token as a (string key, string secret) tuple."""
     return (self.token_key, self.token_secret)
 
   def _api(self):

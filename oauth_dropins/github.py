@@ -75,13 +75,15 @@ class GitHubAuth(BaseAuth):
     return 'GitHub'
 
   def user_display_name(self):
-    """Returns the user's full name or username.
-    """
+    """Returns the user's full name or username."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return json_loads(self.user_json).get('avatarUrl')
+
   def access_token(self):
-    """Returns the OAuth access token string.
-    """
+    """Returns the OAuth access token string."""
     return self.access_token_str
 
   def get(self, *args, **kwargs):

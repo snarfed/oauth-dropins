@@ -65,6 +65,14 @@ class BloggerV2Auth(models.BaseAuth):
     """
     return self.name
 
+  def image_url(self):
+    """
+    Returns:
+      str:
+    """
+    # TODO
+    return None
+
   def access_token(self):
     """
     Returns:

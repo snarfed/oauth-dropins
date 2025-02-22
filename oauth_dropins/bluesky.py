@@ -129,6 +129,13 @@ class BlueskyAuth(models.BaseAuth):
     """
     return json_loads(self.user_json).get('handle')
 
+  def image_url(self):
+    """
+    Returns:
+      str:
+    """
+    return json_loads(self.user_json).get('avatar')
+
   def _api(self):
     """
     Returns:

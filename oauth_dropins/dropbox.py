@@ -51,18 +51,20 @@ class DropboxAuth(models.BaseAuth):
     return 'Dropbox'
 
   def user_display_name(self):
-    """Returns the Dropbox user id.
-    """
+    """Returns the Dropbox user id."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    # TODO
+    return None
+
   def access_token(self):
-    """Returns the OAuth access token string.
-    """
+    """Returns the OAuth access token string."""
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urlopen() and adds OAuth credentials to the request.
-    """
+    """Wraps urlopen() and adds OAuth credentials to the request."""
     headers = {'Authorization': f'Bearer {self.access_token_str}'}
     try:
       return util.urlopen(urllib.request.Request(url, headers=headers), **kwargs)

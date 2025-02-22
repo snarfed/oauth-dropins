@@ -152,6 +152,10 @@ class MastodonAuth(BaseAuth):
     """Returns the user's id, eg 123."""
     return json_loads(self.user_json).get('id')
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return json_loads(self.user_json).get('avatar_static')
+
   def access_token(self):
     """Returns the OAuth access token string."""
     return self.access_token_str

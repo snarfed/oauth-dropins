@@ -50,8 +50,12 @@ class GoogleUser(models.BaseAuth):
     """Returns the user's name."""
     return json_loads(self.user_json).get('name') or 'unknown'
 
+  def image_url(self):
+    """Returns the user's name."""
+    return json_loads(self.user_json)['picture']
+
   def access_token(self):
-    """Returns the OAuth access token string."""
+    """Returns the user's profile picture URL, if any."""
     return json_loads(self.token_json)['access_token']
 
 

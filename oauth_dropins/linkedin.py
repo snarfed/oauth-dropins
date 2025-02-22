@@ -55,8 +55,7 @@ class LinkedInAuth(BaseAuth):
     return 'LinkedIn'
 
   def user_display_name(self):
-    """Returns the user's first and last name.
-    """
+    """Returns the user's first and last name."""
     def name(field):
       user = json_loads(self.user_json)
       loc = user.get(field, {}).get('localized', {})
@@ -66,9 +65,13 @@ class LinkedInAuth(BaseAuth):
 
     return f"{name('firstName')} {name('lastName')}"
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    # TODO
+    return None
+
   def access_token(self):
-    """Returns the OAuth access token string.
-    """
+    """Returns the OAuth access token string."""
     return self.access_token_str
 
   def get(self, *args, **kwargs):

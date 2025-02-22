@@ -34,7 +34,12 @@ Click on a site to try it!</p>
 {% endif %}
 {% if entity %}
 <span style="color: green">
-  Authenticated {{ entity.user_display_name() }}
+  Authenticated
+  {% if entity.image_url() %}
+    <img src="{{ entity.image_url() }}" class="shadow" width="32"
+         style="border-radius: 50%; object-fit: cover" />
+  {% endif %}
+  {{ entity.user_display_name() }}
   {% if entity.key.id() != entity.user_display_name() %}
     ({{ entity.key.id() }})
   {% endif %}

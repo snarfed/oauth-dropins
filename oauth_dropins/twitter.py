@@ -41,24 +41,24 @@ class TwitterAuth(models.BaseAuth):
     return 'Twitter'
 
   def user_display_name(self):
-    """Returns the username.
-    """
+    """Returns the username."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return json_loads(self.user_json).get('profile_image_url_https')
+
   def access_token(self):
-    """Returns the OAuth access token as a (string key, string secret) tuple.
-    """
+    """Returns the OAuth access token as a (string key, string secret) tuple."""
     return (self.token_key, self.token_secret)
 
   def urlopen(self, url, **kwargs):
-    """Wraps urllib.request.urlopen() and adds an OAuth signature.
-    """
+    """Wraps urllib.request.urlopen() and adds an OAuth signature."""
     return twitter_auth.signed_urlopen(url, self.token_key, self.token_secret,
                                        **kwargs)
 
   def get(self, *args, **kwargs):
-    """Wraps requests.get() and adds an OAuth signature.
-    """
+    """Wraps requests.get() and adds an OAuth signature."""
     oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
     resp = util.requests_get(*args, auth=oauth1, **kwargs)
     try:
@@ -69,8 +69,7 @@ class TwitterAuth(models.BaseAuth):
     return resp
 
   def post(self, *args, **kwargs):
-    """Wraps requests.post() and adds an OAuth signature.
-    """
+    """Wraps requests.post() and adds an OAuth signature."""
     oauth1 = twitter_auth.auth(self.token_key, self.token_secret)
     resp = util.requests_post(*args, auth=oauth1, **kwargs)
     try:
@@ -81,8 +80,7 @@ class TwitterAuth(models.BaseAuth):
     return resp
 
   def api(self):
-    """Returns a tweepy.API.
-    """
+    """Returns a tweepy.API."""
     return tweepy.API(twitter_auth.tweepy_auth(self.token_key, self.token_secret))
 
 

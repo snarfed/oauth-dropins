@@ -73,18 +73,20 @@ class FacebookAuth(models.BaseAuth):
     return 'Facebook'
 
   def user_display_name(self):
-    """Returns the user's or page's name.
-    """
+    """Returns the user's or page's name."""
     return json_loads(self.user_json)['name']
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    # TODO
+    return None
+
   def access_token(self):
-    """Returns the OAuth access token string.
-    """
+    """Returns the OAuth access token string."""
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps :meth:`models.BaseAuth.urlopen` and adds OAuth credentials to the request.
-    """
+    """Wraps :meth:`models.BaseAuth.urlopen` and adds OAuth credentials."""
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
 

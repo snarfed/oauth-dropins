@@ -89,6 +89,12 @@ class IndieAuth(models.BaseAuth):
     """Returns the user's domain."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    hcard = json_loads(self.user_json).get('h-card', {})
+    if photos := hcard.get('properties', {}).get('photo', []):
+      return photos[0] if isinstance(photos[0], str) else photos[0].get('value')
+
   def access_token(self):
     """Return the access token, N/A for IndieAuth"""
     return self.access_token_str

@@ -50,6 +50,10 @@ class BaseAuth(models.StringIdModel):
     """
     raise NotImplementedError()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    return None
+
   def api(self):
     """Returns the site-specific Python API object, if any.
 

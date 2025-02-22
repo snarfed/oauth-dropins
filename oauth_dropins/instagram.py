@@ -56,18 +56,20 @@ class InstagramAuth(models.BaseAuth):
     return 'Instagram'
 
   def user_display_name(self):
-    """Returns the Instagram username.
-    """
+    """Returns the Instagram username."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    # TODO
+    return None
+
   def access_token(self):
-    """Returns the OAuth access token string.
-    """
+    """Returns the OAuth access token string."""
     return self.access_token_str
 
   def urlopen(self, url, **kwargs):
-    """Wraps urlopen() and adds OAuth credentials to the request.
-    """
+    """Wraps urlopen() and adds OAuth credentials to the request."""
     return models.BaseAuth.urlopen_access_token(url, self.access_token_str,
                                                 **kwargs)
 

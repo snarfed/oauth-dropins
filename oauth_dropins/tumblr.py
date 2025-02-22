@@ -41,24 +41,26 @@ class TumblrAuth(models.BaseAuth):
     return 'Tumblr'
 
   def user_display_name(self):
-    """Returns the username.
-    """
+    """Returns the username."""
     return self.key_id()
 
+  def image_url(self):
+    """Returns the user's profile picture URL, if any."""
+    if blogs :=json_loads(self.user_json).get('user', {}).get('blogs', []):
+      if avatars := blogs[0].get('avatar', []):
+        return avatars[0].get('url')
+
   def access_token(self):
-    """Returns the OAuth access token as a (string key, string secret) tuple.
-    """
+    """Returns the OAuth access token as a (string key, string secret) tuple."""
     return (self.token_key, self.token_secret)
 
   def _api(self):
-    """Returns a tumblpy.Tumblpy.
-    """
+    """Returns a tumblpy.Tumblpy."""
     return TumblrAuth._api_from_token(self.token_key, self.token_secret)
 
   @staticmethod
   def _api_from_token(key, secret):
-    """Returns a tumblpy.Tumblpy.
-    """
+    """Returns a tumblpy.Tumblpy."""
     assert TUMBLR_APP_KEY and TUMBLR_APP_SECRET, \
       "Please fill in the tumblr_app_key and tumblr_app_secret files in your app's root directory."
     return tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,
