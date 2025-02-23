@@ -174,7 +174,7 @@ class StartBase(views.Start):
   @classmethod
   def button_html(cls, *args, **kwargs):
     kwargs['form_extra'] = kwargs.get('form_extra', '') + f"""
-<input name="handle" class="form-control" placeholder="{cls.LABEL} handle" required style="width: 135px; height: 50px; display:inline;" />"""
+<input name="handle" type="text" class="form-control" placeholder="{cls.LABEL} handle" required style="width: 135px; height: 50px; display:inline;" />"""
     return super().button_html(
       *args,
       image_file='bluesky_logo.png',
