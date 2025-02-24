@@ -32,6 +32,12 @@ ALL_SCOPES = (
 )
 
 
+def https_if_localhost(url):
+  return (url.replace('http://', 'https://', 1)
+          if url.startswith('http://localhost:8080/')
+          else url)
+
+
 class ThreadsAuth(models.BaseAuth):
   """An OAuth-authenticated Threads user.
 
@@ -97,10 +103,7 @@ class Start(views.Start):
       **kwargs)
 
   def to_url(self, state=None):
-    url = super().to_url(state=state)
-    if url.startswith('http://'):
-      url = url.replace('http://', 'https://', 1)
-    return url
+    return https_if_localhost(super().to_url(state=state))
 
   def redirect_url(self, state=None):
     assert APP_ID and APP_SECRET, \
@@ -128,7 +131,7 @@ class Callback(views.Callback):
       else:
         flask_util.error(msg)
 
-    session = OAuth2Session(APP_ID, redirect_uri=request.base_url.replace('http://', 'https://', 1))
+    session = OAuth2Session(APP_ID, redirect_uri=https_if_localhost(request.base_url))
     session.fetch_token(ACCESS_TOKEN_URL, include_client_id=True,
                         client_secret=APP_SECRET, authorization_response=request.url)
     logging.info(f'Got access token {session.token}')
@@ -138,9 +141,9 @@ class Callback(views.Callback):
     resp.raise_for_status()
     user_json = resp.json()
     logging.info(user_json)
-    username = user_json['username']
 
-    auth = ThreadsAuth(id=username, token_json=json_dumps(session.token),
+    auth = ThreadsAuth(id=str(session.token['user_id']),
+                       token_json=json_dumps(session.token),
                        user_json=json_dumps(user_json))
     auth.put()
 
