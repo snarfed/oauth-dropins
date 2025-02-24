@@ -156,7 +156,8 @@ Changelog
 
 ### 6.6 - unreleased
 
-* Add [Bluesky OAuth](https://docs.bsky.app/docs/advanced-guides/oauth-client)!
+* Add [Bluesky OAuth](https://docs.bsky.app/docs/advanced-guides/oauth-client).
+* Add [Threads](https://developers.facebook.com/docs/threads/).
 * Store logins in the Flask session. Add new top-level `get_logins` and `logout` functions.
 * Add new `pds_url` attribute to `BlueskyAuth`.
 * Add new `BaseAuth.image_url` method.
