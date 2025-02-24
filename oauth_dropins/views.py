@@ -221,6 +221,7 @@ class Callback(BaseView):
       if login not in logins:
         logins.append(login)
       session.modified = True
+      session.permanent = True
 
     url = util.add_query_params(self.to_path, params)
     logger.info(f'Finishing OAuth flow: redirecting to {url}')
