@@ -108,6 +108,7 @@ class BlueskyAuth(models.BaseAuth):
   password = ndb.StringProperty()
   pds_url = ndb.StringProperty()
   user_json = ndb.TextProperty(required=True)
+  """app.bsky.actor.defs#profileViewDetailed"""
   session = JsonProperty()
   dpop_token = ndb.TextProperty()
 
