@@ -154,7 +154,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 6.6 - unreleased
+### 6.6 - 2025-03-13
 
 * Add [Bluesky OAuth](https://docs.bsky.app/docs/advanced-guides/oauth-client).
 * Add [Threads](https://developers.facebook.com/docs/threads/).

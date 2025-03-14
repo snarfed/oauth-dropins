@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='oauth-dropins',
-      version='6.5',
+      version='6.6',
       description='Drop-in OAuth Flask views for many popular sites.',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',

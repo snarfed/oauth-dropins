@@ -77,6 +77,10 @@ reddit
 ------
 .. automodule:: oauth_dropins.reddit
 
+threads
+-------
+.. automodule:: oauth_dropins.threads
+
 tumblr
 ------
 .. automodule:: oauth_dropins.tumblr
