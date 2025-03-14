@@ -252,7 +252,7 @@ def oauth_client_for_pds(client_metadata, pds_url):
   """Discovers a PDS's OAuth endpoints and creates a client.
 
   Args:
-    client_metadata(dict)
+    client_metadata (dict)
     pds_url (str)
 
   Returns:
