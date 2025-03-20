@@ -394,6 +394,7 @@ class OAuthCallback(views.Callback):
         error(f'{code} {body}')
       raise
 
+    profile['$type'] = 'app.bsky.actor.defs#profileViewDetailed'
     auth = BlueskyAuth(id=login.did,
                        pds_url=pds_url,
                        dpop_token=DPoPTokenSerializer.default_dumper(token),
