@@ -84,7 +84,7 @@ pyasn1-modules==0.4.1
 pycparser==2.22
 pyjwt==2.10.1
 pymemcache==4.0.0
-pyparsing==3.2.1
+pyparsing==3.2.2
 pyrsistent==0.20.0
 python-tumblpy==1.1.4
 pytz==2025.1
