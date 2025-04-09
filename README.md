@@ -157,6 +157,7 @@ Changelog
 ### 6.7 - unreleased
 * Bluesky:
   * Add `$type: app.bsky.actor.defs#profileViewDetailed` to `BlueskyAuth.user_json`.
+  * Add `BlueskyAuth.oauth_api`.
 
 ### 6.6 - 2025-03-13
 

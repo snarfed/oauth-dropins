@@ -40,6 +40,10 @@ class BaseAuth(models.StringIdModel):
     id = self.key.id()
     return id[1:] if id[0] == '\\' else id
 
+  def user_id(self):
+    """Returns the canonical unique user id."""
+    raise NotImplementedError()
+
   def site_name(self):
     """Returns the string name of the site, e.g. ``Facebook``.
     """

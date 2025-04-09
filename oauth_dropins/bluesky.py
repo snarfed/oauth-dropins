@@ -137,6 +137,25 @@ class BlueskyAuth(models.BaseAuth):
     """
     return json_loads(self.user_json).get('avatar')
 
+  def oauth_api(self, client_metadata):
+    """Returns an OAuth-based :class:`lexrpc.Client` for this user.
+
+    Requires :attr:`dpop_token` to be set.
+
+    Args:
+      client_metadata (dict): client info metadata,
+        https://docs.bsky.app/docs/advanced-guides/oauth-client#client-and-server-metadata
+
+    Returns:
+      lexrpc.Client:
+    """
+    assert self.dpop_token
+    pds_url = pds_for_did(self.key.id())
+    oauth_client = oauth_client_for_pds(client_metadata, pds_url)
+    dpop_token = DPoPTokenSerializer.default_loader(self.dpop_token)
+    auth = OAuth2AccessTokenAuth(client=oauth_client, token=dpop_token)
+    return Client(pds_url, auth=auth)
+
   def _api(self):
     """
     Returns:
