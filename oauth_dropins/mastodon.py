@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 # https://docs.joinmastodon.org/api/oauth-scopes/
 ALL_SCOPES = (
+  'profile',
   'read',
   'read:accounts',
   'read:blocks',
@@ -197,7 +198,7 @@ class Start(views.Start):
   """
   NAME = 'mastodon'
   LABEL = 'Mastodon'
-  DEFAULT_SCOPE = 'read:accounts'
+  DEFAULT_SCOPE = 'profile'
   REDIRECT_PATHS = ()
   SCOPE_SEPARATOR = ' '
   APP_CLASS = MastodonApp
