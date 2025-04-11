@@ -264,7 +264,7 @@ def pds_for_did(did):
       logger.info(f'{did} has PDS {pds}')
       return pds
 
-  error(f"{id}'s DID doc has no ATProto PDS")
+  error(f"{did}'s DID doc has no ATProto PDS")
 
 
 def oauth_client_for_pds(client_metadata, pds_url):
@@ -338,6 +338,7 @@ class OAuthStart(StartBase):
     if not handle:
       handle = request.form['handle']
 
+    handle = handle.strip().lstrip('@')
     if not re.fullmatch(util.DOMAIN_RE, handle):
       error(f"{handle} doesn't look like a domain")
 
