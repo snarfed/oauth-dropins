@@ -150,7 +150,7 @@ class BlueskyAuth(models.BaseAuth):
       lexrpc.Client:
     """
     assert self.dpop_token
-    pds_url = pds_for_did(self.key.id())
+    pds_url = self.pds_url or pds_for_did(self.key.id())
     oauth_client = oauth_client_for_pds(client_metadata, pds_url)
     dpop_token = DPoPTokenSerializer.default_loader(self.dpop_token)
     auth = OAuth2AccessTokenAuth(client=oauth_client, token=dpop_token)
@@ -161,7 +161,7 @@ class BlueskyAuth(models.BaseAuth):
     Returns:
       lexrpc.Client:
     """
-    client = Client(headers={'User-Agent': util.user_agent})
+    client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent})
     client.session = self.session
     return client
 
@@ -176,11 +176,11 @@ class BlueskyAuth(models.BaseAuth):
       lexrpc.Client:
     """
     logger.info(f'Logging in with handle {handle}...')
-    client = Client(headers={'User-Agent': util.user_agent})
+    client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent})
     resp = client.com.atproto.server.createSession({
-        'identifier': handle,
-        'password': password,
-      })
+      'identifier': handle,
+      'password': password,
+    })
     logger.info(f'Got DID {resp["did"]}')
     return client
 
