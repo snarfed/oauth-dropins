@@ -160,6 +160,7 @@ Changelog
   * Add `BlueskyAuth.oauth_api`.
 * Mastodon:
   * Change default [scope](https://docs.joinmastodon.org/api/oauth-scopes/) from `read:accounts` to `profile`.
+* Add optional `auth` arg to `logout` to only log out a single account.
 
 ### 6.6 - 2025-03-13
 

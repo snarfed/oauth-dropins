@@ -237,6 +237,16 @@ def get_logins():
   return [Key(kind, id) for kind, id in session.get(LOGINS_SESSION_KEY, [])]
 
 
-def logout():
-  """Clears all logins in the current Flask session."""
-  session.pop(LOGINS_SESSION_KEY, None)
+def logout(auth=None):
+  """Clears one login, or all, in the current Flask session.
+
+  Args:
+    auth (models.BaseAuth): login to remove from the session. Defaults to all.
+  """
+  if auth:
+    key = (auth.__class__.__name__, auth.key.id())
+    logins = session.get(LOGINS_SESSION_KEY, [])
+    if key in logins:
+      logins.remove(key)
+  else:
+    session.pop(LOGINS_SESSION_KEY, None)
