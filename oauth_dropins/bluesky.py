@@ -156,12 +156,16 @@ class BlueskyAuth(models.BaseAuth):
     auth = OAuth2AccessTokenAuth(client=oauth_client, token=dpop_token)
     return Client(pds_url, auth=auth)
 
-  def _api(self):
+  def _api(self, **kwargs):
     """
+    Args:
+      kwargs: passed to the :class:`lexrpc.Client` constructor
+
     Returns:
       lexrpc.Client:
     """
-    client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent})
+    client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent},
+                    **kwargs)
     client.session = self.session
     return client
 
@@ -171,12 +175,14 @@ class BlueskyAuth(models.BaseAuth):
     Args:
       handle (str)
       password (str)
+      kwargs: passed to the :class:`lexrpc.Client` constructor
 
     Returns:
       lexrpc.Client:
     """
     logger.info(f'Logging in with handle {handle}...')
-    client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent})
+    client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent},
+                    **kwargs)
     resp = client.com.atproto.server.createSession({
       'identifier': handle,
       'password': password,
