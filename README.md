@@ -157,9 +157,12 @@ Changelog
 ### 6.7 - unreleased
 * Bluesky:
   * Add `$type: app.bsky.actor.defs#profileViewDetailed` to `BlueskyAuth.user_json`.
-  * Add `BlueskyAuth.oauth_api`.
+  * Add new `BlueskyAuth.oauth_api` method.
 * Mastodon:
   * Change default [scope](https://docs.joinmastodon.org/api/oauth-scopes/) from `read:accounts` to `profile`.
+  * Add new `MastodonAuth.actor_id` method.
+* Pixelfed:
+  * Add new `PixelfedAuth.actor_id` method.
 * Add optional `auth` arg to `logout` to only log out a single account.
 
 ### 6.6 - 2025-03-13

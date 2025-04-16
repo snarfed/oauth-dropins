@@ -3,6 +3,8 @@
 Pixelfed's API is a clone of Mastodon's v1 API:
 https://docs.pixelfed.org/technical-documentation/api-v1.html
 """
+from .webutil.util import json_loads
+
 from . import mastodon
 
 
@@ -16,6 +18,17 @@ class PixelfedAuth(mastodon.MastodonAuth):
 
   def site_name(self):
     return 'Pixelfed'
+
+  def actor_id(self):
+    """Returns the user's ActivityPub actor id URL.
+
+    Example: ``https://pixelfed.social/users/ryan``
+    """
+    url = json_loads(self.user_json).get('id')
+    instance = self.instance().strip('/')
+    username = url.removeprefix(instance).strip('/')
+    assert '/' not in username
+    return f'{instance}/users/{username}'
 
 
 class Start(mastodon.Start):

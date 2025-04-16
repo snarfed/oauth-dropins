@@ -21,7 +21,12 @@ import requests
 from . import views
 from .models import BaseAuth
 from .webutil import appengine_info, flask_util, util
-from .webutil.util import decode_oauth_state, encode_oauth_state, json_dumps, json_loads
+from .webutil.util import (
+  decode_oauth_state,
+  encode_oauth_state,
+  json_dumps,
+  json_loads,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -152,6 +157,13 @@ class MastodonAuth(BaseAuth):
   def user_id(self):
     """Returns the user's id, eg 123."""
     return json_loads(self.user_json).get('id')
+
+  def actor_id(self):
+    """Returns the user's ActivityPub actor id URL.
+
+    Example: ``https://mastodon.social/users/ryan``
+    """
+    return json_loads(self.user_json).get('uri')
 
   def image_url(self):
     """Returns the user's profile picture URL, if any."""
