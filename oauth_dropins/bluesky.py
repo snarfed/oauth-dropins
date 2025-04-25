@@ -170,7 +170,7 @@ class BlueskyAuth(models.BaseAuth):
     return client
 
   @staticmethod
-  def _api_from_password(handle, password):
+  def _api_from_password(handle, password, **kwargs):
     """
     Args:
       handle (str)
@@ -180,14 +180,18 @@ class BlueskyAuth(models.BaseAuth):
     Returns:
       lexrpc.Client:
     """
-    logger.info(f'Logging in with handle {handle}...')
-    client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent},
-                    **kwargs)
+    did = arroba.did.resolve_handle(handle)
+    if not did:
+      error(f"Couldn't resolve {handle} as a Bluesky handle")
+    logger.info(f'resolved {handle} to {did}')
+    pds_url = pds_for_did(did)
+
+    logger.info(f'Logging into {pds_url} as {did}...')
+    client = Client(address=pds_url, headers={'User-Agent': util.user_agent}, **kwargs)
     resp = client.com.atproto.server.createSession({
       'identifier': handle,
       'password': password,
     })
-    logger.info(f'Got DID {resp["did"]}')
     return client
 
 
