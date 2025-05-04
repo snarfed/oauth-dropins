@@ -164,6 +164,8 @@ Changelog
 * Pixelfed:
   * Add new `PixelfedAuth.actor_id` method.
 * Add optional `auth` arg to `logout` to only log out a single account.
+* WordPress:
+  * Handle blog without valid URL.
 
 ### 6.6 - 2025-03-13
 
