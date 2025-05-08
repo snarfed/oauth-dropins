@@ -99,6 +99,7 @@ class Start(views.Start):
   def button_html(cls, *args, **kwargs):
     return super(cls, cls).button_html(
       *args,
+      image_file='threads_2x.png',
       input_style='background-color: #EEEEEE',
       **kwargs)
 
