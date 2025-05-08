@@ -40,3 +40,47 @@
   /* For IE 5.5 - 7 */
   filter: progid:DXImageTransform.Microsoft.Shadow(Strength=2,Direction=135,Color='#222222');
 }
+
+.login-button {
+  margin-right:10px;
+  border:gray 1px solid;
+  border-radius:30px;
+  padding:20px;
+  transition: transform 0.5s ease-in-out;
+  z-index: 2;
+  position: relative;
+}
+
+.login-button.slide-up {
+  transform: translateY(-20px);
+}
+
+.login-input {
+  width: 0px; 
+  height: 0px;
+}
+
+.login-input.visible {
+  width: 135px; 
+  height: 50px; 
+  border-radius: 90px; 
+  margin-right:10px;
+}
+
+.submit-button.visible {
+  border:gray 1px solid;
+  border-radius:30px;
+}
+
+.fade-in-element {
+  transition: all 0.5s ease-in-out;
+  opacity: 0;
+  transform: translateY(16px);
+  display:inline;
+}
+
+.fade-in-element.visible {
+  opacity: 1;
+  transform: translateY(0);
+  position: relative;
+}

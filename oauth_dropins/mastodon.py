@@ -380,7 +380,7 @@ class Start(views.Start):
   @classmethod
   def button_html(cls, *args, **kwargs):
     kwargs['form_extra'] = kwargs.get('form_extra', '') + f"""
-<input type="url" name="instance" class="form-control" placeholder="{cls.LABEL} instance" scheme="https" required style="width: 135px; height: 50px; display:inline;" />"""
+<input id="{cls.LABEL}-input" type="url" name="instance" class="fade-in-element login-input" placeholder="{cls.LABEL} instance" scheme="https" required />"""
     return super(Start, cls).button_html(
       *args, input_style='background-color: #EBEBEB; padding: 5px', **kwargs)
 
