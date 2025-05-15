@@ -149,7 +149,7 @@ class Start(BaseView):
       str:
     """
     if image_file is None:
-      image_file = f'{cls.NAME}_2x.png'
+      image_file = f'{cls.NAME}_large.png'
     vars = locals()
     vars.update({
       'label': cls.LABEL,
@@ -157,9 +157,13 @@ class Start(BaseView):
     })
     html = f"""<form method="{vars['form_method']}" action="{vars['to_path']}" class="{vars['form_classes']}">
   <nobr>
-    {vars['form_extra']}
-    <input type="image" height="50" title="{vars['label']}" class="shadow"
-           src="{vars['image']}" style="{vars['input_style']}" />
+    <div class="row big">
+      <img id="{cls.LABEL}" onclick="toggleInput(this.id)" type="image" height="90" title="{vars['label']}" class="login-button shadow"
+            src="{vars['image']}"" /><br />
+      {vars['form_extra']}
+      <input id="{cls.LABEL}-submit" type="image" title="{vars['label']}" class="submit-button fade-in-element shadow" style="position:absolute" 
+            src="/oauth_dropins_static/material-arrow-icon.svg" />
+    </div>
     <input name="scope" type="hidden" value="{vars['scopes']}">
   </nobr>
 </form>

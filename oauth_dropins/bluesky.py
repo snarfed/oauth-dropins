@@ -204,10 +204,11 @@ class StartBase(views.Start):
   @classmethod
   def button_html(cls, *args, **kwargs):
     kwargs['form_extra'] = kwargs.get('form_extra', '') + f"""
-<input name="handle" type="text" class="form-control" placeholder="{cls.LABEL} handle" required style="width: 135px; height: 50px; display:inline;" />"""
+<input id="{cls.LABEL}-input" name="handle" type="text" class="fade-in-element login-input" placeholder="{cls.LABEL} handle" required />
+"""
     return super().button_html(
       *args,
-      image_file='bluesky_logo.png',
+      image_file='bluesky_logotype.png',
       input_style='background-color: #EEEEEE',
       **kwargs)
 
