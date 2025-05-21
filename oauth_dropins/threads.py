@@ -69,6 +69,7 @@ class ThreadsAuth(models.BaseAuth):
     """Returns a :class:`requests_oauthlib.OAuth2Session`."""
     token = json_loads(self.token_json)
 
+    kwargs = {}
     if token.get('refresh_token') and token.get('expires_at'):
       def update_token(token):
         logging.info(f'Storing new access token {token}')
