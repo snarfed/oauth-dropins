@@ -33,7 +33,7 @@ jobs:
             pip install -U -r requirements.txt
             pip install coverage coveralls
 
-            apt-get install google-cloud-cli-firestore-emulator
+            apt-get install google-cloud-cli-firestore-emulator openjdk-21-jre-headless
 
       - run:
           name: Run tests
