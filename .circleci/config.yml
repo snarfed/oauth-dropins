@@ -7,8 +7,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      # https://hub.docker.com/r/google/cloud-sdk
-      - image: google/cloud-sdk
+      - image: cimg/python:3.12
 
     steps:
       - checkout
@@ -32,6 +31,12 @@ jobs:
             pip -V
             pip install -U -r requirements.txt
             pip install coverage coveralls
+
+            # google-cloud-sdk: https://cloud.google.com/sdk/docs/install#deb
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update
+            sudo apt-get install -y apt-transport-https ca-certificates gnupg google-cloud-sdk pkg-config
 
             apt-get install google-cloud-cli-firestore-emulator openjdk-21-jre-headless
 
