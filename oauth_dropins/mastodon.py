@@ -31,8 +31,12 @@ from .webutil.util import (
 logger = logging.getLogger(__name__)
 
 # https://docs.joinmastodon.org/api/oauth-scopes/
+#
+# TODO: use https://docs.joinmastodon.org/methods/oauth/#authorization-server-metadata
+# to discover per-server scopes automatically
 ALL_SCOPES = (
-  'profile',
+  # 'profile',  # added in 4.3.8, which many Mastodon instances aren't on yet
+  # https://github.com/mastodon/mastodon/commit/e02d23b5499318432981b16d8968e109ebeca18c
   'read',
   'read:accounts',
   'read:blocks',
@@ -58,7 +62,7 @@ ALL_SCOPES = (
   'write:notifications',
   'write:reports',
   'write:statuses',
-  'follow',
+  # 'follow',  # deprecated
   'push',
 )
 
@@ -210,7 +214,7 @@ class Start(views.Start):
   """
   NAME = 'mastodon'
   LABEL = 'Mastodon'
-  DEFAULT_SCOPE = 'profile'
+  DEFAULT_SCOPE = 'read:accounts'
   REDIRECT_PATHS = ()
   SCOPE_SEPARATOR = ' '
   APP_CLASS = MastodonApp
