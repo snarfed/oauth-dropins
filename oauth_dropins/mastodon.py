@@ -151,8 +151,18 @@ class MastodonAuth(BaseAuth):
     return self.key.id()
 
   def instance(self):
-    """Returns the instance base URL, eg https://mastodon.social/."""
-    return self.app.get().instance
+    """Returns the instance base URL, eg https://mastodon.social/.
+
+    Raises:
+      RuntimeError: when the :class:`MastodonApp` can't be loaded
+    """
+    if not (app := self.app.get()):
+      views.logout(self)
+      msg = f'{self.key} app {self.app} is missing! logging it out'
+      logger.error(msg)
+      raise RuntimeError(msg)
+
+    return app.instance
 
   def username(self):
     """Returns the user's username, eg ryan."""
