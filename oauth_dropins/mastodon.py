@@ -266,9 +266,19 @@ class Start(views.Start):
     # normalize instance to URL
     if not instance:
       instance = request.values['instance']
-    instance = instance.strip().split('@')[-1]  # handle addresses, eg user@host.com
-    parsed = urlparse(instance)
-    if not parsed.scheme:
+
+    instance = instance.strip()
+    is_web = util.is_web(instance)
+    parts = instance.split('@')
+
+    if is_web:
+      # it's a URL, use the hostname
+      instance = urlparse(instance).netloc.split(':')[0]
+    elif len(parts) == 3:
+      # it's probably a handle/address, eg @user@host.com
+      instance = parts[-1]
+
+    if not util.is_web(instance):
       instance = 'https://' + instance
 
     # fetch instance info from this instance's API (mostly to test that it's
