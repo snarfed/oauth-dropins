@@ -348,7 +348,7 @@ class OAuthStart(StartBase):
     if not handle:
       handle = request.form['handle']
 
-    handle = handle.strip().lstrip('@')
+    handle = util.remove_invisible_chars(handle).strip().lstrip('@')
     if not re.fullmatch(util.DOMAIN_RE, handle):
       error(f"{handle} doesn't look like a domain")
 

@@ -158,6 +158,7 @@ Changelog
 * Bluesky:
   * Add `$type: app.bsky.actor.defs#profileViewDetailed` to `BlueskyAuth.user_json`.
   * Add new `BlueskyAuth.oauth_api` method.
+  * Remove invisible Unicode characters from handle ([bluesky-social/social-app#8451](https://github.com/bluesky-social/social-app/issues/8451)).
 * Mastodon:
   * Change default [scope](https://docs.joinmastodon.org/api/oauth-scopes/) from `read:accounts` to `profile`.
   * Add new `MastodonAuth.actor_id` method.
