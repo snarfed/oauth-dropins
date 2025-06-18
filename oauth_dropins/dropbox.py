@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 DROPBOX_APP_KEY = util.read('dropbox_app_key')
 DROPBOX_APP_SECRET = util.read('dropbox_app_secret')
 GET_AUTH_CODE_URL = '&'.join((
-  'https://www.dropbox.com/1/oauth2/authorize?'
+  'https://www.dropbox.com/oauth2/authorize?'
   'response_type=code',
   'client_id=%(client_id)s',
   'redirect_uri=%(redirect_uri)s',
   'state=%(state)s',
 ))
 GET_ACCESS_TOKEN_URL = '&'.join((
-  'https://api.dropbox.com/1/oauth2/token?',
+  'https://api.dropbox.com/oauth2/token?',
   'grant_type=authorization_code',
   'code=%(code)s',
   'client_id=%(client_id)s',
