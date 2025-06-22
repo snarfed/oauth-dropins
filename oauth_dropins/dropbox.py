@@ -26,14 +26,7 @@ GET_AUTH_CODE_URL = '&'.join((
   'redirect_uri=%(redirect_uri)s',
   'state=%(state)s',
 ))
-GET_ACCESS_TOKEN_URL = '&'.join((
-  'https://api.dropbox.com/oauth2/token?',
-  'grant_type=authorization_code',
-  'code=%(code)s',
-  'client_id=%(client_id)s',
-  'client_secret=%(client_secret)s',
-  'redirect_uri=%(redirect_uri)s',
-))
+GET_ACCESS_TOKEN_URL = 'https://api.dropbox.com/oauth2/token'
 
 
 class DropboxAuth(models.BaseAuth):
@@ -130,14 +123,14 @@ class Callback(views.Callback):
       flask_util.error(f'No CSRF token for id {csrf_id}')
 
     # request an access token
-    data = {
-      'client_id': DROPBOX_APP_KEY,
-      'client_secret': DROPBOX_APP_SECRET,
-      'code': request.values['code'],
-      'redirect_uri': request.base_url,
-    }
     try:
-      resp = util.urlopen(GET_ACCESS_TOKEN_URL % data, data=b'').read()
+      resp = util.urlopen(GET_ACCESS_TOKEN_URL, data=urllib.parse.urlencode({
+        'grant_type': 'authorization_code',
+        'client_id': DROPBOX_APP_KEY,
+        'client_secret': DROPBOX_APP_SECRET,
+        'code': request.values['code'],
+        'redirect_uri': request.base_url,
+      })).read()
     except BaseException as e:
       util.interpret_http_exception(e)
       raise
