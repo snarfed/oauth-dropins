@@ -411,6 +411,11 @@ Release instructions
 ---
 Here's how to package, test, and ship a new release. (Note that this is [largely duplicated in granary's readme too](https://github.com/snarfed/granary#release-instructions).)
 
+1. Pull from remote to make sure we're at head.
+    ```sh
+    git checkout main
+    git pull
+    ```
 1. Run the unit tests.
     ```sh
     source local/bin/activate.csh
@@ -418,7 +423,6 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     sleep 2s
     python -m unittest discover
     kill %1
-    deactivate
     ```
 1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`.
@@ -427,7 +431,6 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```sh
     python setup.py clean build sdist
     setenv ver X.Y
-    source local/bin/activate.csh
     twine upload -r pypitest dist/oauth_dropins-$ver.tar.gz
     ```
 1. Install from test.pypi.org.
@@ -439,14 +442,11 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     # mf2py 1.1.2 on test.pypi.org is broken :(
     pip install mf2py
     pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
-    deactivate
     ```
 1. Smoke test that the code trivially loads and runs.
     ```sh
-    source local/bin/activate.csh
     python
     # run test code below
-    deactivate
     ```
     Test code to paste into the interpreter:
     ```py
