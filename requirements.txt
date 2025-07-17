@@ -13,6 +13,8 @@ git+https://github.com/snarfed/arroba.git#egg=arroba
 git+https://github.com/snarfed/carbox.git#egg=carbox
 git+https://github.com/snarfed/lexrpc.git#egg=lexrpc
 git+https://github.com/snarfed/mox3.git#egg=mox3
+# TODO: get back to pypi requests_oauth2client
+# blocked on guillp merging https://github.com/guillp/requests_oauth2client/pull/174
 git+https://github.com/snarfed/requests_oauth2client.git@all#egg=requests_oauth2client
 
 # required for mox3, not prod
