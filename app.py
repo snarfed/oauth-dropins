@@ -13,6 +13,7 @@ import requests
 from werkzeug.exceptions import HTTPException
 
 from oauth_dropins import bluesky
+from oauth_dropins.views import get_logins, logout
 from oauth_dropins.webutil import appengine_info, appengine_config
 
 logger = logging.getLogger(__name__)
@@ -100,7 +101,13 @@ def handle_discovery_errors(e):
 @app.route('/')
 def home_page():
   """Renders and serves the home page."""
-  vars = dict(request.args)
+  vars = {
+    **dict(request.args),
+    'get_logins': get_logins,
+    'logout': logout,
+    'request': request,
+    'util': util,
+  }
   vars.update({
     site + '_html': module.Start.button_html(
       '/%s/start' % site, image_prefix='/static/',
@@ -108,13 +115,8 @@ def home_page():
     for site, module in SITES.items()
   })
 
-  key = request.args.get('auth_entity')
-  if key:
+  if key := request.args.get('auth_entity'):
     vars['entity'] = ndb.Key(urlsafe=key).get()
-
-  from oauth_dropins import get_logins, logout
-  vars['get_logins'] = get_logins
-  vars['logout'] = logout
 
   return render_template('index.html', **vars)
 
