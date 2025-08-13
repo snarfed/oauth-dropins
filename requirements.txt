@@ -19,7 +19,7 @@ git+https://github.com/snarfed/requests_oauth2client.git@all#egg=requests_oauth2
 
 # required for mox3, not prod
 fixtures==4.2.6
-pbr==6.1.1
+pbr==7.0.0
 
 attrs==25.3.0
 bases==0.3.0
