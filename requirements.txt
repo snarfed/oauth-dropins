@@ -26,7 +26,7 @@ bases==0.3.0
 beautifulsoup4==4.13.4
 binapy==0.8.0
 cachetools==5.5.2
-cbor2==5.6.5
+cbor2==5.7.0
 certifi==2025.8.3
 cffi==1.17.1
 charset-normalizer==3.4.3
