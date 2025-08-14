@@ -219,7 +219,8 @@ class PasswordCallback(views.Callback):
   App password login callback stub.
   """
   def dispatch_request(self):
-    handle = request.values['username'].strip().lower().removeprefix('@')
+    handle = util.remove_invisible_chars(request.values['username'])\
+                 .strip().lower().removeprefix('@')
     password = request.values['password'].strip()
     state = request.values.get('state')
 
