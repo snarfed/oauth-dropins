@@ -25,7 +25,7 @@ oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.
 * Demo app at [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
 * [Source code on GitHub.](https://github.com/snarfed/oauth-dropins/)
 
-This software is released into the public domain. See LICENSE for details.
+oauth-dropins is dedicated to the the public domain. See LICENSE for details.
 
 
 Quick start
