@@ -1,5 +1,7 @@
 """Base datastore model class for an authenticated account.
 """
+from datetime import timezone
+
 from google.cloud import ndb
 
 from .webutil import models, util
@@ -25,6 +27,9 @@ class BaseAuth(models.StringIdModel):
       flows. Currently unused, informational only.
   """
   SCOPES_RESET = None
+
+  created = ndb.DateTimeProperty(auto_now_add=True, tzinfo=timezone.utc)
+  updated = ndb.DateTimeProperty(auto_now=True, tzinfo=timezone.utc)
 
   # A site-specific API object. Initialized on demand.
   _api_obj = None
