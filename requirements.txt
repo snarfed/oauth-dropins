@@ -23,7 +23,7 @@ pbr==7.0.1
 
 attrs==25.3.0
 bases==0.3.0
-beautifulsoup4==4.13.4
+beautifulsoup4==4.13.5
 binapy==0.8.0
 cachetools==5.5.2
 cbor2==5.7.0
