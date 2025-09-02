@@ -24,11 +24,11 @@ class PixelfedAuth(mastodon.MastodonAuth):
 
     Example: ``https://pixelfed.social/users/ryan``
     """
-    url = json_loads(self.user_json).get('id')
+    if not (acct := json_loads(self.user_json).get('acct')):
+      return None
+
     instance = self.instance().strip('/')
-    username = url.removeprefix(instance).strip('/')
-    assert '/' not in username
-    return f'{instance}/users/{username}'
+    return f'{instance}/users/{acct}'
 
 
 class Start(mastodon.Start):
