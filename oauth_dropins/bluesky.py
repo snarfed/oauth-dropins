@@ -278,12 +278,14 @@ def pds_for_did(did):
   error(f"{did}'s DID doc has no ATProto PDS")
 
 
-def oauth_client_for_pds(client_metadata, pds_url):
+def oauth_client_for_pds(client_metadata, pds_url, redirect_uri=None):
   """Discovers a PDS's OAuth endpoints and creates a client.
 
   Args:
     client_metadata (dict)
     pds_url (str)
+    redirect_uri (str): if not provided, defaults to the first element in
+      ``redirect_uris`` in ``client_metadata`
 
   Returns:
     OAuth2Client:
@@ -300,7 +302,8 @@ def oauth_client_for_pds(client_metadata, pds_url):
   # OAuth special case for localhost client_id and redirect_uri
   # https://atproto.com/specs/oauth#:~:text=Localhost%20Client%20Development
   client_id = client_metadata['client_id']
-  redirect_uri = client_metadata['redirect_uris'][0]
+  if not redirect_uri:
+    redirect_uri = client_metadata['redirect_uris'][0]
 
   if request.host.split(':')[0] in ('localhost', '127.0.0.1'):
     redirect_uri = urljoin('http://127.0.0.1:8080', urlparse(redirect_uri).path)
@@ -361,11 +364,17 @@ class OAuthStart(StartBase):
     logger.info(f'resolved {handle} to {did}')
 
     # generate authz URL, store session, redirect
-    client = oauth_client_for_pds(self.CLIENT_METADATA, pds_for_did(did))
+    redirect_uri = self.to_url()
+    if request.host.split(':')[0] in ('localhost', '127.0.0.1'):
+      redirect_uri = urljoin('http://127.0.0.1:8080', urlparse(redirect_uri).path)
+
+    client = oauth_client_for_pds(self.CLIENT_METADATA, pds_for_did(did),
+                                  redirect_uri=redirect_uri)
     login_key = BlueskyLogin.allocate_ids(1)[0]
+
     try:
-      authz_request = client.authorization_request(scope=self.SCOPE,
-                                                   state=login_key.id())
+      authz_request = client.authorization_request(
+        redirect_uri=redirect_uri, scope=self.SCOPE, state=login_key.id())
       par_request = client.pushed_authorization_request(authz_request)
     except OAuth2Error as e:
       error(e)
@@ -399,7 +408,8 @@ class OAuthCallback(views.Callback):
 
     login = BlueskyLogin.load(request.values['state'])
     pds_url = pds_for_did(login.did)
-    client = oauth_client_for_pds(self.CLIENT_METADATA, pds_url)
+    client = oauth_client_for_pds(self.CLIENT_METADATA, pds_url,
+                                  redirect_uri=request.url)
 
     # validate authz response, get access token
     try:

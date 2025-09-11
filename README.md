@@ -157,6 +157,12 @@ Changelog
 ### 6.8 - unreleased
 
 * Add new `created` and `updated` properties to auth models.
+* Bluesky:
+  * Clean handles more aggressively, eg strip more unprintable Unicode characters.
+  * Add `redirect_uri` kwarg to `oauth_client_for_pds`, use in `OAuthStart` and `OAuthCallback`.
+  * `OAuthStart.redirect_url`: normalize `localhost` to `127.0.0.1`.
+* Pixelfed:
+  * `actor_id` bug fix.
 
 ### 6.7 - 2025-07-08
 * Bluesky:
