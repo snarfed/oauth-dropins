@@ -161,6 +161,8 @@ Changelog
   * Clean handles more aggressively, eg strip more unprintable Unicode characters.
   * Add `redirect_uri` kwarg to `oauth_client_for_pds`, use in `OAuthStart` and `OAuthCallback`.
   * `OAuthStart.redirect_url`: normalize `localhost` to `127.0.0.1`.
+* Mastodon:
+  * `Start`: accept handles in instance URLs, eg `https://snarfed@mas.to`.
 * Pixelfed:
   * `actor_id` bug fix.
 

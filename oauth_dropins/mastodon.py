@@ -273,7 +273,7 @@ class Start(views.Start):
 
     if is_web:
       # it's a URL, use the hostname
-      instance = urlparse(instance).netloc.split(':')[0]
+      instance = urlparse(instance).netloc.split('@')[-1].split(':')[0]
     elif len(parts) == 3:
       # it's probably a handle/address, eg @user@host.com
       instance = parts[-1]
