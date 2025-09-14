@@ -23,7 +23,7 @@ framework.
   `oauth-dropins.appspot.com <http://oauth-dropins.appspot.com/>`__.
 - `Source code on GitHub. <https://github.com/snarfed/oauth-dropins/>`__
 
-This software is released into the public domain. See LICENSE for
+oauth-dropins is dedicated to the public domain. See LICENSE for
 details.
 
 Quick start
@@ -246,6 +246,30 @@ If you really want ``-t``, try removing the ``-e`` from the lines in
 Changelog
 ---------
 
+6.8 - 2025-09-13
+~~~~~~~~~~~~~~~~
+
+- Add new ``created`` and ``updated`` properties to auth models.
+- Bluesky:
+
+  - Clean handles more aggressively, eg strip more unprintable Unicode
+    characters.
+  - Add ``redirect_uri`` kwarg to ``oauth_client_for_pds``, use in
+    ``OAuthStart`` and ``OAuthCallback``.
+  - ``OAuthStart.redirect_url``: normalize ``localhost`` to
+    ``127.0.0.1``.
+
+- Mastodon:
+
+  - ``Start``: accept handles in instance URLs, eg
+    ``https://snarfed@mas.to``.
+
+- Pixelfed:
+
+  - ``actor_id`` bug fix.
+
+.. _section-1:
+
 6.7 - 2025-07-08
 ~~~~~~~~~~~~~~~~
 
@@ -274,7 +298,7 @@ Changelog
 
   - Handle blog without valid URL.
 
-.. _section-1:
+.. _section-2:
 
 6.6 - 2025-03-13
 ~~~~~~~~~~~~~~~~
@@ -287,7 +311,7 @@ Changelog
 - Add new ``pds_url`` attribute to ``BlueskyAuth``.
 - Add new ``BaseAuth.image_url`` method.
 
-.. _section-2:
+.. _section-3:
 
 6.5 - 2025-01-01
 ~~~~~~~~~~~~~~~~
@@ -297,14 +321,14 @@ Changelog
   - Bug fix: handle relative URLs in ``Link`` headers. (Thanks
     `catgirlinspace <https://catgirlin.space/>`__!)
 
-.. _section-3:
+.. _section-4:
 
 6.4 - 2024-06-24
 ~~~~~~~~~~~~~~~~
 
 Misc webutil updaates.
 
-.. _section-4:
+.. _section-5:
 
 6.3 - 2024-03-15
 ~~~~~~~~~~~~~~~~
@@ -316,14 +340,14 @@ Misc webutil updaates.
 
 Miscellaneous changes in ``webutil``.
 
-.. _section-5:
+.. _section-6:
 
 6.2 - 2023-09-15
 ~~~~~~~~~~~~~~~~
 
 Miscellaneous changes in ``webutil``.
 
-.. _section-6:
+.. _section-7:
 
 6.1 - 2023-03-22
 ~~~~~~~~~~~~~~~~
@@ -339,7 +363,7 @@ Miscellaneous changes in ``webutil``.
 
   - Handle errors from initial OAuth 1.0 authorization request.
 
-.. _section-7:
+.. _section-8:
 
 6.0 - 2022-12-03
 ~~~~~~~~~~~~~~~~
@@ -385,7 +409,7 @@ Miscellaneous changes in ``webutil``.
 
 - Misc webutil updates.
 
-.. _section-8:
+.. _section-9:
 
 5.0 - 2022-03-23
 ~~~~~~~~~~~~~~~~
@@ -401,7 +425,7 @@ Miscellaneous changes in ``webutil``.
 - Add ``webutil.util.set_user_agent`` to set ``User-Agent`` header to be
   sent with all HTTP requests.
 
-.. _section-9:
+.. _section-10:
 
 4.0 - 2021-09-15
 ~~~~~~~~~~~~~~~~
@@ -436,7 +460,7 @@ Miscellaneous changes in ``webutil``.
 - ``webutil``: add misc Flask utilities and helpers in new
   ``flask_util`` module.
 
-.. _section-10:
+.. _section-11:
 
 3.1 - 2021-04-03
 ~~~~~~~~~~~~~~~~
@@ -451,7 +475,7 @@ Miscellaneous changes in ``webutil``.
 
   - Handle errors from access token request.
 
-.. _section-11:
+.. _section-12:
 
 3.0 - 2020-03-14
 ~~~~~~~~~~~~~~~~
@@ -521,7 +545,7 @@ Non-breaking changes:
   ``<div>``, eg as Bootstrap columns.
 - Add new ``image_file`` kwarg to ``StartHandler.button_html()``
 
-.. _section-12:
+.. _section-13:
 
 2.2 - 2019-11-01
 ~~~~~~~~~~~~~~~~
@@ -543,7 +567,7 @@ Non-breaking changes:
   `ujson <https://github.com/esnme/ultrajson/>`__ (built into App
   Engine) to speed up JSON parsing and encoding.
 
-.. _section-13:
+.. _section-14:
 
 2.0 - 2019-02-25
 ~~~~~~~~~~~~~~~~
@@ -559,7 +583,7 @@ Non-breaking changes:
 - webutil.logs: return HTTP 400 if ``start_time`` is before 2008-04-01
   (App Engine’s rough launch window).
 
-.. _section-14:
+.. _section-15:
 
 1.14 - 2018-11-12
 ~~~~~~~~~~~~~~~~~
@@ -572,7 +596,7 @@ Non-breaking changes:
   endpoint <https://developers.googleblog.com/2018/03/discontinuing-support-for-json-rpc-and.html>`__.
 - Other minor internal updates.
 
-.. _section-15:
+.. _section-16:
 
 1.13 - 2018-08-08
 ~~~~~~~~~~~~~~~~~
@@ -581,14 +605,14 @@ Non-breaking changes:
   form-encoded
   (`snarfed/bridgy#809 <https://github.com/snarfed/bridgy/issues/809>`__).
 
-.. _section-16:
+.. _section-17:
 
 1.12 - 2018-03-24
 ~~~~~~~~~~~~~~~~~
 
 - More Python 3 updates and bug fixes in webutil.util.
 
-.. _section-17:
+.. _section-18:
 
 1.11 - 2018-03-08
 ~~~~~~~~~~~~~~~~~
@@ -604,14 +628,14 @@ Non-breaking changes:
 - Add Python 3 support to webutil.util!
 - Add humanize dependency for webutil.logs.
 
-.. _section-18:
+.. _section-19:
 
 1.10 - 2017-12-10
 ~~~~~~~~~~~~~~~~~
 
 Mostly just internal changes to webutil to support granary v1.10.
 
-.. _section-19:
+.. _section-20:
 
 1.9 - 2017-10-24
 ~~~~~~~~~~~~~~~~
@@ -622,7 +646,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 
   - Handle punctuation in error messages.
 
-.. _section-20:
+.. _section-21:
 
 1.8 - 2017-08-29
 ~~~~~~~~~~~~~~~~
@@ -645,14 +669,14 @@ Mostly just internal changes to webutil to support granary v1.9.
     from ``me`` parameter, `which is going
     away <https://github.com/aaronpk/IndieAuth.com/issues/167>`__.
 
-.. _section-21:
+.. _section-22:
 
 1.7 - 2017-02-27
 ~~~~~~~~~~~~~~~~
 
 - Updates to bundled webutil library, notably WideUnicode class.
 
-.. _section-22:
+.. _section-23:
 
 1.6 - 2016-11-21
 ~~~~~~~~~~~~~~~~
@@ -661,21 +685,21 @@ Mostly just internal changes to webutil to support granary v1.9.
   `oauth-dropins.readthedocs.io <http://oauth-dropins.readthedocs.io/>`__.
 - Fix Dropbox bug with fetching access token.
 
-.. _section-23:
+.. _section-24:
 
 1.5 - 2016-08-25
 ~~~~~~~~~~~~~~~~
 
 - Add `Medium <https://medium.com/>`__.
 
-.. _section-24:
+.. _section-25:
 
 1.4 - 2016-06-27
 ~~~~~~~~~~~~~~~~
 
 - Upgrade Facebook API from v2.2 to v2.6.
 
-.. _section-25:
+.. _section-26:
 
 1.3 - 2016-04-07
 ~~~~~~~~~~~~~~~~
@@ -684,7 +708,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 - More consistent logging of HTTP requests.
 - Set up Coveralls.
 
-.. _section-26:
+.. _section-27:
 
 1.2 - 2016-01-11
 ~~~~~~~~~~~~~~~~
@@ -698,7 +722,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 - Add developer setup and troubleshooting docs.
 - Set up CircleCI.
 
-.. _section-27:
+.. _section-28:
 
 1.1 - 2015-09-06
 ~~~~~~~~~~~~~~~~
@@ -706,7 +730,7 @@ Mostly just internal changes to webutil to support granary v1.9.
 - Flickr: split out flickr_auth.py file.
 - Add a number of utility functions to webutil.
 
-.. _section-28:
+.. _section-29:
 
 1.0 - 2015-06-27
 ~~~~~~~~~~~~~~~~
@@ -767,37 +791,39 @@ Here’s how to package, test, and ship a new release. (Note that this is
 `largely duplicated in granary’s readme
 too <https://github.com/snarfed/granary#release-instructions>`__.)
 
-1.  Run the unit tests.
-    ``sh     source local/bin/activate.csh     gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &     sleep 2s     python -m unittest discover     kill %1     deactivate``
-2.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
+1.  Pull from remote to make sure we’re at head.
+    ``sh  git checkout main  git pull``
+2.  Run the unit tests.
+    ``sh  source local/bin/activate.csh  gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &  sleep 2s  python -m unittest discover  kill %1``
+3.  Bump the version number in ``setup.py`` and ``docs/conf.py``.
     ``git grep`` the old version number to make sure it only appears in
     the changelog. Change the current changelog entry in ``README.md``
     for this new version from *unreleased* to the current date.
-3.  Build the docs. If you added any new modules, add them to the
+4.  Build the docs. If you added any new modules, add them to the
     appropriate file(s) in ``docs/source/``. Then run
     ``./docs/build.sh``.
-4.  ``git commit -am 'release vX.Y'``
-5.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
-    ``sh     python setup.py clean build sdist     setenv ver X.Y     source local/bin/activate.csh     twine upload -r pypitest dist/oauth_dropins-$ver.tar.gz``
-6.  Install from test.pypi.org.
-    ``sh     cd /tmp     python -m venv local     source local/bin/activate.csh     pip install --upgrade pip     # mf2py 1.1.2 on test.pypi.org is broken :(     pip install mf2py     pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins     deactivate``
-7.  Smoke test that the code trivially loads and runs.
-    ``sh     source local/bin/activate.csh     python     # run test code below     deactivate``
-    Test code to paste into the interpreter:
-    ``py     from oauth_dropins.webutil import util     util.__file__     util.UrlCanonicalizer()('http://asdf.com')     # should print 'https://asdf.com/'     exit()``
-8.  Tag the release in git. In the tag message editor, delete the
+5.  ``git commit -am 'release vX.Y'``
+6.  Upload to `test.pypi.org <https://test.pypi.org/>`__ for testing.
+    ``sh  python setup.py clean build sdist  setenv ver X.Y  twine upload -r pypitest dist/oauth_dropins-$ver.tar.gz``
+7.  Install from test.pypi.org.
+    ``sh  cd /tmp  python -m venv local  source local/bin/activate.csh  pip install --upgrade pip  # mf2py 1.1.2 on test.pypi.org is broken :(  pip install mf2py  pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins``
+8.  Smoke test that the code trivially loads and runs.
+    ``sh  python  # run test code below`` Test code to paste into the
+    interpreter:
+    ``py  from oauth_dropins.webutil import util  util.__file__  util.UrlCanonicalizer()('http://asdf.com')  # should print 'https://asdf.com/'  exit()``
+9.  Tag the release in git. In the tag message editor, delete the
     generated comments at bottom, leave the first line blank (to omit
     the release “title” in github), put ``### Notable changes`` on the
     second line, then copy and paste this version’s changelog contents
     below it.
-    ``sh     git tag -a v$ver --cleanup=verbatim     git push     git push --tags``
-9.  `Click here to draft a new release on
+    ``sh  git tag -a v$ver --cleanup=verbatim  git push  git push --tags``
+10. `Click here to draft a new release on
     GitHub. <https://github.com/snarfed/oauth-dropins/releases/new>`__
     Enter ``vX.Y`` in the *Tag version* box. Leave *Release title*
     empty. Copy ``### Notable changes`` and the changelog contents into
     the description text box.
-10. Upload to `pypi.org <https://pypi.org/>`__!
-    ``sh     twine upload dist/oauth_dropins-$ver.tar.gz``
+11. Upload to `pypi.org <https://pypi.org/>`__!
+    ``sh  twine upload dist/oauth_dropins-$ver.tar.gz``
 
 Related work
 ------------

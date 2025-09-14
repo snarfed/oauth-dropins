@@ -154,7 +154,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 6.8 - unreleased
+### 6.8 - 2025-09-13
 
 * Add new `created` and `updated` properties to auth models.
 * Bluesky:
