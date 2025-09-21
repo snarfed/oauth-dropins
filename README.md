@@ -138,18 +138,6 @@ Troubleshooting/FAQ
 
 1. If you see errors importing or using `tweepy`, it may be because `six.py` isn't installed. Try `pip install six` manually. `tweepy` does include `six` in its dependencies, so this shouldn't be necessary. Please [let us know](https://github.com/snarfed/oauth-dropins/issues) if it happens to you so we can debug!
 
-1. If you get an error like this:
-
-    ```
-    Running setup.py develop for gdata
-    ...
-    error: option --home not recognized
-    ...
-    InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
-    ```
-
-  ...you may be hitting [Pip bug 1833](https://github.com/pypa/pip/issues/1833). Are you passing `-t` to `pip install`? Use the virtualenv instead, it's your friend. If you really want `-t`, try removing the `-e` from the lines in `requirements.txt` that have it.
-
 
 Changelog
 ---
