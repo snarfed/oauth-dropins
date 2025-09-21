@@ -15,7 +15,7 @@ Drop-in Python [OAuth](http://oauth.net/) for popular sites!
 About
 ---
 
-This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Blogger, Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
 
 oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
@@ -153,6 +153,19 @@ Troubleshooting/FAQ
 
 Changelog
 ---
+
+### 7.0 - unreleased
+
+_Breaking changes:_
+
+Remove Blogger support. Google has turned off Blogger's v2.0 API, which oauth-dropins used. [Bridgy](https://brid.gy/) was its main client, and used it to create comments, which the v3.0 API doesn't support. Sadly that means Bridgy will turn down its Blogger support, so I don't plan to port oauth-dropins's Blogger support to v3.0.
+
+If you use Blogger via oauth-dropins and this is a problem for you, please get in touch, PRs are welcome!
+
+_Non-breaking changes:_
+
+...
+
 
 ### 6.8 - 2025-09-13
 

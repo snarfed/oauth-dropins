@@ -29,7 +29,7 @@ class BaseView(View):
   Attributes:
     DEFAULT_SCOPE (str): default OAuth scope(s) to request
     SCOPE_SEPARATOR (str): used to separate multiple scopes
-    LABEL (str): human-readable label, eg 'Blogger'
+    LABEL (str): human-readable label, eg 'Bluesky'
     NAME (str): module name; usually same as `__name__.split('.')[-1]`
     to_path (str): the base redirect URL path for the OAuth callback
     scope (str): OAuth scopes, comma-separated

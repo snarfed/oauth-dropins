@@ -5,10 +5,6 @@ Reference documentation.
 
 .. contents::
 
-blogger
--------
-.. automodule:: oauth_dropins.blogger
-
 bluesky
 -------
 .. automodule:: oauth_dropins.bluesky

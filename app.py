@@ -34,7 +34,6 @@ util.set_user_agent('oauth-dropins (https://oauth-dropins.appspot.com/)')
 
 
 SITES = {name: importlib.import_module(f'oauth_dropins.{name}') for name in (
-    'blogger',
     'bluesky',
     'disqus',
     'dropbox',
