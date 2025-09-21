@@ -45,7 +45,6 @@ SITES = {name: importlib.import_module(f'oauth_dropins.{name}') for name in (
     'instagram',
     'linkedin',
     'mastodon',
-    'medium',
     'meetup',
     'pixelfed',
     'reddit',

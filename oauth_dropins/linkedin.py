@@ -77,14 +77,14 @@ class LinkedInAuth(BaseAuth):
   def get(self, *args, **kwargs):
     """Wraps requests.get() and adds the Bearer token header.
 
-    TODO: unify with github.py, medium.py.
+    TODO: unify with github.py
     """
     return self._requests_call(util.requests_get, *args, **kwargs)
 
   def post(self, *args, **kwargs):
     """Wraps requests.post() and adds the Bearer token header.
 
-    TODO: unify with github.py, medium.py.
+    TODO: unify with github.py
     """
     return self._requests_call(util.requests_post, *args, **kwargs)
 

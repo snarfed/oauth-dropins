@@ -15,7 +15,7 @@ Drop-in Python [OAuth](http://oauth.net/) for popular sites!
 About
 ---
 
-This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Tumblr, Twitter, and WordPress.com.
 
 oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
@@ -146,9 +146,13 @@ Changelog
 
 _Breaking changes:_
 
-Remove Blogger support. Google has turned off Blogger's v2.0 API, which oauth-dropins used. [Bridgy](https://brid.gy/) was its main client, and used it to create comments, which the v3.0 API doesn't support. Sadly that means Bridgy will turn down its Blogger support, so I don't plan to port oauth-dropins's Blogger support to v3.0.
+Remove Blogger and Medium.
+
+Google has turned off Blogger's v2.0 API, which oauth-dropins used. [Bridgy](https://brid.gy/) was its main client, and used it to create comments, which the v3.0 API doesn't support. Sadly that means Bridgy will turn down its Blogger support, so I don't plan to port oauth-dropins's Blogger support to v3.0.
 
 If you use Blogger via oauth-dropins and this is a problem for you, please get in touch, PRs are welcome!
+
+[Medium effectively turned off their API a while ago](https://help.medium.com/hc/en-us/articles/213480228-API-Importing), it's been a dead man walking for years.
 
 _Non-breaking changes:_
 

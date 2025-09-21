@@ -87,17 +87,11 @@ class GitHubAuth(BaseAuth):
     return self.access_token_str
 
   def get(self, *args, **kwargs):
-    """Wraps :func:`requests.get` and adds the Bearer token header.
-
-    TODO: unify with medium.py.
-    """
+    """Wraps :func:`requests.get` and adds the Bearer token header."""
     return self._requests_call(util.requests_get, *args, **kwargs)
 
   def post(self, *args, **kwargs):
-    """Wraps :func:`requests.post` and adds the ``Bearer`` token header.
-
-    TODO: unify with medium.py.
-    """
+    """Wraps :func:`requests.post` and adds the ``Bearer`` token header. """
     return self._requests_call(util.requests_post, *args, **kwargs)
 
   def _requests_call(self, fn, *args, **kwargs):

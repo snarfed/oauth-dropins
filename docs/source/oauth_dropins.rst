@@ -53,10 +53,6 @@ mastodon
 --------
 .. automodule:: oauth_dropins.mastodon
 
-medium
-------
-.. automodule:: oauth_dropins.medium
-
 meetup
 ------
 .. automodule:: oauth_dropins.meetup
