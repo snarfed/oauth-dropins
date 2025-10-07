@@ -156,6 +156,9 @@ If you use Blogger via oauth-dropins and this is a problem for you, please get i
 
 _Non-breaking changes:_
 
+* IndieAuth:
+  * Switch default provider from indieauth.com to indielogin.com.
+
 ...
 
 

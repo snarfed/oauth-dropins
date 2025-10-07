@@ -1,6 +1,6 @@
 """IndieAuth drop-in.
 
-https://indieauth.com/developers
+https://indieauth.net/
 """
 import logging
 import urllib.parse
@@ -12,13 +12,15 @@ import pkce
 import requests
 
 from . import models, views
-from .webutil import flask_util, util
+from .webutil import appengine_info, flask_util, util
 from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 
-INDIEAUTH_CLIENT_ID = util.read('indieauth_client_id')
-INDIEAUTH_URL = 'https://indieauth.com/auth'
+INDIEAUTH_CLIENT_ID = ('http://localhost:8080/'
+                       if appengine_info.LOCAL_SERVER
+                       else util.read('indieauth_client_id'))
+INDIEAUTH_URL = 'https://indielogin.com/auth'
 
 
 def discover_endpoint(rel, resp):
