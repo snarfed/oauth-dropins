@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 INDIEAUTH_CLIENT_ID = ('http://localhost:8080/'
                        if appengine_info.LOCAL_SERVER
                        else util.read('indieauth_client_id'))
-INDIEAUTH_URL = 'https://indielogin.com/auth'
+INDIEAUTH_URL = 'https://indieauth.com/auth'
 
 
 def discover_endpoint(rel, resp):
