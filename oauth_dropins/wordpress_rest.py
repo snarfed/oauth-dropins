@@ -151,20 +151,21 @@ class Callback(views.Callback):
 
     try:
       resp = resp.json()
-      error = resp.get('error')
-      if error:
-        flask_util.error(f"{error} {resp.get('error_description')} ")
-
-      blog_domain = util.domain_from_link(resp['blog_url'])
-      if not blog_domain:
-        flask_util.error('Please choose a blog with a valid URL.')
-
-      blog_id = resp['blog_id']
-      blog_url = resp['blog_url']
-      access_token = resp['access_token']
     except:
       logger.error(f'Could not decode JSON: {resp.text}', exc_info=True)
       raise
+
+    error = resp.get('error')
+    if error:
+      flask_util.error(f"{error} {resp.get('error_description')} ")
+
+    blog_domain = util.domain_from_link(resp.get('blog_url'))
+    if not blog_domain:
+      flask_util.error('Please choose a blog with a valid URL.')
+
+    blog_id = resp['blog_id']
+    blog_url = resp['blog_url']
+    access_token = resp['access_token']
 
     auth = WordPressAuth(id=blog_domain,
                          blog_id=blog_id,

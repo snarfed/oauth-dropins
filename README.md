@@ -158,8 +158,8 @@ _Non-breaking changes:_
 
 * IndieAuth:
   * Switch default provider from indieauth.com to indielogin.com.
-
-...
+* WordPress:
+  * Handle edge case when user logs in without choosing a blog somehow.
 
 
 ### 6.8 - 2025-09-13
