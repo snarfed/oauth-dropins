@@ -22,10 +22,10 @@ import requests
 from requests_oauth2client import (
   AuthorizationRequestSerializer,
   DPoPToken,
-  DPoPTokenSerializer,
   OAuth2Client,
   OAuth2Error,
   OAuth2AccessTokenAuth,
+  TokenSerializer,
 )
 
 from . import views, models
@@ -152,7 +152,7 @@ class BlueskyAuth(models.BaseAuth):
     assert self.dpop_token
     pds_url = self.pds_url or pds_for_did(self.key.id())
     oauth_client = oauth_client_for_pds(client_metadata, pds_url)
-    dpop_token = DPoPTokenSerializer.default_loader(self.dpop_token)
+    dpop_token = TokenSerializer().loads(self.dpop_token)
     auth = OAuth2AccessTokenAuth(client=oauth_client, token=dpop_token)
     return Client(pds_url, auth=auth)
 
@@ -379,7 +379,7 @@ class OAuthStart(StartBase):
     except OAuth2Error as e:
       error(e)
 
-    serialized = AuthorizationRequestSerializer.default_dumper(authz_request)
+    serialized = AuthorizationRequestSerializer().dumps(authz_request)
     BlueskyLogin(key=login_key, state=state, did=did, authz_request=serialized).put()
 
     return par_request.uri
@@ -413,8 +413,7 @@ class OAuthCallback(views.Callback):
 
     # validate authz response, get access token
     try:
-      authz_request = AuthorizationRequestSerializer.default_loader(
-        login.authz_request)
+      authz_request = AuthorizationRequestSerializer().loads(login.authz_request)
       authz_resp = authz_request.validate_callback(request.url)
       token = client.authorization_code(authz_resp, validate=True)
     except OAuth2Error as e:
@@ -438,7 +437,7 @@ class OAuthCallback(views.Callback):
     profile['$type'] = 'app.bsky.actor.defs#profileViewDetailed'
     auth = BlueskyAuth(id=login.did,
                        pds_url=pds_url,
-                       dpop_token=DPoPTokenSerializer.default_dumper(token),
+                       dpop_token=TokenSerializer().dumps(token),
                        user_json=util.json_dumps(profile))
     auth.put()
     return self.finish(auth, state=login.state)
