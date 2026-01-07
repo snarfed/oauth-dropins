@@ -101,7 +101,7 @@ typing_extensions==4.15.0
 typing-validation==1.2.12
 ujson==5.10.0
 update-checker==0.18.0
-urllib3==2.6.2
+urllib3==2.6.3
 webencodings==0.5.1
 WebOb==1.8.9
 websockets==15.0.1
