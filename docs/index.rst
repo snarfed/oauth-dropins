@@ -5,7 +5,7 @@ This is a collection of drop-in Python
 `Flask <https://flask.palletsprojects.com/>`__ views for the initial
 `OAuth <http://oauth.net/>`__ client flows for many popular sites,
 including Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google,
-IndieAuth, Instagram, LinkedIn, Mastodon, Medium, Tumblr, Twitter, and
+IndieAuth, Instagram, LinkedIn, Mastodon, Tumblr, Twitter, and
 WordPress.com.
 
 oauth-dropins stores user credentials in `Google Cloud
@@ -227,22 +227,6 @@ since they’ll prevent virtualenv from installing into the local
    know <https://github.com/snarfed/oauth-dropins/issues>`__ if it
    happens to you so we can debug!
 
-2. If you get an error like this:
-
-   ::
-
-      Running setup.py develop for gdata
-      ...
-      error: option --home not recognized
-      ...
-      InstallationError: Command /usr/bin/python -c "import setuptools, tokenize; __file__='/home/singpolyma/src/bridgy/src/gdata/setup.py'; exec(compile(getattr(tokenize, 'open', open)(__file__).read().replace('\r\n', '\n'), __file__, 'exec'))" develop --no-deps --home=/tmp/tmprBISz_ failed with error code 1 in .../src/gdata
-
-…you may be hitting `Pip bug
-1833 <https://github.com/pypa/pip/issues/1833>`__. Are you passing
-``-t`` to ``pip install``? Use the virtualenv instead, it’s your friend.
-If you really want ``-t``, try removing the ``-e`` from the lines in
-``requirements.txt`` that have it.
-
 Changelog
 ---------
 
@@ -251,18 +235,30 @@ Changelog
 
 *Breaking changes:*
 
-Remove Blogger support. Google has turned off Blogger’s v2.0 API, which
-oauth-dropins used. `Bridgy <https://brid.gy/>`__ was its main client,
-and used it to create comments, which the v3.0 API doesn’t support.
-Sadly that means Bridgy will turn down its Blogger support, so I don’t
-plan to port oauth-dropins’s Blogger support to v3.0.
+Remove Blogger and Medium.
+
+Google has turned off Blogger’s v2.0 API, which oauth-dropins used.
+`Bridgy <https://brid.gy/>`__ was its main client, and used it to create
+comments, which the v3.0 API doesn’t support. Sadly that means Bridgy
+will turn down its Blogger support, so I don’t plan to port
+oauth-dropins’s Blogger support to v3.0.
 
 If you use Blogger via oauth-dropins and this is a problem for you,
 please get in touch, PRs are welcome!
 
+`Medium effectively turned off their API a while
+ago <https://help.medium.com/hc/en-us/articles/213480228-API-Importing>`__,
+it’s been a dead man walking for years.
+
 *Non-breaking changes:*
 
-…
+- IndieAuth:
+
+  - Switch default provider from indieauth.com to indielogin.com.
+
+- WordPress:
+
+  - Handle edge case when user logs in without choosing a blog somehow.
 
 6.8 - 2025-09-13
 ~~~~~~~~~~~~~~~~

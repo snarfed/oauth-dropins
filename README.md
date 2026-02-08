@@ -142,7 +142,7 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 7.0 - unreleased
+### 7.0 - 2026-02-08
 
 _Breaking changes:_
 
