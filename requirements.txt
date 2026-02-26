@@ -39,6 +39,7 @@ Flask-Caching==2.3.1
 flask-gae-static==1.0
 furl==2.1.4
 google-api-core[grpc]==2.25.1
+google-api-python-client==2.190.0
 google-auth==2.41.1
 google-cloud-appengine-logging==1.8.0
 google-cloud-audit-log==0.4.0
@@ -55,6 +56,7 @@ grpcio-status==1.78.1
 gunicorn==23.0.0
 h11==0.16.0
 html5lib==1.1
+httplib2==0.31.2
 humanize==4.15.0
 idna==3.11
 idna==3.11
