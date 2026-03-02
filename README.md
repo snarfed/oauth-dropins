@@ -142,6 +142,11 @@ Troubleshooting/FAQ
 Changelog
 ---
 
+### 7.1 - unreleased
+* `bluesky`:
+  * `StartBase.button_html`: add new `handle` kwarg. If provided, includes the handle in a hidden input instead of an text box.
+
+
 ### 7.0 - 2026-02-08
 
 _Breaking changes:_

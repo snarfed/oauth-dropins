@@ -202,12 +202,16 @@ class StartBase(views.Start):
   LABEL = 'Bluesky'
 
   @classmethod
-  def button_html(cls, *args, **kwargs):
-    kwargs['form_extra'] = kwargs.get('form_extra', '') + f"""
-<input name="handle" type="text" class="form-control" placeholder="{cls.LABEL} handle" required style="width: 135px; height: 50px; display:inline;" />"""
+  def button_html(cls, *args, handle=None, **kwargs):
+    if handle:
+      input = f'<input name="handle" type="hidden" value="{handle}" />'
+    else:
+      input = f'<input name="handle" type="text" class="form-control" placeholder="{cls.LABEL} handle" required style="width: 135px; height: 50px; display:inline;" />'
+
+    kwargs['form_extra'] = kwargs.get('form_extra', '') + input
     return super().button_html(
       *args,
-      image_file='bluesky_logo.png',
+      image_file='bluesky_logotype.png' if handle else 'bluesky_logo.png',
       input_style='background-color: #EEEEEE',
       **kwargs)
 
