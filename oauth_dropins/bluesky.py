@@ -180,7 +180,7 @@ class BlueskyAuth(models.BaseAuth):
     Returns:
       lexrpc.Client:
     """
-    did = arroba.did.resolve_handle(handle)
+    did = arroba.did.resolve_handle(handle, get_fn=util.requests_get)
     if not did:
       error(f"Couldn't resolve {handle} as a Bluesky handle")
     logger.info(f'resolved {handle} to {did}')
@@ -264,7 +264,7 @@ def pds_for_did(did):
     ValueError: if the DID couldn't be resolved, or if its DID document has no
     ATProto PDS endpoint
   """
-  did_doc = arroba.did.resolve(did)
+  did_doc = arroba.did.resolve(did, get_fn=util.requests_get)
   if not did_doc:
     error(f"Couldn't resolve DID {did}")
 
@@ -358,7 +358,7 @@ class OAuthStart(StartBase):
 
     # resolve handle to DID doc and PDS base URL
     # https://atproto.com/specs/handle#handle-resolution
-    did = arroba.did.resolve_handle(handle)
+    did = arroba.did.resolve_handle(handle, get_fn=util.requests_get)
     if not did:
       error(f"Couldn't resolve {handle} as a Bluesky handle")
     logger.info(f'resolved {handle} to {did}')
