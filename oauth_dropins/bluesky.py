@@ -21,7 +21,6 @@ from lexrpc import Client
 import requests
 from requests_oauth2client import (
   AuthorizationRequestSerializer,
-  DPoPToken,
   OAuth2Client,
   OAuth2Error,
   OAuth2AccessTokenAuth,
@@ -141,6 +140,8 @@ class BlueskyAuth(models.BaseAuth):
     """Returns an OAuth-based :class:`lexrpc.Client` for this user.
 
     Requires :attr:`dpop_token` to be set.
+
+    TODO: unify with :meth:`granary.bluesky.Bluesky.from_auth`?
 
     Args:
       client_metadata (dict): client info metadata,
@@ -445,3 +446,32 @@ class OAuthCallback(views.Callback):
                        user_json=util.json_dumps(profile))
     auth.put()
     return self.finish(auth, state=login.state)
+
+
+def make_session_callback(auth_entity):
+    """Returns a ``session_callback`` for storing refreshed tokens to the datastore.
+
+    Used with :class:`granary.Bluesky` and :class:`lexrpc.Client`. Handles both
+    legacy app password sessions (dict) and OAuth DPoP tokens
+    (:class:`requests_oauth2client.OAuth2AccessTokenAuth`).
+
+    Args:
+      auth_entity (BlueskyAuth)
+
+    Returns:
+      callable (dict or OAuth2AccessTokenAuth) => None:
+    """
+    def callback(session_or_auth):
+        if (isinstance(session_or_auth, dict)
+                and session_or_auth != auth_entity.session):
+          logger.info(f'Storing session for {auth_entity.key.id()}')
+          auth_entity.session = session_or_auth
+          auth_entity.put()
+        elif isinstance(session_or_auth, OAuth2AccessTokenAuth):
+            serialized = TokenSerializer().dumps(session_or_auth.token)
+            if serialized != auth_entity.dpop_token:
+                logger.info(f'Storing DPoP token for {auth_entity.key.id()}')
+                auth_entity.dpop_token = serialized
+                auth_entity.put()
+
+    return callback

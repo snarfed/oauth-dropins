@@ -143,8 +143,10 @@ Changelog
 ---
 
 ### 7.1 - unreleased
+
 * `bluesky`:
   * `StartBase.button_html`: add new `handle` kwarg. If provided, includes the handle in a hidden input instead of an text box.
+  * Add new `make_session_callback` function: returns a `session_callback` for storing refreshed tokens to the datastore, for use with granary and lexrpc. Handles both legacy app password sessions and OAuth DPoP tokens.
 
 
 ### 7.0 - 2026-02-08
