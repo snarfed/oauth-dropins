@@ -400,6 +400,10 @@ class OAuthCallback(views.Callback):
   CLIENT_METADATA = None
 
   def dispatch_request(self):
+    login = None
+    if state_id := request.values.get('state'):
+      login = BlueskyLogin.load(state_id)
+
     # handle errors
     err = request.values.get('error')
     desc = request.values.get('error_description')
@@ -407,11 +411,11 @@ class OAuthCallback(views.Callback):
       msg = f'Error: {err}: {desc}'
       logger.info(msg)
       if err == 'access_denied':
-        return self.finish(None, state=request.values.get('state'))
+        return self.finish(None, state=login.state if login else None)
       else:
         error(msg)
 
-    login = BlueskyLogin.load(request.values['state'])
+    assert login
     pds_url = pds_for_did(login.did)
     client = oauth_client_for_pds(self.CLIENT_METADATA, pds_url,
                                   redirect_uri=request.url)
