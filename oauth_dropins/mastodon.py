@@ -249,7 +249,7 @@ class Start(views.Start):
 
   @classmethod
   def _version_ok(cls, version):
-    return 'Pixelfed' not in version
+    return not version or 'Pixelfed' not in version
 
   def redirect_url(self, state=None, instance=None):
     """Returns the local URL for Mastodon to redirect back to after OAuth prompt.

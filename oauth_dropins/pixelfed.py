@@ -40,7 +40,7 @@ class Start(mastodon.Start):
 
   @classmethod
   def _version_ok(cls, version):
-    return 'Pixelfed' in version
+    return version and 'Pixelfed' in version
 
 
 class Callback(mastodon.Callback):
