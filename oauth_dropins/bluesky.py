@@ -415,7 +415,9 @@ class OAuthCallback(views.Callback):
       else:
         error(msg)
 
-    assert login
+    if not login:
+      error('Missing login')
+
     pds_url = pds_for_did(login.did)
     client = oauth_client_for_pds(self.CLIENT_METADATA, pds_url,
                                   redirect_uri=request.url)
