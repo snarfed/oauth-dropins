@@ -7,6 +7,7 @@
 /l3
 /local*/
 datastore.dat
+fake_service_account.json
 flask_secret_key
 oauth_client_secret
 private_notes
@@ -21,6 +22,7 @@ linkedin_client_*
 medium_client_*
 meetup_client_*
 reddit_app_*
+service_account_creds.json
 tumblr_app_*
 twitter_app_*
 wordpress.com_*
