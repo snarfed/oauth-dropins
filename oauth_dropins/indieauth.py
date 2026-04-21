@@ -212,8 +212,8 @@ class Callback(views.Callback):
         'state': state,
       })
 
-    if validate_resp.ok:
-      data = util.sniff_json_or_form_encoded(validate_resp.text)
+    if (validate_resp.ok
+        and (data := util.sniff_json_or_form_encoded(validate_resp.text))):
       if data.get('me'):
         verified = data.get('me')
         user_json = build_user_json(verified)
@@ -226,5 +226,5 @@ class Callback(views.Callback):
         return self.finish(indie_auth, state=state)
       else:
         flask_util.error('Verification response missing required "me" field')
-    else:
-      flask_util.error(f'IndieAuth verification failed: {validate_resp.status_code} {validate_resp.text}')
+
+    flask_util.error(f'IndieAuth verification failed: {validate_resp.status_code} {validate_resp.text}')
