@@ -155,7 +155,7 @@ class BlueskyAuth(models.BaseAuth):
     oauth_client = oauth_client_for_pds(client_metadata, pds_url)
     dpop_token = TokenSerializer().loads(self.dpop_token)
     auth = OAuth2AccessTokenAuth(client=oauth_client, token=dpop_token)
-    return Client(pds_url, auth=auth)
+    return Client(pds_url, auth=auth, requests_session=util.session)
 
   def _api(self, **kwargs):
     """
@@ -166,7 +166,7 @@ class BlueskyAuth(models.BaseAuth):
       lexrpc.Client:
     """
     client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent},
-                    **kwargs)
+                    requests_session=util.session, **kwargs)
     client.session = self.session
     return client
 
@@ -188,7 +188,8 @@ class BlueskyAuth(models.BaseAuth):
     pds_url = pds_for_did(did)
 
     logger.info(f'Logging into {pds_url} as {did}...')
-    client = Client(address=pds_url, headers={'User-Agent': util.user_agent}, **kwargs)
+    client = Client(address=pds_url, headers={'User-Agent': util.user_agent},
+                    requests_session=util.session, **kwargs)
     resp = client.com.atproto.server.createSession({
       'identifier': handle,
       'password': password,
@@ -436,7 +437,7 @@ class OAuthCallback(views.Callback):
     # get user profile
     # https://docs.bsky.app/docs/advanced-guides/oauth-client#callback-and-access-token-request
     auth = OAuth2AccessTokenAuth(client=client, token=token)
-    pds_client = Client(pds_url, auth=auth)
+    pds_client = Client(pds_url, auth=auth, requests_session=util.session)
     try:
       profile = pds_client.app.bsky.actor.getProfile(actor=login.did)
     except BaseException as e:
