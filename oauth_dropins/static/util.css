@@ -3,9 +3,6 @@
 
 #messages {
   position: fixed;
-}
-
-.messages {
   width: 100%;
   font-size: 1.5em;
   top: .2em;
