@@ -117,28 +117,6 @@ The following methods are optional. Auth entity classes usually implement at lea
 - `urlopen(data=None, timeout=None)` wraps `urlopen()` and adds the OAuth credentials to the request. Use this for making direct HTTP request to a site's REST API. Some sites may provide `get()` instead, which wraps `requests.get()`.
 
 
-### Flask session
-
-
-Troubleshooting/FAQ
----
-1. If you get this error:
-
-    ```
-    bash: ./bin/easy_install: ...bad interpreter: No such file or directory
-    ```
-
-  You've probably hit [this virtualenv bug](https://github.com/pypa/virtualenv/issues/53): virtualenv doesn't support paths with spaces.
-
-  The easy fix is to recreate the virtualenv in a path without spaces. If you can't do that, then after creating the virtualenv, but before activating it, edit the activate, easy_install and pip files in `local/bin/` to escape any spaces in the path.
-
-  For example, in `activate`, `VIRTUAL_ENV=".../has space/local"` becomes `VIRTUAL_ENV=".../has\ space/local"`, and in `pip` and `easy_install` the first line changes from `#!".../has space/local/bin/python"` to `#!".../has\ space/local/bin/python"`.
-
-  This should get virtualenv to install in the right place. If you do this wrong at first, you'll have installs in eg `/usr/local/lib/python3.7/site-packages` that you need to delete, since they'll prevent virtualenv from installing into the local `site-packages`.
-
-1. If you see errors importing or using `tweepy`, it may be because `six.py` isn't installed. Try `pip install six` manually. `tweepy` does include `six` in its dependencies, so this shouldn't be necessary. Please [let us know](https://github.com/snarfed/oauth-dropins/issues) if it happens to you so we can debug!
-
-
 Changelog
 ---
 
