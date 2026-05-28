@@ -9,9 +9,8 @@ import urllib.error, urllib.parse, urllib.request
 import oauthlib.oauth1
 import requests_oauthlib
 import requests
-
-from .webutil import util
-from .webutil.util import json_dumps, json_loads
+from webutil import util
+from webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 

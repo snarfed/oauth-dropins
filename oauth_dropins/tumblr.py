@@ -10,10 +10,10 @@ import urllib.parse
 from flask import request
 from google.cloud import ndb
 import tumblpy
+from webutil import flask_util, util
+from webutil.util import json_dumps, json_loads
 
 from . import views, models
-from .webutil import flask_util, util
-from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 

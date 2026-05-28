@@ -12,6 +12,7 @@ git+https://github.com/snarfed/arroba.git#egg=arroba
 git+https://github.com/snarfed/carbox.git#egg=carbox
 git+https://github.com/snarfed/lexrpc.git#egg=lexrpc
 git+https://github.com/snarfed/mox3.git#egg=mox3
+git+https://github.com/snarfed/webutil.git#egg=pywebutil
 
 # required for mox3, not prod
 fixtures==4.2.8

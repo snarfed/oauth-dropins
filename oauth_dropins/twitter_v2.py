@@ -13,10 +13,10 @@ from google.cloud import ndb
 from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
+from webutil import flask_util, util
+from webutil.util import json_dumps, json_loads
 
 from . import models, views
-from .webutil import flask_util, util
-from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 

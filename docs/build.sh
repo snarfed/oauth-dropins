@@ -11,11 +11,10 @@ absfile=`readlink -f $0`
 cd `dirname $absfile`
 
 # generates the module index files:
-#   docs/source/oauth_dropins.rst, oauth_dropins.webutil.rst
+#   docs/source/oauth_dropins.rst
 # only used to bootstrap. we've edited by hand since then so don't run any more
 # or it will overwrite them.
-# sphinx-apidoc -f -o source ../oauth_dropins \
-#   ../oauth_dropins/{webutil,}/{appengine_config.py,tests}
+# sphinx-apidoc -f -o source ../oauth_dropins
 
 rm -f index.rst
 cat > index.rst <<EOF

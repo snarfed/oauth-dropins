@@ -15,8 +15,7 @@ import urllib.parse
 from flask import redirect, request, session
 from flask.views import View
 from google.cloud.ndb.key import Key
-
-from .webutil import util
+from webutil import util
 
 LOGINS_SESSION_KEY = 'oauth-dropins.logins'
 

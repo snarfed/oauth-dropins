@@ -17,16 +17,16 @@ from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlu
 from flask import request
 from google.cloud import ndb
 import requests
-
-from . import views
-from .models import BaseAuth
-from .webutil import appengine_info, flask_util, util
-from .webutil.util import (
+from webutil import appengine_info, flask_util, util
+from webutil.util import (
   decode_oauth_state,
   encode_oauth_state,
   json_dumps,
   json_loads,
 )
+
+from . import views
+from .models import BaseAuth
 
 logger = logging.getLogger(__name__)
 

@@ -9,10 +9,10 @@ import logging
 from flask import request
 from google.cloud import ndb
 import tweepy
+from webutil import flask_util, util
+from webutil.util import json_dumps, json_loads
 
 from . import models, twitter_auth, views
-from .webutil import flask_util, util
-from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 

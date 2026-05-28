@@ -8,13 +8,12 @@ from flask import Flask, render_template, request
 import flask
 import flask_gae_static
 from google.cloud import ndb
-from oauth_dropins.webutil import flask_util, util
 import requests
+from webutil import appengine_info, appengine_config, flask_util, util
 from werkzeug.exceptions import HTTPException
 
 from oauth_dropins import bluesky
 from oauth_dropins.views import get_logins, logout
-from oauth_dropins.webutil import appengine_info, appengine_config
 
 logger = logging.getLogger(__name__)
 

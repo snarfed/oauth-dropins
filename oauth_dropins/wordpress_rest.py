@@ -23,11 +23,11 @@ import urllib.parse, urllib.request
 
 from flask import request
 from google.cloud import ndb
+from webutil import appengine_info, flask_util, util
+from webutil.util import json_dumps, json_loads
 
 from . import views
 from .models import BaseAuth
-from .webutil import appengine_info, flask_util, util
-from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 

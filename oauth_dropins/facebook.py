@@ -7,10 +7,10 @@ import urllib.error, urllib.parse
 
 from flask import request
 from google.cloud import ndb
+from webutil import appengine_info, flask_util, util
+from webutil.util import json_dumps, json_loads
 
 from . import views, models
-from .webutil import appengine_info, flask_util, util
-from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 

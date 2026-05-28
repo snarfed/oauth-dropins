@@ -1,4 +1,0 @@
-[submodule "webutil"]
-	path = oauth_dropins/webutil
-	url = https://github.com/snarfed/webutil.git
-	branch = main

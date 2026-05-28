@@ -10,8 +10,7 @@ import urllib.request
 import requests
 import requests_oauthlib
 import tweepy
-
-from .webutil import util
+from webutil import util
 
 TWITTER_APP_KEY = util.read('twitter_app_key')
 TWITTER_APP_SECRET = util.read('twitter_app_secret')

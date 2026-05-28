@@ -26,11 +26,11 @@ from requests_oauth2client import (
   OAuth2AccessTokenAuth,
   TokenSerializer,
 )
+from webutil import flask_util, util
+from webutil.models import JsonProperty
+from webutil.util import json_dumps, json_loads
 
 from . import views, models
-from .webutil import flask_util, util
-from .webutil.models import JsonProperty
-from .webutil.util import json_dumps, json_loads
 
 logger = logging.getLogger(__name__)
 

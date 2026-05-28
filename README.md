@@ -142,7 +142,13 @@ Troubleshooting/FAQ
 Changelog
 ---
 
-### 7.1 - unreleased
+### 8.0 - unreleased
+
+_Breaking changes:_
+
+Move `webutil` submodule out into its own package, `pywebutil` on PyPI.
+
+_Non-breaking changes:_
 
 * `bluesky`:
   * `StartBase.button_html`: add new `handle` kwarg. If provided, includes the handle in a hidden input instead of an text box.

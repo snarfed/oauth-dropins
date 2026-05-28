@@ -3,7 +3,7 @@
 Pixelfed's API is a clone of Mastodon's v1 API:
 https://docs.pixelfed.org/technical-documentation/api-v1.html
 """
-from .webutil.util import json_loads
+from webutil.util import json_loads
 
 from . import mastodon
 

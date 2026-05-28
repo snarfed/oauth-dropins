@@ -3,8 +3,7 @@
 from datetime import timezone
 
 from google.cloud import ndb
-
-from .webutil import models, util
+from webutil import models, util
 
 
 class BaseAuth(models.StringIdModel):
