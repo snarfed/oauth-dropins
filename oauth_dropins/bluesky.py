@@ -244,8 +244,7 @@ class PasswordCallback(views.Callback):
     auth = BlueskyAuth(
       id=profile['did'],
       password=password,
-      # TODO: resolve DID's PDS
-      pds_url = 'https://bsky.social',
+      pds_url=client.address,
       user_json=util.json_dumps(profile),
       session=client.session,
     )
