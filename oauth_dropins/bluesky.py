@@ -165,9 +165,21 @@ class BlueskyAuth(models.BaseAuth):
     Returns:
       lexrpc.Client:
     """
+    did = self.key.id()
     client = Client(address=self.pds_url, headers={'User-Agent': util.user_agent},
                     requests_session=util.session, **kwargs)
-    client.session = self.session
+
+    if self.session and (self.session.get('accessJwt')
+                         or self.session.get('refreshJwt')):
+      client.session = self.session
+    elif self.password:
+      client.com.atproto.server.createSession({
+        'identifier': did,
+        'password': self.password,
+      })
+    else:
+      raise ValueError(f'No tokens or password for {did}')
+
     return client
 
   @staticmethod
