@@ -76,7 +76,6 @@ AUTH_CODE_API = '&'.join((
   '/oauth/authorize?'
   'response_type=code',
   'client_id=%(client_id)s',
-  'client_secret=%(client_secret)s',
   # https://docs.microsoft.com/en-us/linkedin/shared/integrations/people/profile-api?context=linkedin/consumer/context#permissions
   'scope=%(scope)s',
   # must be the same in the access token request
@@ -337,7 +336,6 @@ class Start(views.Start):
     login_id = MastodonLogin(app=app.key, state=state or '').put().id()
     return urljoin(instance, AUTH_CODE_API % {
       'client_id': app_data['client_id'],
-      'client_secret': app_data['client_secret'],
       'redirect_uri': quote_plus(self.to_url()),
       'state': str(login_id),
       'scope': self.scope,
