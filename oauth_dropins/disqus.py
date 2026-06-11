@@ -119,7 +119,7 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp.text)
     except (ValueError, TypeError):
-      logger.error(f'Bad response:\n{resp}', exc_info=True)
+      logger.warning(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Disqus response to access token request')
 
     access_token = data['access_token']
@@ -135,7 +135,7 @@ class Callback(views.Callback):
     try:
       user_data = json_loads(resp)['response']
     except (ValueError, TypeError):
-      logger.error(f'Bad response:\n{resp}', exc_info=True)
+      logger.warning(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Disqus response to user details request')
 
     auth.user_json = json_dumps(user_data)

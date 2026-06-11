@@ -138,7 +138,7 @@ class Callback(views.Callback):
     try:
       data = json_loads(resp)
     except (ValueError, TypeError):
-      logger.error(f'Bad response:\n{resp}', exc_info=True)
+      logger.warning(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Dropbox response to access token request')
 
     logger.info(f"Storing new Dropbox account: {data['uid']}")

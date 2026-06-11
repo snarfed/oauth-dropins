@@ -152,7 +152,7 @@ class Callback(views.Callback):
     try:
       resp = resp.json()
     except:
-      logger.error(f'Could not decode JSON: {resp.text}', exc_info=True)
+      logger.warning(f'Could not decode JSON: {resp.text}', exc_info=True)
       raise
 
     error = resp.get('error')
