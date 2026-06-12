@@ -72,7 +72,7 @@ class BaseView(View):
     """
     scheme = request.scheme
     # handle when we're not terminating SSL and WSGI thinks we're serving HTTP
-    if (DEBUG or TESTING or LOCAL_SERVER):
+    if not (DEBUG or TESTING or LOCAL_SERVER):
       scheme = 'https'
 
     url = urllib.parse.urljoin(f'{scheme}://{request.host}', self.to_path)
