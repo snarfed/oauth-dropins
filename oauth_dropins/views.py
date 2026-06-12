@@ -15,8 +15,7 @@ import urllib.parse
 from flask import redirect, request, session
 from flask.views import View
 from google.cloud.ndb.key import Key
-from webutil.appengine_info import DEBUG, TESTING, LOCAL_SERVER
-from webutil import flask_util, util
+from webutil import util
 
 LOGINS_SESSION_KEY = 'oauth-dropins.logins'
 
@@ -70,13 +69,11 @@ class BaseView(View):
 
     Includes scheme, host, and optional state.
     """
-    url = urllib.parse.urljoin(flask_util.request_host_url(), self.to_path)
-
+    url = urllib.parse.urljoin(request.host_url, self.to_path)
     if state:
       # unquote first or state will be double-quoted
       state = urllib.parse.unquote_plus(state)
       url = util.add_query_params(url, [('state', state)])
-
     return url
 
   def request_url_with_state(self):

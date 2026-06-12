@@ -244,7 +244,7 @@ class Start(views.Start):
     """
     # normalize trailing slash. oddly sometimes request.host_url has it,
     # sometimes it doesn't.
-    return urljoin(flask_util.request_host_url(), '/')
+    return urljoin(request.host_url, '/')
 
   @classmethod
   def _version_ok(cls, version):
@@ -356,7 +356,7 @@ class Start(views.Start):
     """
     logger.info(f"first time we've seen {self.LABEL} instance {instance} with app {app_name} {app_url}! registering an API app.")
 
-    redirect_uris = {urljoin(flask_util.request_host_url(), path)
+    redirect_uris = {urljoin(request.host_url, path)
                      for path in set(self.REDIRECT_PATHS)}
     redirect_uris.add(self.to_url())
 

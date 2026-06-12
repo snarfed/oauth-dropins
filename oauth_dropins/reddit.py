@@ -71,7 +71,7 @@ class Start(views.Start):
       state = str(randint(100000, 999999))
     assert REDDIT_APP_KEY and REDDIT_APP_SECRET, \
       "Please fill in the reddit_app_key and reddit_app_secret files in your app's root directory."
-    url = urllib.parse.urljoin(flask_util.request_host_url(), self.to_path)
+    url = urllib.parse.urljoin(request.host_url, self.to_path)
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
                          redirect_uri=url,
@@ -114,7 +114,7 @@ class Callback(views.Callback):
     if request_token is None:
       flask_util.error(f'Invalid oauth_token: {state}')
 
-    url = urllib.parse.urljoin(flask_util.request_host_url(), to_path)
+    url = urllib.parse.urljoin(request.host_url, to_path)
     reddit = praw.Reddit(client_id=REDDIT_APP_KEY,
                          client_secret=REDDIT_APP_SECRET,
                          redirect_uri=url,

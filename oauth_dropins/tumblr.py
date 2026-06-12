@@ -80,7 +80,7 @@ class Start(views.Start):
     tp = tumblpy.Tumblpy(app_key=TUMBLR_APP_KEY,
                          app_secret=TUMBLR_APP_SECRET)
     auth_props = tp.get_authentication_tokens(
-      callback_url=urllib.parse.urljoin(flask_util.request_host_url(), self.to_path))
+      callback_url=urllib.parse.urljoin(request.host_url, self.to_path))
 
     # store the request token for later use in the callback view
     models.OAuthRequestToken(id=auth_props['oauth_token'],

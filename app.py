@@ -11,6 +11,7 @@ from google.cloud import ndb
 import requests
 from webutil import appengine_info, appengine_config, flask_util, util
 from werkzeug.exceptions import HTTPException
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from oauth_dropins import bluesky
 from oauth_dropins.views import get_logins, logout
@@ -24,6 +25,14 @@ app.json.compact = False
 app.config.from_pyfile('config.py')
 app.wsgi_app = flask_util.ndb_context_middleware(
     app.wsgi_app, client=appengine_config.ndb_client)
+
+# make Flask's request info (request.url etc) reflect the actual end user's HTTP
+# request (https, host, etc), based on X-Forwarded-* etc headers
+#
+# https://docs.cloud.google.com/functions/docs/reference/headers
+# https://werkzeug.palletsprojects.com/en/stable/middleware/proxy_fix/
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_for=1)
+
 if appengine_info.DEBUG or appengine_info.LOCAL_SERVER:
   flask_gae_static.init_app(app)
 
