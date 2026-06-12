@@ -128,6 +128,7 @@ Move `webutil` submodule out into its own package, `pywebutil` on PyPI.
 
 _Non-breaking changes:_
 
+* When generating redirect URIs in production, default to `https` even if we're on a worker behind a proxy like nginx and WSGI thinks we're serving HTTP.
 * `bluesky`:
   * `StartBase.button_html`: add new `handle` kwarg. If provided, includes the handle in a hidden input instead of an text box.
   * Add new `make_session_callback` function: returns a `session_callback` for storing refreshed tokens to the datastore, for use with granary and lexrpc. Handles both legacy app password sessions and OAuth DPoP tokens.

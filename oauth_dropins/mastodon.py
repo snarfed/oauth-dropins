@@ -292,7 +292,7 @@ class Start(views.Start):
     is_json = resp and resp.headers.get('Content-Type', '').strip().startswith(
       'application/json')
     if is_json:
-      logger.info(resp.text)
+      logger.debug(resp.text)
     if (not resp or not resp.ok or not is_json or
         not self._version_ok(resp.json().get('version'))):
       msg = f"Couldn't connect to {instance}, or it doesn't look like a {self.LABEL} instance."
