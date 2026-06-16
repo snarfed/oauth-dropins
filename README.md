@@ -134,6 +134,7 @@ _Non-breaking changes:_
   * `OAuthCallback` bug fix: load state from datastore correctly on error.
   * `PasswordCallback`: resolve the user's PDS when storing into `BlueskyAuth`.
   * `Callback`: return 400 on missing `login` query param.
+  * Include `atproto-proxy` [service proxying header](https://atproto.com/specs/xrpc#service-proxying) for appview XRPC calls ([bridgy-fed#2519](https://github.com/snarfed/bridgy-fed/issues/2519)).
 * `mastodon`:
   * `redirect_url`: bug fix for fediverse servers that don't include `version` in their `/api/v1/instance` response.
 
