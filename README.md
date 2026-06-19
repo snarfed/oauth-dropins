@@ -138,6 +138,8 @@ _Non-breaking changes:_
 * `mastodon`:
   * `redirect_url`: bug fix for fediverse servers that don't include `version` in their `/api/v1/instance` response.
 
+Packaging: migrate from `setup.py` to `pyproject.toml`.
+
 
 ### 7.0 - 2026-02-08
 
@@ -403,10 +405,8 @@ First, fork and clone this repo. Then, install the [Google Cloud SDK](https://cl
 
 ```shell
 gcloud config set project oauth-dropins
-git submodule init
-git submodule update
-python3 -m venv local
-source local/bin/activate
+python3 -m venv ~/.venv/oauth-dropins
+source ~/.venv/oauth-dropins/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -419,7 +419,7 @@ GAE_ENV=localdev FLASK_ENV=development flask run -p 8080
 
 To deploy to production:
 
-`gcloud -q beta app deploy --no-cache oauth-dropins *.yaml`
+`gcloud -q app deploy --no-cache --project=oauth-dropins *.yaml`
 
 The docs are built with [Sphinx](http://sphinx-doc.org/), including [apidoc](http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html), [autodoc](http://www.sphinx-doc.org/en/stable/ext/autodoc.html), and [napoleon](http://www.sphinx-doc.org/en/stable/ext/napoleon.html). Configuration is in [`docs/conf.py`](https://github.com/snarfed/oauth-dropins/blob/master/docs/conf.py) To build them, first install Sphinx with `pip install sphinx`. (You may want to do this outside your virtualenv; if so, you'll need to reconfigure it to see system packages with `python3 -m venv --system-site-packages local`.) Then, run [`docs/build.sh`](https://github.com/snarfed/oauth-dropins/blob/master/docs/build.sh).
 
@@ -441,12 +441,12 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     python -m unittest discover
     kill %1
     ```
-1. Bump the version number in `setup.py` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
+1. Bump the version number in `pyproject.toml` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`.
 1. `git commit -am 'release vX.Y'`
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
     ```sh
-    python setup.py clean build sdist
+    python -m build
     setenv ver X.Y
     twine upload -r pypitest dist/oauth_dropins-$ver.tar.gz
     ```

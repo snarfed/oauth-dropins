@@ -1,5 +1,5 @@
 # These requirements are for the https://oauth-dropins.appspot.com/ demo app,
-# not the library! The library's dependencies are specified in setup.py.
+# not the library! The library's dependencies are specified in pyproject.toml.
 #
 # Note that App Engine / Cloud Build's default pip cache is overly aggressive
 # with GitHub dependency URLs like these. If I push a new commit to the branch
@@ -11,12 +11,10 @@
 git+https://github.com/snarfed/arroba.git#egg=arroba
 git+https://github.com/snarfed/carbox.git#egg=carbox
 git+https://github.com/snarfed/lexrpc.git#egg=lexrpc
-git+https://github.com/snarfed/mox3.git#egg=mox3
 git+https://github.com/snarfed/webutil.git#egg=pywebutil
 
-# required for mox3, not prod
-fixtures==4.2.8
-pbr==7.0.3
+# only for prod, not required in pyproject.toml
+gunicorn==23.0.0
 
 attrs==26.1.0
 bases==0.3.0
@@ -55,7 +53,6 @@ grapheme==0.6.0
 grpc-google-iam-v1==0.14.4
 grpcio==1.81.0
 grpcio-status==1.81.0
-gunicorn==23.0.0
 h11==0.16.0
 html5lib==1.1
 httplib2==0.31.2

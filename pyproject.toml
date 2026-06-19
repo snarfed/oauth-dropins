@@ -1,0 +1,77 @@
+# https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+[build-system]
+requires = ['setuptools>=77.0']
+build-backend = 'setuptools.build_meta'
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ['oauth_dropins*']
+
+[project]
+name = 'oauth-dropins'
+version = '7.0'
+description = 'Drop-in OAuth Flask views for many popular sites.'
+readme = 'README.md'
+authors = [
+    { name='Ryan Barrett', email='oauth-dropins@ryanb.org' },
+]
+license = 'CC0-1.0'
+requires-python = '>=3.9'
+keywords = ['oauth', 'appengine']
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'Topic :: System :: Systems Administration :: Authentication/Directory',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Environment :: Web Environment',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.9',
+]
+
+dependencies = [
+    'arroba>=0.4',
+    'flask>=2.0.1',
+    'google-cloud-ndb>=1.10.1',
+    'lexrpc>=1.1',
+    'mf2util>=0.5.0',
+    'oauthlib>=3.1',
+    'pkce>=1.0.3',
+    'praw>=7.3.0',
+    'python-tumblpy>=1.1',
+    'pywebutil[google-cloud,html]>=1.0',
+    'requests>=2.22',
+    'requests-oauth2client>=1.8.0',
+    'requests-oauthlib>=1.0',
+    'tweepy>=4.5',
+]
+
+[project.urls]
+'Homepage' = 'https://oauth-dropins.appspot.com/'
+
+[project.optional-dependencies]
+app = [
+    'flask-gae-static',
+    'werkzeug>=2.0',
+]
+build = [
+    'build',
+]
+
+[tool.uv.sources]
+arroba =            { editable = true, path = "../arroba" }
+flask-gae-static =  { editable = true, path = "../flask-gae-static" }
+lexrpc =            { editable = true, path = "../lexrpc" }
+mf2util =           { editable = true, path = "../mf2util" }
+pywebutil =         { editable = true, path = "../webutil" }
+
+[tool.deptry]
+exclude = ['.venv', 'build', 'dist', 'docs']
+
+[tool.deptry.per_rule_ignores]
+# these deps aren't used in the codebase but we want to keep them in the local venv
+DEP002 = [
+    'build',
+]

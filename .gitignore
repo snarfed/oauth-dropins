@@ -29,3 +29,5 @@ wordpress.com_*
 disqus_client_*
 threads_app_*
 TAGS
+uv.lock
+.venv
