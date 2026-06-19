@@ -30,6 +30,7 @@ classifiers = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.9',
 ]
+urls = { Homepage = 'https://oauth-dropins.appspot.com/' }
 
 dependencies = [
     'arroba>=0.4',
@@ -47,9 +48,6 @@ dependencies = [
     'requests-oauthlib>=1.0',
     'tweepy>=4.5',
 ]
-
-[project.urls]
-'Homepage' = 'https://oauth-dropins.appspot.com/'
 
 [project.optional-dependencies]
 app = [
