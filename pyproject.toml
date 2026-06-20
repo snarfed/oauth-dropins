@@ -52,6 +52,8 @@ dependencies = [
 [project.optional-dependencies]
 app = [
     'flask-gae-static',
+    'gunicorn',
+    'ujson',
     'werkzeug>=2.0',
 ]
 build = [
@@ -60,10 +62,21 @@ build = [
 
 [tool.uv.sources]
 arroba =            { editable = true, path = "../arroba" }
-flask-gae-static =  { editable = true, path = "../flask-gae-static" }
+carbox =            { editable = true, path = "../carbox" }
 lexrpc =            { editable = true, path = "../lexrpc" }
-mf2util =           { editable = true, path = "../mf2util" }
 pywebutil =         { editable = true, path = "../webutil" }
+
+# we currently use these from PyPI
+# flask-gae-static =  { editable = true, path = "../flask-gae-static" }
+# mf2util =           { editable = true, path = "../mf2util" }
+
+[tool.uv.pip]
+no-emit-package = [
+    'arroba',
+    'carbox',
+    'lexrpc',
+    'pywebutil',
+]
 
 [tool.deptry]
 exclude = ['.venv', 'build', 'dist', 'docs']
@@ -72,4 +85,6 @@ exclude = ['.venv', 'build', 'dist', 'docs']
 # these deps aren't used in the codebase but we want to keep them in the local venv
 DEP002 = [
     'build',
+    'gunicorn',
+    'ujson',
 ]
