@@ -103,7 +103,7 @@ class Callback(views.Callback):
     to_path = st.get('to_path')
     code = request.values.get('code')
     if error or not state or not code:
-      if error in ('access_denied'):
+      if error == 'access_denied':
         logger.info(f"User declined: {request.values.get('error_description')}")
         return self.finish(None, state=state)
       else:
