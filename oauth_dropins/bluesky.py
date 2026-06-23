@@ -66,12 +66,19 @@ _APP_CLIENT_METADATA = {
   'redirect_uris': ['https://oauth-dropins.appspot.com/bluesky/oauth_callback'],
 }
 
-HEADERS = {
-  'User-Agent': util.user_agent,
-  # https://atproto.com/specs/xrpc#service-proxying
-  # https://github.com/snarfed/bridgy-fed/issues/2519
-  'atproto-proxy': 'did:web:api.bsky.app#bsky_appview',
-}
+def headers():
+  """Returns the HTTP headers to send with Bluesky XRPC requests.
+
+  Function instead of a constant so that it reads :data:`util.user_agent`
+  at call time.
+
+  ``atproto-proxy`` should be safe to include on all requests.
+  https://atproto.com/specs/xrpc#service-proxying
+  """
+  return {
+    'User-Agent': util.user_agent,
+    'atproto-proxy': 'did:web:api.bsky.app#bsky_appview',
+  }
 
 
 def error(msg):
@@ -162,7 +169,8 @@ class BlueskyAuth(models.BaseAuth):
     oauth_client = oauth_client_for_pds(client_metadata, pds_url)
     dpop_token = TokenSerializer().loads(self.dpop_token)
     auth = OAuth2AccessTokenAuth(client=oauth_client, token=dpop_token)
-    return Client(pds_url, auth=auth, headers=HEADERS, requests_session=util.session)
+    return Client(pds_url, auth=auth, requests_session=util.session,
+                  headers=headers())
 
   def _api(self, **kwargs):
     """
@@ -173,8 +181,8 @@ class BlueskyAuth(models.BaseAuth):
       lexrpc.Client:
     """
     did = self.key.id()
-    client = Client(address=self.pds_url, headers=HEADERS,
-                    requests_session=util.session, **kwargs)
+    client = Client(address=self.pds_url, requests_session=util.session,
+                    headers=headers(), **kwargs)
 
     if self.session and (self.session.get('accessJwt')
                          or self.session.get('refreshJwt')):
@@ -207,8 +215,8 @@ class BlueskyAuth(models.BaseAuth):
     pds_url = pds_for_did(did)
 
     logger.info(f'Logging into {pds_url} as {did}...')
-    client = Client(address=pds_url, headers=HEADERS, requests_session=util.session,
-                    **kwargs)
+    client = Client(address=pds_url, requests_session=util.session,
+                    headers=headers(), **kwargs)
     resp = client.com.atproto.server.createSession({
       'identifier': handle,
       'password': password,
@@ -455,8 +463,8 @@ class OAuthCallback(views.Callback):
     # get user profile
     # https://docs.bsky.app/docs/advanced-guides/oauth-client#callback-and-access-token-request
     auth = OAuth2AccessTokenAuth(client=client, token=token)
-    pds_client = Client(pds_url, auth=auth, headers=HEADERS,
-                        requests_session=util.session)
+    pds_client = Client(pds_url, auth=auth, requests_session=util.session,
+                        headers=headers())
     try:
       profile = pds_client.app.bsky.actor.getProfile(actor=login.did)
     except BaseException as e:
