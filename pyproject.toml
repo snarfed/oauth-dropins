@@ -61,6 +61,8 @@ app = [
 ]
 build = [
     'build',
+    'sphinx>=7.0.0',
+    'sphinx-rtd-theme>=3.0.0',
 ]
 
 [tool.uv.sources]
@@ -84,5 +86,7 @@ extend_exclude = ['build', 'dist', 'docs']
 DEP002 = [
     'build',
     'gunicorn',
+    'sphinx',
+    'sphinx-rtd-theme',
     'ujson',
 ]

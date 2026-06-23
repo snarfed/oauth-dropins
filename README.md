@@ -411,6 +411,8 @@ source ~/.venv/oauth-dropins/bin/activate
 pip install -r requirements.txt
 ```
 
+You can also use `uv` instead of `pip`, but if you do, pass it `--no-sources`.
+
 Run the demo app locally with [`flask run`](https://flask.palletsprojects.com/en/2.0.x/cli/#run-the-development-server):
 
 ```shell
