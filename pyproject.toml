@@ -16,7 +16,7 @@ Documentation = 'https://oauth-dropins.readthedocs.io/'
 
 [project]
 name = 'oauth-dropins'
-version = '7.0'
+version = '8.0'
 description = 'Drop-in OAuth Flask views for many popular sites.'
 readme = 'README.md'
 authors = [

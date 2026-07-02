@@ -120,7 +120,7 @@ The following methods are optional. Auth entity classes usually implement at lea
 Changelog
 ---
 
-### 8.0 - unreleased
+### 8.0 - 2026-07-01
 
 _Breaking changes:_
 
@@ -406,8 +406,8 @@ First, fork and clone this repo. Then, install the [Google Cloud SDK](https://cl
 
 ```shell
 gcloud config set project oauth-dropins
-python3 -m venv ~/.venv/oauth-dropins
-source ~/.venv/oauth-dropins/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -436,29 +436,22 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     git checkout main
     git pull
     ```
-1. Run the unit tests.
-    ```sh
-    source local/bin/activate.csh
-    gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &
-    sleep 2s
-    python -m unittest discover
-    kill %1
-    ```
 1. Bump the version number in `pyproject.toml` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
-1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`.
-1. `git commit -am 'release vX.Y'`
+1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`. Check that the generated HTML looks fine by opening `docs/_build/html/index.html` and looking around.
+1. ```sh
+   setenv ver X.Y
+   git commit -am "release v$ver"
+   ```
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
     ```sh
     uv build
-    setenv ver X.Y
-    twine upload -r pypitest dist/oauth_dropins-$ver.tar.gz
+    twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz dist/oauth-dropins-$ver-py3-none-any.whl
     ```
 1. Install from test.pypi.org.
     ```sh
     cd /tmp
-    python -m venv local
-    source local/bin/activate.csh
-    pip install --upgrade pip
+    python -m venv .venv
+    source .venv/bin/activate.csh
     # mf2py 1.1.2 on test.pypi.org is broken :(
     pip install mf2py
     pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
