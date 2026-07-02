@@ -445,7 +445,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. Upload to [test.pypi.org](https://test.pypi.org/) for testing.
     ```sh
     uv build
-    twine upload -r pypitest dist/oauth-dropins-$ver.tar.gz dist/oauth-dropins-$ver-py3-none-any.whl
+    twine upload -r pypitest dist/oauth_dropins-$ver.tar.gz dist/oauth_dropins-$ver-py3-none-any.whl
     ```
 1. Install from test.pypi.org.
     ```sh
@@ -456,19 +456,6 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     pip install mf2py
     pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
     ```
-1. Smoke test that the code trivially loads and runs.
-    ```sh
-    python
-    # run test code below
-    ```
-    Test code to paste into the interpreter:
-    ```py
-    from oauth_dropins.webutil import util
-    util.__file__
-    util.UrlCanonicalizer()('http://asdf.com')
-    # should print 'https://asdf.com/'
-    exit()
-    ```
 1. Tag the release in git. In the tag message editor, delete the generated comments at bottom, leave the first line blank (to omit the release "title" in github), put `### Notable changes` on the second line, then copy and paste this version's changelog contents below it.
     ```sh
     git tag -a v$ver --cleanup=verbatim
@@ -478,7 +465,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
 1. [Click here to draft a new release on GitHub.](https://github.com/snarfed/oauth-dropins/releases/new) Enter `vX.Y` in the _Tag version_ box. Leave _Release title_ empty. Copy `### Notable changes` and the changelog contents into the description text box.
 1. Upload to [pypi.org](https://pypi.org/)!
     ```sh
-    twine upload dist/oauth_dropins-$ver.tar.gz
+    twine upload dist/oauth_dropins-$ver.tar.gz dist/oauth_dropins-$ver-py3-none-any.whl
     ```
 
 
