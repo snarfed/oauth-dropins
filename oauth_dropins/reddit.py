@@ -38,9 +38,10 @@ class RedditAuth(models.BaseAuth):
   requests to the Tumblr API. Stores OAuth credentials in the datastore. See
   models.BaseAuth for usage details.
 
-  reddit-specific details: implements "access_token," which is really a refresh_token
-  see: https://stackoverflow.com/questions/28955541/how-to-get-access-token-reddit-api
-  The datastore entity key name is the reddit username.
+  Key id is the Reddit username.
+
+  We only store and use the refresh_token:
+  https://stackoverflow.com/questions/28955541/how-to-get-access-token-reddit-api
   """
   # refresh token
   refresh_token = ndb.StringProperty(required=True)
@@ -48,6 +49,10 @@ class RedditAuth(models.BaseAuth):
 
   def site_name(self):
     return 'Reddit'
+
+  def access_token(self):
+    """Returns the refresh token, which Reddit uses in place of an access token."""
+    return self.refresh_token
 
   def user_display_name(self):
     """Returns the username."""

@@ -120,6 +120,14 @@ The following methods are optional. Auth entity classes usually implement at lea
 Changelog
 ---
 
+### 8.1 - unreleased
+
+_Non-breaking changes:_
+
+* `reddit`:
+  * `RedditAuth`: implement `access_token`, returns `refresh_token`.
+
+
 ### 8.0 - 2026-07-01
 
 _Breaking changes:_
