@@ -87,7 +87,8 @@ class Start(views.Start):
                              token_secret=state,
                              state=state).put()
     st = util.encode_oauth_state({'state': state, 'to_path': self.to_path})
-    return reddit.auth.url(self.scope.split(self.SCOPE_SEPARATOR), st, 'permanent')
+    return reddit.auth.url(scopes=self.scope.split(self.SCOPE_SEPARATOR), state=st,
+                           duration='permanent')
 
   @classmethod
   def button_html(cls, *args, **kwargs):
