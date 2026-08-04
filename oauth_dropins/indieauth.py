@@ -40,9 +40,9 @@ def discover_endpoint(rel, resp):
 
   # check the html content
   soup = util.parse_html(resp.text)
-  link = soup.find('link', {'rel': rel})
-  if link:
-    return link.get('href')
+  link = soup.find(('link', 'a'), {'rel': rel})
+  if link and link.get('href'):
+    return urllib.parse.urljoin(resp.url, link['href'])
 
 
 def build_user_json(me):
@@ -108,6 +108,8 @@ class Start(views.Start):
   """
   NAME = 'indieauth'
   LABEL = 'IndieAuth'
+  DEFAULT_SCOPE = 'profile'
+  SCOPE_SEPARATOR = ' '
 
   def redirect_url(self, state=None, me=None):
     assert INDIEAUTH_CLIENT_ID, (
@@ -144,7 +146,7 @@ class Start(views.Start):
         'me': me,
         'client_id': INDIEAUTH_CLIENT_ID,
         'redirect_uri': redirect_uri,
-        'scope': 'profile',
+        'scope': self.scope,
         'code_challenge': code_challenge,
         'code_challenge_method': 'S256',
         'response_type': 'code',
