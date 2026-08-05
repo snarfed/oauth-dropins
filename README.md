@@ -124,6 +124,10 @@ Changelog
 
 _Non-breaking changes:_
 
+* `bluesky`:
+  * `BlueskyAuth`: store per-client DPoP tokens, since they're bound to their client id. Adds new `get_dpop_token`/`set_dpop_token` methods.
+  * `OAuthCallback`: preserve existing `BlueskyAuth` fields, eg other clients' DPoP tokens and app password sessions, instead of overwriting the entity.
+  * `make_session_callback`: add new `client_id` kwarg, required for DPoP tokens.
 * `reddit`:
   * `RedditAuth`: implement `access_token`, returns `refresh_token`.
 

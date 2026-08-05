@@ -113,6 +113,21 @@ class BlueskyLogin(ndb.Model):
     return login
 
 
+class DpopToken(ndb.Model):
+  """An OAuth DPoP token, bound to a specific OAuth client id.
+
+  Used in a :class:`google.cloud.ndb.model.StructuredProperty` inside
+  :class:`BlueskyAuth`; not stored as a top-level entity.
+
+  Refresh tokens are bound to the client they were issued to, so a user who logs
+  into more than one client, eg prod and localhost, needs separate tokens for each.
+  """
+  client_id = ndb.StringProperty(required=True)
+  ''
+  token = ndb.TextProperty(required=True)
+  """Serialized with :class:`requests_oauth2client.TokenSerializer`."""
+
+
 class BlueskyAuth(models.BaseAuth):
   """An authenticated Bluesky user.
 
@@ -124,6 +139,43 @@ class BlueskyAuth(models.BaseAuth):
   """app.bsky.actor.defs#profileViewDetailed"""
   session = JsonProperty()
   dpop_token = ndb.TextProperty()
+  """Deprecated, only read if :attr:`dpop_tokens` is empty. Use
+  :meth:`get_dpop_token` and :meth:`set_dpop_token` instead."""
+  dpop_tokens = ndb.StructuredProperty(DpopToken, repeated=True)
+  """OAuth DPoP tokens, at most one per OAuth client."""
+
+  def get_dpop_token(self, client_id):
+    """Returns this user's DPoP token for a given OAuth client, if any.
+
+    Args:
+      client_id (str)
+
+    Returns:
+      requests_oauth2client.DPoPToken or None:
+    """
+    for dpop_token in self.dpop_tokens:
+      if dpop_token.client_id == client_id:
+        return TokenSerializer().loads(dpop_token.token)
+
+    if self.dpop_token:
+      return TokenSerializer().loads(self.dpop_token)
+
+  def set_dpop_token(self, client_id, token):
+    """Stores a DPoP token for a given OAuth client. Doesn't ``put``.
+
+    Args:
+      client_id (str)
+      token (requests_oauth2client.DPoPToken)
+    """
+    self.dpop_token = None
+    serialized = TokenSerializer().dumps(token)
+
+    for dpop_token in self.dpop_tokens:
+      if dpop_token.client_id == client_id:
+        dpop_token.token = serialized
+        return
+
+    self.dpop_tokens.append(DpopToken(client_id=client_id, token=serialized))
 
   def site_name(self):
     return 'Bluesky'
@@ -153,7 +205,7 @@ class BlueskyAuth(models.BaseAuth):
   def oauth_api(self, client_metadata):
     """Returns an OAuth-based :class:`lexrpc.Client` for this user.
 
-    Requires :attr:`dpop_token` to be set.
+    Requires a DPoP token for this client.
 
     TODO: unify with :meth:`granary.bluesky.Bluesky.from_auth`?
 
@@ -164,10 +216,11 @@ class BlueskyAuth(models.BaseAuth):
     Returns:
       lexrpc.Client:
     """
-    assert self.dpop_token
+    dpop_token = self.get_dpop_token(client_metadata['client_id'])
+    assert dpop_token
+
     pds_url = self.pds_url or pds_for_did(self.key.id())
     oauth_client = oauth_client_for_pds(client_metadata, pds_url)
-    dpop_token = TokenSerializer().loads(self.dpop_token)
     auth = OAuth2AccessTokenAuth(client=oauth_client, token=dpop_token)
     return Client(pds_url, auth=auth, requests_session=util.session,
                   headers=headers())
@@ -474,15 +527,16 @@ class OAuthCallback(views.Callback):
       raise
 
     profile['$type'] = 'app.bsky.actor.defs#profileViewDetailed'
-    auth = BlueskyAuth(id=login.did,
-                       pds_url=pds_url,
-                       dpop_token=TokenSerializer().dumps(token),
-                       user_json=util.json_dumps(profile))
+    # existing entity may have tokens for other OAuth clients; don't clobber them
+    auth = BlueskyAuth.get_by_id(login.did) or BlueskyAuth(id=login.did)
+    auth.pds_url = pds_url
+    auth.user_json = util.json_dumps(profile)
+    auth.set_dpop_token(self.CLIENT_METADATA['client_id'], token)
     auth.put()
     return self.finish(auth, state=login.state)
 
 
-def make_session_callback(auth_entity):
+def make_session_callback(auth_entity, client_id=None):
     """Returns a ``session_callback`` for storing refreshed tokens to the datastore.
 
     Used with :class:`granary.Bluesky` and :class:`lexrpc.Client`. Handles both
@@ -491,6 +545,7 @@ def make_session_callback(auth_entity):
 
     Args:
       auth_entity (BlueskyAuth)
+      client_id (str): OAuth client id, required for DPoP tokens
 
     Returns:
       callable (dict or OAuth2AccessTokenAuth) => None:
@@ -501,11 +556,12 @@ def make_session_callback(auth_entity):
           logger.info(f'Storing session for {auth_entity.key.id()}')
           auth_entity.session = session_or_auth
           auth_entity.put()
+
         elif isinstance(session_or_auth, OAuth2AccessTokenAuth):
-            serialized = TokenSerializer().dumps(session_or_auth.token)
-            if serialized != auth_entity.dpop_token:
-                logger.info(f'Storing DPoP token for {auth_entity.key.id()}')
-                auth_entity.dpop_token = serialized
-                auth_entity.put()
+            assert client_id
+            if session_or_auth.token != auth_entity.get_dpop_token(client_id):
+              logger.info(f'Storing DPoP token for {auth_entity.key.id()} {client_id}')
+              auth_entity.set_dpop_token(client_id, session_or_auth.token)
+              auth_entity.put()
 
     return callback
