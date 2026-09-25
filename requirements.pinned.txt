@@ -12,7 +12,7 @@ cffi==2.0.0
 charset-normalizer==3.4.7
 click==8.4.1
 colorama==0.4.6
-cryptography==49.0.0
+cryptography==50.0.0
 dag-cbor==0.3.3
 dag-json==0.3
 defusedxml==0.7.1
