@@ -313,8 +313,8 @@ class Start(views.Start):
       # disambiguate different apps in dev_appserver, since their app_url will
       # always be localhost
       query = query.filter(self.APP_CLASS.app_name == app_name)
-    app = query.get()
 
+    app = max(query.fetch(), key=lambda app: app.created_at, default=None)
     if app:
       if self.EXPIRE_APPS_BEFORE and app.created_at < self.EXPIRE_APPS_BEFORE:
         logging.info(f'Creating new client app for {instance} because existing app {app.key} was created before EXPIRE_APPS_BEFORE {self.EXPIRE_APPS_BEFORE}')

@@ -126,6 +126,8 @@ _Non-breaking changes:_
 
 * `reddit`:
   * `RedditAuth`: implement `access_token`, returns `refresh_token`.
+* `mastodon`:
+  * `Start.redirect_url`: when an instance has multiple matching apps, use the newest one. Fixes repeatedly re-registering apps after `EXPIRE_APPS_BEFORE`.
 
 
 ### 8.0 - 2026-07-01
