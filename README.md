@@ -120,7 +120,7 @@ The following methods are optional. Auth entity classes usually implement at lea
 Changelog
 ---
 
-### 8.1 - unreleased
+### 8.1 - 2026-10-18
 
 _Non-breaking changes:_
 
@@ -464,7 +464,7 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     source .venv/bin/activate.csh
     # mf2py 1.1.2 on test.pypi.org is broken :(
     pip install mf2py
-    pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
+    'pip' install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple oauth-dropins
     ```
 1. Tag the release in git. In the tag message editor, delete the generated comments at bottom, leave the first line blank (to omit the release "title" in github), put `### Notable changes` on the second line, then copy and paste this version's changelog contents below it.
     ```sh
