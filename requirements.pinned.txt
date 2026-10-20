@@ -79,7 +79,7 @@ requests-oauthlib==2.0.0
 setuptools==82.0.1
 simple-websocket==1.1.0
 six==1.17.0
-soupsieve==2.8.4
+soupsieve==2.9
 tweepy==4.16.0
 typing-extensions==4.15.0
 typing-validation==1.2.12
