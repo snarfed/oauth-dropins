@@ -122,8 +122,6 @@ Changelog
 
 ### 8.1 - 2026-10-18
 
-_Non-breaking changes:_
-
 * `reddit`:
   * `RedditAuth`: implement `access_token`, returns `refresh_token`.
 * `mastodon`:
