@@ -130,6 +130,11 @@ class IndieAuth(models.BaseAuth):
     """Return the access token, N/A for IndieAuth"""
     return self.access_token_str
 
+  @property
+  def refresh_token(self):
+    """Returns the refresh token, if any."""
+    return self.refresh_token_str
+
 
 class Start(views.Start):
   """Starts the IndieAuth flow. Requires the ``me`` parameter with the

@@ -130,9 +130,11 @@ _Non-breaking changes:_
 
 * `indieauth`:
   * Store flow data in the datastore in `models.PkceCode`, not in the `state` query parameter.
-  * `Callback`: when the returned `me` differs from the requested one, check that it uses the same endpoints.
   * Always use PKCE, including with authorization endpoints that don't have a token endpoint.
-  * `Callback`: check `iss` from indielogin.com.
+  * Add `IndieAuth.refresh_token` property, so that `Callback.finish` includes it in the redirect.
+  * `Callback`:
+    * When the returned `me` differs from the requested one, check that it uses the same endpoints.
+    * Check `iss` from indielogin.com.
 
 
 ### 8.1 - 2026-10-18

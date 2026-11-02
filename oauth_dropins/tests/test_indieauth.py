@@ -158,11 +158,23 @@ class IndieAuthTest(testutil.TestCase):
       'auth_entity': [auth.key.urlsafe().decode()],
       'state': ['towkin'],
       'access_token': ['a_towkin'],
+      'refresh_token': ['r_towkin'],
     }, parse_qs(urlparse(resp.headers['Location']).query))
 
     with self.client.session_transaction() as session:
       self.assertEqual([('IndieAuth', 'http://snarfed.org')],
                        session[LOGINS_SESSION_KEY])
+
+  @patch.object(util.session, 'post', return_value=requests_response('me=http://snarfed.org'))
+  @patch.object(util.session, 'get', return_value=requests_response(''))
+  def test_callback_no_tokens(self, *_):
+    resp = self.callback()
+
+    auth = IndieAuth.get_by_id('http://snarfed.org')
+    self.assertEqual({
+      'auth_entity': [auth.key.urlsafe().decode()],
+      'state': ['towkin'],
+    }, parse_qs(urlparse(resp.headers['Location']).query))
 
   @patch.object(util.session, 'post', return_value=requests_response('me=http://snarfed.org'))
   @patch.object(util.session, 'get', return_value=requests_response(''))

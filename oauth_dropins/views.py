@@ -210,8 +210,8 @@ class Callback(BaseView):
         logger.info('access_token() not implemented')
 
       try:
-        token = auth_entity.refresh_token
-        params.append(('refresh_token', token))
+        if token := auth_entity.refresh_token:
+          params.append(('refresh_token', token))
       except AttributeError:
         logger.info('refresh_token not included')
 
