@@ -144,3 +144,8 @@ class PkceCode(models.StringIdModel):
     """
     verifier = ndb.StringProperty(required=True)
     challenge = ndb.StringProperty(required=True)
+    # IndieAuth only
+    auth_endpoint = ndb.TextProperty()
+    token_endpoint = ndb.TextProperty()
+    me = ndb.TextProperty()
+    state = ndb.TextProperty()

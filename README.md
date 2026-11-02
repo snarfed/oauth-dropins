@@ -120,6 +120,13 @@ The following methods are optional. Auth entity classes usually implement at lea
 Changelog
 ---
 
+### 8.2 - unreleased
+
+* `indieauth`:
+  * Store flow data in the datastore in `models.PkceCode`, not in the `state` query parameter.
+  * `Callback`: when the returned `me` differs from the requested one, check that it uses the same endpoints.
+
+
 ### 8.1 - 2026-10-18
 
 * `reddit`:

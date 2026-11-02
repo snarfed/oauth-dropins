@@ -3,6 +3,7 @@
 https://indieauth.net/
 """
 import logging
+import secrets
 import urllib.parse
 
 from flask import request
@@ -43,6 +44,29 @@ def discover_endpoint(rel, resp):
   link = soup.find(('link', 'a'), {'rel': rel})
   if link and link.get('href'):
     return urllib.parse.urljoin(resp.url, link['href'])
+
+
+def discover_auth_endpoints(me):
+  """Fetches a user's URL and discovers their IndieAuth endpoints.
+
+  Args:
+    me (str): URL of the user
+
+  Return:
+    (str, str) tuple: authorization endpoint, token endpoint. The token endpoint
+    may be None.
+  """
+  try:
+    resp = util.requests_get(me)
+  except (ValueError, requests.URLRequired, requests.TooManyRedirects) as e:
+    flask_util.error(str(e))
+
+  if not resp.ok:
+    logger.warning(f'could not fetch user url {me}, got response {resp.status_code}')
+    return INDIEAUTH_URL, None
+
+  return (discover_endpoint('authorization_endpoint', resp) or INDIEAUTH_URL,
+          discover_endpoint('token_endpoint', resp))
 
 
 def build_user_json(me):
@@ -105,6 +129,8 @@ class IndieAuth(models.BaseAuth):
 class Start(views.Start):
   """Starts the IndieAuth flow. Requires the ``me`` parameter with the
   user URL that we want to authenticate.
+
+  ``state`` is the :class:`models.PkceCode` datastore key id.
   """
   NAME = 'indieauth'
   LABEL = 'IndieAuth'
@@ -122,26 +148,17 @@ class Start(views.Start):
     if not parsed.scheme:
       me = 'http://' + me
 
-    # fetch user URL
+    auth_endpoint, token_endpoint = discover_auth_endpoints(me)
     redirect_uri = self.to_url()
-    try:
-      resp = util.requests_get(me)
-    except (ValueError, requests.URLRequired, requests.TooManyRedirects) as e:
-      flask_util.error(str(e))
 
-    # discover endpoints
-    if resp.ok:
-      token_endpoint = discover_endpoint('token_endpoint', resp)
-      auth_endpoint = (discover_endpoint('authorization_endpoint', resp) or
-                       INDIEAUTH_URL)
-    else:
-      logger.warning(f'could not fetch user url {me}, got response {resp.status_code}')
-      auth_endpoint = INDIEAUTH_URL
-      token_endpoint = None
+    # store everything that Callback trusts here, not in the state query param
+    code_verifier, code_challenge = pkce.generate_pkce_pair()
+    key = models.PkceCode(id=secrets.token_urlsafe(32), verifier=code_verifier,
+                          challenge=code_challenge, auth_endpoint=auth_endpoint,
+                          token_endpoint=token_endpoint, me=me, state=state).put()
 
     # construct redirect URL
     if token_endpoint:
-      code_verifier, code_challenge = pkce.generate_pkce_pair()
       return auth_endpoint + '?' + urllib.parse.urlencode({
         'me': me,
         'client_id': INDIEAUTH_CLIENT_ID,
@@ -150,23 +167,14 @@ class Start(views.Start):
         'code_challenge': code_challenge,
         'code_challenge_method': 'S256',
         'response_type': 'code',
-        'state': util.encode_oauth_state({
-          'code_verifier': code_verifier,
-          'token_endpoint': token_endpoint,
-          'me': me,
-          'state': state,
-          }),
-        })
+        'state': key.id(),
+      })
     else:
       return auth_endpoint + '?' + urllib.parse.urlencode({
         'me': me,
         'client_id': INDIEAUTH_CLIENT_ID,
         'redirect_uri': redirect_uri,
-        'state': util.encode_oauth_state({
-          'endpoint': auth_endpoint,
-          'me': me,
-          'state': state,
-        }),
+        'state': key.id(),
       })
 
   @classmethod
@@ -184,30 +192,25 @@ class Callback(views.Callback):
   """
   def dispatch_request(self):
     code = request.values['code']
-    state = util.decode_oauth_state(request.values['state'])
 
-    token_endpoint = state.get('token_endpoint')
-    me = state.get('me')
-    if token_endpoint:
+    stored = models.PkceCode.get_by_id(request.values['state'])
+    if not stored or not stored.me:
+      flask_util.error('invalid state parameter')
+    stored.key.delete()
+
+    state = stored.state or ''
+    if stored.token_endpoint:
       # TODO: validate that the `iss` matches the value that is retrieved from the IndieAuth Server Metadata https://indieauth.spec.indieweb.org/#indieauth-server-metadata
-      code_verifier = state.get('code_verifier') or ''
-      state = state.get('state') or ''
-      validate_resp = util.requests_post(token_endpoint, data={
+      validate_resp = util.requests_post(stored.token_endpoint, data={
         'grant_type': 'authorization_code',
         'client_id': INDIEAUTH_CLIENT_ID,
         'code': code,
         'redirect_uri': request.base_url,
-        'code_verifier': code_verifier,
+        'code_verifier': stored.verifier,
       })
     else:
-      endpoint = state.get('endpoint')
-      me = state.get('me')
-      if not endpoint or not me:
-        flask_util.error("invalid state parameter")
-
-      state = state.get('state') or ''
-      validate_resp = util.requests_post(endpoint, data={
-        'me': me,
+      validate_resp = util.requests_post(stored.auth_endpoint, data={
+        'me': stored.me,
         'client_id': INDIEAUTH_CLIENT_ID,
         'code': code,
         'redirect_uri': request.base_url,
@@ -218,6 +221,14 @@ class Callback(views.Callback):
         and (data := util.sniff_json_or_form_encoded(validate_resp.text))):
       if data.get('me'):
         verified = data.get('me')
+
+        # check endpoints, since a site could declare another site's authorization
+        # endpoint with its own token endpoint
+        if verified != stored.me:
+          endpoints = (stored.auth_endpoint, stored.token_endpoint)
+          if discover_auth_endpoints(verified) != endpoints:
+            flask_util.error(f"{verified} doesn't use the same IndieAuth endpoints as {stored.me}")
+
         user_json = build_user_json(verified)
         indie_auth = IndieAuth(id=verified,
                                user_json=json_dumps(user_json),
