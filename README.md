@@ -436,6 +436,15 @@ pip install -r requirements.txt
 
 You can also use `uv` instead of `pip`, but if you do, pass it `--no-sources`.
 
+Now, run the tests to check that everything is set up ok:
+
+```shell
+gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &
+python -m unittest discover
+```
+
+The tests are in [`oauth_dropins/tests/`](https://github.com/snarfed/oauth-dropins/tree/main/oauth_dropins/tests). They need the Firestore emulator running on port 8089, since they use the real datastore, and they mock out HTTP requests to external sites.
+
 Run the demo app locally with [`flask run`](https://flask.palletsprojects.com/en/2.0.x/cli/#run-the-development-server):
 
 ```shell
@@ -458,6 +467,14 @@ Here's how to package, test, and ship a new release. (Note that this is [largely
     ```sh
     git checkout main
     git pull
+    ```
+1. Run the unit tests.
+    ```sh
+    source .venv/bin/activate.csh
+    gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /dev/null &
+    sleep 2s
+    python -m unittest discover
+    kill %1
     ```
 1. Bump the version number in `pyproject.toml` and `docs/conf.py`. `git grep` the old version number to make sure it only appears in the changelog. Change the current changelog entry in `README.md` for this new version from _unreleased_ to the current date.
 1. Build the docs. If you added any new modules, add them to the appropriate file(s) in `docs/source/`. Then run `./docs/build.sh`. Check that the generated HTML looks fine by opening `docs/_build/html/index.html` and looking around.

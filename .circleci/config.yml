@@ -1,0 +1,92 @@
+# CircleCI automatically reads this file from our repo and uses it for
+# configuration. Docs:
+# https://circleci.com/docs/2.0/configuration-reference/
+# https://circleci.com/docs/2.0/sample-config/
+version: 2.1
+
+jobs:
+  build:
+    parameters:
+      # how to install dependencies:
+      # * pinned: requirements.txt versions, on the newest Python we support
+      # * lowest-direct: pyproject.toml versions, lowest possible versions at or
+      #   above our declared version specifiers, on the oldest Python we support
+      deps:
+        type: enum
+        enum: [pinned, lowest-direct]
+      python:
+        type: string
+
+    docker:
+      - image: cimg/python:<< parameters.python >>
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - venv-1-{{ .Branch }}-<< parameters.python >>-<< parameters.deps >>
+
+      - run:
+          name: Install dependencies
+          command: |
+            pip install -U uv
+
+            case "<< parameters.deps >>" in
+              pinned)
+                # force our own packages to reinstall at head from the git refs.
+                uv pip uninstall --system arroba carbox lexrpc pywebutil || true
+                # --no-sources since our other repos aren't checked out here
+                uv pip install --system --no-sources -r requirements.txt
+                uv pip install --system --no-sources '.[tests]'
+                ;;
+              lowest-direct)
+                # resolve third-party packages at lowest-direct floors
+                uv pip install --system --no-sources --resolution=lowest-direct '.[app,tests]'
+                # reinstall own packages at head, overriding PyPI floor versions
+                grep 'git+' requirements.txt | xargs uv pip install --system --no-sources
+                ;;
+            esac
+
+            uv pip install --system coverage coveralls flake8
+
+            # google-cloud-sdk: https://cloud.google.com/sdk/docs/install#deb
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update
+            sudo apt-get install -y apt-transport-https ca-certificates gnupg google-cloud-cli google-cloud-cli-firestore-emulator openjdk-21-jre-headless
+
+      - run:
+          name: Run tests
+          command: |
+            CLOUDSDK_CORE_PROJECT=oauth-dropins gcloud emulators firestore start --host-port=:8089 --database-mode=datastore-mode < /dev/null >& /tmp/firestore-emulator.log &
+            sleep 5s
+            python -m coverage run --source=oauth_dropins --omit=oauth_dropins/tests/\* -m unittest discover -v
+            python -m coverage html -d /tmp/coverage_html
+            if [ "$COVERALLS_REPO_TOKEN" != "" ]; then python -m coveralls || true; fi
+
+            # check for unintentionally overridden test methods
+            # https://flake8.pycqa.org/en/latest/user/error-codes.html#error-codes
+            # https://flake8.pycqa.org/en/latest/user/options.html#cmdoption-flake8-select
+            python -m flake8 --select=F811 oauth_dropins/tests/test_*.py
+
+      - save_cache:
+          key: venv-1-{{ .Branch }}-<< parameters.python >>-<< parameters.deps >>
+          paths:
+            - /home/circleci/.pyenv
+
+      - store_artifacts:
+          path: /tmp/coverage_html
+
+workflows:
+  build:
+    jobs:
+      # two coupled combos run in parallel; both must pass
+      - build:
+          name: python-3.14-pinned
+          python: '3.14'
+          deps: pinned
+      - build:
+          name: python-3.9-lowest-direct
+          python: '3.9'
+          deps: lowest-direct
