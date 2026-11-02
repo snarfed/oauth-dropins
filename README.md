@@ -120,11 +120,19 @@ The following methods are optional. Auth entity classes usually implement at lea
 Changelog
 ---
 
-### 8.2 - unreleased
+### 9.0 - unreleased
+
+_Breaking changes:_
+
+* `indieauth`: switch default provider from indieauth.com to [indielogin.com](https://indielogin.com/api), which [requires client registration](https://indielogin.com/developers#register).
+
+_Non-breaking changes:_
 
 * `indieauth`:
   * Store flow data in the datastore in `models.PkceCode`, not in the `state` query parameter.
   * `Callback`: when the returned `me` differs from the requested one, check that it uses the same endpoints.
+  * Always use PKCE, including with authorization endpoints that don't have a token endpoint.
+  * `Callback`: check `iss` from indielogin.com.
 
 
 ### 8.1 - 2026-10-18

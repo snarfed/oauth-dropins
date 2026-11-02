@@ -18,10 +18,12 @@ from . import models, views
 
 logger = logging.getLogger(__name__)
 
-INDIEAUTH_CLIENT_ID = ('http://localhost:8080/'
+INDIELOGIN_CLIENT_ID = ('http://localhost:8080/'
                        if appengine_info.LOCAL_SERVER
-                       else util.read('indieauth_client_id'))
-INDIEAUTH_URL = 'https://indieauth.com/auth'
+                       else util.read('indielogin_client_id'))
+INDIELOGIN_URL = 'https://indielogin.com/authorize'
+INDIELOGIN_TOKEN_URL = 'https://indielogin.com/token'
+INDIELOGIN_ISSUER = 'https://indielogin.com/'
 
 
 def discover_endpoint(rel, resp):
@@ -54,7 +56,7 @@ def discover_auth_endpoints(me):
 
   Return:
     (str, str) tuple: authorization endpoint, token endpoint. The token endpoint
-    may be None.
+    may be None, which means to redeem codes at the authorization endpoint.
   """
   try:
     resp = util.requests_get(me)
@@ -63,10 +65,13 @@ def discover_auth_endpoints(me):
 
   if not resp.ok:
     logger.warning(f'could not fetch user url {me}, got response {resp.status_code}')
-    return INDIEAUTH_URL, None
+    return INDIELOGIN_URL, INDIELOGIN_TOKEN_URL
 
-  return (discover_endpoint('authorization_endpoint', resp) or INDIEAUTH_URL,
-          discover_endpoint('token_endpoint', resp))
+  auth_endpoint = discover_endpoint('authorization_endpoint', resp)
+  if not auth_endpoint:
+    return INDIELOGIN_URL, INDIELOGIN_TOKEN_URL
+
+  return auth_endpoint, discover_endpoint('token_endpoint', resp)
 
 
 def build_user_json(me):
@@ -138,8 +143,8 @@ class Start(views.Start):
   SCOPE_SEPARATOR = ' '
 
   def redirect_url(self, state=None, me=None):
-    assert INDIEAUTH_CLIENT_ID, (
-      "Please fill in the indieauth_client_id in your app's root directory.")
+    assert INDIELOGIN_CLIENT_ID, (
+      "Please fill in the indielogin_client_id in your app's root directory.")
 
     # TODO: unify with mastodon?
     if not me:
@@ -158,24 +163,16 @@ class Start(views.Start):
                           token_endpoint=token_endpoint, me=me, state=state).put()
 
     # construct redirect URL
-    if token_endpoint:
-      return auth_endpoint + '?' + urllib.parse.urlencode({
-        'me': me,
-        'client_id': INDIEAUTH_CLIENT_ID,
-        'redirect_uri': redirect_uri,
-        'scope': self.scope,
-        'code_challenge': code_challenge,
-        'code_challenge_method': 'S256',
-        'response_type': 'code',
-        'state': key.id(),
-      })
-    else:
-      return auth_endpoint + '?' + urllib.parse.urlencode({
-        'me': me,
-        'client_id': INDIEAUTH_CLIENT_ID,
-        'redirect_uri': redirect_uri,
-        'state': key.id(),
-      })
+    return auth_endpoint + '?' + urllib.parse.urlencode({
+      'me': me,
+      'client_id': INDIELOGIN_CLIENT_ID,
+      'redirect_uri': redirect_uri,
+      'scope': self.scope,
+      'code_challenge': code_challenge,
+      'code_challenge_method': 'S256',
+      'response_type': 'code',
+      'state': key.id(),
+    })
 
   @classmethod
   def button_html(cls, *args, **kwargs):
@@ -198,24 +195,30 @@ class Callback(views.Callback):
       flask_util.error('invalid state parameter')
     stored.key.delete()
 
+    # TODO: fetch server metadata, check that iss matches
+    # https://indieauth.spec.indieweb.org/#indieauth-server-metadata
+    if (stored.auth_endpoint == INDIELOGIN_URL
+        and request.values.get('iss') != INDIELOGIN_ISSUER):
+      flask_util.error(f"iss doesn't match {INDIELOGIN_ISSUER}")
+
     state = stored.state or ''
-    if stored.token_endpoint:
-      # TODO: validate that the `iss` matches the value that is retrieved from the IndieAuth Server Metadata https://indieauth.spec.indieweb.org/#indieauth-server-metadata
-      validate_resp = util.requests_post(stored.token_endpoint, data={
-        'grant_type': 'authorization_code',
-        'client_id': INDIEAUTH_CLIENT_ID,
-        'code': code,
-        'redirect_uri': request.base_url,
-        'code_verifier': stored.verifier,
-      })
-    else:
-      validate_resp = util.requests_post(stored.auth_endpoint, data={
+    data = {
+      'grant_type': 'authorization_code',
+      'client_id': INDIELOGIN_CLIENT_ID,
+      'code': code,
+      'redirect_uri': request.base_url,
+      'code_verifier': stored.verifier,
+    }
+    if not stored.token_endpoint:
+      # older authorization endpoints may expect these
+      data.update({
         'me': stored.me,
-        'client_id': INDIEAUTH_CLIENT_ID,
-        'code': code,
-        'redirect_uri': request.base_url,
         'state': state,
       })
+
+    validate_resp = util.requests_post(stored.token_endpoint or stored.auth_endpoint,
+                                       data=data,
+                                       headers={'Accept': 'application/json'})
 
     if (validate_resp.ok
         and (data := util.sniff_json_or_form_encoded(validate_resp.text))):
