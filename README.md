@@ -135,6 +135,8 @@ _Non-breaking changes:_
   * `Callback`:
     * When the returned `me` differs from the requested one, check that it uses the same endpoints.
     * Check `iss` from indielogin.com.
+* `mastodon`:
+  * `Callback`: reject users whose `uri` isn't on the instance's host.
 
 
 ### 8.1 - 2026-10-18

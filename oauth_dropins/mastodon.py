@@ -456,7 +456,12 @@ class Callback(views.Callback):
     access_token = resp_json['access_token']
     user = self.AUTH_CLASS(app=app.key, access_token_str=access_token).get(VERIFY_API).json()
     logger.debug(f'User: {user}')
-    address = f"@{user['username']}@{urlparse(app.instance).netloc}"
+
+    host = urlparse(app.instance).netloc
+    if (uri := user.get('uri')) and urlparse(uri).netloc != host:
+      flask_util.error(f"{uri} isn't on {host}")
+
+    address = f"@{user['username']}@{host}"
     auth = self.AUTH_CLASS(id=address, app=app.key, access_token_str=access_token,
                            user_json=json_dumps(user))
     auth.put()
