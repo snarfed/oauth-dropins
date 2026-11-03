@@ -73,7 +73,7 @@ class ThreadsAuth(models.BaseAuth):
     if token.get('refresh_token') and token.get('expires_at'):
       def update_token(token):
         logging.info(f'Storing new access token {token}')
-        self.token = token
+        self.token_json = json_dumps(token)
         self.put()
 
       kwargs = {

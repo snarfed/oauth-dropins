@@ -141,6 +141,8 @@ _Non-breaking changes:_
   * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
 * `twitter_v2`:
   * `TwitterOAuth2.session`: store refreshed tokens. Fix `UnboundLocalError` crash when the token has no refresh token.
+* `threads`:
+  * `ThreadsAuth.session`: store refreshed tokens.
 
 
 ### 8.1 - 2026-10-18
