@@ -134,8 +134,8 @@ class Callback(views.Callback):
       logger.warning(f'Bad response:\n{resp}', exc_info=True)
       flask_util.error('Bad Instagram response to access token request')
 
-    if 'error_type' in resp:
-      abort(502, f"{resp['error_type']} {data.get('code')} {data.get('error_message')}")
+    if 'error_type' in data:
+      abort(502, f"{data['error_type']} {data.get('code')} {data.get('error_message')}")
 
     access_token = data['access_token']
     username = data['user']['username']

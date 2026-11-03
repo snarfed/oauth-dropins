@@ -422,8 +422,8 @@ class Callback(views.Callback):
         logger.info(f"User declined: {request.values.get('error_description')}")
         state = request.values.get('state')
         if state:
-          login = MastodonLogin.load(state)
-        return self.finish(None, state=login.state)
+          state = MastodonLogin.load(state).state
+        return self.finish(None, state=state)
       else:
         flask_util.error(f'{error} {desc}')
 

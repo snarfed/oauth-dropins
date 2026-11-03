@@ -101,8 +101,8 @@ class Callback(views.Callback):
   """The auth callback. Fetches an access token, stores it, and redirects home.
   """
   def dispatch_request(self):
-    if self.handle_error():
-      return
+    if resp := self.handle_error():
+      return resp
 
     # https://disqus.com/api/docs/auth/
     auth_code = request.values['code']
@@ -150,15 +150,12 @@ class Callback(views.Callback):
       handler (Callback)
 
     Returns:
-      bool: True if there was an error, False otherwise
+      flask.Response: response if there was an error, otherwise None
     """
     error = request.values.get('error')
     if error:
       if error == 'access_denied':
         logger.info('User declined')
-        handler.finish(None, state=request.values.get('state'))
-        return True
+        return handler.finish(None, state=request.values.get('state'))
       else:
         flask_util.error(error)
-
-    return False

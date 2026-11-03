@@ -137,6 +137,15 @@ _Non-breaking changes:_
     * Check `iss` from indielogin.com.
 * `mastodon`:
   * `Callback`: reject users whose `uri` isn't on the instance's host.
+  * `Callback`: fix crash when the user declines and there's no `state`.
+* `facebook`:
+  * `Callback`: fix crashes when the user declines and on errors without `error_reason`.
+* `disqus`:
+  * `Callback`: fix crash when the user declines.
+* `flickr`:
+  * `Callback`: return HTTP 400 instead of crashing on an unknown `oauth_token`.
+* `instagram`:
+  * `Callback`: return HTTP 502 on error responses from the access token request, as intended.
 * `bluesky`:
   * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
 * `twitter_v2`:

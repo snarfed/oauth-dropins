@@ -154,8 +154,8 @@ class Start(views.Start):
 class Callback(views.Callback):
   """The auth callback. Fetches an access token, stores it, and redirects home."""
   def dispatch_request(self):
-    if Callback.handle_error(self):
-      return
+    if resp := Callback.handle_error(self):
+      return resp
 
     auth_code = request.values['code']
     url = GET_ACCESS_TOKEN_URL % {
@@ -210,4 +210,4 @@ class Callback(views.Callback):
         logger.info(f'User declined: {error_description}')
         return handler.finish(None, state=request.values.get('state'))
       else:
-        flask_util.error(' '.join((error, error_reason, error_description)))
+        flask_util.error(' '.join(util.trim_nulls([error, error_reason, error_description])))

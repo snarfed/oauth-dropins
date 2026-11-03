@@ -59,3 +59,14 @@ class MastodonTest(testutil.TestCase):
   def test_callback_uri_on_other_host(self, *_):
     self.callback(400)
     self.assertIsNone(MastodonAuth.get_by_id('@alice@mastodon.social'))
+
+  def test_callback_declined(self):
+    login = MastodonLogin(app=self.app.key, state='foo').put()
+    resp = self.client.get(f'/callback?error=access_denied&state={login.id()}')
+    self.assertEqual(302, resp.status_code)
+    self.assertEqual('/done?declined=True', resp.headers['Location'])
+
+  def test_callback_declined_no_state(self):
+    resp = self.client.get('/callback?error=access_denied')
+    self.assertEqual(302, resp.status_code)
+    self.assertEqual('/done?declined=True', resp.headers['Location'])

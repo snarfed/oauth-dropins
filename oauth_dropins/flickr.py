@@ -148,6 +148,8 @@ class Callback(views.Callback):
     oauth_token = request.values.get('oauth_token')
     oauth_verifier = request.values.get('oauth_verifier')
     request_token = models.OAuthRequestToken.get_by_id(oauth_token)
+    if not request_token:
+      flask_util.error(f'Invalid oauth_token {oauth_token}')
 
     client = oauthlib.oauth1.Client(
       flickr_auth.FLICKR_APP_KEY,
