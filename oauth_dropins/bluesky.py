@@ -221,10 +221,13 @@ class BlueskyAuth(models.BaseAuth):
     logger.info(f'Logging into {pds_url} as {did}...')
     client = Client(address=pds_url, requests_session=util.session,
                     headers=headers(), **kwargs)
-    resp = client.com.atproto.server.createSession({
+    client.com.atproto.server.createSession({
       'identifier': handle,
       'password': password,
     })
+    if (session_did := client.session.get('did')) != did:
+      error(f'{pds_url} returned session for {session_did}, expected {did}')
+
     return client
 
 
@@ -268,12 +271,16 @@ class PasswordCallback(views.Callback):
       logger.warning(f'Login failed: {e}')
       return self.finish(None, state=state)
 
+    did = client.session['did']
     profile = {
       '$type': 'app.bsky.actor.defs#profileViewDetailed',
-      **client.app.bsky.actor.getProfile(actor=handle)
+      **client.app.bsky.actor.getProfile(actor=did)
     }
+    if profile.get('did') != did:
+      flask_util.error(f"Profile DID {profile.get('did')} doesn't match {did}")
+
     auth = BlueskyAuth(
-      id=profile['did'],
+      id=did,
       password=password,
       pds_url=client.address,
       user_json=util.json_dumps(profile),

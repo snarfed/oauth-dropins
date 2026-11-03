@@ -137,6 +137,8 @@ _Non-breaking changes:_
     * Check `iss` from indielogin.com.
 * `mastodon`:
   * `Callback`: reject users whose `uri` isn't on the instance's host.
+* `bluesky`:
+  * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
 
 
 ### 8.1 - 2026-10-18
