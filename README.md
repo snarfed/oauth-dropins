@@ -139,6 +139,8 @@ _Non-breaking changes:_
   * `Callback`: reject users whose `uri` isn't on the instance's host.
 * `bluesky`:
   * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
+* `twitter_v2`:
+  * `TwitterOAuth2.session`: store refreshed tokens. Fix `UnboundLocalError` crash when the token has no refresh token.
 
 
 ### 8.1 - 2026-10-18
