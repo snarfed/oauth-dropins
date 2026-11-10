@@ -20,6 +20,7 @@ This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com
 oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
 * [Available on PyPi.](https://pypi.python.org/pypi/oauth-dropins/) Install with `pip install oauth-dropins`.
+  * Some sites need extra dependencies. Install them with eg `pip install oauth-dropins[bluesky,flickr]`. Extras: `bluesky`, `flickr`, `google-signin`, `indieauth`, `reddit`, `tumblr`, `twitter` (includes `twitter_v2`).
 * [Getting started docs.](#quick-start)
 * [Reference docs.](https://oauth-dropins.readthedocs.io/en/latest/source/oauth_dropins.html)
 * Demo app at [oauth-dropins.appspot.com](http://oauth-dropins.appspot.com/).
@@ -124,6 +125,8 @@ Changelog
 
 _Breaking changes:_
 
+* Move some site-specific dependencies into new extras: `bluesky`, `flickr`, `google-signin`, `indieauth`, `reddit`, `tumblr`, `twitter`. Notably, `oauthlib`, `requests-oauthlib`, `beautifulsoup4`, and `mf2py` are no longer core dependencies.
+* Drop `pkce` dependency.
 * `indieauth`: switch default provider from indieauth.com to [indielogin.com](https://indielogin.com/api), which [requires client registration](https://indielogin.com/developers#register).
 * `threads`:
   * `ThreadsAuth.session` now returns a plain `requests.Session` with a bearer token instead of a `requests_oauthlib.OAuth2Session`.
@@ -151,7 +154,7 @@ _Non-breaking changes:_
 * `bluesky`:
   * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
 * `twitter_v2`:
-  * `Start`: switch PKCE from `plain` to `S256`. Stop logging PKCE code verifiers.
+  * `Start`: switch PKCE from `plain` to `S256`.
   * `TwitterOAuth2.session`: store refreshed tokens. Fix `UnboundLocalError` crash when the token has no refresh token.
 
 

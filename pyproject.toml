@@ -36,26 +36,45 @@ classifiers = [
 ]
 
 dependencies = [
-    'arroba>=0.4',
     'flask>=2.0.1',
     'google-cloud-ndb>=1.10.1',
-    'lexrpc>=1.1',
-    'mf2util>=0.5.0',
-    'oauthlib>=3.1',
-    'pkce>=1.0.3',
-    'praw>=7.3.0',
-    'python-tumblpy>=1.1',
-    'pywebutil[google-cloud,html]>=2.0',
+    'pywebutil>=2.0',
     'requests>=2.22',
     'requests-oauth2client>=1.8.0',
-    'requests-oauthlib>=1.0',
-    'tweepy>=4.5',
 ]
 
 [project.optional-dependencies]
+bluesky = [
+    'arroba>=0.4',
+    'lexrpc>=1.1',
+]
+flickr = [
+    'oauthlib>=3.1',
+    'requests-oauthlib>=1.0',
+]
+google-signin = [
+    'requests-oauthlib>=1.0',
+]
+indieauth = [
+    'mf2util>=0.5.0',
+    'pywebutil[html]>=2.0',
+]
+reddit = [
+    'praw>=7.3.0',
+]
+tumblr = [
+    'python-tumblpy>=1.1',
+]
+twitter = [
+    'oauthlib>=3.1',
+    'requests-oauthlib>=1.0',
+    'tweepy>=4.5',
+]
 app = [
     'flask-gae-static>=1.0',
     'gunicorn>=20.1.0',
+    'oauth-dropins[bluesky,flickr,google-signin,indieauth,reddit,tumblr,twitter]',
+    'pywebutil[google-cloud]>=2.0',
     'ujson>=5.7.0',
     'werkzeug>=2.0',
 ]
