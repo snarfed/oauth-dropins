@@ -123,8 +123,11 @@ class Start(views.Start):
     # x_auth_access_type not play nice with each other. Work around that by only
     # using /authenticate if access_type isn't set.
     # https://dev.twitter.com/discussions/21281
-    auth_url = auth.get_authorization_url(
-      signin_with_twitter=not self.access_type, access_type=self.access_type)
+    try:
+      auth_url = auth.get_authorization_url(
+        signin_with_twitter=not self.access_type, access_type=self.access_type)
+    except tweepy.TweepyException as e:
+      flask_util.error(f'Twitter request token failed: {e}', status=502)
 
     # store the request token for later use in the callback view
     models.OAuthRequestToken(id=auth.request_token['oauth_token'],

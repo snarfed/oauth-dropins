@@ -153,6 +153,8 @@ _Non-breaking changes:_
   * `Callback`: return HTTP 502 on error responses from the access token request, as intended.
 * `bluesky`:
   * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
+* `twitter`:
+  * `Start`: return HTTP 502 instead of crashing when the request token request fails.
 * `twitter_v2`:
   * `Start`: switch PKCE from `plain` to `S256`.
   * `TwitterOAuth2.session`: store refreshed tokens. Fix `UnboundLocalError` crash when the token has no refresh token.
