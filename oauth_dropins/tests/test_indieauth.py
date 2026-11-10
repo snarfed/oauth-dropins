@@ -3,6 +3,7 @@ from unittest.mock import patch
 from urllib.parse import parse_qs, parse_qsl, urlparse
 
 from flask import Flask
+from requests_oauth2client import PkceUtils
 from webutil import util
 from webutil.testutil import requests_response
 from webutil.util import json_dumps, json_loads
@@ -90,6 +91,7 @@ class IndieAuthTest(testutil.TestCase):
       'state': stored.key.id(),
     }, params)
     self.assertEqual(expected_token_endpoint, stored.token_endpoint)
+    self.assertEqual(PkceUtils.derive_challenge(stored.verifier), stored.challenge)
 
   @patch.object(util.session, 'get', return_value=requests_response(''))
   def test_start_default_endpoints(self, _):

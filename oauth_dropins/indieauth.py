@@ -9,8 +9,8 @@ import urllib.parse
 from flask import request
 from google.cloud import ndb
 import mf2util
-import pkce
 import requests
+from requests_oauth2client import PkceUtils
 from webutil import appengine_info, flask_util, util
 from webutil.util import json_dumps, json_loads
 
@@ -162,7 +162,7 @@ class Start(views.Start):
     redirect_uri = self.to_url()
 
     # store everything that Callback trusts here, not in the state query param
-    code_verifier, code_challenge = pkce.generate_pkce_pair()
+    code_verifier, code_challenge = PkceUtils.generate_code_verifier_and_challenge()
     key = models.PkceCode(id=secrets.token_urlsafe(32), verifier=code_verifier,
                           challenge=code_challenge, auth_endpoint=auth_endpoint,
                           token_endpoint=token_endpoint, me=me, state=state).put()
