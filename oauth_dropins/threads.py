@@ -6,8 +6,8 @@ import logging
 
 from flask import request
 from google.cloud import ndb
-from requests.auth import HTTPBasicAuth
-from requests_oauthlib import OAuth2Session
+import requests
+from requests_oauth2client import BearerToken, OAuth2Client
 from webutil import flask_util, util
 from webutil.util import json_dumps, json_loads
 
@@ -46,7 +46,7 @@ class ThreadsAuth(models.BaseAuth):
 
   The datastore entity key name is the integer user id.
   """
-  # Fields: token_type, access_token, scope, expires_at, expires_in
+  # Fields: access_token, token_type, user_id
   token_json = ndb.TextProperty(required=True)
   user_json = ndb.TextProperty(required=True)
 
@@ -66,24 +66,9 @@ class ThreadsAuth(models.BaseAuth):
     return json_loads(self.token_json)['access_token']
 
   def session(self):
-    """Returns a :class:`requests_oauthlib.OAuth2Session`."""
-    token = json_loads(self.token_json)
-
-    kwargs = {}
-    if token.get('refresh_token') and token.get('expires_at'):
-      def update_token(token):
-        logging.info(f'Storing new access token {token}')
-        self.token_json = json_dumps(token)
-        self.put()
-
-      kwargs = {
-        'auto_refresh_url': ACCESS_TOKEN_URL,
-        'auto_refresh_kwargs': {'client_id': APP_ID},
-        'token_updater': update_token,
-      }
-
-    session = OAuth2Session(APP_ID, token=token, **kwargs)
-    session.auth = HTTPBasicAuth(APP_ID, APP_SECRET)
+    """Returns a :class:`requests.Session` that uses this user's access token."""
+    session = requests.Session()
+    session.auth = BearerToken(self.access_token())
     return session
 
 
@@ -111,8 +96,14 @@ class Start(views.Start):
       "Please fill in the threads_app_key and threads_app_secret files in your app's root directory."
 
     # redirect to Threads auth URL
-    session = OAuth2Session(APP_ID, scope=self.scope, redirect_uri=self.to_url())
-    auth_url, state = session.authorization_url(AUTH_CODE_URL, state=state)
+    client = OAuth2Client(token_endpoint=ACCESS_TOKEN_URL,
+                          authorization_endpoint=AUTH_CODE_URL,
+                          client_id=APP_ID,
+                          redirect_uri=self.to_url(),
+                          code_challenge_method=None,
+                          session=util.session)
+    auth_url = client.authorization_request(
+      scope=self.scope, state=state, nonce=None).uri
     logger.info(f'Redirecting to {auth_url}')
     return auth_url
 
@@ -132,19 +123,20 @@ class Callback(views.Callback):
       else:
         flask_util.error(msg)
 
-    session = OAuth2Session(APP_ID, redirect_uri=https_if_localhost(request.base_url))
-    session.fetch_token(ACCESS_TOKEN_URL, include_client_id=True,
-                        client_secret=APP_SECRET, authorization_response=request.url)
-    logging.info(f'Got access token {session.token}')
+    client = OAuth2Client(token_endpoint=ACCESS_TOKEN_URL, client_id=APP_ID,
+                          client_secret=APP_SECRET, session=util.session)
+    token = client.authorization_code(
+      request.values['code'], redirect_uri=https_if_localhost(request.base_url))
+    logger.info(f'Got access token for user {token.user_id}')
 
     # Fetch user info
-    resp = util.requests_get(API_ACCOUNT_URL, session=session)
+    resp = util.requests_get(API_ACCOUNT_URL, auth=token)
     resp.raise_for_status()
     user_json = resp.json()
     logging.info(user_json)
 
-    auth = ThreadsAuth(id=str(session.token['user_id']),
-                       token_json=json_dumps(session.token),
+    auth = ThreadsAuth(id=str(token.user_id),
+                       token_json=json_dumps(token.as_dict()),
                        user_json=json_dumps(user_json))
     auth.put()
 

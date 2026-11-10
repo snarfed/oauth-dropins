@@ -125,6 +125,8 @@ Changelog
 _Breaking changes:_
 
 * `indieauth`: switch default provider from indieauth.com to [indielogin.com](https://indielogin.com/api), which [requires client registration](https://indielogin.com/developers#register).
+* `threads`:
+  * `ThreadsAuth.session` now returns a plain `requests.Session` with a bearer token instead of a `requests_oauthlib.OAuth2Session`.
 
 _Non-breaking changes:_
 
@@ -150,8 +152,6 @@ _Non-breaking changes:_
   * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
 * `twitter_v2`:
   * `TwitterOAuth2.session`: store refreshed tokens. Fix `UnboundLocalError` crash when the token has no refresh token.
-* `threads`:
-  * `ThreadsAuth.session`: store refreshed tokens.
 
 
 ### 8.1 - 2026-10-18
