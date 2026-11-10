@@ -151,6 +151,7 @@ _Non-breaking changes:_
 * `bluesky`:
   * `PasswordCallback`: require the session and profile DIDs to match the DID resolved from the handle.
 * `twitter_v2`:
+  * `Start`: switch PKCE from `plain` to `S256`. Stop logging PKCE code verifiers.
   * `TwitterOAuth2.session`: store refreshed tokens. Fix `UnboundLocalError` crash when the token has no refresh token.
 
 

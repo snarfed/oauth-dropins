@@ -11,6 +11,7 @@ import time
 from flask import request
 from google.cloud import ndb
 from requests.auth import HTTPBasicAuth
+from requests_oauth2client import PkceUtils
 from requests_oauthlib import OAuth2Session
 from urllib.parse import quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 from webutil import flask_util, util
@@ -117,17 +118,17 @@ class Start(views.Start):
       logging.debug(f'No state provided; generated default random state {state}')
 
     # generate and store PKCE code
-    verifier = secrets.token_urlsafe(64)
-    key = models.PkceCode(id=state, challenge=verifier, verifier=verifier).put()
-    logging.info(f'Storing PKCE code verifier {verifier}: {key}')
+    verifier, challenge = PkceUtils.generate_code_verifier_and_challenge()
+    key = models.PkceCode(id=state, challenge=challenge, verifier=verifier).put()
+    logging.info(f'Stored PKCE code {key}')
 
     # redirect to Twitter auth URL
     session = OAuth2Session(TWITTER_CLIENT_ID, scope=self.scope,
                             redirect_uri=self.to_url())
     auth_url, state = session.authorization_url(
       AUTH_CODE_URL, state=state,
-      code_challenge=verifier,
-      code_challenge_method='plain')
+      code_challenge=challenge,
+      code_challenge_method='S256')
     logger.info(f'Redirecting to {auth_url}')
     return auth_url
 
@@ -151,7 +152,7 @@ class Callback(views.Callback):
     code = models.PkceCode.get_by_id(state)
     if not code:
       flask_util.error(f'state not found: {state}')
-    logging.info(f'Loaded PKCE code {code}')
+    logging.info(f'Loaded PKCE code {code.key}')
 
     session = OAuth2Session(TWITTER_CLIENT_ID, redirect_uri=request.base_url)
     session.fetch_token(ACCESS_TOKEN_URL, code=request.values['code'],
