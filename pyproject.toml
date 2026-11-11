@@ -73,6 +73,7 @@ twitter = [
 app = [
     'flask-gae-static>=1.0',
     'gunicorn>=20.1.0',
+    'lxml>=6.0',
     'oauth-dropins[bluesky,flickr,google-signin,indieauth,reddit,tumblr,twitter]',
     'pywebutil[google-cloud]>=2.0',
     'ujson>=5.7.0',
