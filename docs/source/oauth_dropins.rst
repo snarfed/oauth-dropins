@@ -61,6 +61,10 @@ models
 ------
 .. automodule:: oauth_dropins.models
 
+patreon
+-------
+.. automodule:: oauth_dropins.patreon
+
 pixelfed
 --------
 .. automodule:: oauth_dropins.pixelfed

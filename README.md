@@ -15,7 +15,7 @@ Drop-in Python [OAuth](http://oauth.net/) for popular sites!
 About
 ---
 
-This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Tumblr, Twitter, and WordPress.com.
+This is a collection of drop-in Python [Flask](https://flask.palletsprojects.com/) views for the initial [OAuth](http://oauth.net/) client flows for many popular sites, including Bluesky, Disqus, Dropbox, Facebook, Flickr, GitHub, Google, IndieAuth, Instagram, LinkedIn, Mastodon, Patreon, Tumblr, Twitter, and WordPress.com.
 
 oauth-dropins stores user credentials in [Google Cloud Datastore](https://cloud.google.com/datastore/). It's primarily designed for [Google App Engine](https://appengine.google.com/), but it can be used in any Python web application, regardless of host or framework.
 
@@ -133,6 +133,7 @@ _Breaking changes:_
 
 _Non-breaking changes:_
 
+* Add [Patreon](https://docs.patreon.com/#oauth)!
 * `indieauth`:
   * Store flow data in the datastore in `models.PkceCode`, not in the `state` query parameter.
   * Always use PKCE, including with authorization endpoints that don't have a token endpoint.
