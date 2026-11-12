@@ -91,6 +91,7 @@ class PatreonTest(testutil.TestCase):
     self.assertEqual('reephrush', auth.refresh_token)
     self.assertEqual('Alice', auth.user_display_name())
     self.assertEqual('http://alice.example/pic.jpg', auth.image_url())
+    self.assertEqual('https://www.patreon.com/alice', auth.user_url())
     self.assertEqual(
       f'/done?auth_entity={auth.key.urlsafe().decode()}&state=foo&access_token=towkin&refresh_token=reephrush',
       resp.headers['Location'])

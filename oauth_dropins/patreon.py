@@ -62,6 +62,10 @@ class PatreonAuth(models.BaseAuth):
     """Returns the user's profile picture URL, if any."""
     return json_loads(self.user_json)['data']['attributes'].get('image_url')
 
+  def user_url(self):
+    """Returns the user's Patreon profile URL, if any."""
+    return json_loads(self.user_json)['data']['attributes'].get('url')
+
   def access_token(self):
     """Returns the OAuth access token string."""
     return json_loads(self.token_json)['access_token']
