@@ -2,6 +2,7 @@
 
 https://docs.patreon.com/#oauth
 """
+from enum import Enum
 import logging
 
 from flask import request
@@ -38,6 +39,13 @@ ALL_SCOPES = (
 )
 
 
+class Membership(str, Enum):
+  """A user's membership in the OAuth client's campaign."""
+  PAID = 'paid'
+  FREE = 'free'
+  FORMER = 'former'
+
+
 class PatreonAuth(models.BaseAuth):
   """An OAuth-authenticated Patreon user.
 
@@ -65,6 +73,24 @@ class PatreonAuth(models.BaseAuth):
   def user_url(self):
     """Returns the user's Patreon profile URL, if any."""
     return json_loads(self.user_json)['data']['attributes'].get('url')
+
+  def get_membership(self):
+    """Returns the user's membership in the OAuth client's campaign, if any.
+
+    Returns:
+      Membership: or None if they've never been a member
+    """
+    for included in json_loads(self.user_json).get('included', []):
+      if included.get('type') != 'member':
+        continue
+
+      attrs = included.get('attributes') or {}
+      status = attrs.get('patron_status')
+      if status == 'active_patron':
+        return (Membership.PAID if attrs.get('currently_entitled_amount_cents')
+                else Membership.FREE)
+      elif status in ('declined_patron', 'former_patron'):
+        return Membership.FORMER
 
   def access_token(self):
     """Returns the OAuth access token string."""
