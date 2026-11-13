@@ -46,6 +46,27 @@ class Membership(str, Enum):
   FORMER = 'former'
 
 
+def parse_membership(attrs):
+  """Converts a JSON:API member's attributes to a :class:`Membership`.
+
+  Args:
+    attrs (dict): member attributes, including ``patron_status`` and
+      ``currently_entitled_amount_cents``
+
+  Returns:
+    Membership: or None if they've never been a member
+  """
+  if not attrs:
+    return None
+
+  status = attrs.get('patron_status')
+  if status == 'active_patron':
+    return (Membership.PAID if attrs.get('currently_entitled_amount_cents')
+            else Membership.FREE)
+  elif status in ('declined_patron', 'former_patron'):
+    return Membership.FORMER
+
+
 class PatreonAuth(models.BaseAuth):
   """An OAuth-authenticated Patreon user.
 
@@ -57,6 +78,7 @@ class PatreonAuth(models.BaseAuth):
   # Fields: access_token, refresh_token, expires_in, scope, token_type
   token_json = ndb.TextProperty(required=True)
   # JSON:API identity response, with user attributes in data.attributes
+  # https://docs.patreon.com/#user-v2
   user_json = ndb.TextProperty(required=True)
 
   def site_name(self):
@@ -81,16 +103,8 @@ class PatreonAuth(models.BaseAuth):
       Membership: or None if they've never been a member
     """
     for included in json_loads(self.user_json).get('included', []):
-      if included.get('type') != 'member':
-        continue
-
-      attrs = included.get('attributes') or {}
-      status = attrs.get('patron_status')
-      if status == 'active_patron':
-        return (Membership.PAID if attrs.get('currently_entitled_amount_cents')
-                else Membership.FREE)
-      elif status in ('declined_patron', 'former_patron'):
-        return Membership.FORMER
+      if included.get('type') == 'member':
+        return parse_membership(included.get('attributes'))
 
   def access_token(self):
     """Returns the OAuth access token string."""

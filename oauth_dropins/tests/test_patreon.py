@@ -9,7 +9,7 @@ from webutil.testutil import requests_response
 from webutil.util import json_dumps, json_loads
 
 from .. import patreon
-from ..patreon import Callback, Membership, PatreonAuth, Start
+from ..patreon import Callback, Membership, parse_membership, PatreonAuth, Start
 from . import testutil
 
 USER = {
@@ -119,8 +119,8 @@ class PatreonTest(testutil.TestCase):
                        token_json=json_dumps({'access_token': 'towkin'}))
     self.assertEqual(BearerToken('towkin'), auth.session().auth)
 
-  def test_get_membership(self):
-    for expected, member in (
+  def test_parse_membership(self):
+    for expected, attrs in (
         (Membership.PAID, {'patron_status': 'active_patron',
                            'currently_entitled_amount_cents': 500}),
         (Membership.FREE, {'patron_status': 'active_patron',
@@ -129,6 +129,16 @@ class PatreonTest(testutil.TestCase):
                              'currently_entitled_amount_cents': 500}),
         (Membership.FORMER, {'patron_status': 'former_patron'}),
         (None, {'patron_status': None}),
+        (None, {}),
+        (None, None),
+    ):
+      with self.subTest(attrs=attrs):
+        self.assertEqual(expected, parse_membership(attrs))
+
+  def test_get_membership(self):
+    for expected, member in (
+        (Membership.PAID, {'patron_status': 'active_patron',
+                           'currently_entitled_amount_cents': 500}),
         (None, None),
     ):
       with self.subTest(member=member):
