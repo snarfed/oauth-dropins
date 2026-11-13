@@ -73,7 +73,7 @@ class PatreonAuth(models.BaseAuth):
   Provides methods that return information about this user and store OAuth 2 tokens
   in the datastore. See models.BaseAuth for usage details.
 
-  The datastore entity key name is the Patreon user id.
+  The datastore entity key name is the string Patreon user id.
   """
   # Fields: access_token, refresh_token, expires_in, scope, token_type
   token_json = ndb.TextProperty(required=True)
@@ -99,12 +99,43 @@ class PatreonAuth(models.BaseAuth):
   def get_membership(self):
     """Returns the user's membership in the OAuth client's campaign, if any.
 
+    Assumes the ``identity`` scope without ``identity.memberships``, so that
+    Patreon only includes the client's own campaign's member, if any. If there
+    are multiple members, uses the first one.
+
     Returns:
       Membership: or None if they've never been a member
     """
     for included in json_loads(self.user_json).get('included', []):
       if included.get('type') == 'member':
         return parse_membership(included.get('attributes'))
+
+  def set_membership(self, attrs):
+    """Sets the user's membership in the OAuth client's campaign.
+
+    Replaces the first member's attributes in ``user_json``, or adds a member if
+    there isn't one already. Doesn't store the entity. Assumes the same scope as
+    :meth:`get_membership`.
+
+    Args:
+      attrs (dict): JSON:API member attributes, or None to remove the member
+    """
+    user = json_loads(self.user_json)
+    included = user.get('included', [])
+
+    for i, item in enumerate(included):
+      if item.get('type') == 'member':
+        if attrs is None:
+          del included[i]
+        else:
+          included[i] = {**item, 'attributes': attrs}
+        break
+    else:
+      if attrs is not None:
+        included.append({'type': 'member', 'attributes': attrs})
+
+    user['included'] = included
+    self.user_json = json_dumps(user)
 
   def access_token(self):
     """Returns the OAuth access token string."""

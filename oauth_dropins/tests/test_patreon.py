@@ -147,3 +147,35 @@ class PatreonTest(testutil.TestCase):
           user['included'] = [{'type': 'member', 'attributes': member}]
         auth = PatreonAuth(id='123', token_json='{}', user_json=json_dumps(user))
         self.assertEqual(expected, auth.get_membership())
+
+  def test_set_membership(self):
+    campaign = {'type': 'campaign', 'id': '789'}
+    old = {'type': 'member', 'id': 'abc', 'attributes': {
+      'patron_status': 'active_patron',
+      'currently_entitled_amount_cents': 500,
+    }}
+    other = {'type': 'member', 'id': 'def', 'attributes': {
+      'patron_status': 'active_patron',
+    }}
+    new = {'patron_status': 'former_patron'}
+
+    for included, attrs, expected in (
+        ([old, campaign], new, [{'type': 'member', 'id': 'abc', 'attributes': new},
+                                campaign]),
+        ([campaign], new, [campaign, {'type': 'member', 'attributes': new}]),
+        (None, new, [{'type': 'member', 'attributes': new}]),
+        ([old, campaign], None, [campaign]),
+        ([old, campaign, other], new, [
+          {'type': 'member', 'id': 'abc', 'attributes': new}, campaign, other]),
+        ([old, campaign, other], None, [campaign, other]),
+        (None, None, []),
+    ):
+      with self.subTest(included=included, attrs=attrs):
+        user = {'data': {'id': '123'}}
+        if included:
+          user['included'] = included
+        auth = PatreonAuth(id='123', token_json='{}', user_json=json_dumps(user))
+
+        auth.set_membership(attrs)
+        self.assertEqual({'data': {'id': '123'}, 'included': expected},
+                         json_loads(auth.user_json))
