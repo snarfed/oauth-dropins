@@ -20,7 +20,7 @@ CLIENT_SECRET = util.read('patreon_client_secret')
 
 AUTH_CODE_URL = 'https://www.patreon.com/oauth2/authorize'
 ACCESS_TOKEN_URL = 'https://www.patreon.com/api/oauth2/token'
-API_IDENTITY_URL = 'https://www.patreon.com/api/oauth2/v2/identity?fields%5Buser%5D=full_name,image_url,thumb_url,url,vanity'
+API_IDENTITY_URL = 'https://www.patreon.com/api/oauth2/v2/identity?include=memberships&fields%5Buser%5D=full_name,image_url,thumb_url,url,vanity&fields%5Bmember%5D=patron_status,currently_entitled_amount_cents,pledge_cadence,last_charge_date,last_charge_status,next_charge_date,is_free_trial,is_gifted'
 
 # https://docs.patreon.com/#scopes
 ALL_SCOPES = (

@@ -22,7 +22,20 @@ USER = {
       'url': 'https://www.patreon.com/alice',
       'vanity': 'alice',
     },
+    'relationships': {
+      'memberships': {
+        'data': [{'id': 'abc-def', 'type': 'member'}],
+      },
+    },
   },
+  'included': [{
+    'id': 'abc-def',
+    'type': 'member',
+    'attributes': {
+      'patron_status': 'active_patron',
+      'currently_entitled_amount_cents': 500,
+    },
+  }],
 }
 
 app = Flask(__name__)
